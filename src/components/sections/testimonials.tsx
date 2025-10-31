@@ -2,6 +2,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import AnimatedDiv from "../animated-div";
+import { Button } from "../ui/button";
+import WhatsappIcon from "../icons/whatsapp-icon";
 
 const testimonials = [
   {
@@ -81,6 +83,20 @@ const Testimonials = () => {
             </AnimatedDiv>
           ))}
         </AnimatedDiv>
+
+        <AnimatedDiv className="text-center mt-16">
+          <h3 className="font-headline text-2xl sm:text-3xl font-bold">Conviértete en nuestro próximo caso de éxito</h3>
+          <p className="mt-4 text-lg text-foreground/80 max-w-2xl mx-auto">
+            ¿Listo para ver resultados reales? Hablemos de tu proyecto.
+          </p>
+          <Button size="lg" className="mt-8" asChild>
+            <a href="https://wa.me/1234567890" target="_blank" rel="noopener noreferrer">
+              <WhatsappIcon className="w-5 h-5 mr-2" />
+              Chatea con un experto
+            </a>
+          </Button>
+        </AnimatedDiv>
+
       </div>
     </section>
   );
