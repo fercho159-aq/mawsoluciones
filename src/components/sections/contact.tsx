@@ -2,19 +2,20 @@ import ContactForm from "@/components/contact-form";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone } from "lucide-react";
 import WhatsappIcon from "@/components/icons/whatsapp-icon";
+import AnimatedDiv from "../animated-div";
 
 const Contact = () => {
   return (
     <section id="contact" className="py-20 md:py-28">
       <div className="container mx-auto px-4 md:px-6">
-        <div className="max-w-3xl mx-auto text-center mb-12">
+        <AnimatedDiv className="max-w-3xl mx-auto text-center mb-12">
           <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold">Hablemos</h2>
           <p className="mt-4 text-lg text-foreground/80">
             ¿Listo para llevar tu marca al siguiente nivel? Contáctanos o reserva una sesión estratégica.
           </p>
-        </div>
+        </AnimatedDiv>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto">
-          <div className="bg-card p-8 rounded-lg shadow-lg">
+          <AnimatedDiv className="bg-card p-8 rounded-lg shadow-lg" transition={{ delay: 0.2 }}>
             <h3 className="font-headline text-2xl font-bold mb-6">Información de Contacto</h3>
             <div className="space-y-4">
               <div className="flex items-center gap-4">
@@ -33,11 +34,11 @@ const Contact = () => {
                 Enviar Mensaje
               </a>
             </Button>
-          </div>
-          <div id="booking" className="bg-card p-8 rounded-lg shadow-lg">
+          </AnimatedDiv>
+          <AnimatedDiv id="booking" className="bg-card p-8 rounded-lg shadow-lg" transition={{ delay: 0.4 }}>
             <h3 className="font-headline text-2xl font-bold mb-6">Envíanos un mensaje</h3>
             <ContactForm />
-          </div>
+          </AnimatedDiv>
         </div>
       </div>
     </section>

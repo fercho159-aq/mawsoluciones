@@ -1,3 +1,4 @@
+import AnimatedDiv from "../animated-div";
 
 const timelineEvents = [
   {
@@ -31,17 +32,17 @@ const About = () => {
   return (
     <section id="about" className="py-20 md:py-28">
       <div className="container mx-auto px-4 md:px-6">
-        <div className="max-w-3xl mx-auto text-center mb-16">
+        <AnimatedDiv className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold">Nuestra Trayectoria</h2>
           <p className="mt-4 text-lg text-foreground/80">
             Un viaje de pasión, crecimiento e innovación constante.
           </p>
-        </div>
+        </AnimatedDiv>
         
         <div className="relative max-w-2xl mx-auto">
           <div className="absolute left-3 sm:left-1/2 w-0.5 h-full bg-border -translate-x-1/2"></div>
           {timelineEvents.map((event, index) => (
-            <div key={index} className="relative mb-12">
+            <AnimatedDiv key={index} className="relative mb-12">
               <div className="flex items-center">
                 <div className="hidden sm:flex w-1/2">
                   {index % 2 === 0 && <TimelineCard {...event} alignment="left" />}
@@ -60,7 +61,7 @@ const About = () => {
                     <div className="ml-8"><TimelineCard {...event} alignment="right" /></div>
                   )}
                </div>
-            </div>
+            </AnimatedDiv>
           ))}
         </div>
       </div>
