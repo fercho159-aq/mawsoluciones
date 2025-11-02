@@ -74,7 +74,7 @@ export const blogPosts: BlogPostType[] = [
     date: "2024-07-29T13:00:00.000Z",
     author: "Carlos Digital",
     content: `
-      <p>En el corazón de la Ciudad de México, una ferretería tradicional está cerrando un trato con una constructora sin que sus vendedores hayan tenido que pasar horas investigando a quién contactar. ¿La clave? La inteligencia artificial no solo encontró al tomador de decisiones correcto, sino que personalizó la propuesta y anticipó las necesidades del cliente. Esta escena, cada vez más común, ilustra una transformación imparable. Para 2025, se espera que el mercado global de la IA crezca a una tasa anual compuesta del 37%, y México no es la excepción. Las ferreterías que atienden a otras empresas (B2B) se encuentran en una encrucijada crucial: adaptarse o quedar rezagadas.</p>
+      <p>En el corazón de la Ciudad de México, una ferretería tradicional está cerrando un trato con una constructora sin que sus vendedores hayan tenido que pasar horas investigando a quién contactar. ¿La clave? La inteligencia artificial no solo encontró al tomador de decisiones correcto, sino que personalizó la propuesta y anticipó las necesidades del cliente. Esta escena, cada vez más común, ilustra una transformación imparable. Para 2025, se espera que el mercado global de la IA crezca a una tasa anual compuesta del 37%, y México no es la excepción.</p>
       <p>Este artículo explora cómo la inteligencia artificial, con herramientas como Lusha, está redefiniendo las estrategias de ventas B2B para el sector ferretero mexicano, detalla el poder concreto de la IA generativa y revela por qué, a veces, estas herramientas generan tráfico que no se convierte en ventas.</p>
 
       <h3 class="font-headline text-2xl font-bold mt-8 mb-4">Cómo Lusha y la IA están Revolucionando las Ventas B2B en Ferreterías</h3>
@@ -757,5 +757,7 @@ export const blogPosts: BlogPostType[] = [
     
 
 
+
+    
 
     
