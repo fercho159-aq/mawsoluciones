@@ -53,6 +53,36 @@
       "description": "Profile picture of Sofia Lopez",
       "imageUrl": "https://images.unsplash.com/photo-1525134479668-1bee5c7c6845?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx3b21hbiUyMHNtaWxpbmd8ZW58MHx8fHwxNzYxODg1MDQyfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "woman smiling"
+    },
+    {
+      "id": "service-content-creation",
+      "description": "Content creation for marketing",
+      "imageUrl": "https://images.unsplash.com/photo-1559526324-c1f275fbfa32?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjb250ZW50JTIwY3JlYXRpb258ZW58MHx8fHwxNzYyMDkzMzAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "content creation"
+    },
+    {
+      "id": "service-web-development",
+      "description": "Web development services",
+      "imageUrl": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx3ZWIlMjBkZXZlbG9wbWVudHxlbnwwfHx8fDE3NjIwOTM0MTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "web development"
+    },
+    {
+      "id": "service-photo-video",
+      "description": "Photo and video production",
+      "imageUrl": "https://images.unsplash.com/photo-1526656001222-41c7b74f686c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwaG90byUyMHByb2R1Y3Rpb258ZW58MHx8fHwxNzYyMDkzNTEyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "photo production"
+    },
+    {
+      "id": "service-automation",
+      "description": "Marketing automation",
+      "imageUrl": "https://images.unsplash.com/photo-1674049406295-86d11b33415c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYXJrZXRpbmclMjBhdXRvbWF0aW9ufGVufDB8fHx8MTc2MjA5MzU3NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "marketing automation"
+    },
+    {
+      "id": "service-campaigns",
+      "description": "Ad campaign management",
+      "imageUrl": "https://images.unsplash.com/photo-1557804506-669a67965ba0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxhZCUyMGNhbXBhaWdufGVufDB8fHx8MTc2MjA5MzYyM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ad campaign"
     }
   ]
 }
