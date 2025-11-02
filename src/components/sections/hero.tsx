@@ -17,7 +17,7 @@ import Autoplay from "embla-carousel-autoplay";
 
 const slides = [
   {
-    image: "/images/charlesdeluvio-Lks7vei-eAg-unsplash.jpg",
+    image: "/images/annie-spratt-QckxruozjRg-unsplash.jpg",
     imageHint: "digital marketing agency",
     headline: "Transformamos Ideas en Resultados Digitales",
     subheadline:
