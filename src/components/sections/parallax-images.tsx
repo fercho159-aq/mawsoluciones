@@ -40,10 +40,11 @@ const ParallaxImages = () => {
             }}
         >
           <Image
-            src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx3ZWIlMjBkZXZlbG9wbWVudHxlbnwwfHx8fDE3NjIwOTM0MTF8MA&ixlib=rb-4.1.0&q=80&w=1080"
+            src="https://images.unsplash.com/photo-1542393545-10f5cde2c810?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx3ZWIlMjBkZXZlbG9wbWVudCUyMGxhcHRvcHxlbnwwfHx8fDE3NjI4NzM3MTZ8MA&ixlib=rb-4.1.0&q=80&w=1080"
             alt="Laptop"
             fill
             className="object-contain"
+            data-ai-hint="web development laptop"
           />
         </motion.div>
         <motion.div 
