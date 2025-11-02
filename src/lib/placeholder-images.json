@@ -83,6 +83,30 @@
       "description": "Ad campaign management",
       "imageUrl": "https://images.unsplash.com/photo-1557804506-669a67965ba0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxhZCUyMGNhbXBhaWdufGVufDB8fHx8MTc2MjA5MzYyM3ww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "ad campaign"
+    },
+    {
+      "id": "blog-seo",
+      "description": "Person working on a laptop with charts",
+      "imageUrl": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxTRU98ZW58MHx8fHwxNzYyMTk4ODcxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "SEO"
+    },
+    {
+      "id": "blog-visual-content",
+      "description": "Social media icons on phone screens",
+      "imageUrl": "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxzb2NpYWwlMjBtZWRpYXxlbnwwfHx8fDE3NjE4Njk1NzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "social media"
+    },
+    {
+      "id": "blog-email-automation",
+      "description": "Email inbox on a laptop",
+      "imageUrl": "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxlbWFpbCUyMG1hcmtldGluZ3xlbnwwfHx8fDE3NjIxOTkwMDN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "email marketing"
+    },
+    {
+      "id": "blog-website",
+      "description": "Team collaborating over a website design",
+      "imageUrl": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx3ZWIlMjBkZXZlbG9wbWVudHxlbnwwfHx8fDE3NjIwOTM0MTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "web development"
     }
   ]
 }
