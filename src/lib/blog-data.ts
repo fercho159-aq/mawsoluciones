@@ -90,7 +90,12 @@ export const blogPosts: BlogPostType[] = [
     slug: "tendencias-marketing-digital-2025",
     title: "Tendencias de Marketing Digital 2025: La Guía Definitiva para Pymes en México (IA, Comercio Social y Autenticidad)",
     category: "Marketing Digital",
-    image: PlaceHolderImages.find(img => img.id === 'portfolio-campaign-1'),
+    image: {
+      id: "tendencias-marketing-digital-2025",
+      description: "tendencias-marketing-digital-2025",
+      imageUrl: "/images/blog/Gemini_Generated_Image_8km1vt8km1vt8km1.png",
+      imageHint: "digital marketing"
+    },
     excerpt: "Descubre las tendencias de marketing digital 2025 que definirán el éxito en México: IA generativa, comercio social y marketing inclusivo.",
     date: "2024-07-29T16:00:00.000Z",
     author: "Carlos Digital",
@@ -150,7 +155,12 @@ export const blogPosts: BlogPostType[] = [
     slug: "ecommerce-mexico-2025-trinidad-exito",
     title: "E-commerce en México 2025: La Trinidad del Éxito (Venta Social, Publicidad y UGC)",
     category: "Marketing Digital",
-    image: PlaceHolderImages.find(img => img.id === 'portfolio-campaign-1'),
+    image: {
+      id: "ecommerce-mexico-2025-trinidad-exito",
+      description: "ecommerce-mexico-2025-trinidad-exito",
+      imageUrl: "/images/blog/Gemini_Generated_Image_et07sdet07sdet07.png",
+      imageHint: "digital marketing"
+    },
     excerpt: "Potencia tu e-commerce en México 2025. Domina las plataformas de venta social, optimiza tu publicidad y usa el contenido UGC para marketing digital.",
     date: "2024-07-29T15:00:00.000Z",
     author: "Carlos Digital",
@@ -200,7 +210,12 @@ export const blogPosts: BlogPostType[] = [
     slug: "estrategias-marketing-2025-contenido-tiktok-cafe",
     title: "Estrategias de Marketing 2025: Contenido, TikTok y Café en la CDMX",
     category: "Marketing Digital",
-    image: PlaceHolderImages.find(img => img.id === 'portfolio-content-1'),
+    image: {
+      id: "estrategias-marketing-2025-contenido-tiktok-cafe",
+      description: "estrategias-marketing-2025-contenido-tiktok-cafe",
+      imageUrl: "/images/blog/Gemini_Generated_Image_6j93s46j93s46j93.png",
+      imageHint: "digital marketing"
+    },
     excerpt: "Domina el marketing de contenidos 2025, el algoritmo de TikTok 2025 y estrategias de marketing digital para empresas de café en CDMX. Conecta con tu audiencia mexicana.",
     date: "2024-07-29T14:00:00.000Z",
     author: "Carlos Digital",
@@ -272,7 +287,12 @@ export const blogPosts: BlogPostType[] = [
     slug: "revolucion-digital-ferreteria-ia",
     title: "Revolución Digital en la Ferretería: Cómo la IA está Transformando las Ventas B2B en México",
     category: "Marketing Digital",
-    image: PlaceHolderImages.find(img => img.id === 'blog-ai-web'),
+    image: {
+      id: "revolucion-digital-ferreteria-ia",
+      description: "revolucion-digital-ferreteria-ia",
+      imageUrl: "/images/blog/Gemini_Generated_Image_pc4670pc4670pc46.png",
+      imageHint: "digital marketing"
+    },
     excerpt: "Descubre cómo la IA y Lusha revolucionan las ventas B2B de ferreterías en México. Aprovecha la IA generativa y supera los retos del ecommerce para aumentar tus conversiones.",
     date: "2024-07-29T13:00:00.000Z",
     author: "Carlos Digital",
@@ -281,7 +301,7 @@ export const blogPosts: BlogPostType[] = [
       <p>Este artículo explora cómo la inteligencia artificial, con herramientas como Lusha, está redefiniendo las estrategias de ventas B2B para el sector ferretero mexicano, detalla el poder concreto de la IA generativa y revela por qué, a veces, estas herramientas generan tráfico que no se convierte en ventas.</p>
 
       <h3 class="font-headline text-2xl font-bold mt-8 mb-4">Cómo Lusha y la IA están Revolucionando las Ventas B2B en Ferreterías</h3>
-      <p>Para una ferretería en Guadalajara o Monterrey que provee materiales a constructoras, contratistas y grandes proyectos, encontrar al contacto correcto es, a menudo, el mayor cuello de botella. Las herramientas de inteligencia de ventas impulsadas por IA, como Lusha, están abordando este desafío de manera directa.</p>
+      <p>Para una ferretería en Guadalajara o CDMX que provee materiales a constructoras, contratistas y grandes proyectos, encontrar al contacto correcto es, a menudo, el mayor cuello de botella. Las herramientas de inteligencia de ventas impulsadas por IA, como Lusha, están abordando este desafío de manera directa.</p>
       <p>La <strong>prospección de clientes</strong> deja de ser una búsqueda a ciegas. La IA de Lusha analiza perfiles de LinkedIn, sitios corporativos y noticias para identificar con precisión a los decisores clave, como jefes de obra o gerentes de compras en empresas constructoras. Imagine poder encontrar proactivamente a los responsables de proyectos de construcción en su área, con sus datos de contacto verificados. Esta plataforma va más allá de una simple base de datos; comprende patrones para encontrar "la aguja en el pajar".</p>
       <p>Una vez identificado un contacto, la IA realiza un <strong>enriquecimiento automático de datos</strong>, añadiendo información crítica como email directo, teléfono corporativo y noticias relevantes de la empresa. Si una constructora ha ganado un nuevo proyecto grande en el Estado de México, Lusha puede alertarle, permitiéndole ofrecer sus materiales en el momento más oportuno. Esto elimina horas de investigación tediosa y reduce drásticamente los datos incorrectos o desactualizados, con una precisión de email que alcanza hasta un 98% de entregabilidad.</p>
       <p>Pero el potencial no termina con la captación. La <strong>gestión de clientes existentes</strong> también se ve potenciada. La IA monitorea cambios en la información de contacto o en las empresas clientes (fusiones, adquisiciones), asegurando que su CRM esté siempre actualizado. Además, puede analizar patrones de interacción para asignar puntuaciones de prioridad, indicando a sus comerciales dónde enfocar esfuerzos para ventas cruzadas o para prevenir la pérdida de un cliente.</p>
@@ -315,12 +335,17 @@ export const blogPosts: BlogPostType[] = [
     `
   },
   {
-    id: "email-marketing-2025-pymes-monterrey",
-    slug: "email-marketing-2025-pymes-monterrey",
-    title: "Email Marketing 2025: Herramientas, Agencias en Monterrey y Estrategias para PYMES",
+    id: "email-marketing-2025-pymes-CDMX",
+    slug: "email-marketing-2025-pymes-CDMX",
+    title: "Email Marketing 2025: Herramientas, Agencias en CDMX y Estrategias para PYMES",
     category: "Email Marketing",
-    image: PlaceHolderImages.find(img => img.id === 'blog-email-automation'),
-    excerpt: "Descubre las mejores herramientas de email marketing 2025 y una estrategia de marketing digital para PYMES efectiva. Aprende a elegir agencias en Monterrey y a usar la IA para crecer.",
+    image: {
+      id: "email-marketing-2025-pymes-CDMX",
+      description: "email-marketing-2025-pymes-CDMX",
+      imageUrl: "/images/blog/Gemini_Generated_Image_ykk0e4ykk0e4ykk0.png",
+      imageHint: "digital marketing"
+    },
+    excerpt: "Descubre las mejores herramientas de email marketing 2025 y una estrategia de marketing digital para PYMES efectiva. Aprende a elegir agencias en CDMX y a usar la IA para crecer.",
     date: "2024-07-29T12:00:00.000Z",
     author: "Carlos Digital",
     content: `
@@ -372,8 +397,8 @@ export const blogPosts: BlogPostType[] = [
 
       <p><strong>Tendencia clave en 2025</strong>: La <strong>IA predictiva</strong> es la gran aliada. Plataformas como Seventh Sense analizan el comportamiento de tus suscriptores para determinar el <strong>momento óptimo de envío</strong> para cada uno, maximizando la interacción. Además, herramientas como <strong>Grammarly</strong>, impulsadas por IA, se han vuelto indispensables para asegurar que el contenido de tus correos no solo esté bien escrito, sino que también tenga el tono y estilo correctos para tu audiencia.</p>
 
-      <h3 class="font-headline text-2xl font-bold mt-8 mb-4">🚀 Mejores agencias de marketing digital en Monterrey 2025</h3>
-      <p>Contratar a una agencia especializada puede ser el acelerador que tu negocio necesita. En Monterrey, un hub industrial y tecnológico en crecimiento, las agencias se caracterizan por su enfoque en resultados medibles y su comprensión del mercado local y fronterizo.</p>
+      <h3 class="font-headline text-2xl font-bold mt-8 mb-4">🚀 Mejores agencias de marketing digital en CDMX 2025</h3>
+      <p>Contratar a una agencia especializada puede ser el acelerador que tu negocio necesita. En CDMX, un hub industrial y tecnológico en crecimiento, las agencias se caracterizan por su enfoque en resultados medibles y su comprensión del mercado local y fronterizo.</p>
       
       <h4 class="font-headline text-xl font-bold mt-6 mb-2">Cómo elegir la agencia correcta para tu PYME:</h4>
       <ol class="list-decimal list-inside space-y-2 my-4">
@@ -383,7 +408,7 @@ export const blogPosts: BlogPostType[] = [
         <li><strong>Verifica su expertise técnico</strong>: Asegúrate de que dominan las herramientas y tendencias actuales, desde el <strong>SEO</strong> y <strong>PPC</strong> hasta la integración de <strong>IA en el marketing</strong>, como el uso de análisis predictivo para campañas más inteligentes.</li>
         <li><strong>Pide referencias y casos de éxito</strong>: No temas preguntar por otros clientes similares a ti y los resultados que obtuvieron.</li>
       </ol>
-      <p>El ecosistema de agencias en Monterrey es robusto. Busca aquellas que demuestren un conocimiento profundo de tu industria y te propongan una estrategia basada en datos, no en suposiciones.</p>
+      <p>El ecosistema de agencias en CDMX es robusto. Busca aquellas que demuestren un conocimiento profundo de tu industria y te propongan una estrategia basada en datos, no en suposiciones.</p>
 
       <h3 class="font-headline text-2xl font-bold mt-8 mb-4">💡 Estrategia de marketing digital para PYMES: Un plan de 4 pasos</h3>
       <p>Una estrategia efectiva no requiere un presupuesto millonario, sino un plan coherente y ejecutado con constancia. Sigue estos pasos para construir la tuya:</p>
@@ -405,7 +430,12 @@ export const blogPosts: BlogPostType[] = [
     slug: "hub-educativo-ia-estrategias-funnel-innovacion-latinoamerica",
     title: "Hub educativo de IA y estrategias para tu funnel: Innovación que transforma Latinoamérica",
     category: "Marketing Digital",
-    image: PlaceHolderImages.find(img => img.id === 'blog-ai-web'),
+    image: {
+      id: "hub-educativo-ia-estrategias-funnel-innovacion-latinoamerica",
+      description: "hub-educativo-ia-estrategias-funnel-innovacion-latinoamerica",
+      imageUrl: "/images/blog/Gemini_Generated_Image_f6ymo8f6ymo8f6ym.png",
+      imageHint: "digital marketing"
+    },
     excerpt: "Descubre cómo un hub de IA revoluciona la educación en América Latina y aplica estrategias de IA probadas para optimizar tu funnel de marketing y aumentar conversiones.",
     date: "2024-07-29T10:00:00.000Z",
     author: "Carlos Digital",
@@ -462,7 +492,12 @@ export const blogPosts: BlogPostType[] = [
     slug: "estrategias-trafico-web-instagram-2026",
     title: "Estrategias de Tráfico Web, Sitios Inspiradores y Contenido para Instagram: La Guía 2026 para Emprendedores Mexicanos",
     category: "Marketing Digital",
-    image: PlaceHolderImages.find(img => img.id === 'portfolio-campaign-1'),
+    image: {
+      id: "estrategias-trafico-web-instagram-2026",
+      description: "estrategias-trafico-web-instagram-2026",
+      imageUrl: "/images/blog/Gemini_Generated_Image_q7d760q7d760q7d7.png",
+      imageHint: "digital marketing"
+    },
     excerpt: "Descubre estrategias probadas para optimizar tu ecommerce, inspírate con sitios web mexicanos exitosos y domina Instagram. Potencia tu negocio online en 2026.",
     date: "2024-07-27T10:00:00.000Z",
     author: "Carlos Digital",
@@ -575,7 +610,12 @@ export const blogPosts: BlogPostType[] = [
     slug: "mapa-marketing-digital-influencers-masters",
     title: "El Mapa Definitivo para Triunfar en Marketing Digital: Influencers, Másters y Formación Online",
     category: "Marketing Digital",
-    image: PlaceHolderImages.find(img => img.id === 'portfolio-campaign-1'),
+    image: {
+      id: "estrategias-trafico-web-instagram-2026",
+      description: "estrategias-trafico-web-instagram-2026",
+      imageUrl: "/images/blog/Gemini_Generated_Image_lkv6c4lkv6c4lkv6.png",
+      imageHint: "digital marketing"
+    },
     excerpt: "Descubre cómo diseñar campañas con influencers, los mejores másters en España y compara opciones formativas para triunfar en marketing digital.",
     date: "2024-07-26T10:00:00.000Z",
     author: "Carlos Digital",
@@ -653,7 +693,12 @@ export const blogPosts: BlogPostType[] = [
     slug: "checklist-sitio-web-que-convierta",
     title: "Checklist Definitivo: 10 Claves para un Sitio Web que Convierta",
     category: "Desarrollo Web",
-    image: PlaceHolderImages.find(img => img.id === 'blog-checklist'),
+    image: {
+      id: "estrategias-trafico-web-instagram-2026",
+      description: "estrategias-trafico-web-instagram-2026",
+      imageUrl: "/images/blog/Gemini_Generated_Image_s9m37as9m37as9m3.png",
+      imageHint: "digital marketing"
+    },
     excerpt: "¿Tu sitio web no genera leads? Transfórmalo con nuestro checklist definitivo. Optimiza UX, velocidad y CTAs para convertir visitantes en clientes.",
     date: "2024-07-25T10:00:00.000Z",
     author: "Carlos Digital",
@@ -734,7 +779,12 @@ export const blogPosts: BlogPostType[] = [
     slug: "sitio-web-2025-ia-checklist",
     title: "Tu Sitio Web en 2025: El Checklist Definitivo Impulsado por IA",
     category: "Automatización",
-    image: PlaceHolderImages.find(img => img.id === 'blog-ai-web'),
+    image: {
+      id: "estrategias-trafico-web-instagram-2026",
+      description: "estrategias-trafico-web-instagram-2026",
+      imageUrl: "/images/blog/Gemini_Generated_Image_dh3in3dh3in3dh3i.png",
+      imageHint: "digital marketing"
+    },
     excerpt: "Descubre cómo la IA transforma los sitios web en motores de conversión. Checklist con agentes autónomos, hiperpersonalización y herramientas esenciales para 2025.",
     date: "2024-07-24T11:00:00.000Z",
     author: "Carlos Digital",
@@ -792,7 +842,12 @@ export const blogPosts: BlogPostType[] = [
     slug: "estrategias-marketing-digital-2025-cafe-logistica",
     title: "Estrategias de Marketing Digital 2025: Conquistar Mercados desde el Café hasta la Logística en México",
     category: "Marketing Digital",
-    image: PlaceHolderImages.find(img => img.id === 'service-campaigns'),
+    image: {
+      id: "estrategias-trafico-web-instagram-2026",
+      description: "estrategias-trafico-web-instagram-2026",
+      imageUrl: "/images/blog/Gemini_Generated_Image_449hap449hap449h.png",
+      imageHint: "digital marketing"
+    },
     excerpt: "Descubre estrategias de marketing digital para empresas de café y logística en México. Aprende sobre campañas exitosas para 2025 con IA y personalización.",
     date: "2024-07-28T10:00:00.000Z",
     author: "Carlos Digital",
