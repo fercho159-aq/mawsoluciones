@@ -28,7 +28,7 @@ const Contact = () => {
               </div>
             </div>
             <h3 className="font-headline text-2xl font-bold mt-10 mb-4">O contáctanos por WhatsApp</h3>
-            <Button asChild className="w-full" size="lg">
+            <Button asChild className="w-full" size="lg" variant="whatsapp">
               <a href="https://wa.me/1234567890" target="_blank" rel="noopener noreferrer">
                 <WhatsappIcon className="w-6 h-6 mr-2" />
                 Enviar Mensaje
