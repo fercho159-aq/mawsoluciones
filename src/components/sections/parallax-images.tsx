@@ -4,7 +4,12 @@ import { useRef } from 'react';
 import Image from 'next/image';
 import { motion, useScroll, useTransform } from 'framer-motion';
 
-const ParallaxImages = () => {
+interface ParallaxImagesProps {
+  laptopImage: string;
+  phoneImage: string;
+}
+
+const ParallaxImages = ({ laptopImage, phoneImage }: ParallaxImagesProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -36,7 +41,7 @@ const ParallaxImages = () => {
             }}
         >
           <Image
-            src="/images/desarrollo web/2.png"
+            src={laptopImage}
             alt="Laptop"
             fill
             className="object-contain"
@@ -55,7 +60,7 @@ const ParallaxImages = () => {
             }}
         >
           <Image
-             src="/images/desarrollo web/4.png"
+             src={phoneImage}
             alt="Phone"
             fill
             className="object-contain"

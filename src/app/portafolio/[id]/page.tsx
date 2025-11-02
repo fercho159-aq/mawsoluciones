@@ -20,6 +20,9 @@ export default function PortfolioItemPage({
     notFound();
   }
 
+  const defaultLaptopImage = "/images/desarrollo web/2.png";
+  const defaultPhoneImage = "/images/desarrollo web/4.png";
+
   return (
     <div className="bg-background">
       <section className="py-24 sm:py-32 md:py-40 bg-card">
@@ -36,7 +39,10 @@ export default function PortfolioItemPage({
         </div>
       </section>
 
-      <ParallaxImages />
+      <ParallaxImages 
+        laptopImage={item.parallaxImages?.laptop ?? defaultLaptopImage}
+        phoneImage={item.parallaxImages?.phone ?? defaultPhoneImage}
+      />
 
       <section className="py-20 md:py-28">
         <div className="container mx-auto px-4 md:px-6">

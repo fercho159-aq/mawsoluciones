@@ -16,6 +16,10 @@ export type PortfolioItemType = {
   client: string;
   challenge: string;
   solution: string;
+  parallaxImages?: {
+    laptop: string;
+    phone: string;
+  };
 };
 
 export const portfolioItems: PortfolioItemType[] = [
@@ -29,7 +33,11 @@ export const portfolioItems: PortfolioItemType[] = [
     challenge: "Crear una presencia online desde cero que pudiera competir en un mercado saturado, destacando la innovación del producto y generando confianza en potenciales inversores y clientes.",
     solution: "Diseñamos una experiencia de usuario (UX) centrada en la conversión, con un diseño limpio y profesional. Desarrollamos el sitio con Next.js para un rendimiento óptimo y un SEO técnico impecable. Integramos un CMS para que el equipo de marketing pudiera gestionar el contenido fácilmente.",
     services: ["Desarrollo Web", "Diseño UI/UX", "SEO Técnico"],
-    website: "https://example.com"
+    website: "https://example.com",
+    parallaxImages: {
+      laptop: "/images/desarrollo web/2.png",
+      phone: "/images/desarrollo web/4.png"
+    }
   },
   {
     id: "fashion-brand-socials",
@@ -85,6 +93,10 @@ export const portfolioItems: PortfolioItemType[] = [
     challenge: "Digitalizar un negocio tradicional, creando una plataforma de e-commerce que fuera fácil de gestionar para el propietario y que transmitiera la calidad y unicidad de los productos artesanales.",
     solution: "Desarrollamos una tienda online en Shopify, personalizando un tema para reflejar la identidad de la marca. Realizamos una sesión de fotografía de producto para asegurar imágenes de alta calidad y configuramos los métodos de pago y envío. El resultado fue un nuevo canal de ventas que expandió el alcance del negocio a nivel nacional.",
     services: ["Desarrollo Web", "E-commerce", "Fotografía de Producto"],
-    website: "https://example.com"
+    website: "https://example.com",
+    parallaxImages: {
+      laptop: "/images/desarrollo web/laptop-2.png",
+      phone: "/images/desarrollo web/phone-2.png"
+    }
   }
 ];
