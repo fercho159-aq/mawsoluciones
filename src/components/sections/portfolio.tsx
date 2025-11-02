@@ -52,7 +52,7 @@ const Portfolio = () => {
                     <Card className="overflow-hidden group flex flex-col h-full bg-card/50 hover:bg-card border-border/50 hover:border-border transition-all duration-300 ease-in-out transform hover:-translate-y-2 shadow-sm hover:shadow-2xl">
                     <Link href={`/portafolio/${item.id}`} className="flex flex-col flex-grow">
                         <CardContent className="p-0">
-                        <div className="relative aspect-w-4 aspect-h-3">
+                        <div className="relative aspect-video">
                             {item.image && (
                             <Image
                                 src={item.image.imageUrl}
