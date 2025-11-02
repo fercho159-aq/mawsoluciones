@@ -41,6 +41,48 @@ export const portfolioItems: PortfolioItemType[] = [
     }
   },
   {
+    id: "dfac-accesorios-cimbra",
+    title: "DFAC - Accesorios para Cimbra: Digitalizando la Confianza y Velocidad en la Construcción",
+    category: "Desarrollo Web",
+    image: {
+        id: "portfolio-web-dfac",
+        description: "DFAC website",
+        imageUrl: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjb25zdHJ1Y3Rpb24lMjBzaXRlfGVufDB8fHx8MTc2MjI0NTcwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+        imageHint: "construction site"
+    },
+    client: "DFAC - Accesorios para Cimbra",
+    description: "Desarrollamos la plataforma web B2B para DFAC (Cimbra y Accesorios), creando un catálogo digital optimizado para la generación de cotizaciones urgentes y destacando su promesa de entrega de material en menos de 24 horas.",
+    challenge: "El principal diferenciador de DFAC es su capacidad logística para entregar accesorios de cimbra y andamiaje en la obra en menos de 24 horas. El reto era crear un sitio web que no solo mostrara su extenso catálogo de productos técnicos (moños, puntales, etc.), sino que también transmitiera esta sensación de urgencia, confiabilidad y servicio experto a un público B2B (ingenieros, arquitectos y jefes de obra) que toma decisiones bajo presión.",
+    solution: "Construimos un sitio web corporativo enfocado en la conversión y la velocidad. El diseño prioriza las llamadas a la acción (CTAs) para contacto inmediato, como un botón flotante de WhatsApp para \"Material de URGENCIA\" y formularios de cotización simplificados accesibles desde cada producto del catálogo. Organizamos los productos de forma intuitiva y destacamos sus clientes de alto perfil (BBVA, UNAM) y testimonios para construir credibilidad instantánea. El resultado es una herramienta digital que funciona como un socio logístico: rápido, eficiente y confiable.",
+    services: ["Diseño Web Corporativo B2B", "Desarrollo de Catálogo de Productos (con solicitud de cotización)", "Diseño UX/UI enfocado a la Generación de Leads", "Integración de Chat (WhatsApp) y Formularios de Contacto", "Optimización para Dispositivos Móviles"],
+    website: "https://cimbrayaccesorios.com.mx/",
+    parallaxImages: {
+      laptop: "https://images.unsplash.com/photo-1581094376363-9521a37c867a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      phone: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+    }
+  },
+  {
+    id: "polar-autopartes",
+    title: "Polar Autopartes: Digitalización de un Catálogo Complejo de Refacciones",
+    category: "Desarrollo Web",
+    image: {
+        id: "portfolio-web-polar",
+        description: "Polar autopartes website",
+        imageUrl: "/images/desarrollo web/5.png",
+        imageHint: "auto parts website"
+    },
+    client: "Polar Autopartes",
+    description: "Desarrollamos la plataforma de e-commerce para Polar Autopartes, implementando un buscador de refacciones avanzado para conectar a talleres, refaccionarias y clientes particulares con el inventario exacto para el sistema de enfriamiento de sus vehículos.",
+    challenge: "Polar Autopartes, con más de 20 años de experiencia, enfrentaba el reto de digitalizar un inventario masivo y altamente específico. El éxito del proyecto dependía de crear un sistema donde un usuario pudiera encontrar una pieza exacta (como una bomba de agua o un radiador) entre miles de opciones, filtrando por Marca, Modelo, Año y Motor. El sitio debía ser rápido, confiable y generar confianza tanto para compradores B2B como para el consumidor final.",
+    solution: "Construimos un sitio de e-commerce robusto centrado en un potente motor de \"Búsqueda Avanzada\". Esta herramienta se convirtió en el núcleo del sitio, permitiendo a los usuarios filtrar con precisión el catálogo completo y encontrar la pieza compatible sin errores. Diseñamos una interfaz limpia que organiza los productos por líneas principales (Bombas de Agua, Depósitos, etc.) y destacamos sus fortalezas clave: cobertura nacional, envío rápido y calidad garantizada, todo respaldado por testimonios de clientes reales para solidificar su reputación líder en el sector.",
+    services: ["Diseño y Desarrollo de E-commerce", "Implementación de Catálogo Digital Complejo", "Desarrollo de Buscador de Productos por Filtros (Marca, Modelo, Año, Motor)", "Diseño de Experiencia de Usuario (UX) e Interfaz de Usuario (UI)", "Optimización para Dispositivos Móviles (Responsive Design)"],
+    website: "https://www.polarautopartes.com/",
+    parallaxImages: {
+      laptop: "/images/desarrollo web/6.png",
+      phone: "/images/desarrollo web/8.png"
+    }
+  },
+  {
     id: "fashion-brand-socials",
     title: "Redes Sociales para Marca de Moda",
     category: "Creación de Contenido",
@@ -83,26 +125,5 @@ export const portfolioItems: PortfolioItemType[] = [
     challenge: "Aumentar las reservas y la afluencia de clientes durante los días de semana, compitiendo con otros restaurantes de la zona.",
     solution: "Lanzamos campañas de Google Ads enfocadas en búsquedas locales (ej. 'restaurante cerca de mí') y campañas en Instagram y Facebook con segmentación geográfica y por intereses (ej. 'foodies'). Creamos anuncios atractivos con ofertas especiales para los días de menor afluencia, logrando un aumento del 30% en las reservas.",
     services: ["Gestión de Campañas", "Google Ads", "Social Ads"],
-  },
-  {
-    id: "polar-autopartes",
-    title: "Polar Autopartes: Digitalización de un Catálogo Complejo de Refacciones",
-    category: "Desarrollo Web",
-    image: {
-        id: "portfolio-web-polar",
-        description: "Polar autopartes website",
-        imageUrl: "/images/desarrollo web/5.png",
-        imageHint: "auto parts website"
-    },
-    client: "Polar Autopartes",
-    description: "Desarrollamos la plataforma de e-commerce para Polar Autopartes, implementando un buscador de refacciones avanzado para conectar a talleres, refaccionarias y clientes particulares con el inventario exacto para el sistema de enfriamiento de sus vehículos.",
-    challenge: "Polar Autopartes, con más de 20 años de experiencia, enfrentaba el reto de digitalizar un inventario masivo y altamente específico. El éxito del proyecto dependía de crear un sistema donde un usuario pudiera encontrar una pieza exacta (como una bomba de agua o un radiador) entre miles de opciones, filtrando por Marca, Modelo, Año y Motor. El sitio debía ser rápido, confiable y generar confianza tanto para compradores B2B como para el consumidor final.",
-    solution: "Construimos un sitio de e-commerce robusto centrado en un potente motor de \"Búsqueda Avanzada\". Esta herramienta se convirtió en el núcleo del sitio, permitiendo a los usuarios filtrar con precisión el catálogo completo y encontrar la pieza compatible sin errores. Diseñamos una interfaz limpia que organiza los productos por líneas principales (Bombas de Agua, Depósitos, etc.) y destacamos sus fortalezas clave: cobertura nacional, envío rápido y calidad garantizada, todo respaldado por testimonios de clientes reales para solidificar su reputación líder en el sector.",
-    services: ["Diseño y Desarrollo de E-commerce", "Implementación de Catálogo Digital Complejo", "Desarrollo de Buscador de Productos por Filtros (Marca, Modelo, Año, Motor)", "Diseño de Experiencia de Usuario (UX) e Interfaz de Usuario (UI)", "Optimización para Dispositivos Móviles (Responsive Design)"],
-    website: "https://www.polarautopartes.com/",
-    parallaxImages: {
-      laptop: "/images/desarrollo web/6.png",
-      phone: "/images/desarrollo web/8.png"
-    }
   }
 ];
