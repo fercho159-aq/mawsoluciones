@@ -19,7 +19,12 @@ export const blogPosts: BlogPostType[] = [
     slug: "omnisearch-optimization-ia-2025",
     title: "Omnisearch Optimization, IA y Más: Las Estrategias Clave del Marketing Digital para 2025 en México",
     category: "Marketing Digital",
-    image: PlaceHolderImages.find(img => img.id === 'portfolio-campaign-1'),
+    image: {
+      id: "blog-omnisearch",
+      description: "Omnisearch optimization and AI concepts",
+      imageUrl: "/images/blog/Gemini_Generated_Image_cya9eocya9eocya9.png",
+      imageHint: "digital marketing"
+    },
     excerpt: "Domina el ecosistema de búsquedas con OSO, implementa IA en tu marketing y aplica las tendencias clave para conectar con el consumidor mexicano en 2025.",
     date: "2024-07-29T17:00:00.000Z",
     author: "Carlos Digital",
@@ -39,7 +44,7 @@ export const blogPosts: BlogPostType[] = [
       </ul>
 
       <h3 class="font-headline text-2xl font-bold mt-8 mb-4">2. Guía práctica para implementar inteligencia artificial en marketing digital</h3>
-      <p>La <strong>IA en marketing digital</strong> ha pasado de ser un concepto futurista a un conjunto de herramientas prácticas y accesibles que están revolucionando la eficiencia y la personalización. Para las empresas en México, su adopción ya no es un lujo, sino una necesidad para competir. La IA permite analizar grandes volúmenes de datos para predecir comportamientos, automatizar tareas repetitivas y ofrecer contenido hyperpersonalizado.</p>
+      <p>La <strong>IA en marketing digital</strong> ha pasado de ser un concepto futurista a un conjunto de herramientas prácticas y accesibles que están revolucionando la eficiencia y la personalización. Para las empresas en México, su adopción ya no es un lujo, sino una necesidad para competir.</p>
 
       <h4 class="font-headline text-xl font-bold mt-6 mb-2">Fases de adopción de la IA para tu negocio:</h4>
       <ol class="list-decimal list-inside space-y-2 my-4">
