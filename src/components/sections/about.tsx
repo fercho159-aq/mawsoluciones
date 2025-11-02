@@ -1,3 +1,6 @@
+
+"use client";
+
 import AnimatedDiv from "../animated-div";
 import { Button } from "../ui/button";
 import WhatsappIcon from "../icons/whatsapp-icon";
@@ -5,12 +8,15 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel";
 import Image from "next/image";
 import { Card, CardContent } from "../ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import React, { useCallback, useEffect, useState } from "react";
+import Autoplay from "embla-carousel-autoplay";
+import { cn } from "@/lib/utils";
+import { PauseCircle, PlayCircle } from "lucide-react";
 
 const whyHireUsPoints = [
   {
@@ -27,7 +33,7 @@ const whyHireUsPoints = [
     title: "Resultados Medibles y ROI",
     description: "Nos enfocamos en los datos. Tomamos decisiones basadas en análisis para optimizar continuamente tus campañas y demostrar un retorno de inversión claro y tangible para tu negocio.",
     image: {
-      id: "blog-seo",
+      id: "blog-seo-fix",
       description: "Person working on a laptop with charts",
       imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxTRU98ZW58MHx8fHwxNzYyMTk4ODcxfDA&ixlib=rb-4.1.0&q=80&w=1080",
       imageHint: "analytics dashboard"
@@ -42,6 +48,35 @@ const whyHireUsPoints = [
 
 
 const About = () => {
+    const [api, setApi] = useState<CarouselApi>()
+    const [current, setCurrent] = useState(0)
+    const [isPlaying, setIsPlaying] = useState(true)
+
+    const plugin = React.useRef(
+      Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })
+    )
+
+    useEffect(() => {
+        if (!api) {
+        return
+        }
+
+        setCurrent(api.selectedScrollSnap())
+
+        api.on("select", () => {
+        setCurrent(api.selectedScrollSnap())
+        })
+    }, [api])
+
+    const togglePlay = () => {
+        if (isPlaying) {
+            plugin.current.stop()
+        } else {
+            plugin.current.play()
+        }
+        setIsPlaying(!isPlaying)
+    }
+
   return (
     <section id="about" className="py-20 md:py-28 bg-card">
       <div className="container mx-auto px-4 md:px-6">
@@ -54,40 +89,53 @@ const About = () => {
         
         <AnimatedDiv>
             <Carousel
+              setApi={setApi}
+              plugins={[plugin.current]}
               opts={{
-                align: "start",
+                align: "center",
                 loop: true,
               }}
               className="w-full"
             >
-              <CarouselContent>
+              <CarouselContent className="-ml-8">
                 {whyHireUsPoints.map((point, index) => (
-                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                  <CarouselItem key={index} className="pl-8 md:basis-3/4 lg:basis-2/3">
                     <div className="p-1 h-full">
-                      <Card className="h-full flex flex-col group overflow-hidden">
-                        {point.image && (
-                          <div className="relative aspect-video overflow-hidden">
-                            <Image
-                              src={point.image.imageUrl}
-                              alt={point.title}
-                              fill
-                              className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
-                              data-ai-hint={point.image.imageHint}
-                            />
-                          </div>
-                        )}
-                        <CardContent className="p-6 flex flex-col flex-grow">
-                          <h3 className="font-headline text-2xl font-bold mb-4">{point.title}</h3>
-                          <p className="text-foreground/80 flex-grow">{point.description}</p>
-                        </CardContent>
-                      </Card>
+                        <div className="flex flex-col h-full rounded-lg overflow-hidden">
+                            <div className="bg-background/40 rounded-lg p-6 text-center shadow-inner">
+                                <h3 className="font-headline text-3xl font-bold mb-2">{point.title}</h3>
+                                <p className="text-foreground/80 max-w-xl mx-auto">{point.description}</p>
+                            </div>
+                            {point.image && (
+                            <div className="relative aspect-video mt-6 rounded-lg overflow-hidden shadow-2xl">
+                                <Image
+                                src={point.image.imageUrl}
+                                alt={point.title}
+                                fill
+                                className="object-cover"
+                                data-ai-hint={point.image.imageHint}
+                                />
+                            </div>
+                            )}
+                        </div>
                     </div>
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious className="hidden lg:inline-flex" />
-              <CarouselNext className="hidden lg:inline-flex" />
             </Carousel>
+            <div className="flex items-center justify-center gap-4 mt-8">
+                {whyHireUsPoints.map((_, index) => (
+                    <button
+                        key={index}
+                        onClick={() => api?.scrollTo(index)}
+                        className={cn("w-2 h-2 rounded-full bg-foreground/30 transition-all", { "w-6 bg-primary": current === index })}
+                        aria-label={`Ir a la diapositiva ${index + 1}`}
+                    />
+                ))}
+                <button onClick={togglePlay} className="text-foreground/50 hover:text-foreground transition-colors" aria-label={isPlaying ? "Pausar carrusel" : "Reproducir carrusel"}>
+                    {isPlaying ? <PauseCircle className="w-6 h-6" /> : <PlayCircle className="w-6 h-6" />}
+                </button>
+            </div>
         </AnimatedDiv>
 
         <AnimatedDiv className="text-center mt-20">
