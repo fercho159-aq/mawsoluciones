@@ -20,6 +20,23 @@ export type PortfolioItemType = {
 
 export const portfolioItems: PortfolioItemType[] = [
   {
+    id: "dc-solutions-b2b",
+    title: "Creación de Plataforma Digital B2B para DC Solutions: Expertos en Gestión de Impresión y Digitalización",
+    category: "Desarrollo Web",
+    image: {
+      id: "portfolio-web-dcsolutions",
+      description: "DC Solutions website showcasing office technology",
+      imageUrl: "https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxvZmZpY2UlMjB0ZWNoJTIwc29sdXRpb25zfGVufDB8fHx8MTc2MjI1MzYwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      imageHint: "office technology"
+    },
+    client: "DC Solutions",
+    description: "Desarrollo del sitio web corporativo para DC Solutions, un destacado Gold Partner de HP y socio de Xerox. El proyecto se centró en diseñar una plataforma B2B profesional que comunicara eficazmente su portafolio de servicios administrados de impresión, digitalización y soporte técnico, optimizada para la generación de prospectos calificados.",
+    challenge: "El reto principal era traducir un conjunto de servicios B2B altamente técnicos y especializados (como los Servicios Administrados de Impresión y la digitalización de flujos de trabajo) en una experiencia de usuario (UX) clara, intuitiva y convincente. El sitio web debía proyectar un alto nivel de confianza y profesionalismo para atraer a su público objetivo (gerentes de TI, directores de finanzas y operaciones). Era crucial diferenciar claramente sus líneas de negocio —renta, venta, soporte y soluciones de software— y estructurar la información de manera que cada visitante empresarial pudiera identificar rápidamente la solución a su necesidad específica, guiándolo hacia el contacto.",
+    solution: "Implementamos un sitio web corporativo con un diseño limpio, moderno y enfocado en la usabilidad. La arquitectura de la información se planificó meticulosamente para segmentar los servicios y facilitar la navegación. Nuestra solución incluyó: Diseño UI/UX Corporativo, Estructura Orientada a la Conversión, Desarrollo sobre un CMS (WordPress) y Diseño Adaptable (Responsive).",
+    services: ["Diseño y Desarrollo Web Corporativo", "Diseño de Experiencia de Usuario (UX/UI)", "Arquitectura de la Información", "Implementación y Personalización de CMS (WordPress)", "Optimización de Rendimiento y Velocidad (WPO)", "Desarrollo Responsive (Adaptable)", "Consultoría SEO On-Page"],
+    website: "https://www.dcsolutions.com.mx/",
+  },
+  {
     id: "my-team-platform",
     title: "My Team: Creando una Plataforma Digital para el Deporte como Catalizador de Cambio",
     category: "Desarrollo Web",
@@ -44,7 +61,7 @@ export const portfolioItems: PortfolioItemType[] = [
       id: "portfolio-web-ficc",
       description: "Feria del cine de los cabos",
       imageUrl: "/images/desarrollo web/1.png",
-      imageHint: "movie festival website",
+      imageHint: "movie festival website"
     },
     client: "Festival Internacional de Cine de Los Cabos (FICLosCabos)",
     description: "Desarrollamos el sitio web oficial para la 13ª edición del Festival Internacional de Cine de Los Cabos (FICLosCabos), creando un hub digital centralizado para asistentes, cineastas y patrocinadores, enfocado en la experiencia e innovación del festival.",
@@ -161,3 +178,5 @@ export const portfolioItems: PortfolioItemType[] = [
     services: ["Gestión de Campañas", "Google Ads", "Social Ads"],
   }
 ];
+
+    
