@@ -20,6 +20,23 @@ export type PortfolioItemType = {
 
 export const portfolioItems: PortfolioItemType[] = [
   {
+    id: "my-team-platform",
+    title: "My Team: Creando una Plataforma Digital para el Deporte como Catalizador de Cambio",
+    category: "Desarrollo Web",
+    image: {
+      id: "portfolio-web-myteam",
+      description: "My Team website showing collaboration in sports",
+      imageUrl: "https://images.unsplash.com/photo-1521464307205-2a2b034a7019?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjB0ZWFtJTIwY2VsZWJyYXRpbmd8ZW58MHx8fHwxNzYyMjUyODAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      imageHint: "sports team celebrating"
+    },
+    client: "My Team",
+    description: "Desarrollamos el sitio web oficial de My Team, una marca que ve el deporte \"Más allá del deporte\". Creamos un ecosistema digital que fusiona una revista de contenido inspirador con una plataforma de e-commerce bajo una filosofía de impacto social.",
+    challenge: "My Team no es solo una revista deportiva, es un movimiento centrado en la colaboración, la sustentabilidad y la equidad de género. El desafío era diseñar una plataforma digital que pudiera articular esta filosofía compleja. Necesitábamos integrar con éxito tres componentes distintos —una revista digital (Revista My Team), un portafolio de proyectos de impacto (Proyectos) y una tienda en línea (Tienda)— en una experiencia de usuario cohesiva que inspirara un sentido de pertenencia y comunidad.",
+    solution: "Construimos un sitio web dinámico y moderno que sirve como el corazón de la marca My Team. Creamos una estructura de contenido clara que permite a los usuarios sumergirse en las historias de la revista, entender la filosofía de la marca y comprar productos en la tienda de forma intuitiva. El diseño visual se centró en transmitir los valores clave de \"colaboración, pasión y pertenencia\", utilizando imágenes impactantes y una navegación fluida para asegurar que cada visita comunicara la misión de My Team: usar el deporte como una herramienta para el cambio positivo.",
+    services: ["Diseño y Desarrollo Web", "Creación de Plataforma de Revista Digital (Blog)", "Integración de E-commerce (Tienda en línea)", "Diseño de Experiencia de Usuario (UX) e Interfaz de Usuario (UI)", "Desarrollo de Identidad de Marca Digital"],
+    website: "https://myteam-mag.com/",
+  },
+  {
     id: "festival-cine-los-cabos",
     title: "Festival Internacional de Cine de Los Cabos: Una Plataforma Digital #BeyondTheScreen",
     category: "Desarrollo Web",
