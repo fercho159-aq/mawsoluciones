@@ -19,6 +19,23 @@ export type PortfolioItemType = {
 };
 
 export const portfolioItems: PortfolioItemType[] = [
+    {
+    id: "boda-santiago-loreto",
+    title: "Creación de Sitio Web Interactivo para Boda: Santiago y Loreto",
+    category: "Desarrollo Web",
+    image: {
+      id: "portfolio-web-boda",
+      description: "Wedding website for Santiago and Loreto",
+      imageUrl: "https://images.unsplash.com/photo-1523438885200-e635ba2c371e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwZGV0YWlsc3xlbnwwfHx8fDE3NjIyNTQ0ODJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      imageHint: "wedding details"
+    },
+    client: "Santiago y Loreto",
+    description: "Desarrollo de la plataforma digital oficial para la boda de Santiago y Loreto. Este proyecto va más allá de una simple invitación; es un hub central e interactivo diseñado para guiar a los invitados a través de toda la experiencia del evento, gestionando desde la información logística hasta la confirmación de asistencia (RSVP) y la mesa de regalos.",
+    challenge: "El desafío principal era crear una experiencia digital que capturara la esencia y la estética de la pareja, combinando elegancia con funcionalidad moderna. El sitio debía ser el único punto de verdad para cientos de invitados, por lo que requería una fiabilidad absoluta. Los retos clave fueron: Gestión de Asistencia (RSVP), Experiencia Mobile-First, Bilingüismo e Interactividad.",
+    solution: "Para garantizar un rendimiento de primer nivel y una experiencia de usuario moderna (tipo Single Page Application o SPA), desarrollé el sitio utilizando un stack de JavaScript moderno, específicamente React (Next.js), y lo desplegué en la plataforma global de Vercel. La solución se enfocó en: Desarrollo Front-End Moderno, Gestión de RSVP, Internacionalización (i18n), Diseño Adaptable (Responsive) y Optimización de Despliegue.",
+    services: ["Diseño y Desarrollo Web Front-End (React/Next.js)", "Diseño de Experiencia de Usuario (UX/UI)", "Desarrollo Responsive (Mobile-First)", "Implementación de Internacionalización (i18n)", "Integración de API (Google Maps, Spotify, RSVP Backend)", "Despliegue y Configuración (Vercel)"],
+    website: "https://santiagoyloreto.vercel.app/es",
+  },
   {
     id: "dc-solutions-b2b",
     title: "Creación de Plataforma Digital B2B para DC Solutions: Expertos en Gestión de Impresión y Digitalización",
@@ -54,7 +71,7 @@ export const portfolioItems: PortfolioItemType[] = [
     website: "https://myteam-mag.com/",
   },
   {
-    id: "festival-cine-los-cabos",
+    id: "fic-los-cabos",
     title: "Festival Internacional de Cine de Los Cabos: Una Plataforma Digital #BeyondTheScreen",
     category: "Desarrollo Web",
     image: {
@@ -178,5 +195,7 @@ export const portfolioItems: PortfolioItemType[] = [
     services: ["Gestión de Campañas", "Google Ads", "Social Ads"],
   }
 ];
+
+    
 
     
