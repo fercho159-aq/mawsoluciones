@@ -98,7 +98,7 @@ export default function PortfolioItemPage({
               <Button variant="outline" asChild>
                   <Link href="/portafolio">
                       <ArrowLeft className="w-4 h-4 mr-2" />
-                      Volver al Portafolio
+                      Volver a Clientes
                   </Link>
               </Button>
           </div>

@@ -80,7 +80,7 @@ const Portfolio = () => {
         <AnimatedDiv className="text-center mt-16">
             <Button asChild size="lg">
                 <Link href="/portafolio">
-                    Ver todo el Portafolio
+                    Ver todos los proyectos
                     <ArrowRight className="w-4 h-4 ml-2"/>
                 </Link>
             </Button>
