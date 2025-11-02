@@ -20,6 +20,23 @@ export type PortfolioItemType = {
 
 export const portfolioItems: PortfolioItemType[] = [
     {
+    id: "core-31-fitness",
+    title: "Creación de Sitio Web de Alto Impacto para CORE 31 Wod & Fitness",
+    category: "Desarrollo Web",
+    image: {
+      id: "portfolio-web-core31",
+      description: "CORE 31 Wod & Fitness website",
+      imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmaXRuZXNzJTIwZ3ltfGVufDB8fHx8MTc2MjI1NTAwMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      imageHint: "fitness gym"
+    },
+    client: "CORE 31 Wod & Fitness",
+    description: "Desarrollo del sitio web principal para el box de Wod & Fitness, CORE 31. La plataforma fue diseñada para ser el principal canal de captación de nuevos miembros, transmitiendo la energía de su comunidad y detallando de forma clara su completa oferta de clases, horarios y coaches.",
+    challenge: "El principal desafío fue capturar la alta energía, la intensidad y el fuerte sentido de comunidad de un box de CrossFit en un formato digital. El sitio no podía ser una página corporativa estática; debía ser visualmente impactante y motivador desde el primer segundo. El reto técnico consistía en organizar de manera intuitiva una gran cantidad de información clave (múltiples tipos de clases, perfiles de coaches, un horario detallado, planes de precios) en un formato de una sola página (one-page), asegurando que la navegación fuera fluida y que el sitio cargara rápidamente, a pesar de la gran cantidad de imágenes de alta calidad necesarias para transmitir la atmósfera del lugar.",
+    solution: "Para lograr la velocidad y la experiencia de usuario deseadas, desarrollamos un sitio web estático (HTML, CSS y JavaScript), lo que garantiza un rendimiento óptimo y una seguridad robusta. Nuestra solución se centró en: Diseño Inmersivo y Enérgico, Navegación One-Page Fluida, Arquitectura de Información Clara y Enfoque Mobile-First.",
+    services: ["Diseño y Desarrollo Web (HTML/CSS/JS)", "Diseño de Experiencia de Usuario (UX/UI)", "Desarrollo Responsive (Mobile-First)", "Arquitectura de la Información", "Optimización de Rendimiento Web (WPO)"],
+    website: "https://core31.com.mx/index.html",
+  },
+  {
     id: "boda-santiago-loreto",
     title: "Creación de Sitio Web Interactivo para Boda: Santiago y Loreto",
     category: "Desarrollo Web",
@@ -108,8 +125,8 @@ export const portfolioItems: PortfolioItemType[] = [
     services: ["Diseño Web Corporativo B2B", "Desarrollo de Catálogo de Productos (con solicitud de cotización)", "Diseño UX/UI enfocado a la Generación de Leads", "Integración de Chat (WhatsApp) y Formularios de Contacto", "Optimización para Dispositivos Móviles"],
     website: "https://cimbrayaccesorios.com.mx/",
     parallaxImages: {
-      laptop: "https://images.unsplash.com/photo-1581094376363-9521a37c867a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      phone: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      laptop: "https://images.unsplash.com/photo-1581094376363-9521a37c867a?q=80&amp;w=2070&amp;auto=format&amp;fit=crop&amp;ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      phone: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&amp;w=2069&amp;auto=format&amp;fit=crop&amp;ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     }
   },
   {

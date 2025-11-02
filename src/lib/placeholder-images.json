@@ -125,6 +125,12 @@
       "description": "Abstract image of artificial intelligence network",
       "imageUrl": "https://images.unsplash.com/photo-1535223289827-42f1e9919769?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxhcnRpZmljaWFsJTIwaW50ZWxsaWdlbmNlfGVufDB8fHx8MTc2MjIzMDU5OHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "artificial intelligence"
+    },
+    {
+      "id": "portfolio-web-core31",
+      "description": "CORE 31 Wod & Fitness website",
+      "imageUrl": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmaXRuZXNzJTIwZ3ltfGVufDB8fHx8MTc2MjI1NTAwMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "fitness gym"
     }
   ]
 }
