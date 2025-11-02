@@ -42,21 +42,21 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.15,
+      staggerChildren: 0.1,
       ease: "easeOut"
     },
   },
 };
 
 const itemVariants = {
-  hidden: { y: 30, opacity: 0, scale: 0.98 },
+  hidden: { y: 20, opacity: 0, scale: 0.95 },
   visible: {
     y: 0,
     opacity: 1,
     scale: 1,
     transition: {
-        duration: 0.6,
-        ease: [0.25, 1, 0.5, 1] // A gentle ease-out curve
+        duration: 0.5,
+        ease: [0.25, 1, 0.5, 1]
     }
   },
 };
@@ -65,9 +65,9 @@ const Services = () => {
   return (
     <section id="services" className="py-20 md:py-32 bg-background">
       <div className="container mx-auto px-4 md:px-6">
-        <AnimatedDiv className="max-w-4xl mx-auto text-center mb-16">
-          <h2 className="font-headline text-4xl sm:text-5xl md:text-6xl font-bold">Todo lo que necesitas para crecer</h2>
-          <p className="mt-6 text-lg sm:text-xl text-foreground/70">
+        <AnimatedDiv className="max-w-3xl mx-auto text-center mb-16">
+           <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold">Todo lo que necesitas para crecer</h2>
+          <p className="mt-4 text-lg text-foreground/80">
             Ofrecemos una gama completa de soluciones de marketing digital diseñadas para llevar tu negocio al siguiente nivel.
           </p>
         </AnimatedDiv>
@@ -79,13 +79,13 @@ const Services = () => {
             <AnimatedDiv key={index} variants={itemVariants}>
               <Link href={service.href} className="h-full block group">
                 <Card className="h-full flex flex-col bg-card/50 hover:bg-card border-border/50 hover:border-border transition-all duration-300 ease-in-out transform hover:-translate-y-2 shadow-sm hover:shadow-2xl">
-                    <CardHeader>
+                    <CardHeader className="p-6 pb-4">
                       {service.icon}
                     </CardHeader>
-                    <CardContent className="flex-grow flex flex-col pt-0">
-                      <CardTitle className="font-headline text-2xl mb-3">{service.title}</CardTitle>
-                      <CardDescription className="flex-grow text-base">{service.description}</CardDescription>
-                      <div className="flex items-center text-primary mt-6 font-medium">
+                    <CardContent className="flex-grow flex flex-col p-6 pt-0">
+                      <CardTitle className="font-headline text-2xl mb-2">{service.title}</CardTitle>
+                      <CardDescription className="flex-grow text-base text-foreground/70">{service.description}</CardDescription>
+                       <div className="flex items-center text-primary mt-4 font-semibold">
                           Saber más <ArrowRight className="w-4 h-4 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
                       </div>
                     </CardContent>
@@ -95,10 +95,10 @@ const Services = () => {
           ))}
            <AnimatedDiv variants={itemVariants}>
               <div className="h-full flex flex-col bg-card/50 border-border/50 rounded-lg p-8 items-center justify-center text-center">
-                    <h3 className="font-headline text-2xl mb-3">¿Listo para empezar?</h3>
-                    <p className="flex-grow text-base text-foreground/70 mb-6">Hablemos de cómo podemos ayudarte a alcanzar tus objetivos. ¡Agenda una sesión gratuita!</p>
+                    <h3 className="font-headline text-2xl mb-3">¿Aún no te decides?</h3>
+                    <p className="flex-grow text-base text-foreground/70 mb-6">Explora todos nuestros servicios en detalle y encuentra la solución perfecta para tu negocio.</p>
                     <Button className="w-full" asChild>
-                      <a href="#booking">Reservar Sesión Estratégica</a>
+                      <Link href="/servicios">Ver todos los servicios</Link>
                     </Button>
               </div>
             </AnimatedDiv>

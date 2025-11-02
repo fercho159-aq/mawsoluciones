@@ -10,10 +10,10 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Logo from "./logo";
 
 const navLinks = [
-  { href: "#services", label: "Servicios" },
-  { href: "#portfolio", label: "Portafolio" },
-  { href: "#about", label: "Nosotros" },
-  { href: "#contact", label: "Contacto" },
+  { href: "/servicios", label: "Servicios" },
+  { href: "/#portfolio", label: "Portafolio" },
+  { href: "/#about", label: "Nosotros" },
+  { href: "/#contact", label: "Contacto" },
 ];
 
 const Header = () => {

@@ -17,10 +17,10 @@ const Footer = () => {
           <div>
             <h4 className="font-headline font-semibold text-lg mb-4">Navegación</h4>
             <ul className="space-y-2">
-              <li><Link href="#services" className="hover:text-primary transition-colors">Servicios</Link></li>
-              <li><Link href="#portfolio" className="hover:text-primary transition-colors">Portafolio</Link></li>
-              <li><Link href="#about" className="hover:text-primary transition-colors">Nosotros</Link></li>
-              <li><Link href="#contact" className="hover:text-primary transition-colors">Contacto</Link></li>
+              <li><Link href="/servicios" className="hover:text-primary transition-colors">Servicios</Link></li>
+              <li><Link href="/#portfolio" className="hover:text-primary transition-colors">Portafolio</Link></li>
+              <li><Link href="/#about" className="hover:text-primary transition-colors">Nosotros</Link></li>
+              <li><Link href="/#contact" className="hover:text-primary transition-colors">Contacto</Link></li>
             </ul>
           </div>
           <div>
