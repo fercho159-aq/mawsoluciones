@@ -37,7 +37,7 @@ const Portfolio = () => {
     <section id="portfolio" className="py-20 md:py-28 bg-card">
       <div className="container mx-auto px-4 md:px-6">
         <AnimatedDiv className="max-w-3xl mx-auto text-center mb-12">
-          <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold">Nuestro Portafolio</h2>
+          <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold">Nuestros Clientes</h2>
           <p className="mt-4 text-lg text-foreground/80">
             Explora algunos de nuestros proyectos más exitosos y ve el impacto de nuestro trabajo.
           </p>
