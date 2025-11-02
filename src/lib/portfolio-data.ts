@@ -1,15 +1,10 @@
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { PlaceHolderImages, ImagePlaceholder } from "@/lib/placeholder-images";
 
 export type PortfolioItemType = {
   id: string;
   title: string;
   category: string;
-  image?: {
-    id: string;
-    description: string;
-    imageUrl: string;
-    imageHint: string;
-  };
+  image?: ImagePlaceholder;
   description: string;
   services: string[];
   website?: string;
@@ -25,9 +20,14 @@ export type PortfolioItemType = {
 export const portfolioItems: PortfolioItemType[] = [
   {
     id: "tech-startup-website",
-    title: "Sitio Web para Startup Tecnológica",
+    title: "Sitio Web para la Feria Internacion del cine de los cabos",
     category: "Desarrollo Web",
-    image: PlaceHolderImages.find(img => img.id === 'portfolio-web-1'),
+    image: {
+      id: "portfolio-web-ficc",
+      description: "Feria del cine de los cabos",
+      imageUrl: "/images/desarrollo web/1.png",
+      imageHint: "movie festival website"
+    },
     client: "Innovatech Solutions",
     description: "Un sitio web moderno, rápido y escalable para una startup de SaaS, diseñado para generar leads y comunicar una propuesta de valor compleja de forma sencilla.",
     challenge: "Crear una presencia online desde cero que pudiera competir en un mercado saturado, destacando la innovación del producto y generando confianza en potenciales inversores y clientes.",
@@ -85,9 +85,14 @@ export const portfolioItems: PortfolioItemType[] = [
   },
   {
     id: "boutique-ecommerce",
-    title: "E-commerce para Boutique",
+    title: "E-commerce para Polar autopartes",
     category: "Desarrollo Web",
-    image: PlaceHolderImages.find(img => img.id === 'portfolio-web-2'),
+    image: {
+        id: "portfolio-web-polar",
+        description: "Polar autopartes website",
+        imageUrl: "/images/desarrollo web/5.png",
+        imageHint: "auto parts website"
+    },
     client: "Artesanía Local",
     description: "Creación de una tienda online para una boutique de artesanías.",
     challenge: "Digitalizar un negocio tradicional, creando una plataforma de e-commerce que fuera fácil de gestionar para el propietario y que transmitiera la calidad y unicidad de los productos artesanales.",
@@ -95,8 +100,8 @@ export const portfolioItems: PortfolioItemType[] = [
     services: ["Desarrollo Web", "E-commerce", "Fotografía de Producto"],
     website: "https://example.com",
     parallaxImages: {
-      laptop: "/images/desarrollo web/laptop-2.png",
-      phone: "/images/desarrollo web/phone-2.png"
+      laptop: "/images/desarrollo web/6.png",
+      phone: "/images/desarrollo web/8.png"
     }
   }
 ];
