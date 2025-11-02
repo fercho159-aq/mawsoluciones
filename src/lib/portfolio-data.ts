@@ -86,7 +86,7 @@ export const portfolioItems: PortfolioItemType[] = [
   },
   {
     id: "boutique-ecommerce",
-    title: "E-commerce para Polar autopartes",
+    title: "Polar Autopartes: Digitalización de un Catálogo Complejo de Refacciones",
     category: "Desarrollo Web",
     image: {
         id: "portfolio-web-polar",
@@ -94,12 +94,12 @@ export const portfolioItems: PortfolioItemType[] = [
         imageUrl: "/images/desarrollo web/5.png",
         imageHint: "auto parts website"
     },
-    client: "Artesanía Local",
-    description: "Creación de una tienda online para una boutique de artesanías.",
-    challenge: "Digitalizar un negocio tradicional, creando una plataforma de e-commerce que fuera fácil de gestionar para el propietario y que transmitiera la calidad y unicidad de los productos artesanales.",
-    solution: "Desarrollamos una tienda online en Shopify, personalizando un tema para reflejar la identidad de la marca. Realizamos una sesión de fotografía de producto para asegurar imágenes de alta calidad y configuramos los métodos de pago y envío. El resultado fue un nuevo canal de ventas que expandió el alcance del negocio a nivel nacional.",
-    services: ["Desarrollo Web", "E-commerce", "Fotografía de Producto"],
-    website: "https://example.com",
+    client: "Polar Autopartes",
+    description: "Desarrollamos la plataforma de e-commerce para Polar Autopartes, implementando un buscador de refacciones avanzado para conectar a talleres, refaccionarias y clientes particulares con el inventario exacto para el sistema de enfriamiento de sus vehículos.",
+    challenge: "Polar Autopartes, con más de 20 años de experiencia, enfrentaba el reto de digitalizar un inventario masivo y altamente específico. El éxito del proyecto dependía de crear un sistema donde un usuario pudiera encontrar una pieza exacta (como una bomba de agua o un radiador) entre miles de opciones, filtrando por Marca, Modelo, Año y Motor. El sitio debía ser rápido, confiable y generar confianza tanto para compradores B2B como para el consumidor final.",
+    solution: "Construimos un sitio de e-commerce robusto centrado en un potente motor de \"Búsqueda Avanzada\". Esta herramienta se convirtió en el núcleo del sitio, permitiendo a los usuarios filtrar con precisión el catálogo completo y encontrar la pieza compatible sin errores. Diseñamos una interfaz limpia que organiza los productos por líneas principales (Bombas de Agua, Depósitos, etc.) y destacamos sus fortalezas clave: cobertura nacional, envío rápido y calidad garantizada, todo respaldado por testimonios de clientes reales para solidificar su reputación líder en el sector.",
+    services: ["Diseño y Desarrollo de E-commerce", "Implementación de Catálogo Digital Complejo", "Desarrollo de Buscador de Productos por Filtros (Marca, Modelo, Año, Motor)", "Diseño de Experiencia de Usuario (UX) e Interfaz de Usuario (UI)", "Optimización para Dispositivos Móviles (Responsive Design)"],
+    website: "https://www.polarautopartes.com/",
     parallaxImages: {
       laptop: "/images/desarrollo web/6.png",
       phone: "/images/desarrollo web/8.png"
