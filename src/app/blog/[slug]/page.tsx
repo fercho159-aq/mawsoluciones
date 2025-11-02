@@ -7,6 +7,7 @@ import { ArrowLeft, Calendar, User, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import AnimatedDiv from "@/components/animated-div";
 
 export default function BlogPostPage({ params }: { params: { slug: string } }) {
   const post = blogPosts.find((p) => p.slug === params.slug);
@@ -14,6 +15,10 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
   if (!post) {
     notFound();
   }
+
+  const relatedPosts = blogPosts
+    .filter((p) => p.id !== post.id)
+    .slice(0, 3);
 
   return (
     <div className="bg-background">
@@ -75,6 +80,46 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
           </div>
         </div>
       </section>
+
+      {relatedPosts.length > 0 && (
+        <section className="py-20 md:py-28 border-t">
+            <div className="container mx-auto px-4 md:px-6">
+                <AnimatedDiv className="text-center mb-16">
+                    <h2 className="font-headline text-3xl sm:text-4xl font-bold">Otras entradas que podrían interesarte</h2>
+                </AnimatedDiv>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                    {relatedPosts.map((relatedPost) => (
+                        <AnimatedDiv key={relatedPost.id}>
+                            <Link href={`/blog/${relatedPost.slug}`} className="group block h-full">
+                                <div className="bg-card rounded-lg shadow-lg overflow-hidden h-full flex flex-col transform hover:-translate-y-2 transition-transform duration-300">
+                                {relatedPost.image && (
+                                    <div className="relative aspect-video">
+                                    <Image
+                                        src={relatedPost.image.imageUrl}
+                                        alt={relatedPost.title}
+                                        fill
+                                        className="object-cover"
+                                        data-ai-hint={relatedPost.image.imageHint}
+                                    />
+                                    </div>
+                                )}
+                                <div className="p-6 flex flex-col flex-grow">
+                                    <Badge variant="secondary" className="mb-2 w-fit">{relatedPost.category}</Badge>
+                                    <h3 className="font-headline text-xl font-bold mb-3 flex-grow group-hover:text-primary transition-colors">
+                                    {relatedPost.title}
+                                    </h3>
+                                    <div className="flex items-center text-sm text-primary mt-auto font-semibold">
+                                    Leer más <ArrowRight className="w-4 h-4 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
+                                    </div>
+                                </div>
+                                </div>
+                            </Link>
+                        </AnimatedDiv>
+                    ))}
+                </div>
+            </div>
+        </section>
+      )}
 
        <section className="py-20 md:py-28 bg-card">
         <div className="container mx-auto px-4 md:px-6 text-center">
