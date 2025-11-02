@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
+import ParallaxImages from "@/components/sections/parallax-images";
 
 const ServicePage = () => {
   return (
@@ -17,6 +18,8 @@ const ServicePage = () => {
           </div>
         </div>
       </section>
+      
+      <ParallaxImages />
 
       <section className="py-20 md:py-28">
         <div className="container mx-auto px-4 md:px-6">
