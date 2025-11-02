@@ -20,7 +20,7 @@ const Hero = () => {
         transition={{ duration: 1.5, ease: "easeInOut" }}
       >
         <Image 
-          src="https://images.unsplash.com/photo-1556742044-597b14072382?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxkaWdpdGFsJTIwbWFya2V0aW5nJTIwYWdlbmN5fGVufDB8fHx8MTc2MjExNDU1NHww&ixlib=rb-4.1.0&q=80&w=1080"
+          src="/images/charlesdeluvio-Lks7vei-eAg-unsplash.jpg"
           alt="Agencia de marketing digital"
           fill
           priority
