@@ -20,14 +20,14 @@ export type PortfolioItemType = {
 
 export const portfolioItems: PortfolioItemType[] = [
   {
-    id: "tech-startup-website",
+    id: "festival-cine-los-cabos",
     title: "Festival Internacional de Cine de Los Cabos: Una Plataforma Digital #BeyondTheScreen",
     category: "Desarrollo Web",
     image: {
       id: "portfolio-web-ficc",
       description: "Feria del cine de los cabos",
       imageUrl: "/images/desarrollo web/1.png",
-      imageHint: "movie festival website"
+      imageHint: "movie festival website",
     },
     client: "Festival Internacional de Cine de Los Cabos (FICLosCabos)",
     description: "Desarrollamos el sitio web oficial para la 13ª edición del Festival Internacional de Cine de Los Cabos (FICLosCabos), creando un hub digital centralizado para asistentes, cineastas y patrocinadores, enfocado en la experiencia e innovación del festival.",
@@ -85,7 +85,7 @@ export const portfolioItems: PortfolioItemType[] = [
     services: ["Gestión de Campañas", "Google Ads", "Social Ads"],
   },
   {
-    id: "boutique-ecommerce",
+    id: "polar-autopartes",
     title: "Polar Autopartes: Digitalización de un Catálogo Complejo de Refacciones",
     category: "Desarrollo Web",
     image: {
