@@ -24,7 +24,7 @@ const ParallaxImages = () => {
 
 
   return (
-    <section ref={containerRef} className="relative h-[150vh] bg-background">
+    <section ref={containerRef} className="relative h-[200vh] bg-background">
       <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
         <motion.div 
             className="absolute w-[100vw] h-[100vh] max-w-[1300px] max-h-[800px]"
