@@ -1,4 +1,5 @@
 
+
 import { portfolioItems } from "@/lib/portfolio-data";
 import { notFound } from "next/navigation";
 import Image from "next/image";
@@ -6,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CheckCircle2, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import ParallaxImages from "@/components/sections/parallax-images";
 
 export default function PortfolioItemPage({
   params,
@@ -34,21 +36,7 @@ export default function PortfolioItemPage({
         </div>
       </section>
 
-      {item.image && (
-        <section className="py-0">
-          <div className="container mx-auto px-4 md:px-6">
-            <div className="relative aspect-video max-w-5xl mx-auto -mt-20 rounded-lg shadow-2xl overflow-hidden">
-              <Image
-                src={item.image.imageUrl}
-                alt={item.title}
-                fill
-                className="object-cover"
-                data-ai-hint={item.image.imageHint}
-              />
-            </div>
-          </div>
-        </section>
-      )}
+      <ParallaxImages />
 
       <section className="py-20 md:py-28">
         <div className="container mx-auto px-4 md:px-6">
