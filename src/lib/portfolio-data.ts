@@ -23,12 +23,7 @@ export const portfolioItems: PortfolioItemType[] = [
     id: "core-31-fitness",
     title: "Creación de Sitio Web de Alto Impacto para CORE 31 Wod & Fitness",
     category: "Desarrollo Web",
-    image: {
-      id: "portfolio-web-core31",
-      description: "CORE 31 Wod & Fitness website",
-      imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmaXRuZXNzJTIwZ3ltfGVufDB8fHx8MTc2MjI1NTAwMHww&ixlib=rb-4.1.0&q=80&w=1080",
-      imageHint: "fitness gym"
-    },
+    image: PlaceHolderImages.find(img => img.id === 'portfolio-web-core31'),
     client: "CORE 31 Wod & Fitness",
     description: "Desarrollo del sitio web principal para el box de Wod & Fitness, CORE 31. La plataforma fue diseñada para ser el principal canal de captación de nuevos miembros, transmitiendo la energía de su comunidad y detallando de forma clara su completa oferta de clases, horarios y coaches.",
     challenge: "El principal desafío fue capturar la alta energía, la intensidad y el fuerte sentido de comunidad de un box de CrossFit en un formato digital. El sitio no podía ser una página corporativa estática; debía ser visualmente impactante y motivador desde el primer segundo. El reto técnico consistía en organizar de manera intuitiva una gran cantidad de información clave (múltiples tipos de clases, perfiles de coaches, un horario detallado, planes de precios) en un formato de una sola página (one-page), asegurando que la navegación fuera fluida y que el sitio cargara rápidamente, a pesar de la gran cantidad de imágenes de alta calidad necesarias para transmitir la atmósfera del lugar.",
@@ -40,12 +35,7 @@ export const portfolioItems: PortfolioItemType[] = [
     id: "boda-santiago-loreto",
     title: "Creación de Sitio Web Interactivo para Boda: Santiago y Loreto",
     category: "Desarrollo Web",
-    image: {
-      id: "portfolio-web-boda",
-      description: "Wedding website for Santiago and Loreto",
-      imageUrl: "https://images.unsplash.com/photo-1523438885200-e635ba2c371e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwZGV0YWlsc3xlbnwwfHx8fDE3NjIyNTQ0ODJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      imageHint: "wedding details"
-    },
+    image: PlaceHolderImages.find(img => img.id === 'portfolio-web-boda'),
     client: "Santiago y Loreto",
     description: "Desarrollo de la plataforma digital oficial para la boda de Santiago y Loreto. Este proyecto va más allá de una simple invitación; es un hub central e interactivo diseñado para guiar a los invitados a través de toda la experiencia del evento, gestionando desde la información logística hasta la confirmación de asistencia (RSVP) y la mesa de regalos.",
     challenge: "El desafío principal era crear una experiencia digital que capturara la esencia y la estética de la pareja, combinando elegancia con funcionalidad moderna. El sitio debía ser el único punto de verdad para cientos de invitados, por lo que requería una fiabilidad absoluta. Los retos clave fueron: Gestión de Asistencia (RSVP), Experiencia Mobile-First, Bilingüismo e Interactividad.",
@@ -57,12 +47,7 @@ export const portfolioItems: PortfolioItemType[] = [
     id: "dc-solutions-b2b",
     title: "Creación de Plataforma Digital B2B para DC Solutions: Expertos en Gestión de Impresión y Digitalización",
     category: "Desarrollo Web",
-    image: {
-      id: "portfolio-web-dcsolutions",
-      description: "DC Solutions website showcasing office technology",
-      imageUrl: "https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxvZmZpY2UlMjB0ZWNoJTIwc29sdXRpb25zfGVufDB8fHx8MTc2MjI1MzYwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
-      imageHint: "office technology"
-    },
+    image: PlaceHolderImages.find(img => img.id === 'portfolio-web-dcsolutions'),
     client: "DC Solutions",
     description: "Desarrollo del sitio web corporativo para DC Solutions, un destacado Gold Partner de HP y socio de Xerox. El proyecto se centró en diseñar una plataforma B2B profesional que comunicara eficazmente su portafolio de servicios administrados de impresión, digitalización y soporte técnico, optimizada para la generación de prospectos calificados.",
     challenge: "El reto principal era traducir un conjunto de servicios B2B altamente técnicos y especializados (como los Servicios Administrados de Impresión y la digitalización de flujos de trabajo) en una experiencia de usuario (UX) clara, intuitiva y convincente. El sitio web debía proyectar un alto nivel de confianza y profesionalismo para atraer a su público objetivo (gerentes de TI, directores de finanzas y operaciones). Era crucial diferenciar claramente sus líneas de negocio —renta, venta, soporte y soluciones de software— y estructurar la información de manera que cada visitante empresarial pudiera identificar rápidamente la solución a su necesidad específica, guiándolo hacia el contacto.",
@@ -74,12 +59,7 @@ export const portfolioItems: PortfolioItemType[] = [
     id: "my-team-platform",
     title: "My Team: Creando una Plataforma Digital para el Deporte como Catalizador de Cambio",
     category: "Desarrollo Web",
-    image: {
-      id: "portfolio-web-myteam",
-      description: "My Team website showing collaboration in sports",
-      imageUrl: "https://images.unsplash.com/photo-1521464307205-2a2b034a7019?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjB0ZWFtJTIwY2VsZWJyYXRpbmd8ZW58MHx8fHwxNzYyMjUyODAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      imageHint: "sports team celebrating"
-    },
+    image: PlaceHolderImages.find(img => img.id === 'portfolio-web-myteam'),
     client: "My Team",
     description: "Desarrollamos el sitio web oficial de My Team, una marca que ve el deporte \"Más allá del deporte\". Creamos un ecosistema digital que fusiona una revista de contenido inspirador con una plataforma de e-commerce bajo una filosofía de impacto social.",
     challenge: "My Team no es solo una revista deportiva, es un movimiento centrado en la colaboración, la sustentabilidad y la equidad de género. El desafío era diseñar una plataforma digital que pudiera articular esta filosofía compleja. Necesitábamos integrar con éxito tres componentes distintos —una revista digital (Revista My Team), un portafolio de proyectos de impacto (Proyectos) y una tienda en línea (Tienda)— en una experiencia de usuario cohesiva que inspirara un sentido de pertenencia y comunidad.",
@@ -88,15 +68,22 @@ export const portfolioItems: PortfolioItemType[] = [
     website: "https://myteam-mag.com/",
   },
   {
+    id: "valor-compartido",
+    title: "Creación de Plataforma Digital de Medios para \"Valor Compartido\" y \"Foro M\"",
+    category: "Desarrollo Web",
+    image: PlaceHolderImages.find(img => img.id === 'portfolio-web-valor-compartido'),
+    client: "Valor Compartido / Foro M",
+    description: "Se desarrolló el portal digital \"Valor Compartido\", una plataforma de medios líder en Iberoamérica enfocada en sostenibilidad, responsabilidad social y liderazgo. El sitio funciona como un hub de contenido editorial y, a su vez, como la plataforma oficial del \"Foro M: Movilizando Conciencias\", integrando noticias, columnas de opinión y la información de este importante evento.",
+    challenge: "El desafío principal era diseñar y construir un portal de medios de comunicación robusto, capaz de gestionar un alto volumen de publicaciones diarias y una taxonomía compleja (múltiples categorías, etiquetas y autores). El sitio requería una doble funcionalidad: 1. Medio de Comunicación: Servir como una revista digital con artículos, noticias y perfiles de columnistas, optimizada para la lectura y el descubrimiento de contenido. 2. Plataforma de Evento: Alojar toda la información relevante del \"Foro M\", incluyendo ponentes, agenda y ediciones pasadas. Necesitábamos una solución que fuera extremadamente fácil de administrar para un equipo editorial no técnico, permitiéndoles publicar contenido nuevo de forma ágil, sin sacrificar la velocidad de carga ni la experiencia del usuario, incluso con la integración de anuncios (publicidad).",
+    solution: "Implementamos una solución integral basada en un Sistema de Gestión de Contenidos (CMS) potente y flexible, WordPress, personalizándolo a fondo para las necesidades editoriales del cliente. Nuestra solución se enfocó en: 1. Arquitectura Editorial: Se diseñó una estructura de información lógica. Se crearon tipos de contenido personalizados y taxonomías para diferenciar claramente las noticias, las columnas de opinión (sección \"Columnistas\") y el contenido estático del \"Foro M\". 2. Diseño UX/UI Enfocado en el Contenido: Se desarrolló una interfaz limpia, moderna y enfocada 100% en la legibilidad. La página de inicio se estructuró como un homepage de revista, con módulos dinámicos que destacan el contenido principal, las publicaciones recientes y las diferentes secciones temáticas. 3. Facilidad de Gestión (Backend): Se configuró el panel de administración de WordPress para que fuera intuitivo, permitiendo al equipo de Valor Compartido gestionar todo el contenido, los autores y los banners publicitarios sin necesidad de asistencia técnica. 4. Optimización de Rendimiento (WPO): Sabiendo que es un sitio con mucho tráfico y contenido multimedia, se implementaron sistemas de caché avanzados y optimización de imágenes para garantizar tiempos de carga rápidos y una experiencia fluida.",
+    services: ["Diseño y Desarrollo Web", "Implementación y Personalización de CMS (WordPress)", "Diseño UI/UX para Medios Digitales", "Arquitectura de la Información", "Desarrollo Responsive (Mobile-First)", "Optimización de Rendimiento y Velocidad (WPO)", "Consultoría Editorial Digital"],
+    website: "https://valor-compartido.com/",
+  },
+  {
     id: "fic-los-cabos",
     title: "Festival Internacional de Cine de Los Cabos: Una Plataforma Digital #BeyondTheScreen",
     category: "Desarrollo Web",
-    image: {
-      id: "portfolio-web-ficc",
-      description: "Feria del cine de los cabos",
-      imageUrl: "/images/desarrollo web/1.png",
-      imageHint: "movie festival website"
-    },
+    image: PlaceHolderImages.find(img => img.id === 'portfolio-web-ficc'),
     client: "Festival Internacional de Cine de Los Cabos (FICLosCabos)",
     description: "Desarrollamos el sitio web oficial para la 13ª edición del Festival Internacional de Cine de Los Cabos (FICLosCabos), creando un hub digital centralizado para asistentes, cineastas y patrocinadores, enfocado en la experiencia e innovación del festival.",
     challenge: "El FICLosCabos necesitaba una plataforma digital que no solo sirviera como un canal informativo para su 13ª edición, sino que también reflejara su evolución de un evento de cine a una \"plataforma creativa expandida\" bajo el concepto #BeyondTheScreen. El reto era integrar múltiples iniciativas clave —como el Fondo Fílmico Gabriel Figueroa, la nueva sección de Animación y la convocatoria \"La Baja Inspira\"— en una interfaz intuitiva, moderna y que facilitara la captación de asistentes mediante un sistema de pre-registro.",
@@ -112,12 +99,7 @@ export const portfolioItems: PortfolioItemType[] = [
     id: "dfac-accesorios-cimbra",
     title: "DFAC - Accesorios para Cimbra: Digitalizando la Confianza y Velocidad en la Construcción",
     category: "Desarrollo Web",
-    image: {
-        id: "portfolio-web-dfac",
-        description: "DFAC website",
-        imageUrl: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjb25zdHJ1Y3Rpb24lMjBzaXRlfGVufDB8fHx8MTc2MjI0NTcwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
-        imageHint: "construction site"
-    },
+    image: PlaceHolderImages.find(img => img.id === 'portfolio-web-dfac'),
     client: "DFAC - Accesorios para Cimbra",
     description: "Desarrollamos la plataforma web B2B para DFAC (Cimbra y Accesorios), creando un catálogo digital optimizado para la generación de cotizaciones urgentes y destacando su promesa de entrega de material en menos de 24 horas.",
     challenge: "El principal diferenciador de DFAC es su capacidad logística para entregar accesorios de cimbra y andamiaje en la obra en menos de 24 horas. El reto era crear un sitio web que no solo mostrara su extenso catálogo de productos técnicos (moños, puntales, etc.), sino que también transmitiera esta sensación de urgencia, confiabilidad y servicio experto a un público B2B (ingenieros, arquitectos y jefes de obra) que toma decisiones bajo presión.",
@@ -125,20 +107,15 @@ export const portfolioItems: PortfolioItemType[] = [
     services: ["Diseño Web Corporativo B2B", "Desarrollo de Catálogo de Productos (con solicitud de cotización)", "Diseño UX/UI enfocado a la Generación de Leads", "Integración de Chat (WhatsApp) y Formularios de Contacto", "Optimización para Dispositivos Móviles"],
     website: "https://cimbrayaccesorios.com.mx/",
     parallaxImages: {
-      laptop: "https://images.unsplash.com/photo-1581094376363-9521a37c867a?q=80&amp;w=2070&amp;auto=format&amp;fit=crop&amp;ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      phone: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&amp;w=2069&amp;auto=format&amp;fit=crop&amp;ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      laptop: "https://images.unsplash.com/photo-1581094376363-9521a37c867a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      phone: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     }
   },
   {
     id: "polar-autopartes",
     title: "Polar Autopartes: Digitalización de un Catálogo Complejo de Refacciones",
     category: "Desarrollo Web",
-    image: {
-        id: "portfolio-web-polar",
-        description: "Polar autopartes website",
-        imageUrl: "/images/desarrollo web/5.png",
-        imageHint: "auto parts website"
-    },
+    image: PlaceHolderImages.find(img => img.id === 'portfolio-web-polar'),
     client: "Polar Autopartes",
     description: "Desarrollamos la plataforma de e-commerce para Polar Autopartes, implementando un buscador de refacciones avanzado para conectar a talleres, refaccionarias y clientes particulares con el inventario exacto para el sistema de enfriamiento de sus vehículos.",
     challenge: "Polar Autopartes, con más de 20 años de experiencia, enfrentaba el reto de digitalizar un inventario masivo y altamente específico. El éxito del proyecto dependía de crear un sistema donde un usuario pudiera encontrar una pieza exacta (como una bomba de agua o un radiador) entre miles de opciones, filtrando por Marca, Modelo, Año y Motor. El sitio debía ser rápido, confiable y generar confianza tanto para compradores B2B como para el consumidor final.",
@@ -154,12 +131,7 @@ export const portfolioItems: PortfolioItemType[] = [
     id: "paolo-gourmet",
     title: "Paolo Gourmet: Diseño de una Experiencia E-commerce Premium para Tablas de Queso Artesanales",
     category: "Desarrollo Web",
-    image: {
-      id: "portfolio-web-paolo",
-      description: "Paolo Gourmet website",
-      imageUrl: "https://images.unsplash.com/photo-1561043433-aaf687c4cf04?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhcnRpc2FuYWwlMjBjaGVlc2UlMjBib2FyZHxlbnwwfHx8fDE3NjIyNDg0NTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      imageHint: "artisanal cheese board"
-    },
+    image: PlaceHolderImages.find(img => img.id === 'portfolio-web-paolo'),
     client: "Paolo Gourmet",
     description: "Desarrollamos la tienda en línea para Paolo Gourmet, un e-commerce sofisticado enfocado en la venta de tablas de queso artesanales y cajas gourmet, diseñado para transmitir lujo, calidad y facilitar la compra para eventos y regalos en CDMX.",
     challenge: "El producto de Paolo Gourmet es altamente visual y premium. El reto era crear una plataforma digital que no solo funcionara como un catálogo de productos, sino que también capturara la elegancia, frescura y el \"arte de compartir\" que define a la marca. Necesitábamos construir un sitio que inspirara confianza, manejara pedidos con 24 horas de anticipación y facilitara las solicitudes de cotizaciones personalizadas para eventos grandes.",

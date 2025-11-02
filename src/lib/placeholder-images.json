@@ -131,6 +131,30 @@
       "description": "CORE 31 Wod & Fitness website",
       "imageUrl": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmaXRuZXNzJTIwZ3ltfGVufDB8fHx8MTc2MjI1NTAwMHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "fitness gym"
+    },
+    {
+      "id": "portfolio-web-boda",
+      "description": "Wedding website for Santiago and Loreto",
+      "imageUrl": "https://images.unsplash.com/photo-1523438885200-e635ba2c371e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwZGV0YWlsc3xlbnwwfHx8fDE3NjIyNTQ0ODJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wedding details"
+    },
+    {
+      "id": "portfolio-web-dcsolutions",
+      "description": "DC Solutions website showcasing office technology",
+      "imageUrl": "https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxvZmZpY2UlMjB0ZWNoJTIwc29sdXRpb25zfGVufDB8fHx8MTc2MjI1MzYwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "office technology"
+    },
+    {
+      "id": "portfolio-web-myteam",
+      "description": "My Team website showing collaboration in sports",
+      "imageUrl": "https://images.unsplash.com/photo-1521464307205-2a2b034a7019?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjB0ZWFtJTIwY2VsZWJyYXRpbmd8ZW58MHx8fHwxNzYyMjUyODAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "sports team celebrating"
+    },
+    {
+      "id": "portfolio-web-valor-compartido",
+      "description": "Valor Compartido media platform",
+      "imageUrl": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWVkaWElMjBsZWFkZXJzaGlwfGVufDB8fHx8MTc2MjI3NjIwNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "digital media leadership"
     }
   ]
 }
