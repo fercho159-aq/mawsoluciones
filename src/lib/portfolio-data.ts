@@ -82,6 +82,23 @@ export const portfolioItems: PortfolioItemType[] = [
       phone: "/images/desarrollo web/8.png"
     }
   },
+   {
+    id: "paolo-gourmet",
+    title: "Paolo Gourmet: Diseño de una Experiencia E-commerce Premium para Tablas de Queso Artesanales",
+    category: "Desarrollo Web",
+    image: {
+      id: "portfolio-web-paolo",
+      description: "Paolo Gourmet website",
+      imageUrl: "https://images.unsplash.com/photo-1561043433-aaf687c4cf04?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhcnRpc2FuYWwlMjBjaGVlc2UlMjBib2FyZHxlbnwwfHx8fDE3NjIyNDg0NTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      imageHint: "artisanal cheese board"
+    },
+    client: "Paolo Gourmet",
+    description: "Desarrollamos la tienda en línea para Paolo Gourmet, un e-commerce sofisticado enfocado en la venta de tablas de queso artesanales y cajas gourmet, diseñado para transmitir lujo, calidad y facilitar la compra para eventos y regalos en CDMX.",
+    challenge: "El producto de Paolo Gourmet es altamente visual y premium. El reto era crear una plataforma digital que no solo funcionara como un catálogo de productos, sino que también capturara la elegancia, frescura y el \"arte de compartir\" que define a la marca. Necesitábamos construir un sitio que inspirara confianza, manejara pedidos con 24 horas de anticipación y facilitara las solicitudes de cotizaciones personalizadas para eventos grandes.",
+    solution: "Diseñamos y construimos una plataforma de e-commerce limpia, moderna y centrada en la fotografía de alta calidad del producto. Creamos una estructura de navegación clara que separa los productos por categorías lógicas (Tablas Premium, Cajas, Letras y números), destacando el número de personas que atiende cada producto. Integramos CTAs (Llamadas a la Acción) claras para pedidos directos por WhatsApp y correo, y destacamos los testimonios de clientes para generar prueba social y confianza. El resultado es un sitio que funciona como una boutique digital de lujo.",
+    services: ["Diseño y Desarrollo de E-commerce", "Diseño de Experiencia de Usuario (UX) e Interfaz de Usuario (UI)", "Desarrollo de Catálogo Digital de Productos", "Integración de Pedidos (WhatsApp y Correo)", "Optimización para Dispositivos Móviles (Responsive Design)"],
+    website: "https://paologourmet.com.mx/",
+  },
   {
     id: "fashion-brand-socials",
     title: "Redes Sociales para Marca de Moda",
