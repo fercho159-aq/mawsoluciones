@@ -85,7 +85,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         <section className="py-20 md:py-28 border-t">
             <div className="container mx-auto px-4 md:px-6">
                 <AnimatedDiv className="text-center mb-16">
-                    <h2 className="font-headline text-3xl sm:text-4xl font-bold">Otras entradas que podrían interesarte</h2>
+                    <h2 className="font-headline text-3xl sm:text-4xl font-bold">Noticias relacionadas</h2>
                 </AnimatedDiv>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
                     {relatedPosts.map((relatedPost) => (
