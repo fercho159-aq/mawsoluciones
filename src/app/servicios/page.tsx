@@ -1,15 +1,11 @@
-import {
-  Card,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PlaceHolderImages, ImagePlaceholder } from '@/lib/placeholder-images';
 import WhatsappIcon from '@/components/icons/whatsapp-icon';
+import { cn } from '@/lib/utils';
+import AnimatedDiv from '@/components/animated-div';
 
 type Service = {
   title: string;
@@ -61,7 +57,7 @@ const ServicesPage = () => {
     <div className="bg-background">
       <section className="py-24 sm:py-32 md:py-40 bg-card">
         <div className="container mx-auto px-4 md:px-6 text-center">
-          <div className="max-w-3xl mx-auto">
+          <AnimatedDiv className="max-w-3xl mx-auto">
             <h1 className="font-headline text-4xl sm:text-5xl md:text-6xl font-bold">
               Nuestros Servicios
             </h1>
@@ -71,51 +67,54 @@ const ServicesPage = () => {
               nuestros servicios para encontrar el que mejor se adapte a tus
               necesidades.
             </p>
-          </div>
+          </AnimatedDiv>
         </div>
       </section>
 
       <section className="py-20 md:py-28">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="flex flex-col gap-20 md:gap-28">
             {services.map((service, index) => (
-              <Card
-                key={index}
-                className="h-full flex flex-col bg-card/50 hover:bg-card border-border/50 hover:border-border transition-all duration-300 ease-in-out transform hover:-translate-y-2 shadow-sm hover:shadow-2xl overflow-hidden"
-              >
-                {service.image && (
-                  <div className="relative aspect-video">
+              <AnimatedDiv key={index} className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+                <div
+                  className={cn(
+                    'relative aspect-video rounded-lg overflow-hidden shadow-2xl group',
+                    index % 2 !== 0 && 'md:order-2'
+                  )}
+                >
+                  {service.image && (
                     <Image
                       src={service.image.imageUrl}
                       alt={service.title}
                       fill
-                      className="object-cover"
+                      className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
                       data-ai-hint={service.image.imageHint}
                     />
-                  </div>
-                )}
-                <CardContent className="flex-grow flex flex-col p-6">
-                  <CardTitle className="font-headline text-2xl mb-3">
+                  )}
+                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+                </div>
+                <div className={cn(index % 2 !== 0 && 'md:order-1')}>
+                  <h2 className="font-headline text-3xl sm:text-4xl font-bold mb-4">
                     {service.title}
-                  </CardTitle>
-                  <CardDescription className="flex-grow text-base mb-6">
+                  </h2>
+                  <p className="text-lg text-foreground/80 mb-8">
                     {service.description}
-                  </CardDescription>
-                  <div className="flex flex-col sm:flex-row gap-2 mt-auto">
-                    <Button asChild className="w-full">
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Button size="lg" asChild className="w-full sm:w-auto">
                       <Link href={service.href}>
                         Ver más <ArrowRight className="w-4 h-4 ml-2" />
                       </Link>
                     </Button>
-                    <Button variant="outline" asChild className="w-full">
+                    <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
                       <a href="https://wa.me/1234567890" target="_blank" rel="noopener noreferrer">
-                        <WhatsappIcon className="w-4 h-4 mr-2" />
+                        <WhatsappIcon className="w-5 h-5 mr-2" />
                         Contactar
                       </a>
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </AnimatedDiv>
             ))}
           </div>
         </div>
@@ -125,4 +124,3 @@ const ServicesPage = () => {
 };
 
 export default ServicesPage;
-    
