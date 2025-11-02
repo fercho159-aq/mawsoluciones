@@ -45,7 +45,7 @@ const Hero = () => {
               },
             },
           }}
-          className="max-w-4xl text-center"
+          className="max-w-4xl text-center mx-auto"
         >
           <motion.h1
             variants={{
