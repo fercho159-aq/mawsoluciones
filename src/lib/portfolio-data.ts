@@ -1,3 +1,4 @@
+
 import { PlaceHolderImages, ImagePlaceholder } from "@/lib/placeholder-images";
 
 export type PortfolioItemType = {
@@ -20,7 +21,7 @@ export type PortfolioItemType = {
 export const portfolioItems: PortfolioItemType[] = [
   {
     id: "tech-startup-website",
-    title: "Sitio Web para la Feria Internacion del cine de los cabos",
+    title: "Festival Internacional de Cine de Los Cabos: Una Plataforma Digital #BeyondTheScreen",
     category: "Desarrollo Web",
     image: {
       id: "portfolio-web-ficc",
@@ -28,12 +29,12 @@ export const portfolioItems: PortfolioItemType[] = [
       imageUrl: "/images/desarrollo web/1.png",
       imageHint: "movie festival website"
     },
-    client: "Innovatech Solutions",
-    description: "Un sitio web moderno, rápido y escalable para una startup de SaaS, diseñado para generar leads y comunicar una propuesta de valor compleja de forma sencilla.",
-    challenge: "Crear una presencia online desde cero que pudiera competir en un mercado saturado, destacando la innovación del producto y generando confianza en potenciales inversores y clientes.",
-    solution: "Diseñamos una experiencia de usuario (UX) centrada en la conversión, con un diseño limpio y profesional. Desarrollamos el sitio con Next.js para un rendimiento óptimo y un SEO técnico impecable. Integramos un CMS para que el equipo de marketing pudiera gestionar el contenido fácilmente.",
-    services: ["Desarrollo Web", "Diseño UI/UX", "SEO Técnico"],
-    website: "https://example.com",
+    client: "Festival Internacional de Cine de Los Cabos (FICLosCabos)",
+    description: "Desarrollamos el sitio web oficial para la 13ª edición del Festival Internacional de Cine de Los Cabos (FICLosCabos), creando un hub digital centralizado para asistentes, cineastas y patrocinadores, enfocado en la experiencia e innovación del festival.",
+    challenge: "El FICLosCabos necesitaba una plataforma digital que no solo sirviera como un canal informativo para su 13ª edición, sino que también reflejara su evolución de un evento de cine a una \"plataforma creativa expandida\" bajo el concepto #BeyondTheScreen. El reto era integrar múltiples iniciativas clave —como el Fondo Fílmico Gabriel Figueroa, la nueva sección de Animación y la convocatoria \"La Baja Inspira\"— en una interfaz intuitiva, moderna y que facilitara la captación de asistentes mediante un sistema de pre-registro.",
+    solution: "Diseñamos y desarrollamos un sitio web dinámico y visualmente impactante que captura la esencia del festival, donde convergen el cine, la música, el arte digital y la gastronomía. Implementamos una arquitectura de información clara que permite a los usuarios navegar fácilmente entre las distintas secciones, desde la programación hasta las convocatorias abiertas. Integramos un formulario de pre-registro prominente para maximizar la captación de interesados y optimizamos el sitio para comunicar eficazmente la visión #BeyondTheScreen, asegurando una experiencia de usuario fluida tanto en escritorio como en dispositivos móviles.",
+    services: ["Diseño y Desarrollo Web", "Diseño de Experiencia de Usuario (UX) e Interfaz de Usuario (UI)", "Integración de Sistema de Gestión de Contenidos (CMS)", "Desarrollo de formularios de pre-registro y gestión de convocatorias", "Optimización Móvil (Responsive Design)"],
+    website: "https://www.ficloscabos.org/",
     parallaxImages: {
       laptop: "/images/desarrollo web/2.png",
       phone: "/images/desarrollo web/4.png"
