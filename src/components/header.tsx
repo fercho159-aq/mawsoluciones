@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -11,7 +12,7 @@ import Logo from "./logo";
 
 const navLinks = [
   { href: "/servicios", label: "Servicios" },
-  { href: "/#portfolio", label: "Portafolio" },
+  { href: "/portafolio", label: "Portafolio" },
   { href: "/blog", label: "Blog" },
   { href: "/#about", label: "Nosotros" },
   { href: "/#contact", label: "Contacto" },
@@ -95,7 +96,7 @@ const Header = () => {
                 </nav>
                 <div className="mt-auto">
                   <Button asChild className="w-full">
-                    <a href="#booking" onClick={() => setIsMobileMenuOpen(false)}>
+                    <a href="/#booking" onClick={() => setIsMobileMenuOpen(false)}>
                       Reservar Sesión
                     </a>
                   </Button>

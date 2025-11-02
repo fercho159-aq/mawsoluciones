@@ -1,3 +1,4 @@
+
 import { portfolioItems } from "@/lib/portfolio-data";
 import { notFound } from "next/navigation";
 import Image from "next/image";
@@ -95,7 +96,7 @@ export default function PortfolioItemPage({
 
           <div className="text-center mt-20">
               <Button variant="outline" asChild>
-                  <Link href="/#portfolio">
+                  <Link href="/portafolio">
                       <ArrowLeft className="w-4 h-4 mr-2" />
                       Volver al Portafolio
                   </Link>
@@ -105,4 +106,11 @@ export default function PortfolioItemPage({
       </section>
     </div>
   );
+}
+
+// Generate static paths for each portfolio item
+export async function generateStaticParams() {
+  return portfolioItems.map((item) => ({
+    id: item.id,
+  }));
 }
