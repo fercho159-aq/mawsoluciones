@@ -19,8 +19,8 @@ const Footer = () => {
             <h4 className="font-headline font-semibold text-lg mb-4">Navegación</h4>
             <ul className="space-y-2">
               <li><Link href="/servicios/sitios-web" className="hover:text-primary transition-colors">Sitios Web</Link></li>
-              <li><Link href="/servicios/contenido" className="hover:text-primary transition-colors">Contenido</Link></li>
-              <li><Link href="/servicios/ads" className="hover:text-primary transition-colors">Ads</Link></li>
+              <li><Link href="/servicios/creacion-de-contenido" className="hover:text-primary transition-colors">Contenido</Link></li>
+              <li><Link href="/servicios/gestion-de-campanas" className="hover:text-primary transition-colors">Ads</Link></li>
               <li><Link href="/servicios/automatizacion" className="hover:text-primary transition-colors">Automatización</Link></li>
               <li><Link href="/portafolio" className="hover:text-primary transition-colors">Nuestros clientes</Link></li>
               <li><Link href="/blog" className="hover:text-primary transition-colors">Blog</Link></li>
