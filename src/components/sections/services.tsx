@@ -6,34 +6,28 @@ import AnimatedDiv from "../animated-div";
 
 const services = [
   {
-    icon: <PenSquare className="w-10 h-10 text-primary" />,
-    title: "Creación de Contenido",
-    description: "Creamos contenido atractivo y de alta calidad que resuena con tu audiencia y fortalece tu marca.",
-    href: "/servicios/creacion-de-contenido"
-  },
-  {
     icon: <CodeXml className="w-10 h-10 text-primary" />,
-    title: "Desarrollo Web",
+    title: "Sitios Web",
     description: "Diseñamos y desarrollamos sitios web modernos, rápidos y optimizados para la conversión.",
-    href: "/servicios/desarrollo-web"
+    href: "/servicios/sitios-web"
   },
   {
-    icon: <Camera className="w-10 h-10 text-primary" />,
-    title: "Producción de Foto/Video",
-    description: "Producimos material audiovisual profesional que captura la esencia de tu marca y cuenta tu historia.",
-    href: "/servicios/produccion-foto-video"
-  },
-  {
-    icon: <Bot className="w-10 h-10 text-primary" />,
-    title: "Automatización de Marketing",
-    description: "Implementamos sistemas de automatización para nutrir leads y optimizar tus embudos de venta.",
-    href: "/servicios/automatizacion"
+    icon: <PenSquare className="w-10 h-10 text-primary" />,
+    title: "Contenido",
+    description: "Creamos contenido atractivo y de alta calidad que resuena con tu audiencia y fortalece tu marca.",
+    href: "/servicios/contenido"
   },
   {
     icon: <Megaphone className="w-10 h-10 text-primary" />,
-    title: "Gestión de Campañas",
+    title: "Ads",
     description: "Planificamos, ejecutamos y medimos campañas publicitarias para maximizar tu retorno de inversión (ROI).",
-    href: "/servicios/gestion-de-campanas"
+    href: "/servicios/ads"
+  },
+  {
+    icon: <Bot className="w-10 h-10 text-primary" />,
+    title: "Automatización",
+    description: "Implementamos sistemas de automatización para nutrir leads y optimizar tus embudos de venta.",
+    href: "/servicios/automatizacion"
   },
 ];
 

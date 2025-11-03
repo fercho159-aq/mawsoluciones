@@ -14,6 +14,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import Link from "next/link";
 
 const slides = [
   {
@@ -150,7 +151,7 @@ const Hero = () => {
                       className="mt-10 flex flex-col sm:flex-row justify-center gap-4"
                     >
                       <Button size="lg" asChild>
-                        <a href="#booking">Reserva tu Sesión Estratégica</a>
+                        <Link href="/contacto">Reserva tu Sesión Estratégica</Link>
                       </Button>
                       <Button size="lg" variant="whatsapp" asChild>
                         <a

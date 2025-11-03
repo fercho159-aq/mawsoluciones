@@ -5,7 +5,6 @@ import Portfolio from "@/components/sections/portfolio";
 import About from "@/components/sections/about";
 import Testimonials from "@/components/sections/testimonials";
 import BlogSection from "@/components/sections/blog";
-import Contact from "@/components/sections/contact";
 import Footer from "@/components/footer";
 
 export default function Home() {
@@ -19,7 +18,6 @@ export default function Home() {
         <About />
         <BlogSection />
         <Testimonials />
-        <Contact />
       </main>
       <Footer />
     </div>

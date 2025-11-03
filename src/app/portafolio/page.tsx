@@ -10,7 +10,7 @@ import { portfolioItems } from "@/lib/portfolio-data";
 import { ArrowRight } from "lucide-react";
 import AnimatedDiv from "@/components/animated-div";
 
-const categories = ["Todos", "Desarrollo Web", "Creación de Contenido", "Producción de Video", "Automatización", "Campañas"];
+const categories = ["Todos", "Sitios Web", "Contenido"];
 
 const containerVariants = {
   hidden: {},
@@ -34,6 +34,13 @@ const itemVariants = {
 };
 
 const PortfolioPage = () => {
+
+  const categoryMapping: { [key: string]: string[] } = {
+    "Sitios Web": ["Desarrollo Web"],
+    "Contenido": ["Creación de Contenido", "Producción de Video"],
+  };
+
+
   return (
     <div className="bg-background">
         <section className="py-24 sm:py-32 md:py-40 bg-card">
@@ -53,7 +60,7 @@ const PortfolioPage = () => {
             <div className="container mx-auto px-4 md:px-6">
                 <Tabs defaultValue="Todos" className="w-full">
                 <AnimatedDiv>
-                    <TabsList className="grid w-full grid-cols-3 sm:grid-cols-4 md:grid-cols-6 mb-8">
+                    <TabsList className="grid w-full grid-cols-3 mb-8">
                     {categories.map(category => (
                         <TabsTrigger key={category} value={category}>{category}</TabsTrigger>
                     ))}
@@ -67,7 +74,7 @@ const PortfolioPage = () => {
                         variants={containerVariants}
                     >
                         {portfolioItems
-                        .filter(item => category === "Todos" || item.category === category)
+                        .filter(item => category === "Todos" || categoryMapping[category]?.includes(item.category))
                         .map(item => (
                             <AnimatedDiv key={item.id} variants={itemVariants}>
                             <Card className="overflow-hidden group flex flex-col h-full bg-card/50 hover:bg-card border-border/50 hover:border-border transition-all duration-300 ease-in-out transform hover:-translate-y-2 shadow-sm hover:shadow-2xl">

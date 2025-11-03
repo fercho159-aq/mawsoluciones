@@ -19,22 +19,22 @@ const services: Service[] = [
     title: 'Creación de Contenido',
     description:
       'Creamos contenido atractivo, relevante y de alta calidad que resuena con tu audiencia. Desde artículos de blog optimizados para SEO y guiones para redes sociales hasta la gestión completa de tus perfiles, nuestro contenido está diseñado para fortalecer tu marca, construir una comunidad y generar resultados medibles que impulsen tu negocio.',
-    href: '/servicios/creacion-de-contenido',
+    href: '/servicios/contenido',
     image: PlaceHolderImages.find(img => img.id === 'service-content-creation'),
   },
   {
     title: 'Desarrollo Web',
     description:
       'Diseñamos y desarrollamos sitios web modernos, rápidos y optimizados para la conversión que actúan como el centro de tu ecosistema digital. Creamos experiencias de usuario intuitivas y atractivas que no solo se ven increíbles, sino que también funcionan como una poderosa herramienta de marketing y ventas para tu negocio.',
-    href: '/servicios/desarrollo-web',
+    href: '/servicios/sitios-web',
     image: PlaceHolderImages.find(img => img.id === 'service-web-development'),
   },
   {
-    title: 'Producción de Foto/Video',
+    title: 'Gestión de Campañas',
     description:
-      'Producimos material audiovisual profesional de alto impacto que captura la esencia de tu marca y cuenta tu historia de manera memorable. Desde fotografía de producto y retratos corporativos hasta videos promocionales cinemáticos, elevamos tu comunicación visual al siguiente nivel para que destaques en un mercado competitivo.',
-    href: '/servicios/produccion-foto-video',
-    image: PlaceHolderImages.find(img => img.id === 'service-photo-video'),
+      'Planificamos, ejecutamos y medimos campañas publicitarias en plataformas clave como Google Ads y redes sociales para maximizar tu retorno de inversión (ROI). A través de un enfoque basado en datos, atraemos a tu público objetivo y alcanzamos tus metas comerciales con estrategias precisas y optimizadas continuamente.',
+    href: '/servicios/ads',
+    image: PlaceHolderImages.find(img => img.id === 'service-campaigns'),
   },
   {
     title: 'Automatización de Marketing',
@@ -42,13 +42,6 @@ const services: Service[] = [
       'Implementamos sistemas inteligentes y flujos de trabajo personalizados para nutrir leads, optimizar tus embudos de venta y fidelizar clientes de forma automática. Deja que la tecnología trabaje por ti 24/7, permitiéndote concentrarte en las áreas estratégicas para hacer crecer tu negocio de manera escalable.',
     href: '/servicios/automatizacion',
     image: PlaceHolderImages.find(img => img.id === 'service-automation'),
-  },
-  {
-    title: 'Gestión de Campañas',
-    description:
-      'Planificamos, ejecutamos y medimos campañas publicitarias en plataformas clave como Google Ads y redes sociales para maximizar tu retorno de inversión (ROI). A través de un enfoque basado en datos, atraemos a tu público objetivo y alcanzamos tus metas comerciales con estrategias precisas y optimizadas continuamente.',
-    href: '/servicios/gestion-de-campanas',
-    image: PlaceHolderImages.find(img => img.id === 'service-campaigns'),
   },
 ];
 

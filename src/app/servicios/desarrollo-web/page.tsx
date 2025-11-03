@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import ParallaxImages from "@/components/sections/parallax-images";
+import Link from "next/link";
 
 const ServicePage = () => {
   return (
@@ -71,9 +72,9 @@ const ServicePage = () => {
               Creemos juntos un sitio web que impulse tu negocio hacia el futuro.
             </p>
             <Button size="lg" className="mt-8" asChild>
-                <a href="/#booking">
+                <Link href="/contacto">
                     Reserva tu Sesión Estratégica <ArrowRight className="w-5 h-5 ml-2" />
-                </a>
+                </Link>
             </Button>
         </div>
       </section>

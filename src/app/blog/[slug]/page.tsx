@@ -128,9 +128,9 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               Hablemos de cómo nuestras estrategias pueden llevar tu negocio al siguiente nivel.
             </p>
             <Button size="lg" className="mt-8" asChild>
-                <a href="/#booking">
+                <Link href="/contacto">
                     Reserva tu Sesión Estratégica <ArrowRight className="w-5 h-5 ml-2" />
-                </a>
+                </Link>
             </Button>
         </div>
       </section>

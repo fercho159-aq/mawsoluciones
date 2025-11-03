@@ -12,11 +12,13 @@ import Logo from "./logo";
 import { ThemeToggle } from "./theme-toggle";
 
 const navLinks = [
-  { href: "/servicios", label: "Servicios" },
+  { href: "/servicios/sitios-web", label: "Sitios Web" },
+  { href: "/servicios/contenido", label: "Contenido" },
+  { href: "/servicios/ads", label: "Ads" },
+  { href: "/servicios/automatizacion", label: "Automatización" },
   { href: "/portafolio", label: "Nuestros clientes" },
   { href: "/blog", label: "Blog" },
-  { href: "/#about", label: "Nosotros" },
-  { href: "/#contact", label: "Contacto" },
+  { href: "/contacto", label: "Contacto" },
 ];
 
 const Header = () => {
@@ -60,7 +62,7 @@ const Header = () => {
         <div className="hidden md:flex items-center gap-2">
           <ThemeToggle />
           <Button asChild>
-            <a href="#booking">Reservar Sesión</a>
+            <Link href="/contacto">Reservar Sesión</Link>
           </Button>
         </div>
 
@@ -99,9 +101,9 @@ const Header = () => {
                 </nav>
                 <div className="mt-auto">
                   <Button asChild className="w-full">
-                    <a href="/#booking" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Link href="/contacto" onClick={() => setIsMobileMenuOpen(false)}>
                       Reservar Sesión
-                    </a>
+                    </Link>
                   </Button>
                 </div>
               </div>

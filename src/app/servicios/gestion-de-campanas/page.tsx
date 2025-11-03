@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 const ServicePage = () => {
   return (
@@ -65,9 +66,9 @@ const ServicePage = () => {
               Hablemos de cómo nuestras campañas pueden llevar tu negocio al siguiente nivel.
             </p>
             <Button size="lg" className="mt-8" asChild>
-                <a href="/#booking">
+                <Link href="/contacto">
                     Reserva tu Sesión Estratégica <ArrowRight className="w-5 h-5 ml-2" />
-                </a>
+                </Link>
             </Button>
         </div>
       </section>
