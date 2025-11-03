@@ -39,7 +39,7 @@
     {
       "id": "portfolio-web-polar",
       "description": "E-commerce platform for a boutique.",
-      "imageUrl": "https://images.unsplash.com/photo-1657812159075-7f0abd98f7b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxlY29tbWVyY2UlMjB3ZWJzaXRlfGVufDB8fHx8MTc2MTg5MTYyN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "/images/desarrollo web/5.png",
       "imageHint": "ecommerce website"
     },
     {
@@ -153,7 +153,7 @@
     {
       "id": "portfolio-web-myteam",
       "description": "My Team website showing collaboration in sports",
-      "imageUrl": "https://images.unsplash.com/photo-1521464307205-2a2b034a7019?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjB0ZWFtJTIwY2VsZWJyYXRpbmd8ZW58MHx8fHwxNzYyMjUyODAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "/images/desarrollo web/17.png",
       "imageHint": "sports team celebrating"
     },
     {
@@ -165,13 +165,13 @@
     {
       "id": "portfolio-web-dfac",
       "description": "DFAC website for construction supplies",
-      "imageUrl": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjb25zdHJ1Y3Rpb24lMjBzaXRlfGVufDB8fHx8MTc2MjI0NzE4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "/images/desarrollo web/9.png",
       "imageHint": "construction site"
     },
     {
       "id": "portfolio-web-paolo",
       "description": "Paolo Gourmet website",
-      "imageUrl": "https://images.unsplash.com/photo-1561043433-aaf687c4cf04?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhcnRpc2FuYWwlMjBjaGVlc2UlMjBib2FyZHxlbnwwfHx8fDE3NjIyNDg0NTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "/images/desarrollo web/13.png",
       "imageHint": "artisanal cheese board"
     }
   ]

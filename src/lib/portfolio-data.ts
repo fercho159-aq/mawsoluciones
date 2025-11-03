@@ -66,6 +66,10 @@ export const portfolioItems: PortfolioItemType[] = [
     solution: "Construimos un sitio web dinámico y moderno que sirve como el corazón de la marca My Team. Creamos una estructura de contenido clara que permite a los usuarios sumergirse en las historias de la revista, entender la filosofía de la marca y comprar productos en la tienda de forma intuitiva. El diseño visual se centró en transmitir los valores clave de \"colaboración, pasión y pertenencia\", utilizando imágenes impactantes y una navegación fluida para asegurar que cada visita comunicara la misión de My Team: usar el deporte como una herramienta para el cambio positivo.",
     services: ["Diseño y Desarrollo Web", "Creación de Plataforma de Revista Digital (Blog)", "Integración de E-commerce (Tienda en línea)", "Diseño de Experiencia de Usuario (UX) e Interfaz de Usuario (UI)", "Desarrollo de Identidad de Marca Digital"],
     website: "https://myteam-mag.com/",
+    parallaxImages: {
+      laptop: "/images/desarrollo web/18.png",
+      phone: "/images/desarrollo web/20.png"
+    }
   },
   {
     id: "valor-compartido",
@@ -107,8 +111,8 @@ export const portfolioItems: PortfolioItemType[] = [
     services: ["Diseño Web Corporativo B2B", "Desarrollo de Catálogo de Productos (con solicitud de cotización)", "Diseño UX/UI enfocado a la Generación de Leads", "Integración de Chat (WhatsApp) y Formularios de Contacto", "Optimización para Dispositivos Móviles"],
     website: "https://cimbrayaccesorios.com.mx/",
     parallaxImages: {
-      laptop: "https://images.unsplash.com/photo-1581094376363-9521a37c867a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      phone: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      laptop: "/images/desarrollo web/10.png",
+      phone: "/images/desarrollo web/12.png"
     }
   },
   {
@@ -138,6 +142,10 @@ export const portfolioItems: PortfolioItemType[] = [
     solution: "Diseñamos y construimos una plataforma de e-commerce limpia, moderna y centrada en la fotografía de alta calidad del producto. Creamos una estructura de navegación clara que separa los productos por categorías lógicas (Tablas Premium, Cajas, Letras y números), destacando el número de personas que atiende cada producto. Integramos CTAs (Llamadas a la Acción) claras para pedidos directos por WhatsApp y correo, y destacamos los testimonios de clientes para generar prueba social y confianza. El resultado es un sitio que funciona como una boutique digital de lujo.",
     services: ["Diseño y Desarrollo de E-commerce", "Diseño de Experiencia de Usuario (UX) e Interfaz de Usuario (UI)", "Desarrollo de Catálogo Digital de Productos", "Integración de Pedidos (WhatsApp y Correo)", "Optimización para Dispositivos Móviles (Responsive Design)"],
     website: "https://paologourmet.com.mx/",
+    parallaxImages: {
+      laptop: "/images/desarrollo web/14.png",
+      phone: "/images/desarrollo web/16.png"
+    }
   },
   {
     id: "fashion-brand-socials",
