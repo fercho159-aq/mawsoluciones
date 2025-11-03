@@ -26,7 +26,7 @@ export const blogPosts: BlogPostType[] = [
       imageHint: "digital marketing"
     },
     excerpt: "Domina el ecosistema de búsquedas con OSO, implementa IA en tu marketing y aplica las tendencias clave para conectar con el consumidor mexicano en 2025.",
-    date: "2024-07-29T17:00:00.000Z",
+    date: "2025-10-29T17:00:00.000Z",
     author: "Carlos Digital",
     content: `
       <p>¿Sabías que, según un estudio de IAB Spain, la inversión en marketing de influencers en países de habla hispana creció un 59% tan solo en 2024? Esto es una muestra de la velocidad a la que evoluciona el consumo digital en nuestra región. Para las marcas en México, 2025 no es solo un año más en el calendario; es el punto de inflexión donde la inteligencia artificial, la hiperpersonalización y un nuevo concepto de búsqueda están redefiniendo las reglas del juego.</p>
@@ -97,7 +97,7 @@ export const blogPosts: BlogPostType[] = [
       imageHint: "digital marketing"
     },
     excerpt: "Descubre las tendencias de marketing digital 2025 que definirán el éxito en México: IA generativa, comercio social y marketing inclusivo.",
-    date: "2024-07-29T16:00:00.000Z",
+    date: "2025-10-28T16:00:00.000Z",
     author: "Carlos Digital",
     content: `
       <p>El ecosistema digital en México se transforma a una velocidad vertiginosa. Lo que funcionó en 2023 es obsoleto, y lo que triunfó en 2024 apenas sobrevive. Para 2025, el marketing digital deja de ser un juego de intuición para convertirse en una disciplina de adaptación radical.</p>
@@ -162,7 +162,7 @@ export const blogPosts: BlogPostType[] = [
       imageHint: "digital marketing"
     },
     excerpt: "Potencia tu e-commerce en México 2025. Domina las plataformas de venta social, optimiza tu publicidad y usa el contenido UGC para marketing digital.",
-    date: "2024-07-29T15:00:00.000Z",
+    date: "2025-10-27T15:00:00.000Z",
     author: "Carlos Digital",
     content: `
       <p>El comercio electrónico en México ya no es una promesa; es un presente vibrante y ferozmente competitivo. En los corredores digitales de la CDMX, desde Polanco hasta la Roma, la batalla por el clic ya no se gana solo con un buen producto. El consumidor mexicano post-pandemia, hiperconectado con más de 100 millones de usuarios activos en redes sociales, exige más. No quiere que le vendan; quiere descubrir, confiar y pertenecer.</p>
@@ -217,7 +217,7 @@ export const blogPosts: BlogPostType[] = [
       imageHint: "digital marketing"
     },
     excerpt: "Domina el marketing de contenidos 2025, el algoritmo de TikTok 2025 y estrategias de marketing digital para empresas de café en CDMX. Conecta con tu audiencia mexicana.",
-    date: "2024-07-29T14:00:00.000Z",
+    date: "2025-10-26T14:00:00.000Z",
     author: "Carlos Digital",
     content: `
       <p>El panorama digital en México está viviendo una transformación sin precedentes. En la CDMX, donde el ecosistema emprendedor y tecnológico crece a un ritmo acelerado, comprender las nuevas reglas del marketing digital se ha convertido en una necesidad imperante para cualquier negocio que aspire a destacar. ¿Cómo pueden las empresas mexicanas adaptarse a estos cambios y conectar efectivamente con su audiencia?</p>
@@ -294,7 +294,7 @@ export const blogPosts: BlogPostType[] = [
       imageHint: "digital marketing"
     },
     excerpt: "Descubre cómo la IA y Lusha revolucionan las ventas B2B de ferreterías en México. Aprovecha la IA generativa y supera los retos del ecommerce para aumentar tus conversiones.",
-    date: "2024-07-29T13:00:00.000Z",
+    date: "2025-10-25T13:00:00.000Z",
     author: "Carlos Digital",
     content: `
       <p>En el corazón de la Ciudad de México, una ferretería tradicional está cerrando un trato con una constructora sin que sus vendedores hayan tenido que pasar horas investigando a quién contactar. ¿La clave? La inteligencia artificial no solo encontró al tomador de decisiones correcto, sino que personalizó la propuesta y anticipó las necesidades del cliente. Esta escena, cada vez más común, ilustra una transformación imparable. Para 2025, se espera que el mercado global de la IA crezca a una tasa anual compuesta del 37%, y México no es la excepción.</p>
@@ -346,7 +346,7 @@ export const blogPosts: BlogPostType[] = [
       imageHint: "digital marketing"
     },
     excerpt: "Descubre las mejores herramientas de email marketing 2025 y una estrategia de marketing digital para PYMES efectiva. Aprende a elegir agencias en CDMX y a usar la IA para crecer.",
-    date: "2024-07-29T12:00:00.000Z",
+    date: "2025-10-24T12:00:00.000Z",
     author: "Carlos Digital",
     content: `
       <p>¡Olvídate del correo masivo! Las estrategias de <strong>email marketing en 2025</strong> se centran en la hiperpersonalización y la automatización inteligente, permitiendo a emprendedores y PYMES conectar con su audiencia de manera más efectiva y eficiente.</p>
@@ -437,7 +437,7 @@ export const blogPosts: BlogPostType[] = [
       imageHint: "digital marketing"
     },
     excerpt: "Descubre cómo un hub de IA revoluciona la educación en América Latina y aplica estrategias de IA probadas para optimizar tu funnel de marketing y aumentar conversiones.",
-    date: "2024-07-29T10:00:00.000Z",
+    date: "2025-10-23T10:00:00.000Z",
     author: "Carlos Digital",
     content: `
       <p>En un mundo donde la tecnología redefine fronteras, América Latina no se queda atrás. Mientras en Uruguay se siembra la semilla de un hub regional de Inteligencia Artificial destinado a revolucionar la educación, las empresas en México y toda la región pueden hoy mismo cosechar los frutos de esta misma tecnología para optimizar sus embudos de marketing y ventas.</p>
@@ -499,7 +499,7 @@ export const blogPosts: BlogPostType[] = [
       imageHint: "digital marketing"
     },
     excerpt: "Descubre estrategias probadas para optimizar tu ecommerce, inspírate con sitios web mexicanos exitosos y domina Instagram. Potencia tu negocio online en 2026.",
-    date: "2024-07-27T10:00:00.000Z",
+    date: "2025-10-22T10:00:00.000Z",
     author: "Carlos Digital",
     content: `
       <p>Imagina un flujo constante de clientes potenciales visitando tu tienda online, un sitio web que no solo vende, sino que enamora, y una comunidad en Instagram que espera ansiosa tu próximo contenido. Este escenario no es una fantasía; es el resultado de aplicar estrategias de marketing digital enfocadas en el contexto mexicano. Con el <strong>ecommerce en México en plena expansión</strong>, adaptarse no es una opción, sino una necesidad para sobrevivir y crecer.</p>
@@ -617,7 +617,7 @@ export const blogPosts: BlogPostType[] = [
       imageHint: "digital marketing"
     },
     excerpt: "Descubre cómo diseñar campañas con influencers, los mejores másters en España y compara opciones formativas para triunfar en marketing digital.",
-    date: "2024-07-26T10:00:00.000Z",
+    date: "2025-10-21T10:00:00.000Z",
     author: "Carlos Digital",
     content: `
       <p>El marketing digital en México no es solo el futuro: es el presente. Con más de <strong>110 millones de usuarios de internet</strong> y un <strong>83.3% de la población conectada</strong>, la oportunidad es tan masiva como la competencia.</p>
@@ -700,7 +700,7 @@ export const blogPosts: BlogPostType[] = [
       imageHint: "digital marketing"
     },
     excerpt: "¿Tu sitio web no genera leads? Transfórmalo con nuestro checklist definitivo. Optimiza UX, velocidad y CTAs para convertir visitantes en clientes.",
-    date: "2024-07-25T10:00:00.000Z",
+    date: "2025-10-20T10:00:00.000Z",
     author: "Carlos Digital",
     content: `
       <p>En el panorama digital de hoy, tener un sitio web es el equivalente a tener una tienda en la calle más transitada del mundo. Sin embargo, millones de empresas tienen "tiendas" hermosas con las puertas cerradas: reciben tráfico, pero nadie compra. Tienen un folleto digital, no un motor de ventas.</p>
@@ -786,7 +786,7 @@ export const blogPosts: BlogPostType[] = [
       imageHint: "digital marketing"
     },
     excerpt: "Descubre cómo la IA transforma los sitios web en motores de conversión. Checklist con agentes autónomos, hiperpersonalización y herramientas esenciales para 2025.",
-    date: "2024-07-24T11:00:00.000Z",
+    date: "2025-10-19T11:00:00.000Z",
     author: "Carlos Digital",
     content: `
       <p>¿Tu sitio web sigue funcionando como un escaparate estático? Para muchas empresas, esta realidad es el "cuello de botella silencioso" que frena su crecimiento. La inteligencia artificial ha redefinido lo que significa tener una presencia digital efectiva. Hoy, un sitio que realmente convierte no es cuestión de diseño; es una máquina de precisión impulsada por IA que anticipa, personaliza y automatiza la experiencia del usuario.</p>
@@ -849,7 +849,7 @@ export const blogPosts: BlogPostType[] = [
       imageHint: "digital marketing"
     },
     excerpt: "Descubre estrategias de marketing digital para empresas de café y logística en México. Aprende sobre campañas exitosas para 2025 con IA y personalización.",
-    date: "2024-07-28T10:00:00.000Z",
+    date: "2025-10-18T10:00:00.000Z",
     author: "Carlos Digital",
     content: `
       <h3 class="font-headline text-2xl font-bold mt-8 mb-4">Introducción: Un Mercado Mexicano en Transformación Digital</h3>
