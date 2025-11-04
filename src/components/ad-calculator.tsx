@@ -24,6 +24,42 @@ const estadosMexico: Record<string, string[]> = {
 };
 const plataformasPauta: Record<string, { minInversion: number }> = { "Facebook": { minInversion: 2000 }, "Instagram": { minInversion: 2000 }, "TikTok": { minInversion: 3000 }, "LinkedIn": { minInversion: 8000 }, "YouTube": { minInversion: 5000 }, "Google Ads": { minInversion: 3000 } };
 const tabuladorAlcance: Record<string, Record<string, string>> = { "4000-8000": { "Facebook": "15,000 - 30,000 personas", "Instagram": "12,000 - 25,000 personas", "TikTok": "20,000 - 40,000 personas", "LinkedIn": "5,000 - 10,000 profesionales", "YouTube": "8,000 - 15,000 visualizaciones", "Google Ads": "500 - 1,200 clics" }, "8001-20000": { "Facebook": "30,000 - 80,000 personas", "Instagram": "25,000 - 60,000 personas", "TikTok": "40,000 - 100,000 personas", "LinkedIn": "10,000 - 25,000 profesionales", "YouTube": "15,000 - 40,000 visualizaciones", "Google Ads": "1,200 - 3,000 clics" }, "20001-150000": { "Facebook": "80,000 - 600,000 personas", "Instagram": "60,000 - 450,000 personas", "TikTok": "100,000 - 750,000 personas", "LinkedIn": "25,000 - 200,000 profesionales", "YouTube": "40,000 - 300,000 visualizaciones", "Google Ads": "3,000 - 22,500 clics" } };
+const platformAdvantages: Record<string, Record<string, string>> = {
+  "Restaurante": {
+    "Instagram": "Es la plataforma visual por excelencia. Ideal para mostrar tus platillos con fotos y videos de alta calidad (Reels). El 62% de los usuarios se interesa más en una marca después de verla en Stories.",
+    "Facebook": "Permite segmentar por intereses locales muy específicos (ej. 'gente que vive cerca de la Condesa'). Excelente para promociones, eventos y construir una comunidad local.",
+    "TikTok": "Perfecto para contenido viral y mostrar el ambiente de tu restaurante. El 85% de los usuarios de TikTok descubren nuevos productos o servicios en la plataforma."
+  },
+  "Servicios Profesionales": {
+    "LinkedIn": "Es la red profesional #1. Indispensable para generar leads B2B, conectar con tomadores de decisiones y posicionarte como un experto en tu industria.",
+    "Google Ads": "Captura clientes que ya están buscando activamente tus servicios. Aparecer en los primeros resultados para búsquedas como 'abogado fiscal en CDMX' es crucial.",
+    "Facebook": "Útil para retargeting y campañas de reconocimiento de marca, educando a una audiencia más amplia sobre la necesidad de tus servicios."
+  },
+  "Retail/Ropa": {
+    "Instagram": "Tu catálogo visual. Las funciones de Instagram Shopping permiten una compra casi instantánea. El contenido generado por usuarios (UGC) es extremadamente poderoso aquí.",
+    "TikTok": "El rey del 'descubrimiento'. Ideal para mostrar cómo se ven tus prendas en gente real, unirte a tendencias y generar compras por impulso.",
+    "Facebook": "Potente para remarketing dinámico (mostrarle a un usuario exactamente la prenda que vio) y para construir una comunidad leal a través de grupos."
+  },
+  "Salud/Medicina": {
+    "Google Ads": "Fundamental. Los pacientes buscan soluciones a problemas de salud con alta intención. Estar presente en búsquedas como 'mejor cardiólogo en Monterrey' es vital.",
+    "Facebook": "Excelente para educar a la comunidad sobre padecimientos, prevención y nuevos tratamientos. Ayuda a construir confianza y autoridad.",
+    "LinkedIn": "Muy útil si tus servicios se dirigen a otros profesionales de la salud o a empresas (B2B)."
+  },
+  "Bienes Raíces": {
+    "Facebook": "La mejor plataforma para segmentación demográfica y geográfica. Los 'Lead Ads' son extremadamente efectivos para capturar datos de interesados en una propiedad.",
+    "Instagram": "Perfecto para mostrar propiedades de lujo con recorridos en video (Reels) y fotos de alta calidad. Atrae a un público aspiracional.",
+    "Google Ads": "Esencial para capturar leads de alta intención que buscan activamente 'departamentos en venta en la Roma Norte'."
+  },
+  "Default": {
+    "Google Ads": "Te permite capturar la demanda existente, llegando a usuarios que buscan activamente tus productos o servicios, lo que se traduce en leads de alta calidad.",
+    "Facebook": "Ideal para construir una comunidad, generar reconocimiento de marca (awareness) y para estrategias de retargeting muy efectivas.",
+    "Instagram": "Es una plataforma altamente visual, perfecta para mostrar la estética de tu producto o servicio y conectar con audiencias más jóvenes a través de Reels y Stories.",
+    "TikTok": "Su algoritmo de descubrimiento es inigualable para contenido creativo y viral, permitiendo un alcance masivo con una inversión inicial menor.",
+    "LinkedIn": "Indispensable para negocios B2B, permite conectar directamente con tomadores de decisiones y establecer autoridad en tu industria.",
+    "YouTube": "Excelente para contenido educativo y de formato largo que construye confianza y posiciona a tu marca como una experta en el tema."
+  }
+};
+
 
 const steps = [
   { id: 1, title: 'Tu Negocio', description: 'Cuéntanos sobre tu empresa.' },
@@ -36,6 +72,7 @@ const steps = [
 const AdCalculator = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+  const [showResults, setShowResults] = useState(false);
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [formData, setFormData] = useState({
     companyName: '',
@@ -72,7 +109,6 @@ const AdCalculator = () => {
     setTiktokError('');
     if (currentStep < steps.length) {
       if (currentStep === 4) {
-          // Trigger modal on the last step
           setIsResultModalOpen(true);
       }
       setCurrentStep(currentStep + 1);
@@ -89,6 +125,24 @@ const AdCalculator = () => {
       setCurrentStep(currentStep - 1);
     }
   };
+
+  const resetForm = () => {
+    setCurrentStep(1);
+    setShowResults(false);
+    setFormData({
+        companyName: '',
+        personName: '',
+        jobTitle: '',
+        giro: '',
+        estado: 'CDMX',
+        municipios: ['Benito Juárez'],
+        otroMunicipio: '',
+        plataformas: ['Facebook', 'Instagram'],
+        prevInvestment: 'No',
+        campaignType: 'Performance',
+        presupuesto: 4000
+    });
+  }
   
   const handlePlatformChange = (platform: string) => {
     setError('');
@@ -144,21 +198,7 @@ const AdCalculator = () => {
     const whatsappUrl = `https://wa.me/5542314150?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
     setIsResultModalOpen(false);
-    setCurrentStep(1);
-    // Reset form
-    setFormData({
-        companyName: '',
-        personName: '',
-        jobTitle: '',
-        giro: '',
-        estado: 'CDMX',
-        municipios: ['Benito Juárez'],
-        otroMunicipio: '',
-        plataformas: ['Facebook', 'Instagram'],
-        prevInvestment: 'No',
-        campaignType: 'Performance',
-        presupuesto: 4000
-      });
+    setShowResults(true); // Show results after sending
   };
 
 
@@ -175,7 +215,7 @@ const AdCalculator = () => {
               <Label htmlFor="personName">Tu Nombre</Label>
               <Input id="personName" value={formData.personName} onChange={(e) => setFormData({...formData, personName: e.target.value})} placeholder="Ej. Juan Pérez" />
             </div>
-            <div>
+             <div>
               <Label htmlFor="jobTitle">Tu Cargo</Label>
               <Input id="jobTitle" value={formData.jobTitle} onChange={(e) => setFormData({...formData, jobTitle: e.target.value})} placeholder="Ej. Director de Marketing" />
             </div>
@@ -304,9 +344,12 @@ const AdCalculator = () => {
       case 5:
         const budgetKey = getBudgetRangeKey(formData.presupuesto);
         const estimatedReach = tabuladorAlcance[budgetKey] || {};
+        const giro = formData.giro || 'Default';
+        const advantages = platformAdvantages[giro] || platformAdvantages['Default'];
+
         return (
             <div className="space-y-6 relative">
-                 <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10"></div>
+                 <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10" style={{ display: showResults ? 'none' : 'block' }}></div>
                 <Card>
                     <CardHeader>
                         <CardTitle>Resumen de tu Cotización</CardTitle>
@@ -327,6 +370,28 @@ const AdCalculator = () => {
                         </div>
                     </CardContent>
                 </Card>
+
+                 {showResults && (
+                   <motion.div initial={{opacity: 0}} animate={{opacity: 1}} className="space-y-4">
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>Recomendaciones Personalizadas</CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-4 text-sm">
+                            <p>¡Hola, {formData.personName}! Para un negocio de <strong>{formData.giro}</strong> como el tuyo, las plataformas que elegiste son una excelente opción. Aquí te explicamos por qué:</p>
+                             <ul className="list-disc list-inside space-y-2 text-foreground/80">
+                                {formData.plataformas.map(p => (
+                                    <li key={p}><strong>{p}:</strong> {advantages[p] || platformAdvantages['Default'][p]}</li>
+                                ))}
+                            </ul>
+                          </CardContent>
+                        </Card>
+                        <Button onClick={resetForm} className="w-full">
+                            Realizar otra cotización
+                        </Button>
+                   </motion.div>
+                )}
+                
                 <Alert>
                     <AlertTriangle className="h-4 w-4" />
                     <AlertTitle>Nota Importante</AlertTitle>
@@ -382,7 +447,7 @@ const AdCalculator = () => {
                    Siguiente
                    <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
-            ) : currentStep === steps.length -1 ? (
+            ) : currentStep === steps.length -1 && !showResults ? (
                 <Button onClick={handleNext}>
                     Calcular Estimación
                     <ArrowRight className="w-4 h-4 ml-2" />
