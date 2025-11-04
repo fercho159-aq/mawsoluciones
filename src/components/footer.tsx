@@ -14,14 +14,6 @@ const Footer = () => {
             <p className="mt-4 text-foreground/70 max-w-xs">
               Transformando ideas en resultados digitales.
             </p>
-             <div className="mt-8">
-                <h4 className="font-headline font-semibold text-lg mb-4">Navegación</h4>
-                 <ul className="space-y-2">
-                    <li><Link href="/portafolio" className="hover:text-primary transition-colors">Nuestros clientes</Link></li>
-                    <li><Link href="/blog" className="hover:text-primary transition-colors">Blog</Link></li>
-                    <li><Link href="/contacto" className="hover:text-primary transition-colors">Contacto</Link></li>
-                </ul>
-            </div>
           </div>
           <div>
             <h4 className="font-headline font-semibold text-lg mb-4 text-center">Nuestros Servicios</h4>
