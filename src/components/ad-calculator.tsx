@@ -49,6 +49,7 @@ const AdCalculator = () => {
     presupuesto: 4000
   });
   const [error, setError] = useState('');
+  const [tiktokError, setTiktokError] = useState('');
 
   const minInversion = useMemo(() => {
     if (formData.plataformas.length === 0) return 4000;
@@ -66,6 +67,7 @@ const AdCalculator = () => {
       return;
     }
     setError('');
+    setTiktokError('');
     if (currentStep < steps.length) {
       if (currentStep === 4) {
           // Trigger modal on the last step
@@ -77,6 +79,7 @@ const AdCalculator = () => {
 
   const handleBack = () => {
     setError('');
+    setTiktokError('');
     if (isResultModalOpen) {
         setIsResultModalOpen(false);
     }
@@ -86,6 +89,14 @@ const AdCalculator = () => {
   };
   
   const handlePlatformChange = (platform: string) => {
+    setError('');
+    setTiktokError('');
+
+    if (platform === 'TikTok' && formData.giro === 'Salud/Medicina' && !formData.plataformas.includes('TikTok')) {
+      setTiktokError('Por el momento no es posible hacer pautas médicas en TikTok.');
+      return;
+    }
+
     setFormData(prev => {
       const newPlataformas = prev.plataformas.includes(platform)
         ? prev.plataformas.filter(p => p !== platform)
@@ -247,6 +258,14 @@ const AdCalculator = () => {
                         </div>
                     ))}
                     </div>
+                    {tiktokError && (
+                        <motion.div initial={{opacity: 0}} animate={{opacity: 1}} className="mt-2">
+                            <Alert variant="destructive">
+                                <AlertTriangle className="h-4 w-4" />
+                                <AlertDescription>{tiktokError}</AlertDescription>
+                            </Alert>
+                        </motion.div>
+                    )}
                 </div>
             </div>
         );
