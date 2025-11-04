@@ -14,7 +14,7 @@ export default function BlogPage() {
 
   return (
     <div className="bg-background">
-      <section className="py-24 sm:py-32 md:py-40 bg-card">
+      <section className="py-20 md:py-28 bg-card">
         <div className="container mx-auto px-4 md:px-6 text-center">
           <AnimatedDiv className="max-w-3xl mx-auto">
             <TypewriterTitle text="Nuestro Blog" />
