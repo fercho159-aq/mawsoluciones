@@ -142,6 +142,7 @@ ${recomendacionTexto}
     window.open(whatsappUrl, '_blank');
     setIsResultModalOpen(false);
     setShowResults(true);
+    setCurrentStep(steps.length);
   };
   
   const renderStep = () => {
@@ -340,3 +341,4 @@ ${recomendacionTexto}
 };
 
 export default ContentRecommender;
+
