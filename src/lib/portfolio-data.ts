@@ -22,6 +22,7 @@ export type ContentPortfolioItemType = {
   id: string;
   title: string;
   type: "Reel" | "Campaña de Fotos" | "Video Corporativo";
+  sector: string;
   client: string;
   image: ImagePlaceholder;
   url: string;
@@ -43,13 +44,311 @@ const getNextImage = () => {
 
 export const contentPortfolioItems: ContentPortfolioItemType[] = [
   {
-    id: "content-1",
-    title: "Campaña de Lanzamiento para Buffalo Ribs",
-    type: "Reel",
-    client: "Buffalo Ribs",
-    image: PlaceHolderImages.find(img => img.id === 'portfolio-content-1')!,
-    url: "https://www.instagram.com/p/C6Z0X3zP_1D/?img_index=1",
+    "id": "biofert",
+    "title": "Biofert",
+    "type": "Campaña de Fotos",
+    "sector": "Salud",
+    "client": "Biofert",
+    "image": PlaceHolderImages.find(img => img.id === 'content-salud-1')!,
+    "url": "https://www.instagram.com/biofert_/"
   },
+  {
+    "id": "centro-urologico",
+    "title": "Centro Urológico",
+    "type": "Reel",
+    "sector": "Salud",
+    "client": "Centro Urológico",
+    "image": PlaceHolderImages.find(img => img.id === 'content-salud-2')!,
+    "url": "https://www.instagram.com/centrourologico"
+  },
+  {
+    "id": "huesos-y-articulaciones",
+    "title": "Huesos y Articulaciones",
+    "type": "Reel",
+    "sector": "Salud",
+    "client": "Huesos y Articulaciones",
+    "image": PlaceHolderImages.find(img => img.id === 'content-salud-3')!,
+    "url": "https://www.facebook.com/HuesosyArticulaciones"
+  },
+  {
+    "id": "grupo-deasa",
+    "title": "Grupo Deasa",
+    "type": "Campaña de Fotos",
+    "sector": "Salud",
+    "client": "Grupo Deasa",
+    "image": PlaceHolderImages.find(img => img.id === 'content-salud-4')!,
+    "url": "https://www.facebook.com/grupodeasaoficial?locale=es_LA"
+  },
+  {
+    "id": "medical-tower",
+    "title": "Medical Tower",
+    "type": "Reel",
+    "sector": "Salud",
+    "client": "Medical Tower",
+    "image": PlaceHolderImages.find(img => img.id === 'content-salud-5')!,
+    "url": "https://www.tiktok.com/@mit.medical.tower"
+  },
+  {
+    "id": "technosim",
+    "title": "Technosim",
+    "type": "Campaña de Fotos",
+    "sector": "Salud",
+    "client": "Technosim",
+    "image": PlaceHolderImages.find(img => img.id === 'content-salud-6')!,
+    "url": "https://www.facebook.com/profile.php?id=61578682690139"
+  },
+  {
+    "id": "niu-coliving",
+    "title": "NIU Coliving",
+    "type": "Reel",
+    "sector": "Turismo",
+    "client": "NIU Coliving",
+    "image": PlaceHolderImages.find(img => img.id === 'content-turismo-1')!,
+    "url": "https://www.instagram.com/niu_coliving/"
+  },
+  {
+    "id": "cenote-san-isidro-content",
+    "title": "Cenote San Isidro",
+    "type": "Reel",
+    "sector": "Turismo",
+    "client": "Cenote San Isidro",
+    "image": PlaceHolderImages.find(img => img.id === 'content-turismo-2')!,
+    "url": "https://www.facebook.com/profile.php?id=61572579834917"
+  },
+  {
+    "id": "saudade-do-brazil",
+    "title": "Saudade do Brazil",
+    "type": "Reel",
+    "sector": "Restaurantes",
+    "client": "Saudade do Brazil",
+    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-1')!,
+    "url": "https://www.instagram.com/saudadedobrazil.mx/"
+  },
+  {
+    "id": "polanco-santino",
+    "title": "Polanco Santino",
+    "type": "Reel",
+    "sector": "Restaurantes",
+    "client": "Polanco Santino",
+    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-2')!,
+    "url": "https://www.instagram.com/polancosantino/?hl=es"
+  },
+  {
+    "id": "santa-carne-y-mas",
+    "title": "Santa Carne y Más",
+    "type": "Reel",
+    "sector": "Restaurantes",
+    "client": "Santa Carne y Más",
+    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-3')!,
+    "url": "https://www.facebook.com/santacarneymas/reels/"
+  },
+  {
+    "id": "don-jose-steakhouse",
+    "title": "Don José Steakhouse",
+    "type": "Reel",
+    "sector": "Restaurantes",
+    "client": "Don José Steakhouse",
+    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-4')!,
+    "url": "https://www.instagram.com/donjosesteakhouse/"
+  },
+  {
+    "id": "las-delicias-del-campo-content",
+    "title": "Las Delicias del Campo",
+    "type": "Campaña de Fotos",
+    "sector": "Restaurantes",
+    "client": "Las Delicias del Campo",
+    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-5')!,
+    "url": "https://www.instagram.com/lasdeliciasdelcampomexico/"
+  },
+  {
+    "id": "wapas",
+    "title": "Wapas",
+    "type": "Reel",
+    "sector": "Restaurantes",
+    "client": "Wapas",
+    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-6')!,
+    "url": "https://www.tiktok.com/@laswapas_oficial"
+  },
+  {
+    "id": "paolo-gourmet-content",
+    "title": "Paolo Gourmet",
+    "type": "Campaña de Fotos",
+    "sector": "Restaurantes",
+    "client": "Paolo Gourmet",
+    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-7')!,
+    "url": "https://www.facebook.com/profile.php?id=61578410386269"
+  },
+  {
+    "id": "buffalo-ribs-content",
+    "title": "Buffalo Ribs",
+    "type": "Reel",
+    "sector": "Restaurantes",
+    "client": "Buffalo Ribs",
+    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-8')!,
+    "url": "https://www.tiktok.com/@buffalo_ribs_"
+  },
+  {
+    "id": "electrica-san-miguel",
+    "title": "Electrica San Miguel de México",
+    "type": "Campaña de Fotos",
+    "sector": "Industrial",
+    "client": "Electrica San Miguel de México",
+    "image": PlaceHolderImages.find(img => img.id === 'content-industrial-1')!,
+    "url": "https://www.facebook.com/electricasanmigueldemexico/?locale=es_LA"
+  },
+  {
+    "id": "sinube",
+    "title": "SiNube",
+    "type": "Reel",
+    "sector": "Software",
+    "client": "SiNube",
+    "image": PlaceHolderImages.find(img => img.id === 'content-software-1')!,
+    "url": "https://www.facebook.com/sinube?locale=es_LA"
+  },
+  {
+    "id": "gruas-y-polipastos",
+    "title": "Gruas y Polipastos",
+    "type": "Reel",
+    "sector": "Industrial",
+    "client": "Gruas y Polipastos",
+    "image": PlaceHolderImages.find(img => img.id === 'content-industrial-2')!,
+    "url": "https://www.instagram.com/gruasypolipastos"
+  },
+  {
+    "id": "dfac-content",
+    "title": "DFAC",
+    "type": "Campaña de Fotos",
+    "sector": "Industrial",
+    "client": "DFAC",
+    "image": PlaceHolderImages.find(img => img.id === 'content-industrial-3')!,
+    "url": "https://www.facebook.com/bandasdepvcymonosparacimbra"
+  },
+  {
+    "id": "turismar-content",
+    "title": "Turismar",
+    "type": "Campaña de Fotos",
+    "sector": "Industrial",
+    "client": "Turismar",
+    "image": PlaceHolderImages.find(img => img.id === 'content-industrial-4')!,
+    "url": "https://www.facebook.com/rentaturismar"
+  },
+  {
+    "id": "maqtech",
+    "title": "Maqtech",
+    "type": "Campaña de Fotos",
+    "sector": "Industrial",
+    "client": "Maqtech",
+    "image": PlaceHolderImages.find(img => img.id === 'content-industrial-5')!,
+    "url": "https://www.facebook.com/profile.php?id=61570233765991"
+  },
+  {
+    "id": "dra-karen-carrillo",
+    "title": "Dra. Karen Carrillo",
+    "type": "Reel",
+    "sector": "Influencers",
+    "client": "Dra. Karen Carrillo",
+    "image": PlaceHolderImages.find(img => img.id === 'content-influencer-1')!,
+    "url": "https://www.instagram.com/drakarencarrillo/"
+  },
+  {
+    "id": "ricardo-garza",
+    "title": "Ricardo Garza",
+    "type": "Reel",
+    "sector": "Influencers",
+    "client": "Ricardo Garza",
+    "image": PlaceHolderImages.find(img => img.id === 'content-influencer-2')!,
+    "url": "https://www.instagram.com/ricardogarzamx/?hl=es"
+  },
+  {
+    "id": "haide-unique",
+    "title": "Haide Unique",
+    "type": "Reel",
+    "sector": "Influencers",
+    "client": "Haide Unique",
+    "image": PlaceHolderImages.find(img => img.id === 'content-influencer-3')!,
+    "url": "https://www.instagram.com/haideuniquemx/"
+  },
+  {
+    "id": "nizmenur",
+    "title": "Nizmenur",
+    "type": "Reel",
+    "sector": "Influencers",
+    "client": "Nizmenur",
+    "image": PlaceHolderImages.find(img => img.id === 'content-influencer-4')!,
+    "url": "https://www.instagram.com/nizmenur/?hl=es-la"
+  },
+  {
+    "id": "gi-alpine",
+    "title": "Gi Alpine",
+    "type": "Reel",
+    "sector": "Influencers",
+    "client": "Gi Alpine",
+    "image": PlaceHolderImages.find(img => img.id === 'content-influencer-5')!,
+    "url": "https://www.instagram.com/gi.alpine?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+  },
+  {
+    "id": "dc-solutions-ti",
+    "title": "DC Solutions TI",
+    "type": "Campaña de Fotos",
+    "sector": "Servicios Profesionales",
+    "client": "DC Solutions TI",
+    "image": PlaceHolderImages.find(img => img.id === 'content-servicios-1')!,
+    "url": "https://www.facebook.com/dcsolutionsTI"
+  },
+  {
+    "id": "benjamin-jv",
+    "title": "Benjamin JV",
+    "type": "Reel",
+    "sector": "Servicios Profesionales",
+    "client": "Benjamin JV",
+    "image": PlaceHolderImages.find(img => img.id === 'content-servicios-2')!,
+    "url": "https://www.instagram.com/benjamin_jv/"
+  },
+  {
+    "id": "consultoria-luz-sistemica",
+    "title": "Consultoría Luz Sistémica",
+    "type": "Campaña de Fotos",
+    "sector": "Servicios Profesionales",
+    "client": "Consultoría Luz Sistémica",
+    "image": PlaceHolderImages.find(img => img.id === 'content-servicios-3')!,
+    "url": "https://www.facebook.com/ConsultoriaLuzSistemica/"
+  },
+  {
+    "id": "caf-consultores",
+    "title": "CAF Consultores",
+    "type": "Campaña de Fotos",
+    "sector": "Servicios Profesionales",
+    "client": "CAF Consultores",
+    "image": PlaceHolderImages.find(img => img.id === 'content-servicios-4')!,
+    "url": "https://www.facebook.com/consultorescafmx"
+  },
+  {
+    "id": "epidemic-content",
+    "title": "Epidemic",
+    "type": "Campaña de Fotos",
+    "sector": "Ropa",
+    "client": "Epidemic",
+    "image": PlaceHolderImages.find(img => img.id === 'content-ropa-1')!,
+    "url": "https://www.facebook.com/profile.php?id=61579397999096"
+  },
+  {
+    "id": "agel-dori",
+    "title": "Agel Dori",
+    "type": "Reel",
+    "sector": "Ropa",
+    "client": "Agel Dori",
+    "image": PlaceHolderImages.find(img => img.id === 'content-ropa-2')!,
+    "url": "https://www.instagram.com/angeldori_deseo_interior?igsh=enlwaWNrdWNjb2Qw"
+  },
+  {
+    "id": "cucu-becerra-content",
+    "title": "Cucu Becerra",
+    "type": "Reel",
+    "sector": "Ropa",
+    "client": "Cucu Becerra",
+    "image": PlaceHolderImages.find(img => img.id === 'content-ropa-3')!,
+    "url": "https://www.instagram.com/cucubecerra_mx?igsh=NzZxcWRkeHp4NjQx"
+  }
 ];
 
 
@@ -955,3 +1254,5 @@ export const portfolioItems: PortfolioItemType[] = [
 
 export const portfolioCategories = Array.from(new Set(portfolioItems.map(item => item.category)));
 export const portfolioSectors = Array.from(new Set(portfolioItems.map(item => item.sector)));
+
+    

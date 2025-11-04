@@ -1,15 +1,29 @@
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { PenSquare, CodeXml, Camera, Bot, Megaphone, ArrowRight } from "lucide-react";
+"use client";
+
+import React, { useState } from 'react';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { PenSquare, CodeXml, Camera, Bot, Megaphone, ArrowRight, Link as LinkIcon, Send, ShoppingCart, Briefcase, Building, Film, HeartHandshake, Utensils, Construction, Car, Flower, Hospital, Newspaper } from "lucide-react";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import AnimatedDiv from "../animated-div";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { portfolioItems, portfolioCategories, portfolioSectors, contentPortfolioItems } from "@/lib/portfolio-data";
+import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 
 const services = [
   {
     icon: <CodeXml className="w-10 h-10 text-primary" />,
     title: "Sitios Web",
     description: "Diseñamos y desarrollamos sitios web modernos, rápidos y optimizados para la conversión.",
-    href: "/servicios/sitios-web"
+    href: "/servicios/desarrollo-web"
   },
   {
     icon: <PenSquare className="w-10 h-10 text-primary" />,
@@ -55,7 +69,48 @@ const itemVariants = {
   },
 };
 
+const categoryIcons: { [key: string]: React.ReactNode } = {
+  "E-commerce": <ShoppingCart className="w-4 h-4" />,
+  "Connective": <LinkIcon className="w-4 h-4" />,
+  "Landing": <Send className="w-4 h-4" />,
+};
+
+const sectorIcons: { [key: string]: React.ReactNode } = {
+    "Servicios Profesionales": <Briefcase className="w-4 h-4" />,
+    "Inmobiliaria": <Building className="w-4 h-4" />,
+    "Eventos": <Film className="w-4 h-4" />,
+    "Actividades recreativas": <HeartHandshake className="w-4 h-4" />,
+    "Restaurante": <Utensils className="w-4 h-4" />,
+    "Sector industrial": <Construction className="w-4 h-4" />,
+    "Ropa y Calzado": <ShoppingCart className="w-4 h-4" />,
+    "Floreria": <Flower className="w-4 h-4" />,
+    "Medico": <Hospital className="w-4 h-4" />,
+    "Noticias": <Newspaper className="w-4 h-4" />,
+    "Catalogo": <LinkIcon className="w-4 h-4" />,
+    "Otros": <Briefcase className="w-4 h-4" />,
+    "Ropa": <ShoppingCart className="w-4 h-4" />,
+    "Automotriz": <Car className="w-4 h-4" />,
+};
+
 const Services = () => {
+  const [categoryFilter, setCategoryFilter] = useState<string>("Todos");
+  const [sectorFilter, setSectorFilter] = useState<string>("Todos");
+  const [contentSectorFilter, setContentSectorFilter] = useState<string>("Todos");
+
+  const filteredItems = portfolioItems.filter(item => {
+    const categoryMatch = categoryFilter === "Todos" || item.category === categoryFilter;
+    const sectorMatch = sectorFilter === "Todos" || item.sector === sectorFilter;
+    return categoryMatch && sectorMatch;
+  }).slice(0, 3);
+  
+  const allContentSectors = Array.from(new Set(contentPortfolioItems.map(item => item.sector)));
+
+  const filteredContentItems = contentPortfolioItems.filter(item => {
+    const sectorMatch = contentSectorFilter === "Todos" || item.sector === contentSectorFilter;
+    return sectorMatch;
+  }).slice(0, 3);
+
+
   return (
     <section id="services" className="py-20 md:py-32 bg-background">
       <div className="container mx-auto px-4 md:px-6">
@@ -66,7 +121,7 @@ const Services = () => {
           </p>
         </AnimatedDiv>
         <AnimatedDiv
-          className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-4xl mx-auto"
           variants={containerVariants}
         >
           {services.map((service, index) => (
@@ -93,9 +148,188 @@ const Services = () => {
               <Link href="/servicios">Ver todos los servicios</Link>
             </Button>
         </AnimatedDiv>
+
+        <AnimatedDiv className="max-w-5xl mx-auto text-center mt-28 mb-16">
+           <h2 className="font-headline text-3xl sm:text-4xl font-bold">Nuestros Clientes</h2>
+          <p className="mt-4 text-lg text-foreground/80">
+            Explora una selección de nuestros proyectos y descubre cómo hemos ayudado a empresas a alcanzar sus objetivos.
+          </p>
+        </AnimatedDiv>
+
+        <Tabs defaultValue="websites" className="w-full max-w-5xl mx-auto">
+            <AnimatedDiv>
+              <div className="flex justify-center mb-8">
+                <TabsList>
+                  <TabsTrigger value="websites">Sitios Web</TabsTrigger>
+                  <TabsTrigger value="content">Contenido</TabsTrigger>
+                </TabsList>
+              </div>
+            </AnimatedDiv>
+            
+            <TabsContent value="websites">
+              <AnimatedDiv>
+                <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-foreground/80 mb-2">Filtrar por Categoría</label>
+                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleccionar Categoría" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Todos">Todos</SelectItem>
+                        {portfolioCategories.map(category => (
+                          <SelectItem key={category} value={category}>{category}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-foreground/80 mb-2">Filtrar por Sector</label>
+                    <Select value={sectorFilter} onValueChange={setSectorFilter}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleccionar Sector" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Todos">Todos</SelectItem>
+                        {portfolioSectors.map(sector => (
+                          <SelectItem key={sector} value={sector}>{sector}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </AnimatedDiv>
+
+              <AnimatedDiv
+                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                {filteredItems.map(item => (
+                  <AnimatedDiv key={item.id} variants={itemVariants}>
+                    <Card className="overflow-hidden group flex flex-col h-full bg-card/50 hover:bg-card border-border/50 hover:border-border transition-all duration-300 ease-in-out transform hover:-translate-y-2 shadow-sm hover:shadow-2xl">
+                      <Link href={`/portafolio/${item.id}`} className="flex flex-col flex-grow">
+                        <CardContent className="p-0">
+                          <div className="relative aspect-video bg-muted">
+                            {item.image && (
+                              <Image
+                                src={item.image.imageUrl}
+                                alt={item.title}
+                                fill
+                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                data-ai-hint={item.image.imageHint}
+                              />
+                            )}
+                          </div>
+                        </CardContent>
+                        <CardFooter className="p-4 flex flex-col items-start flex-grow">
+                          <Badge variant="secondary" className="mb-2">
+                            <div className="flex items-center gap-1.5">
+                                {categoryIcons[item.category] || null}
+                                <span>{item.category}</span>
+                            </div>
+                          </Badge>
+                          <h3 className="font-headline font-semibold text-md flex-grow flex items-center gap-2">
+                             {sectorIcons[item.sector] || <Briefcase className="w-4 h-4" />}
+                            <span>{item.title}</span>
+                          </h3>
+                          <div className="flex items-center text-sm text-primary mt-4 self-start">
+                            Ver Proyecto <ArrowRight className="w-4 h-4 ml-2" />
+                          </div>
+                        </CardFooter>
+                      </Link>
+                    </Card>
+                  </AnimatedDiv>
+                ))}
+              </AnimatedDiv>
+              
+              {filteredItems.length === 0 && (
+                <AnimatedDiv className="text-center py-16">
+                    <p className="text-lg text-foreground/80">No se encontraron proyectos con los filtros seleccionados.</p>
+                </AnimatedDiv>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="content">
+               <AnimatedDiv>
+                <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-foreground/80 mb-2">Filtrar por Sector</label>
+                    <Select value={contentSectorFilter} onValueChange={setContentSectorFilter}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleccionar Sector" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Todos">Todos</SelectItem>
+                        {allContentSectors.map(sector => (
+                          <SelectItem key={sector} value={sector}>{sector}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </AnimatedDiv>
+              <AnimatedDiv
+                  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  {filteredContentItems.map(item => (
+                    <AnimatedDiv key={item.id} variants={itemVariants}>
+                      <Card className="overflow-hidden group flex flex-col h-full bg-card/50 hover:bg-card border-border/50 hover:border-border transition-all duration-300 ease-in-out transform hover:-translate-y-2 shadow-sm hover:shadow-2xl">
+                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="flex flex-col flex-grow">
+                          <CardContent className="p-0">
+                            <div className="relative aspect-video bg-muted">
+                              {item.image && (
+                                <Image
+                                  src={item.image.imageUrl}
+                                  alt={item.title}
+                                  fill
+                                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                  data-ai-hint={item.image.imageHint}
+                                />
+                              )}
+                            </div>
+                          </CardContent>
+                          <CardFooter className="p-4 flex flex-col items-start flex-grow">
+                            <Badge variant="secondary" className="mb-2">
+                              {item.sector}
+                            </Badge>
+                            <h3 className="font-headline font-semibold text-md flex-grow">
+                              {item.title}
+                            </h3>
+                            <div className="flex items-center text-sm text-primary mt-4 self-start">
+                              Ver Contenido <ArrowRight className="w-4 h-4 ml-2" />
+                            </div>
+                          </CardFooter>
+                        </a>
+                      </Card>
+                    </AnimatedDiv>
+                  ))}
+                </AnimatedDiv>
+                {filteredContentItems.length === 0 && (
+                   <AnimatedDiv className="text-center py-16">
+                    <p className="text-lg text-foreground/80">No se encontraron proyectos con los filtros seleccionados.</p>
+                  </AnimatedDiv>
+                )}
+            </TabsContent>
+          </Tabs>
+
+          <AnimatedDiv className="text-center mt-16">
+            <Button className="w-full sm:w-auto" asChild size="lg">
+              <Link href="/portafolio">Ver todos los proyectos</Link>
+            </Button>
+        </AnimatedDiv>
+
       </div>
     </section>
   );
 };
 
 export default Services;
+
+    
