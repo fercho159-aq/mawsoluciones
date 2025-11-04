@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
@@ -61,7 +62,7 @@ const Testimonials = () => {
         <AnimatedDiv className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" variants={containerVariants}>
           {testimonials.map((testimonial, index) => (
             <AnimatedDiv key={index} variants={itemVariants}>
-              <Card className="h-full flex flex-col justify-between shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
+              <Card className="h-full flex flex-col justify-between bg-background/50 shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
                 <CardContent className="pt-6">
                   <blockquote className="text-foreground/80 italic">"{testimonial.quote}"</blockquote>
                 </CardContent>

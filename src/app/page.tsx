@@ -1,3 +1,4 @@
+
 import Header from "@/components/header";
 import Hero from "@/components/sections/hero";
 import Services from "@/components/sections/services";
@@ -5,6 +6,7 @@ import About from "@/components/sections/about";
 import Testimonials from "@/components/sections/testimonials";
 import BlogSection from "@/components/sections/blog";
 import Footer from "@/components/footer";
+import Contact from "@/components/sections/contact";
 
 export default function Home() {
   return (
@@ -16,6 +18,7 @@ export default function Home() {
         <About />
         <BlogSection />
         <Testimonials />
+        <Contact />
       </main>
       <Footer />
     </div>

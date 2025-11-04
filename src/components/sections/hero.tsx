@@ -64,7 +64,7 @@ const Hero = () => {
   return (
     <section
       id="home"
-      className="relative min-h-[70vh] md:min-h-screen bg-card overflow-hidden"
+      className="relative min-h-[70vh] md:min-h-screen bg-background overflow-hidden"
     >
       <Carousel
         setApi={setApi}

@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -116,7 +117,7 @@ const Services = () => {
 
   return (
     <>
-      <section id="services" className="py-20 md:py-32 bg-background">
+      <section id="services" className="py-20 md:py-32 bg-card">
         <div className="container mx-auto px-4 md:px-6">
           <AnimatedDiv className="max-w-3xl mx-auto text-center mb-16">
             <h2 className="font-headline text-3xl sm:text-4xl font-bold">Todo lo que necesitas para crecer</h2>
@@ -131,7 +132,7 @@ const Services = () => {
             {services.map((service, index) => (
               <AnimatedDiv key={index} variants={itemVariants}>
                 <Link href={service.href} className="h-full block group">
-                  <Card className="h-full flex flex-col bg-card/50 hover:bg-card border-border/50 hover:border-border transition-all duration-300 ease-in-out transform hover:-translate-y-2 shadow-sm hover:shadow-2xl">
+                  <Card className="h-full flex flex-col bg-background/50 hover:bg-background border-border/50 hover:border-border transition-all duration-300 ease-in-out transform hover:-translate-y-2 shadow-sm hover:shadow-2xl">
                       <CardHeader className="p-6 pb-4">
                         {service.icon}
                       </CardHeader>
@@ -150,7 +151,7 @@ const Services = () => {
         </div>
       </section>
 
-      <section className="py-20 md:py-28 bg-card">
+      <section className="py-20 md:py-28 bg-background">
         <div className="container mx-auto px-4 md:px-6">
           <AnimatedDiv className="max-w-5xl mx-auto text-center mb-16">
             <h2 className="font-headline text-3xl sm:text-4xl font-bold">Nuestros Clientes</h2>
