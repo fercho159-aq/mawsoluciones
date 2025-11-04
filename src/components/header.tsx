@@ -139,12 +139,14 @@ const Header = () => {
                   <ListItem
                     href="/portafolio"
                     title="Sitios Web"
+                    icon={<CodeXml className="w-5 h-5" />}
                   >
                     Proyectos de desarrollo y diseño web.
                   </ListItem>
                   <ListItem
                     href="/portafolio" // TODO: Change to content portfolio page
                     title="Contenido"
+                    icon={<PenSquare className="w-5 h-5" />}
                   >
                     Ejemplos de creación y estrategia de contenido.
                   </ListItem>
