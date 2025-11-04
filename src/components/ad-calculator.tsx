@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo } from 'react';
@@ -77,7 +78,6 @@ const AdCalculator = () => {
   const [formData, setFormData] = useState({
     companyName: '',
     personName: '',
-    jobTitle: '',
     giro: '',
     estado: 'CDMX',
     municipios: ['Benito Juárez'],
@@ -97,7 +97,7 @@ const AdCalculator = () => {
   }, [formData.plataformas]);
 
   const handleNext = () => {
-    if (currentStep === 1 && (!formData.companyName || !formData.personName || !formData.jobTitle)) {
+    if (currentStep === 1 && (!formData.companyName || !formData.personName)) {
         setError('Por favor, completa todos los campos.');
         return;
     }
@@ -132,7 +132,6 @@ const AdCalculator = () => {
     setFormData({
         companyName: '',
         personName: '',
-        jobTitle: '',
         giro: '',
         estado: 'CDMX',
         municipios: ['Benito Juárez'],
@@ -186,7 +185,6 @@ const AdCalculator = () => {
 *¡Hola! Quiero mi cotización de publicidad!*
 \n*Empresa:* ${formData.companyName}
 *Nombre:* ${formData.personName}
-*Cargo:* ${formData.jobTitle}
 *Giro:* ${formData.giro}
 *Ubicación:* ${formData.estado} - ${formData.municipios.join(', ')}${formData.otroMunicipio ? `, ${formData.otroMunicipio}`: ''}
 *Plataformas:* ${formData.plataformas.join(', ')}
@@ -207,17 +205,15 @@ const AdCalculator = () => {
       case 1:
         return (
           <div className="space-y-6">
-            <div>
-              <Label htmlFor="companyName">Nombre de tu Empresa</Label>
-              <Input id="companyName" value={formData.companyName} onChange={(e) => setFormData({...formData, companyName: e.target.value})} placeholder="Ej. Mi Negocio Increíble" />
-            </div>
-            <div>
-              <Label htmlFor="personName">Tu Nombre</Label>
-              <Input id="personName" value={formData.personName} onChange={(e) => setFormData({...formData, personName: e.target.value})} placeholder="Ej. Juan Pérez" />
-            </div>
-             <div>
-              <Label htmlFor="jobTitle">Tu Cargo</Label>
-              <Input id="jobTitle" value={formData.jobTitle} onChange={(e) => setFormData({...formData, jobTitle: e.target.value})} placeholder="Ej. Director de Marketing" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="companyName">Nombre de tu Empresa</Label>
+                  <Input id="companyName" value={formData.companyName} onChange={(e) => setFormData({...formData, companyName: e.target.value})} placeholder="Ej. Mi Negocio Increíble" />
+                </div>
+                <div>
+                  <Label htmlFor="personName">Tu Nombre</Label>
+                  <Input id="personName" value={formData.personName} onChange={(e) => setFormData({...formData, personName: e.target.value})} placeholder="Ej. Juan Pérez" />
+                </div>
             </div>
             <div>
               <Label>Giro del Negocio</Label>
@@ -409,8 +405,10 @@ const AdCalculator = () => {
   return (
     <Card className="w-full max-w-4xl mx-auto shadow-2xl">
       <CardHeader>
-        <CardTitle>{steps[currentStep-1].title}</CardTitle>
-        <CardDescription>{steps[currentStep-1].description}</CardDescription>
+        <div className="space-y-2">
+            <CardTitle>{steps[currentStep-1].title}</CardTitle>
+            <CardDescription>{steps[currentStep-1].description}</CardDescription>
+        </div>
         <Progress value={(currentStep / (steps.length -1)) * 100} className="mt-4" />
       </CardHeader>
       <CardContent>
@@ -485,5 +483,7 @@ const AdCalculator = () => {
 };
 
 export default AdCalculator;
+
+    
 
     
