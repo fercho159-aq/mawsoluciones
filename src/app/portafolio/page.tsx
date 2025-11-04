@@ -16,7 +16,7 @@ import { portfolioItems, portfolioCategories, portfolioSectors } from "@/lib/por
 import { ArrowRight, Link as LinkIcon, Send, ShoppingCart } from "lucide-react";
 import AnimatedDiv from "@/components/animated-div";
 import React, { useState } from "react";
-import TypewriterTitle from "@/components/typewriter-title";
+import GlitchTitle from "@/components/glitch-title";
 
 const containerVariants = {
   hidden: {},
@@ -61,7 +61,7 @@ const PortfolioPage = () => {
         <div className="container mx-auto px-4 md:px-6">
 
           <div className="mb-16">
-            <TypewriterTitle text="Sitios Web" />
+            <GlitchTitle text="Sitios Web" />
           </div>
 
           <AnimatedDiv>
