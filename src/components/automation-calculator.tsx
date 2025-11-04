@@ -114,6 +114,7 @@ ${selectedGoalsText}
     window.open(whatsappUrl, '_blank');
     setIsResultModalOpen(false);
     setShowResults(true);
+    setCurrentStep(steps.length);
   };
 
   const renderStep = () => {
@@ -313,3 +314,5 @@ ${selectedGoalsText}
 };
 
 export default AutomationCalculator;
+
+    
