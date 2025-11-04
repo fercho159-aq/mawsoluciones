@@ -1,10 +1,9 @@
-
 import { PlaceHolderImages, ImagePlaceholder } from "@/lib/placeholder-images";
 
 export type PortfolioItemType = {
   id: string;
   title: string;
-  category: string; // "Giro"
+  category: "E-commerce" | "Connective" | "Landing" | "Catalogo" | "Servicios"; // "Giro"
   sector: string; // "Sector"
   image?: ImagePlaceholder;
   description: string;
@@ -137,6 +136,19 @@ export const portfolioItems: PortfolioItemType[] = [
     "challenge": "Proyectar confianza y profesionalismo en un sector competitivo.",
     "solution": "Un diseño web sobrio y profesional, con casos de estudio y testimonios para construir credibilidad.",
     "services": ["Diseño y Desarrollo Web", "Marketing de Contenidos"]
+  },
+   {
+    "id": "floraenvia-com-mx",
+    "title": "Flora Envia",
+    "category": "E-commerce",
+    "sector": "Floreria",
+    "website": "https://floraenvia.com.mx",
+    "client": "Flora Envia",
+    "image": getNextImage(),
+    "description": "E-commerce de arreglos florales y regalos.",
+    "challenge": "Ofrecer una experiencia de compra emocional y garantizar la entrega puntual.",
+    "solution": "Una plataforma de e-commerce con un configurador de arreglos, opciones de dedicatorias y seguimiento de envío en tiempo real.",
+    "services": ["Desarrollo de E-commerce", "Logística de Última Milla"]
   },
   {
     "id": "simtex-com-mx",
@@ -519,7 +531,7 @@ export const portfolioItems: PortfolioItemType[] = [
     "id": "papierwaren-com-mx",
     "title": "Papierwaren",
     "category": "Connective",
-    "sector": "Active",
+    "sector": "Otros",
     "website": "https://papierwaren.com.mx",
     "client": "Papierwaren",
     "image": getNextImage(),
@@ -700,8 +712,8 @@ export const portfolioItems: PortfolioItemType[] = [
   {
     "id": "cimbrayaccesorios-com-mx",
     "title": "Cimbra y Accesorios",
-    "category": "Connective",
-    "sector": "Catalogo",
+    "category": "Catalogo",
+    "sector": "Sector industrial",
     "website": "https://www.cimbrayaccesorios.com.mx/",
     "client": "Cimbra y Accesorios",
     "image": getNextImage(),
@@ -713,8 +725,8 @@ export const portfolioItems: PortfolioItemType[] = [
   {
     "id": "puntales-com-mx",
     "title": "Puntales.com.mx",
-    "category": "Connective",
-    "sector": "Catalogo",
+    "category": "Catalogo",
+    "sector": "Sector industrial",
     "website": "https://www.puntales.com.mx/",
     "client": "Puntales.com.mx",
     "image": getNextImage(),
@@ -726,8 +738,8 @@ export const portfolioItems: PortfolioItemType[] = [
   {
     "id": "puntales-mx",
     "title": "Puntales.mx",
-    "category": "Connective",
-    "sector": "Catalogo",
+    "category": "Catalogo",
+    "sector": "Sector industrial",
     "website": "https://www.puntales.mx/",
     "client": "Puntales.mx",
     "image": getNextImage(),
@@ -922,6 +934,5 @@ export const portfolioItems: PortfolioItemType[] = [
 
 export const portfolioCategories = Array.from(new Set(portfolioItems.map(item => item.category)));
 export const portfolioSectors = Array.from(new Set(portfolioItems.map(item => item.sector)));
-
 
     
