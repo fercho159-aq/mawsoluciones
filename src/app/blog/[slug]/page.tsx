@@ -28,7 +28,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             <Badge variant="secondary" className="mb-4">
               {post.category}
             </Badge>
-            <h1 className="font-headline text-4xl sm:text-5xl md:text-6xl font-bold">
+            <h1 className="font-headline text-4xl sm:text-5xl font-bold">
               {post.title}
             </h1>
             <div className="flex items-center justify-center gap-6 text-md text-foreground/70 mt-8">

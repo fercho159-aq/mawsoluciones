@@ -81,7 +81,7 @@ const About = () => {
     <section id="about" className="py-20 md:py-28 bg-card">
       <div className="container mx-auto px-4 md:px-6">
         <AnimatedDiv className="max-w-3xl mx-auto text-center mb-16">
-          <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold">¿Por qué contratar una Agencia de Marketing?</h2>
+          <h2 className="font-headline text-3xl sm:text-4xl font-bold">¿Por qué contratar una Agencia de Marketing?</h2>
           <p className="mt-4 text-lg text-foreground/80">
             En un mundo digital que cambia constantemente, un socio estratégico es tu mayor ventaja competitiva.
           </p>

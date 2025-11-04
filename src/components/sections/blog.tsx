@@ -15,7 +15,7 @@ export default function BlogSection() {
     <section id="blog" className="py-20 md:py-28 bg-background">
       <div className="container mx-auto px-4 md:px-6">
         <AnimatedDiv className="max-w-3xl mx-auto text-center mb-16">
-          <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold">Últimas Entradas del Blog</h2>
+          <h2 className="font-headline text-3xl sm:text-4xl font-bold">Últimas Entradas del Blog</h2>
           <p className="mt-4 text-lg text-foreground/80">
             Mantente al día con las últimas tendencias y consejos de marketing digital.
           </p>

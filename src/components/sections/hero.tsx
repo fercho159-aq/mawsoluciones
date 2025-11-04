@@ -122,7 +122,7 @@ const Hero = () => {
                           transition: { duration: 0.8, ease: "easeOut" },
                         },
                       }}
-                      className="font-headline text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight"
+                      className="font-headline text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight"
                     >
                       {slide.headline}
                     </motion.h1>

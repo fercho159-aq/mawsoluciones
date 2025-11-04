@@ -9,7 +9,7 @@ const ContactPage = () => {
     <section id="contact" className="py-20 md:py-28">
       <div className="container mx-auto px-4 md:px-6">
         <AnimatedDiv className="max-w-3xl mx-auto text-center mb-12">
-          <h1 className="font-headline text-4xl sm:text-5xl md:text-6xl font-bold">Hablemos</h1>
+          <h1 className="font-headline text-4xl sm:text-5xl font-bold">Hablemos</h1>
           <p className="mt-6 text-lg sm:text-xl text-foreground/80">
             ¿Listo para llevar tu marca al siguiente nivel? Contáctanos o reserva una sesión estratégica.
           </p>
