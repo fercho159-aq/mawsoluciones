@@ -266,7 +266,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "sector": "Influencers",
     "client": "Haide Unique",
     "image": PlaceHolderImages.find(img => img.id === 'content-influencer-3'),
-    "url": "https://www.instagram.com/haideuniquemx/"
+    "url": "https://www.instagram.com/haideuniquemex/"
   },
   {
     "id": "nizmenur",
@@ -430,6 +430,19 @@ export const portfolioItems: PortfolioItemType[] = [
     "challenge": "Crear una experiencia de compra online que refleje la exclusividad y calidad de la marca.",
     "solution": "Una tienda online con un diseño limpio y elegante, fotografía de alta calidad y una experiencia de checkout optimizada y sencilla.",
     "services": ["Desarrollo de E-commerce", "Optimización de la Conversión (CRO)", "Fotografía de Producto"]
+  },
+  {
+    "id": "cantina-20",
+    "title": "Cantina 20",
+    "category": "Connective",
+    "sector": "Restaurantes",
+    "website": "https://cantina20.com/",
+    "client": "Cantina 20",
+    "image": getNextImage(),
+    "description": "Sitio web para la reconocida Cantina 20, un ícono de la gastronomía mexicana. El sitio busca reflejar la atmósfera vibrante y la alta cocina del lugar, facilitando las reservaciones y la exploración de sus menús.",
+    "challenge": "Capturar la esencia de una marca premium y sofisticada, combinando tradición y modernidad en la experiencia digital, y gestionar un alto volumen de solicitudes de reservación.",
+    "solution": "Se desarrolló un sitio web con un diseño elegante y oscuro, que utiliza fotografía y video de alta calidad para sumergir al usuario en la atmósfera de la cantina. Se integró un sistema de reservaciones en línea directo y fácil de usar para optimizar la gestión de mesas.",
+    "services": ["Diseño y Desarrollo Web", "Sistema de Reservas", "Fotografía y Video"]
   },
   {
     "id": "paologourmet-com-mx",
