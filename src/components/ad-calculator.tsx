@@ -110,8 +110,9 @@ const AdCalculator = () => {
     if (currentStep < steps.length) {
       if (currentStep === 4) {
           setIsResultModalOpen(true);
+      } else {
+        setCurrentStep(currentStep + 1);
       }
-      setCurrentStep(currentStep + 1);
     }
   };
 
@@ -192,11 +193,12 @@ const AdCalculator = () => {
 *Inversión previa:* ${formData.prevInvestment}
 *Presupuesto mensual estimado:* ${formData.presupuesto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
 \n*Mi número es:* ${whatsappNumber}
-    `;
+    `.trim();
     const whatsappUrl = `https://wa.me/5542314150?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
     setIsResultModalOpen(false);
     setShowResults(true); // Show results after sending
+    setCurrentStep(currentStep + 1); // Move to final step
   };
 
 
@@ -278,7 +280,7 @@ const AdCalculator = () => {
             <div className="space-y-6">
                  <div>
                     <Label>¿Cuál es tu objetivo principal?</Label>
-                    <RadioGroup defaultValue="Performance" value={formData.campaignType} onValueChange={(v) => setFormData({...formData, campaignType: v})} className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <RadioGroup defaultValue="Performance" value={formData.campaignType} onValueChange={(v) => setFormData({...formData, campaignType: v as string})} className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <RadioGroupItem value="Performance" id="r1" className="peer sr-only" />
                             <Label htmlFor="r1" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
@@ -344,8 +346,16 @@ const AdCalculator = () => {
         const advantages = platformAdvantages[giro] || platformAdvantages['Default'];
 
         return (
-            <div className="space-y-6 relative">
-                 <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10" style={{ display: showResults ? 'none' : 'block' }}></div>
+            <motion.div 
+                className="space-y-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+            >
+                <div className="text-center">
+                    <h3 className="text-xl font-semibold">¡Hola, {formData.personName} de {formData.companyName}!</h3>
+                    <p className="text-muted-foreground">Gracias a tu información, aquí tienes tu estimación personalizada.</p>
+                </div>
                 <Card>
                     <CardHeader>
                         <CardTitle>Resumen de tu Cotización</CardTitle>
@@ -367,26 +377,19 @@ const AdCalculator = () => {
                     </CardContent>
                 </Card>
 
-                 {showResults && (
-                   <motion.div initial={{opacity: 0}} animate={{opacity: 1}} className="space-y-4">
-                        <Card>
-                          <CardHeader>
-                            <CardTitle>Recomendaciones Personalizadas</CardTitle>
-                          </CardHeader>
-                          <CardContent className="space-y-4 text-sm">
-                            <p>¡Hola, {formData.personName}! Para un negocio de <strong>{formData.giro}</strong> como el tuyo, las plataformas que elegiste son una excelente opción. Aquí te explicamos por qué:</p>
-                             <ul className="list-disc list-inside space-y-2 text-foreground/80">
-                                {formData.plataformas.map(p => (
-                                    <li key={p}><strong>{p}:</strong> {advantages[p] || platformAdvantages['Default'][p]}</li>
-                                ))}
-                            </ul>
-                          </CardContent>
-                        </Card>
-                        <Button onClick={resetForm} className="w-full">
-                            Realizar otra cotización
-                        </Button>
-                   </motion.div>
-                )}
+                <Card>
+                    <CardHeader>
+                    <CardTitle>Recomendaciones Personalizadas</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 text-sm">
+                    <p>Para un negocio de <strong>{formData.giro}</strong> como el tuyo, las plataformas que elegiste son una excelente opción. Aquí te explicamos por qué:</p>
+                        <ul className="list-disc list-inside space-y-2 text-foreground/80">
+                        {formData.plataformas.map(p => (
+                            <li key={p}><strong>{p}:</strong> {advantages[p] || platformAdvantages['Default'][p]}</li>
+                        ))}
+                    </ul>
+                    </CardContent>
+                </Card>
                 
                 <Alert>
                     <AlertTriangle className="h-4 w-4" />
@@ -395,7 +398,11 @@ const AdCalculator = () => {
                         Estos números son estimaciones. El alcance real puede variar según la segmentación, la calidad del anuncio y la competencia.
                     </AlertDescription>
                 </Alert>
-            </div>
+
+                <Button onClick={resetForm} className="w-full">
+                    Realizar otra cotización
+                </Button>
+            </motion.div>
         )
       default:
         return null;
@@ -405,11 +412,11 @@ const AdCalculator = () => {
   return (
     <Card className="w-full max-w-4xl mx-auto shadow-2xl">
       <CardHeader>
-        <div className="space-y-2">
+        <Progress value={(currentStep / steps.length) * 100} className="mb-4" />
+        <div className="space-y-2 text-center">
             <CardTitle>{steps[currentStep-1].title}</CardTitle>
             <CardDescription>{steps[currentStep-1].description}</CardDescription>
         </div>
-        <Progress value={(currentStep / (steps.length -1)) * 100} className="mt-4" />
       </CardHeader>
       <CardContent>
         <AnimatePresence mode="wait">
@@ -436,21 +443,21 @@ const AdCalculator = () => {
         )}
 
         <div className="flex justify-between mt-8">
-            <Button variant="outline" onClick={handleBack} disabled={currentStep === 1 && !isResultModalOpen}>
+            <Button variant="outline" onClick={handleBack} disabled={currentStep === 1}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Anterior
             </Button>
-            {currentStep < steps.length - 1 ? (
+            {currentStep < 4 ? (
                 <Button onClick={handleNext}>
                    Siguiente
                    <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
-            ) : currentStep === steps.length -1 && !showResults ? (
+            ) : currentStep === 4 ? (
                 <Button onClick={handleNext}>
                     Calcular Estimación
                     <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
-            ): null}
+            ) : null}
         </div>
       </CardContent>
 
@@ -474,7 +481,7 @@ const AdCalculator = () => {
             </div>
             <Button onClick={handleSendToWhatsapp} size="lg" className="w-full">
                 <WhatsappIcon className="w-5 h-5 mr-2" />
-                Enviar y Recibir Cotización
+                Enviar y Ver Mi Cotización
             </Button>
         </DialogContent>
       </Dialog>
@@ -483,7 +490,3 @@ const AdCalculator = () => {
 };
 
 export default AdCalculator;
-
-    
-
-    

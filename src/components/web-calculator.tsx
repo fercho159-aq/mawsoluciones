@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, ArrowRight, Briefcase, Bot, ShoppingCart, Send, Link as LinkIcon, Building, Palette, Sparkles, Redo, CircleDollarSign } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import WhatsappIcon from './icons/whatsapp-icon';
+import { cn } from '@/lib/utils';
 
 const webGoals = [
     { id: 'ecommerce', label: 'Vender productos directamente', icon: <ShoppingCart />, recommendation: 'Sitio E-commerce' },
@@ -44,6 +45,7 @@ const WebCalculator = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isResultModalOpen, setIsResultModalOpen] = useState(false);
   const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [showResults, setShowResults] = useState(false);
   const [formData, setFormData] = useState({
     companyName: '',
     personName: '',
@@ -51,6 +53,7 @@ const WebCalculator = () => {
     competitors: '',
     designStyle: 'minimalist',
     isRedesign: 'No',
+    currentWebsite: '',
     productRange: '1-20',
   });
   const [error, setError] = useState('');
@@ -105,17 +108,17 @@ const WebCalculator = () => {
 \n*Empresa:* ${formData.companyName}
 *Nombre:* ${formData.personName}
 *Tipo de Sitio Recomendado:* ${recommendation}
-${formData.mainGoal === 'ecommerce' ? `*Cantidad de Productos:* ${productRangeLabel}` : ''}
-*Precio Estimado Mostrado:* ${price.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+${formData.mainGoal === 'ecommerce' ? `*Cantidad de Productos:* ${productRangeLabel}\n` : ''}*Precio Estimado Mostrado:* ${price.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
 *¿Busca rediseño?:* ${formData.isRedesign}
-*Estilo de diseño preferido:* ${designStyleLabel}
+${formData.isRedesign === 'Sí' ? `*Sitio Actual:* ${formData.currentWebsite}\n` : ''}*Estilo de diseño preferido:* ${designStyleLabel}
 *Sitios de referencia:* 
 ${formData.competitors || 'No especificados'}
 \n*Mi número es:* ${whatsappNumber}
-    `;
+    `.trim().replace(/\n\s*\n/g, '\n'); // Remove empty lines
     const whatsappUrl = `https://wa.me/5542314150?text=${encodeURIComponent(message.trim())}`;
     window.open(whatsappUrl, '_blank');
     setIsResultModalOpen(false);
+    setShowResults(true);
   };
 
   const renderStep = () => {
@@ -206,6 +209,26 @@ ${formData.competitors || 'No especificados'}
                         </div>
                     </RadioGroup>
                 </div>
+
+                <AnimatePresence>
+                {formData.isRedesign === 'Sí' && (
+                    <motion.div 
+                        className="space-y-2"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <Label htmlFor="currentWebsite">URL de tu sitio web actual</Label>
+                        <Input 
+                            id="currentWebsite" 
+                            value={formData.currentWebsite} 
+                            onChange={(e) => setFormData({...formData, currentWebsite: e.target.value})} 
+                            placeholder="Ej. www.mi-sitio-actual.com" 
+                        />
+                    </motion.div>
+                )}
+                </AnimatePresence>
             </div>
         );
       case formData.mainGoal === 'ecommerce' ? 5 : 4:
@@ -227,26 +250,34 @@ ${formData.competitors || 'No especificados'}
         return (
             <div className="text-center py-8">
                 <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 20 }}>
-                    <div className="inline-block bg-primary/10 p-6 rounded-full mb-4">
-                        {recommendedGoal?.icon && React.cloneElement(recommendedGoal.icon, { className: "w-16 h-16 text-primary" })}
-                    </div>
-                    <p className="text-xl text-muted-foreground">Basado en tus respuestas, tu sitio ideal es un</p>
-                    <p className="text-5xl sm:text-6xl font-bold text-primary my-2">{recommendation}</p>
-                    <Card className="mt-6 text-left">
-                        <CardHeader>
-                            <CardTitle className='flex items-center gap-2'><CircleDollarSign /> Inversión Estimada</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                             <p className="text-2xl font-bold">
-                                {price.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
-                                {recommendation !== 'Sitio E-commerce' && <span className="text-lg font-normal text-muted-foreground ml-2">(desde)</span>}
-                             </p>
-                             <p className="text-foreground/80 mt-2">
-                                Un <strong>{recommendation}</strong> está diseñado específicamente para <strong>{recommendedGoal?.label.toLowerCase()}</strong>. Es la herramienta perfecta para alcanzar tus objetivos porque se centra en funcionalidades clave para ello.
-                             </p>
-                              <p className="text-xs text-muted-foreground mt-4">*Este es un precio estimado y puede variar según la complejidad final del proyecto.</p>
-                        </CardContent>
-                    </Card>
+                    {showResults ? (
+                        <>
+                         <div className="text-center mb-6">
+                            <h3 className="text-xl font-semibold">¡Hola, {formData.personName} de {formData.companyName}!</h3>
+                            <p className="text-muted-foreground">Gracias a tu información, aquí tienes tu recomendación personalizada.</p>
+                         </div>
+                        <div className="inline-block bg-primary/10 p-6 rounded-full mb-4">
+                            {recommendedGoal?.icon && React.cloneElement(recommendedGoal.icon, { className: "w-16 h-16 text-primary" })}
+                        </div>
+                        <p className="text-xl text-muted-foreground">Basado en tus respuestas, tu sitio ideal es un</p>
+                        <p className="text-5xl sm:text-6xl font-bold text-primary my-2">{recommendation}</p>
+                        <Card className="mt-6 text-left">
+                            <CardHeader>
+                                <CardTitle className='flex items-center gap-2'><CircleDollarSign /> Inversión Estimada</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-2xl font-bold">
+                                    {price.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+                                    {recommendation !== 'Sitio E-commerce' && <span className="text-lg font-normal text-muted-foreground ml-2">(desde)</span>}
+                                </p>
+                                <p className="text-foreground/80 mt-2">
+                                    Un <strong>{recommendation}</strong> está diseñado específicamente para <strong>{recommendedGoal?.label.toLowerCase()}</strong>. Es la herramienta perfecta para alcanzar tus objetivos porque se centra en funcionalidades clave para ello.
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-4">*Este es un precio estimado y puede variar según la complejidad final del proyecto.</p>
+                            </CardContent>
+                        </Card>
+                        </>
+                    ) : <div className="min-h-[300px] bg-background/50 backdrop-blur-sm" />}
                 </motion.div>
             </div>
         )
@@ -316,7 +347,7 @@ ${formData.competitors || 'No especificados'}
             </div>
             <Button onClick={handleSendToWhatsapp} size="lg" className="w-full">
                 <WhatsappIcon className="w-5 h-5 mr-2" />
-                Enviar y Recibir Recomendación
+                Enviar y Ver mi Recomendación
             </Button>
         </DialogContent>
       </Dialog>

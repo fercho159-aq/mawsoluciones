@@ -39,6 +39,7 @@ const AutomationCalculator = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isResultModalOpen, setIsResultModalOpen] = useState(false);
   const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [showResults, setShowResults] = useState(false);
   const [formData, setFormData] = useState({
     companyName: '',
     personName: '',
@@ -50,7 +51,6 @@ const AutomationCalculator = () => {
   const [error, setError] = useState('');
 
   const estimatedHoursSaved = useMemo(() => {
-    // Estimación simple: 1 min por mensaje + 50% de horas repetitivas
     const hoursFromMessages = (formData.dailyMessages * 1 * 30) / 60; // 1 min/msg
     const hoursFromTasks = (formData.repetitiveHours * 0.5 * 30);
     let goalsMultiplier = 1 + (formData.goals.length * 0.1);
@@ -109,10 +109,11 @@ const AutomationCalculator = () => {
 ${selectedGoalsText}
 *Ahorro de tiempo estimado:* ${estimatedHoursSaved} horas/mes
 \n*Mi número es:* ${whatsappNumber}
-    `;
+    `.trim();
     const whatsappUrl = `https://wa.me/5542314150?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
     setIsResultModalOpen(false);
+    setShowResults(true);
   };
 
   const renderStep = () => {
@@ -202,30 +203,38 @@ ${selectedGoalsText}
         return (
             <div className="text-center py-8">
                 <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 20 }}>
-                    <div className="inline-block bg-primary/10 p-6 rounded-full mb-4">
-                        <Clock className="w-16 h-16 text-primary" />
-                    </div>
-                    <p className="text-xl text-muted-foreground">Podrías ahorrar un estimado de</p>
-                    <p className="text-6xl sm:text-7xl font-bold text-primary my-2">{estimatedHoursSaved}</p>
-                    <p className="text-xl text-muted-foreground mb-6">horas al mes.</p>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Soluciones Recomendadas</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                             <ul className="text-left space-y-2">
-                                {formData.goals.map(goalId => {
-                                    const goal = automationGoals.find(g => g.id === goalId);
-                                    return (
-                                        <li key={goalId} className="flex items-center gap-2">
-                                            <ChevronRight className="w-5 h-5 text-primary"/> 
-                                            <span className='text-foreground/80'>{goal?.label}</span>
-                                        </li>
-                                    );
-                                })}
-                            </ul>
-                        </CardContent>
-                    </Card>
+                    {showResults ? (
+                        <>
+                            <div className="text-center mb-6">
+                                <h3 className="text-xl font-semibold">¡Hola, {formData.personName} de {formData.companyName}!</h3>
+                                <p className="text-muted-foreground">Gracias a tu información, aquí tienes tu diagnóstico personalizado.</p>
+                            </div>
+                            <div className="inline-block bg-primary/10 p-6 rounded-full mb-4">
+                                <Clock className="w-16 h-16 text-primary" />
+                            </div>
+                            <p className="text-xl text-muted-foreground">Podrías ahorrar un estimado de</p>
+                            <p className="text-6xl sm:text-7xl font-bold text-primary my-2">{estimatedHoursSaved}</p>
+                            <p className="text-xl text-muted-foreground mb-6">horas al mes.</p>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Soluciones Recomendadas</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <ul className="text-left space-y-2">
+                                        {formData.goals.map(goalId => {
+                                            const goal = automationGoals.find(g => g.id === goalId);
+                                            return (
+                                                <li key={goalId} className="flex items-center gap-2">
+                                                    <ChevronRight className="w-5 h-5 text-primary"/> 
+                                                    <span className='text-foreground/80'>{goal?.label}</span>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </CardContent>
+                            </Card>
+                        </>
+                    ) : <div className="min-h-[300px] bg-background/50 backdrop-blur-sm" />}
                 </motion.div>
             </div>
         )
@@ -295,7 +304,7 @@ ${selectedGoalsText}
             </div>
             <Button onClick={handleSendToWhatsapp} size="lg" className="w-full">
                 <WhatsappIcon className="w-5 h-5 mr-2" />
-                Enviar y Recibir Diagnóstico
+                Enviar y Ver mi Diagnóstico
             </Button>
         </DialogContent>
       </Dialog>
