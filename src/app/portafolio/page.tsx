@@ -16,6 +16,7 @@ import { portfolioItems, portfolioCategories, portfolioSectors } from "@/lib/por
 import { ArrowRight, Link as LinkIcon, Send, ShoppingCart } from "lucide-react";
 import AnimatedDiv from "@/components/animated-div";
 import React, { useState } from "react";
+import TypewriterTitle from "@/components/typewriter-title";
 
 const containerVariants = {
   hidden: {},
@@ -39,7 +40,7 @@ const itemVariants = {
 };
 
 const categoryIcons: { [key: string]: React.ReactNode } = {
-  "Ecomerce": <ShoppingCart className="w-4 h-4" />,
+  "E-commerce": <ShoppingCart className="w-4 h-4" />,
   "Connective": <LinkIcon className="w-4 h-4" />,
   "Landing": <Send className="w-4 h-4" />,
 };
@@ -56,21 +57,13 @@ const PortfolioPage = () => {
 
   return (
     <div className="bg-background">
-      <section className="py-24 sm:py-32 md:py-40 bg-card">
-        <div className="container mx-auto px-4 md:px-6 text-center">
-          <AnimatedDiv className="max-w-3xl mx-auto">
-            <h1 className="font-headline text-4xl sm:text-5xl md:text-6xl font-bold">
-              Nuestros Clientes
-            </h1>
-            <p className="mt-6 text-lg sm:text-xl text-foreground/80">
-              Explora algunos de nuestros proyectos más exitosos y ve el impacto de nuestro trabajo.
-            </p>
-          </AnimatedDiv>
-        </div>
-      </section>
-
       <section className="py-20 md:py-28">
         <div className="container mx-auto px-4 md:px-6">
+
+          <div className="mb-16">
+            <TypewriterTitle text="Sitios Web" />
+          </div>
+
           <AnimatedDiv>
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
               <div className="flex-1">
