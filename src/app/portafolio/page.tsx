@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { portfolioItems, portfolioCategories, portfolioSectors } from "@/lib/portfolio-data";
+import { portfolioItems, portfolioCategories, portfolioSectors, contentPortfolioItems } from "@/lib/portfolio-data";
 import { ArrowRight, Link as LinkIcon, Send, ShoppingCart, Briefcase, Building, Film, HeartHandshake, Utensils, Construction, Car, Flower, Hospital, Newspaper } from "lucide-react";
 import AnimatedDiv from "@/components/animated-div";
 import React, { useState } from "react";
@@ -60,11 +60,13 @@ const sectorIcons: { [key: string]: React.ReactNode } = {
     "Catalogo": <LinkIcon className="w-4 h-4" />,
     "Otros": <Briefcase className="w-4 h-4" />,
     "Ropa": <ShoppingCart className="w-4 h-4" />,
+    "Automotriz": <Car className="w-4 h-4" />,
 };
 
 const PortfolioPage = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>("Todos");
   const [sectorFilter, setSectorFilter] = useState<string>("Todos");
+  const [activeTab, setActiveTab] = useState("Sitios Web");
 
   const filteredItems = portfolioItems.filter(item => {
     const categoryMatch = categoryFilter === "Todos" || item.category === categoryFilter;
@@ -78,10 +80,10 @@ const PortfolioPage = () => {
         <div className="container mx-auto px-4 md:px-6">
 
           <div className="mb-16 text-center">
-            <TypewriterTitle text="Sitios Web" />
+            <TypewriterTitle key={activeTab} text={activeTab} />
           </div>
 
-          <Tabs defaultValue="websites" className="w-full">
+          <Tabs defaultValue="websites" className="w-full" onValueChange={(value) => setActiveTab(value === 'websites' ? 'Sitios Web' : 'Contenido')}>
             <AnimatedDiv>
               <div className="flex justify-center mb-8">
                 <TabsList>
@@ -178,9 +180,51 @@ const PortfolioPage = () => {
             </TabsContent>
             
             <TabsContent value="content">
-              <AnimatedDiv className="text-center py-16">
-                  <p className="text-lg text-foreground/80">La sección de portafolio de contenido estará disponible próximamente.</p>
-              </AnimatedDiv>
+              <AnimatedDiv
+                  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  {contentPortfolioItems.map(item => (
+                    <AnimatedDiv key={item.id} variants={itemVariants}>
+                      <Card className="overflow-hidden group flex flex-col h-full bg-card/50 hover:bg-card border-border/50 hover:border-border transition-all duration-300 ease-in-out transform hover:-translate-y-2 shadow-sm hover:shadow-2xl">
+                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="flex flex-col flex-grow">
+                          <CardContent className="p-0">
+                            <div className="relative aspect-video bg-muted">
+                              {item.image && (
+                                <Image
+                                  src={item.image.imageUrl}
+                                  alt={item.title}
+                                  fill
+                                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                  data-ai-hint={item.image.imageHint}
+                                />
+                              )}
+                            </div>
+                          </CardContent>
+                          <CardFooter className="p-4 flex flex-col items-start flex-grow">
+                            <Badge variant="secondary" className="mb-2">
+                              {item.type}
+                            </Badge>
+                            <h3 className="font-headline font-semibold text-md flex-grow">
+                              {item.title}
+                            </h3>
+                            <div className="flex items-center text-sm text-primary mt-4 self-start">
+                              Ver Contenido <ArrowRight className="w-4 h-4 ml-2" />
+                            </div>
+                          </CardFooter>
+                        </a>
+                      </Card>
+                    </AnimatedDiv>
+                  ))}
+                </AnimatedDiv>
+                {contentPortfolioItems.length === 0 && (
+                   <AnimatedDiv className="text-center py-16">
+                    <p className="text-lg text-foreground/80">La sección de portafolio de contenido estará disponible próximamente.</p>
+                  </AnimatedDiv>
+                )}
             </TabsContent>
           </Tabs>
 
@@ -191,5 +235,3 @@ const PortfolioPage = () => {
 };
 
 export default PortfolioPage;
-
-    

@@ -18,6 +18,15 @@ export type PortfolioItemType = {
   };
 };
 
+export type ContentPortfolioItemType = {
+  id: string;
+  title: string;
+  type: "Reel" | "Campaña de Fotos" | "Video Corporativo";
+  client: string;
+  image: ImagePlaceholder;
+  url: string;
+};
+
 const placeholderImages = [
   PlaceHolderImages.find(img => img.id === 'portfolio-web-ficc'),
   PlaceHolderImages.find(img => img.id === 'portfolio-web-dfac'),
@@ -31,6 +40,18 @@ const getNextImage = () => {
   imageCounter = (imageCounter + 1) % placeholderImages.length;
   return image;
 }
+
+export const contentPortfolioItems: ContentPortfolioItemType[] = [
+  {
+    id: "content-1",
+    title: "Campaña de Lanzamiento para Buffalo Ribs",
+    type: "Reel",
+    client: "Buffalo Ribs",
+    image: PlaceHolderImages.find(img => img.id === 'portfolio-content-1')!,
+    url: "https://www.instagram.com/p/C6Z0X3zP_1D/?img_index=1",
+  },
+];
+
 
 export const portfolioItems: PortfolioItemType[] = [
   {
@@ -550,7 +571,7 @@ export const portfolioItems: PortfolioItemType[] = [
     "image": getNextImage(),
     "description": "Sitio para empresa de soluciones empresariales.",
     "challenge": "Articular un portafolio de servicios diverso bajo una marca unificada.",
-    "solution": "Una arquitectura de información clara que guía a cada tipo de cliente a la solución que necesita, con casos de estudio relevantes.",
+    "solution": "Una arquitectura de información clara que guía a cada tipo de cliente a la solución que necesita, con páginas de aterrizaje específicas para cada uno.",
     "services": ["Diseño y Desarrollo Web", "Arquitectura de la Información"]
   },
   {
@@ -583,7 +604,7 @@ export const portfolioItems: PortfolioItemType[] = [
     "id": "polarautopartes-com",
     "title": "Polar Autopartes",
     "category": "E-commerce",
-    "sector": "Sector industrial",
+    "sector": "Automotriz",
     "website": "https://www.polarautopartes.com/",
     "client": "Polar Autopartes",
     "image": getNextImage(),
@@ -596,7 +617,7 @@ export const portfolioItems: PortfolioItemType[] = [
     "id": "core31-com-mx",
     "title": "CORE 31",
     "category": "Connective",
-    "sector": "Inmobiliaria",
+    "sector": "Actividades recreativas",
     "website": "https://core31.com.mx",
     "client": "CORE 31",
     "image": getNextImage(),
@@ -934,5 +955,3 @@ export const portfolioItems: PortfolioItemType[] = [
 
 export const portfolioCategories = Array.from(new Set(portfolioItems.map(item => item.category)));
 export const portfolioSectors = Array.from(new Set(portfolioItems.map(item => item.sector)));
-
-    
