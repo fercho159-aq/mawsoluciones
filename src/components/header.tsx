@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Logo from "./logo";
-import { ThemeToggle } from "./theme-toggle";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -166,7 +165,7 @@ const Header = () => {
         </NavigationMenu>
 
         <div className="hidden md:flex items-center gap-2">
-          <ThemeToggle />
+          
           <Button asChild>
             <Link href="/contacto">Reservar Sesión</Link>
           </Button>
@@ -174,7 +173,7 @@ const Header = () => {
 
         {/* Mobile Navigation */}
         <div className="md:hidden flex items-center gap-2">
-          <ThemeToggle />
+          
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
