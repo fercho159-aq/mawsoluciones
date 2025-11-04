@@ -89,7 +89,7 @@ export const portfolioItems: PortfolioItemType[] = [
   {
     "id": "ixagaleather-com-mx",
     "title": "Ixaga Leather",
-    "category": "Ecomerce",
+    "category": "E-commerce",
     "sector": "Ropa y Calzado",
     "website": "https://ixagaleather.com.mx",
     "client": "Ixaga Leather",
@@ -115,7 +115,7 @@ export const portfolioItems: PortfolioItemType[] = [
   {
     "id": "epicrides-com-mx",
     "title": "Epic Rides",
-    "category": "Ecomerce",
+    "category": "E-commerce",
     "sector": "Eventos",
     "website": "https://epicrides.com.mx",
     "client": "Epic Rides",
@@ -180,7 +180,7 @@ export const portfolioItems: PortfolioItemType[] = [
   {
     "id": "laminadeoro-com",
     "title": "Lámina de Oro",
-    "category": "Ecomerce",
+    "category": "E-commerce",
     "sector": "Otros",
     "website": "https://laminadeoro.com",
     "client": "Lámina de Oro",
@@ -193,7 +193,7 @@ export const portfolioItems: PortfolioItemType[] = [
   {
     "id": "cenotesanisidro-com",
     "title": "Cenote San Isidro",
-    "category": "Ecomerce",
+    "category": "E-commerce",
     "sector": "Actividades recreativas",
     "website": "https://cenotesanisidro.com",
     "client": "Cenote San Isidro",
@@ -271,7 +271,7 @@ export const portfolioItems: PortfolioItemType[] = [
   {
     "id": "plantforst-com",
     "title": "Plantforst",
-    "category": "Ecomerce",
+    "category": "E-commerce",
     "sector": "Otros",
     "website": "https://plantforst.com",
     "client": "Plantforst",
@@ -284,7 +284,7 @@ export const portfolioItems: PortfolioItemType[] = [
   {
     "id": "lasdeliciasdelcampo-com",
     "title": "Las Delicias del Campo",
-    "category": "Ecomerce",
+    "category": "E-commerce",
     "sector": "Restaurante",
     "website": "https://lasdeliciasdelcampo.com",
     "client": "Las Delicias del Campo",
@@ -375,7 +375,7 @@ export const portfolioItems: PortfolioItemType[] = [
   {
     "id": "suministroshebe-com",
     "title": "Suministros Hebe",
-    "category": "Ecomerce",
+    "category": "E-commerce",
     "sector": "Sector industrial",
     "website": "https://suministroshebe.com",
     "client": "Suministros Hebe",
@@ -414,7 +414,7 @@ export const portfolioItems: PortfolioItemType[] = [
   {
     "id": "traktobuss-com",
     "title": "Traktobuss",
-    "category": "Ecomerce",
+    "category": "E-commerce",
     "sector": "Sector industrial",
     "website": "https://traktobuss.com",
     "client": "Traktobuss",
@@ -440,7 +440,7 @@ export const portfolioItems: PortfolioItemType[] = [
   {
     "id": "elconejo-com-mx",
     "title": "El Conejo",
-    "category": "Ecomerce",
+    "category": "E-commerce",
     "sector": "Sector industrial",
     "website": "https://elconejo.com.mx",
     "client": "El Conejo",
@@ -570,7 +570,7 @@ export const portfolioItems: PortfolioItemType[] = [
   {
     "id": "polarautopartes-com",
     "title": "Polar Autopartes",
-    "category": "Ecomerce",
+    "category": "E-commerce",
     "sector": "Sector industrial",
     "website": "https://www.polarautopartes.com/",
     "client": "Polar Autopartes",
@@ -596,7 +596,7 @@ export const portfolioItems: PortfolioItemType[] = [
   {
     "id": "concamin-comenor-org-mx",
     "title": "Concamin Comenor",
-    "category": "Ecomerce",
+    "category": "E-commerce",
     "sector": "Servicios Profesionales",
     "website": "https://concamin.comenor.org.mx/",
     "client": "Concamin Comenor",
@@ -648,7 +648,7 @@ export const portfolioItems: PortfolioItemType[] = [
   {
     "id": "jazaguilar-com",
     "title": "Jaz Aguilar",
-    "category": "Ecomerce",
+    "category": "E-commerce",
     "sector": "Sector industrial",
     "website": "https://jazaguilar.com",
     "client": "Jaz Aguilar",
@@ -687,7 +687,7 @@ export const portfolioItems: PortfolioItemType[] = [
   {
     "id": "abevolks-com",
     "title": "Abe Volks",
-    "category": "Ecomerce",
+    "category": "E-commerce",
     "sector": "Sector industrial",
     "website": "https://abevolks.com",
     "client": "Abe Volks",
@@ -817,7 +817,7 @@ export const portfolioItems: PortfolioItemType[] = [
   {
     "id": "epidemic-mx",
     "title": "Epidemic",
-    "category": "Ecommerce",
+    "category": "E-commerce",
     "sector": "Ropa",
     "website": "https://epidemic.mx/",
     "client": "Epidemic",
@@ -908,7 +908,7 @@ export const portfolioItems: PortfolioItemType[] = [
   {
     "id": "cucubecerra-com",
     "title": "Cucu Becerra",
-    "category": "Ecommerce",
+    "category": "E-commerce",
     "sector": "Ropa",
     "website": "https://cucubecerra.com/",
     "client": "Cucu Becerra",
@@ -922,3 +922,6 @@ export const portfolioItems: PortfolioItemType[] = [
 
 export const portfolioCategories = Array.from(new Set(portfolioItems.map(item => item.category)));
 export const portfolioSectors = Array.from(new Set(portfolioItems.map(item => item.sector)));
+
+
+    
