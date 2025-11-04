@@ -15,13 +15,13 @@ const services = [
     icon: <PenSquare className="w-10 h-10 text-primary" />,
     title: "Contenido",
     description: "Creamos contenido atractivo y de alta calidad que resuena con tu audiencia y fortalece tu marca.",
-    href: "/servicios/contenido"
+    href: "/servicios/creacion-de-contenido"
   },
   {
     icon: <Megaphone className="w-10 h-10 text-primary" />,
     title: "Ads",
     description: "Planificamos, ejecutamos y medimos campañas publicitarias para maximizar tu retorno de inversión (ROI).",
-    href: "/servicios/ads"
+    href: "/servicios/gestion-de-campanas"
   },
   {
     icon: <Bot className="w-10 h-10 text-primary" />,
@@ -66,7 +66,7 @@ const Services = () => {
           </p>
         </AnimatedDiv>
         <AnimatedDiv
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto"
           variants={containerVariants}
         >
           {services.map((service, index) => (
@@ -87,15 +87,11 @@ const Services = () => {
               </Link>
             </AnimatedDiv>
           ))}
-           <AnimatedDiv variants={itemVariants}>
-              <div className="h-full flex flex-col bg-card/50 border-border/50 rounded-lg p-8 items-center justify-center text-center">
-                    <h3 className="font-headline text-2xl mb-3">¿Aún no te decides?</h3>
-                    <p className="flex-grow text-base text-foreground/70 mb-6">Explora todos nuestros servicios en detalle y encuentra la solución perfecta para tu negocio.</p>
-                    <Button className="w-full" asChild>
-                      <Link href="/servicios">Ver todos los servicios</Link>
-                    </Button>
-              </div>
-            </AnimatedDiv>
+        </AnimatedDiv>
+        <AnimatedDiv className="text-center mt-16">
+            <Button className="w-full sm:w-auto" asChild size="lg">
+              <Link href="/servicios">Ver todos los servicios</Link>
+            </Button>
         </AnimatedDiv>
       </div>
     </section>

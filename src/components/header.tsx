@@ -27,7 +27,7 @@ import {
 
 const servicesLinks = [
   { 
-    href: "/servicios/sitios-web", 
+    href: "/servicios/desarrollo-web", 
     label: "Sitios Web",
     description: "Diseñamos y desarrollamos sitios web modernos, rápidos y optimizados para la conversión.",
     icon: <CodeXml className="w-5 h-5" />
@@ -133,25 +133,11 @@ const Header = () => {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuTrigger>Nuestros clientes</NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <ul className="grid w-[300px] gap-3 p-4">
-                  <ListItem
-                    href="/portafolio"
-                    title="Sitios Web"
-                    icon={<CodeXml className="w-5 h-5" />}
-                  >
-                    Proyectos de desarrollo y diseño web.
-                  </ListItem>
-                  <ListItem
-                    href="/portafolio" // TODO: Change to content portfolio page
-                    title="Contenido"
-                    icon={<PenSquare className="w-5 h-5" />}
-                  >
-                    Ejemplos de creación y estrategia de contenido.
-                  </ListItem>
-                </ul>
-              </NavigationMenuContent>
+              <Link href="/portafolio" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Nuestros clientes
+                  </NavigationMenuLink>
+              </Link>
             </NavigationMenuItem>
             
             {navLinks.map((link) => (
@@ -215,22 +201,10 @@ const Header = () => {
                         </div>
                       </AccordionContent>
                     </AccordionItem>
-                    <AccordionItem value="item-2" className="border-b-0">
-                      <AccordionTrigger className="text-lg font-medium py-2 hover:no-underline">
-                        Nuestros clientes
-                      </AccordionTrigger>
-                      <AccordionContent className="pl-4">
-                        <div className="flex flex-col gap-4 pt-2">
-                          <Link href="/portafolio" className="text-base font-medium text-foreground/80" onClick={() => setIsMobileMenuOpen(false)}>
-                            Sitios Web
-                          </Link>
-                          <Link href="/portafolio" className="text-base font-medium text-foreground/80" onClick={() => setIsMobileMenuOpen(false)}>
-                            Contenido
-                          </Link>
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
                   </Accordion>
+                  <Link href="/portafolio" className="text-lg font-medium px-4 py-2" onClick={() => setIsMobileMenuOpen(false)}>
+                    Nuestros clientes
+                  </Link>
                   {navLinks.map((link) => (
                     <Link
                       key={link.href}

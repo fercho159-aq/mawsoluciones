@@ -19,21 +19,21 @@ const services: Service[] = [
     title: 'Creación de Contenido',
     description:
       'Creamos contenido atractivo, relevante y de alta calidad que resuena con tu audiencia. Desde artículos de blog optimizados para SEO y guiones para redes sociales hasta la gestión completa de tus perfiles, nuestro contenido está diseñado para fortalecer tu marca, construir una comunidad y generar resultados medibles que impulsen tu negocio.',
-    href: '/servicios/contenido',
+    href: '/servicios/creacion-de-contenido',
     image: PlaceHolderImages.find(img => img.id === 'service-content-creation'),
   },
   {
     title: 'Desarrollo Web',
     description:
       'Diseñamos y desarrollamos sitios web modernos, rápidos y optimizados para la conversión que actúan como el centro de tu ecosistema digital. Creamos experiencias de usuario intuitivas y atractivas que no solo se ven increíbles, sino que también funcionan como una poderosa herramienta de marketing y ventas para tu negocio.',
-    href: '/servicios/sitios-web',
+    href: '/servicios/desarrollo-web',
     image: PlaceHolderImages.find(img => img.id === 'service-web-development'),
   },
   {
     title: 'Gestión de Campañas',
     description:
       'Planificamos, ejecutamos y medimos campañas publicitarias en plataformas clave como Google Ads y redes sociales para maximizar tu retorno de inversión (ROI). A través de un enfoque basado en datos, atraemos a tu público objetivo y alcanzamos tus metas comerciales con estrategias precisas y optimizadas continuamente.',
-    href: '/servicios/ads',
+    href: '/servicios/gestion-de-campanas',
     image: PlaceHolderImages.find(img => img.id === 'service-campaigns'),
   },
   {
