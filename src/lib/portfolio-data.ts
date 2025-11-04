@@ -24,7 +24,7 @@ export type ContentPortfolioItemType = {
   type: "Reel" | "Campaña de Fotos" | "Video Corporativo";
   sector: string;
   client: string;
-  image: ImagePlaceholder;
+  image?: ImagePlaceholder;
   url: string;
 };
 
@@ -49,7 +49,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Campaña de Fotos",
     "sector": "Salud",
     "client": "Biofert",
-    "image": PlaceHolderImages.find(img => img.id === 'content-salud-1')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-salud-1'),
     "url": "https://www.instagram.com/biofert_/"
   },
   {
@@ -58,7 +58,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Salud",
     "client": "Centro Urológico",
-    "image": PlaceHolderImages.find(img => img.id === 'content-salud-2')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-salud-2'),
     "url": "https://www.instagram.com/centrourologico"
   },
   {
@@ -67,7 +67,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Salud",
     "client": "Huesos y Articulaciones",
-    "image": PlaceHolderImages.find(img => img.id === 'content-salud-3')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-salud-3'),
     "url": "https://www.facebook.com/HuesosyArticulaciones"
   },
   {
@@ -76,7 +76,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Campaña de Fotos",
     "sector": "Salud",
     "client": "Grupo Deasa",
-    "image": PlaceHolderImages.find(img => img.id === 'content-salud-4')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-salud-4'),
     "url": "https://www.facebook.com/grupodeasaoficial?locale=es_LA"
   },
   {
@@ -85,7 +85,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Salud",
     "client": "Medical Tower",
-    "image": PlaceHolderImages.find(img => img.id === 'content-salud-5')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-salud-5'),
     "url": "https://www.tiktok.com/@mit.medical.tower"
   },
   {
@@ -94,7 +94,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Campaña de Fotos",
     "sector": "Salud",
     "client": "Technosim",
-    "image": PlaceHolderImages.find(img => img.id === 'content-salud-6')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-salud-6'),
     "url": "https://www.facebook.com/profile.php?id=61578682690139"
   },
   {
@@ -103,7 +103,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Turismo",
     "client": "NIU Coliving",
-    "image": PlaceHolderImages.find(img => img.id === 'content-turismo-1')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-turismo-1'),
     "url": "https://www.instagram.com/niu_coliving/"
   },
   {
@@ -112,7 +112,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Turismo",
     "client": "Cenote San Isidro",
-    "image": PlaceHolderImages.find(img => img.id === 'content-turismo-2')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-turismo-2'),
     "url": "https://www.facebook.com/profile.php?id=61572579834917"
   },
   {
@@ -121,7 +121,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Restaurantes",
     "client": "Saudade do Brazil",
-    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-1')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-1'),
     "url": "https://www.instagram.com/saudadedobrazil.mx/"
   },
   {
@@ -130,7 +130,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Restaurantes",
     "client": "Polanco Santino",
-    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-2')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-2'),
     "url": "https://www.instagram.com/polancosantino/?hl=es"
   },
   {
@@ -139,7 +139,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Restaurantes",
     "client": "Santa Carne y Más",
-    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-3')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-3'),
     "url": "https://www.facebook.com/santacarneymas/reels/"
   },
   {
@@ -148,7 +148,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Restaurantes",
     "client": "Don José Steakhouse",
-    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-4')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-4'),
     "url": "https://www.instagram.com/donjosesteakhouse/"
   },
   {
@@ -157,7 +157,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Campaña de Fotos",
     "sector": "Restaurantes",
     "client": "Las Delicias del Campo",
-    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-5')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-5'),
     "url": "https://www.instagram.com/lasdeliciasdelcampomexico/"
   },
   {
@@ -166,7 +166,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Restaurantes",
     "client": "Wapas",
-    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-6')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-6'),
     "url": "https://www.tiktok.com/@laswapas_oficial"
   },
   {
@@ -175,7 +175,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Campaña de Fotos",
     "sector": "Restaurantes",
     "client": "Paolo Gourmet",
-    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-7')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-7'),
     "url": "https://www.facebook.com/profile.php?id=61578410386269"
   },
   {
@@ -184,7 +184,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Restaurantes",
     "client": "Buffalo Ribs",
-    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-8')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-restaurante-8'),
     "url": "https://www.tiktok.com/@buffalo_ribs_"
   },
   {
@@ -193,7 +193,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Campaña de Fotos",
     "sector": "Industrial",
     "client": "Electrica San Miguel de México",
-    "image": PlaceHolderImages.find(img => img.id === 'content-industrial-1')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-industrial-1'),
     "url": "https://www.facebook.com/electricasanmigueldemexico/?locale=es_LA"
   },
   {
@@ -202,7 +202,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Software",
     "client": "SiNube",
-    "image": PlaceHolderImages.find(img => img.id === 'content-software-1')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-software-1'),
     "url": "https://www.facebook.com/sinube?locale=es_LA"
   },
   {
@@ -211,7 +211,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Industrial",
     "client": "Gruas y Polipastos",
-    "image": PlaceHolderImages.find(img => img.id === 'content-industrial-2')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-industrial-2'),
     "url": "https://www.instagram.com/gruasypolipastos"
   },
   {
@@ -220,7 +220,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Campaña de Fotos",
     "sector": "Industrial",
     "client": "DFAC",
-    "image": PlaceHolderImages.find(img => img.id === 'content-industrial-3')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-industrial-3'),
     "url": "https://www.facebook.com/bandasdepvcymonosparacimbra"
   },
   {
@@ -229,7 +229,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Campaña de Fotos",
     "sector": "Industrial",
     "client": "Turismar",
-    "image": PlaceHolderImages.find(img => img.id === 'content-industrial-4')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-industrial-4'),
     "url": "https://www.facebook.com/rentaturismar"
   },
   {
@@ -238,7 +238,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Campaña de Fotos",
     "sector": "Industrial",
     "client": "Maqtech",
-    "image": PlaceHolderImages.find(img => img.id === 'content-industrial-5')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-industrial-5'),
     "url": "https://www.facebook.com/profile.php?id=61570233765991"
   },
   {
@@ -247,7 +247,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Influencers",
     "client": "Dra. Karen Carrillo",
-    "image": PlaceHolderImages.find(img => img.id === 'content-influencer-1')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-influencer-1'),
     "url": "https://www.instagram.com/drakarencarrillo/"
   },
   {
@@ -256,7 +256,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Influencers",
     "client": "Ricardo Garza",
-    "image": PlaceHolderImages.find(img => img.id === 'content-influencer-2')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-influencer-2'),
     "url": "https://www.instagram.com/ricardogarzamx/?hl=es"
   },
   {
@@ -265,7 +265,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Influencers",
     "client": "Haide Unique",
-    "image": PlaceHolderImages.find(img => img.id === 'content-influencer-3')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-influencer-3'),
     "url": "https://www.instagram.com/haideuniquemx/"
   },
   {
@@ -274,7 +274,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Influencers",
     "client": "Nizmenur",
-    "image": PlaceHolderImages.find(img => img.id === 'content-influencer-4')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-influencer-4'),
     "url": "https://www.instagram.com/nizmenur/?hl=es-la"
   },
   {
@@ -283,7 +283,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Influencers",
     "client": "Gi Alpine",
-    "image": PlaceHolderImages.find(img => img.id === 'content-influencer-5')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-influencer-5'),
     "url": "https://www.instagram.com/gi.alpine?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
   },
   {
@@ -292,7 +292,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Campaña de Fotos",
     "sector": "Servicios Profesionales",
     "client": "DC Solutions TI",
-    "image": PlaceHolderImages.find(img => img.id === 'content-servicios-1')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-servicios-1'),
     "url": "https://www.facebook.com/dcsolutionsTI"
   },
   {
@@ -301,7 +301,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Servicios Profesionales",
     "client": "Benjamin JV",
-    "image": PlaceHolderImages.find(img => img.id === 'content-servicios-2')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-servicios-2'),
     "url": "https://www.instagram.com/benjamin_jv/"
   },
   {
@@ -310,7 +310,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Campaña de Fotos",
     "sector": "Servicios Profesionales",
     "client": "Consultoría Luz Sistémica",
-    "image": PlaceHolderImages.find(img => img.id === 'content-servicios-3')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-servicios-3'),
     "url": "https://www.facebook.com/ConsultoriaLuzSistemica/"
   },
   {
@@ -319,7 +319,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Campaña de Fotos",
     "sector": "Servicios Profesionales",
     "client": "CAF Consultores",
-    "image": PlaceHolderImages.find(img => img.id === 'content-servicios-4')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-servicios-4'),
     "url": "https://www.facebook.com/consultorescafmx"
   },
   {
@@ -328,7 +328,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Campaña de Fotos",
     "sector": "Ropa",
     "client": "Epidemic",
-    "image": PlaceHolderImages.find(img => img.id === 'content-ropa-1')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-ropa-1'),
     "url": "https://www.facebook.com/profile.php?id=61579397999096"
   },
   {
@@ -337,7 +337,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Ropa",
     "client": "Agel Dori",
-    "image": PlaceHolderImages.find(img => img.id === 'content-ropa-2')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-ropa-2'),
     "url": "https://www.instagram.com/angeldori_deseo_interior?igsh=enlwaWNrdWNjb2Qw"
   },
   {
@@ -346,7 +346,7 @@ export const contentPortfolioItems: ContentPortfolioItemType[] = [
     "type": "Reel",
     "sector": "Ropa",
     "client": "Cucu Becerra",
-    "image": PlaceHolderImages.find(img => img.id === 'content-ropa-3')!,
+    "image": PlaceHolderImages.find(img => img.id === 'content-ropa-3'),
     "url": "https://www.instagram.com/cucubecerra_mx?igsh=NzZxcWRkeHp4NjQx"
   }
 ];
@@ -409,7 +409,7 @@ export const portfolioItems: PortfolioItemType[] = [
     "id": "ixagaleather-com-mx",
     "title": "Ixaga Leather",
     "category": "E-commerce",
-    "sector": "Ropa y Calzado",
+    "sector": "Ropa y Moda",
     "website": "https://ixagaleather.com.mx",
     "client": "Ixaga Leather",
     "image": getNextImage(),
@@ -1150,7 +1150,7 @@ export const portfolioItems: PortfolioItemType[] = [
     "id": "epidemic-mx",
     "title": "Epidemic",
     "category": "E-commerce",
-    "sector": "Ropa",
+    "sector": "Ropa y Moda",
     "website": "https://epidemic.mx/",
     "client": "Epidemic",
     "image": getNextImage(),
@@ -1241,18 +1241,16 @@ export const portfolioItems: PortfolioItemType[] = [
     "id": "cucubecerra-com",
     "title": "Cucu Becerra",
     "category": "E-commerce",
-    "sector": "Ropa",
+    "sector": "Ropa y Moda",
     "website": "https://cucubecerra.com/",
     "client": "Cucu Becerra",
     "image": getNextImage(),
-    "description": "E-commerce para marca de ropa.",
-    "challenge": "Crear una experiencia de compra online que refleje la calidad de la marca.",
-    "solution": "Una tienda online con un diseño limpio, fotografía de alta calidad y una experiencia de checkout optimizada.",
-    "services": ["Desarrollo de E-commerce", "Optimización de la Conversión (CRO)"]
+    "description": "E-commerce para marca de ropa de diseñador.",
+    "challenge": "Crear una experiencia de compra online que refleje la exclusividad y calidad de la marca.",
+    "solution": "Una tienda online con un diseño limpio y elegante, fotografía de alta calidad y una experiencia de checkout optimizada y sencilla.",
+    "services": ["Desarrollo de E-commerce", "Optimización de la Conversión (CRO)", "Fotografía de Producto"]
   }
 ];
 
 export const portfolioCategories = Array.from(new Set(portfolioItems.map(item => item.category)));
 export const portfolioSectors = Array.from(new Set(portfolioItems.map(item => item.sector)));
-
-    

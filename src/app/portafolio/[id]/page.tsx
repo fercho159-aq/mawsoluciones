@@ -3,9 +3,13 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle2, ExternalLink, Mail, MessageSquare } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ExternalLink, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import WhatsappIcon from "@/components/icons/whatsapp-icon";
+import AnimatedDiv from "@/components/animated-div";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+
 
 export default function PortfolioItemPage({
   params,
@@ -17,6 +21,10 @@ export default function PortfolioItemPage({
   if (!item) {
     notFound();
   }
+
+  const similarProjects = portfolioItems
+    .filter(p => p.id !== item.id && p.category === item.category)
+    .slice(0, 4);
 
   const whatsappNumber = "5542314150";
   const whatsappMessage = `Hola, estoy interesado en cotizar un sitio web similar a '${item.title}'. ¿Podemos hablar?`;
@@ -116,6 +124,59 @@ export default function PortfolioItemPage({
           </div>
         </div>
       </section>
+
+      {similarProjects.length > 0 && (
+        <section className="py-20 md:py-28 border-t bg-card">
+          <div className="container mx-auto px-4 md:px-6">
+            <AnimatedDiv className="text-center mb-16">
+              <h2 className="font-headline text-3xl sm:text-4xl font-bold">Más proyectos similares</h2>
+            </AnimatedDiv>
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              className="w-full max-w-5xl mx-auto"
+            >
+              <CarouselContent>
+                {similarProjects.map((project) => (
+                  <CarouselItem key={project.id} className="md:basis-1/2 lg:basis-1/3">
+                    <div className="p-1 h-full">
+                       <Card className="overflow-hidden group flex flex-col h-full bg-card/50 hover:bg-card border-border/50 hover:border-border transition-all duration-300 ease-in-out transform hover:-translate-y-2 shadow-sm hover:shadow-2xl">
+                          <Link href={`/portafolio/${project.id}`} className="flex flex-col flex-grow">
+                              <CardContent className="p-0">
+                              <div className="relative aspect-video">
+                                  {project.image && (
+                                  <Image
+                                      src={project.image.imageUrl}
+                                      alt={project.title}
+                                      fill
+                                      sizes="(max-width: 640px) 100vw, 50vw"
+                                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                      data-ai-hint={project.image.imageHint}
+                                  />
+                                  )}
+                              </div>
+                              </CardContent>
+                              <CardFooter className="p-4 flex flex-col items-start flex-grow">
+                              <Badge variant="secondary" className="mb-2">{project.category}</Badge>
+                              <h3 className="font-headline font-semibold text-lg flex-grow">{project.title}</h3>
+                              <div className="flex items-center text-sm text-primary mt-4 self-start">
+                                  Ver Proyecto <ArrowRight className="w-4 h-4 ml-2" />
+                              </div>
+                              </CardFooter>
+                          </Link>
+                        </Card>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="hidden sm:flex" />
+              <CarouselNext className="hidden sm:flex" />
+            </Carousel>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
