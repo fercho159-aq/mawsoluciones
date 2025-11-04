@@ -54,7 +54,6 @@ const servicesLinks = [
 ];
 
 const navLinks = [
-  { href: "/portafolio", label: "Nuestros clientes" },
   { href: "/blog", label: "Blog" },
   { href: "/contacto", label: "Contacto" },
 ];
@@ -107,7 +106,7 @@ const Header = () => {
         "sticky top-0 z-50 w-full transition-colors duration-300 ease-in-out",
         isScrolled
           ? "bg-background/80 backdrop-blur-lg border-b border-border/20 shadow-sm"
-          : "bg-card"
+          : "bg-background"
       )}
     >
       <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
@@ -133,6 +132,27 @@ const Header = () => {
                 </ul>
               </NavigationMenuContent>
             </NavigationMenuItem>
+
+            <NavigationMenuItem>
+              <NavigationMenuTrigger>Nuestros clientes</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="grid w-[300px] gap-3 p-4">
+                  <ListItem
+                    href="/portafolio"
+                    title="Sitios Web"
+                  >
+                    Proyectos de desarrollo y diseño web.
+                  </ListItem>
+                  <ListItem
+                    href="/portafolio" // TODO: Change to content portfolio page
+                    title="Contenido"
+                  >
+                    Ejemplos de creación y estrategia de contenido.
+                  </ListItem>
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+            
             {navLinks.map((link) => (
               <NavigationMenuItem key={link.href}>
                 <Link href={link.href} legacyBehavior passHref>
@@ -191,6 +211,21 @@ const Header = () => {
                               {link.label}
                             </Link>
                           ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="item-2" className="border-b-0">
+                      <AccordionTrigger className="text-lg font-medium py-2 hover:no-underline">
+                        Nuestros clientes
+                      </AccordionTrigger>
+                      <AccordionContent className="pl-4">
+                        <div className="flex flex-col gap-4 pt-2">
+                          <Link href="/portafolio" className="text-base font-medium text-foreground/80" onClick={() => setIsMobileMenuOpen(false)}>
+                            Sitios Web
+                          </Link>
+                          <Link href="/portafolio" className="text-base font-medium text-foreground/80" onClick={() => setIsMobileMenuOpen(false)}>
+                            Contenido
+                          </Link>
                         </div>
                       </AccordionContent>
                     </AccordionItem>
