@@ -3,6 +3,7 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import ParallaxImages from "@/components/sections/parallax-images";
 import Link from "next/link";
+import WebCalculator from "@/components/web-calculator";
 
 const ServicePage = () => {
   return (
@@ -20,6 +21,18 @@ const ServicePage = () => {
         </div>
       </section>
       
+      <section className="py-20 md:py-28 bg-background">
+        <div className="container mx-auto px-4 md:px-6">
+           <div className="max-w-3xl mx-auto text-center mb-12">
+            <h2 className="font-headline text-3xl sm:text-4xl font-bold">Descubre tu Sitio Web Ideal</h2>
+            <p className="mt-4 text-lg text-foreground/80">
+              Responde unas breves preguntas y obtén una recomendación sobre el tipo de sitio web perfecto para tu negocio.
+            </p>
+          </div>
+          <WebCalculator />
+        </div>
+      </section>
+
       <ParallaxImages 
         laptopImage="/images/desarrollo web/2.png"
         phoneImage="/images/desarrollo web/4.png"
