@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, ArrowRight, Briefcase, Bot, ShoppingCart, Send, Link as LinkIcon, Building } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Briefcase, Bot, ShoppingCart, Send, Link as LinkIcon, Building, Palette, Sparkles, Redo } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import WhatsappIcon from './icons/whatsapp-icon';
 
@@ -21,11 +21,18 @@ const webGoals = [
     { id: 'catalog', label: 'Mostrar un catálogo (sin venta directa)', icon: <Briefcase />, recommendation: 'Sitio de Catálogo' },
 ];
 
+const designStyles = [
+    { id: 'minimalist', label: 'Minimalista', icon: <div className="w-6 h-6 border-2 border-primary rounded-full"></div> },
+    { id: 'bold', label: 'Colores Fuertes / Gen Z', icon: <Palette /> },
+    { id: 'animated', label: 'Animado', icon: <Sparkles /> },
+];
+
 const steps = [
   { id: 1, title: 'Tu Negocio', description: 'Cuéntanos sobre tu proyecto.' },
   { id: 2, 'title': 'Tu Objetivo Principal', description: '¿Qué quieres lograr con tu sitio web?' },
-  { id: 3, title: 'Inspiración', description: 'Ayúdanos a entender tu visión.' },
-  { id: 4, title: 'Recomendación', description: 'Tu tipo de sitio web ideal.' }
+  { id: 3, title: 'Estilo y Diseño', description: 'Define la apariencia que buscas.' },
+  { id: 4, title: 'Inspiración', description: 'Ayúdanos a entender tu visión.' },
+  { id: 5, title: 'Recomendación', description: 'Tu tipo de sitio web ideal.' }
 ];
 
 const WebCalculator = () => {
@@ -36,7 +43,9 @@ const WebCalculator = () => {
     companyName: '',
     personName: '',
     mainGoal: 'connective',
-    competitors: ''
+    competitors: '',
+    designStyle: 'minimalist',
+    isRedesign: 'No',
   });
   const [error, setError] = useState('');
 
@@ -66,11 +75,14 @@ const WebCalculator = () => {
   };
 
   const handleSendToWhatsapp = () => {
+    const designStyleLabel = designStyles.find(d => d.id === formData.designStyle)?.label || 'No especificado';
     const message = `
 *¡Hola! Quiero una cotización para mi sitio web!*
 \n*Empresa:* ${formData.companyName}
 *Nombre:* ${formData.personName}
 *Objetivo Principal:* ${recommendation}
+*¿Busca rediseño?:* ${formData.isRedesign}
+*Estilo de diseño preferido:* ${designStyleLabel}
 *Sitios de referencia:* 
 ${formData.competitors || 'No especificados'}
 \n*Mi número es:* ${whatsappNumber}
@@ -117,7 +129,39 @@ ${formData.competitors || 'No especificados'}
                 </RadioGroup>
             </div>
         );
-      case 3:
+       case 3:
+        return (
+            <div className="space-y-8">
+                <div>
+                    <Label>¿Qué estilo de diseño visual prefieres?</Label>
+                    <RadioGroup value={formData.designStyle} onValueChange={(value) => setFormData({...formData, designStyle: value})} className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                        {designStyles.map(style => (
+                            <div key={style.id}>
+                                <RadioGroupItem value={style.id} id={style.id} className="peer sr-only" />
+                                <Label htmlFor={style.id} className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 h-28 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
+                                    {React.cloneElement(style.icon, { className: "w-6 h-6 text-primary mb-2" })}
+                                    <span className="font-semibold text-center">{style.label}</span>
+                                </Label>
+                            </div>
+                        ))}
+                    </RadioGroup>
+                </div>
+                <div>
+                    <Label>¿Ya tienes un sitio web y buscas un rediseño?</Label>
+                    <RadioGroup value={formData.isRedesign} onValueChange={(value) => setFormData({...formData, isRedesign: value})} className="flex gap-4 mt-2">
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="Sí" id="redesign-yes" />
+                            <Label htmlFor="redesign-yes" className='font-normal'>Sí</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="No" id="redesign-no" />
+                            <Label htmlFor="redesign-no" className='font-normal'>No</Label>
+                        </div>
+                    </RadioGroup>
+                </div>
+            </div>
+        );
+      case 4:
         return (
             <div className="space-y-4">
                 <Label htmlFor="competitors">Inspiración y Competencia</Label>
@@ -131,7 +175,7 @@ ${formData.competitors || 'No especificados'}
                 />
             </div>
         );
-      case 4:
+      case 5:
         const recommendedGoal = webGoals.find(g => g.id === formData.mainGoal);
         return (
             <div className="text-center py-8">
