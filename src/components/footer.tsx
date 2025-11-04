@@ -24,7 +24,7 @@ const Footer = () => {
             </div>
           </div>
           <div>
-            <h4 className="font-headline font-semibold text-lg mb-4">Nuestros Servicios</h4>
+            <h4 className="font-headline font-semibold text-lg mb-4 text-center">Nuestros Servicios</h4>
             <div className="grid grid-cols-2 gap-8">
                 <ul className="space-y-2">
                     <li><Link href="/servicios/automatizacion" className="hover:text-primary transition-colors">Automatización</Link></li>
