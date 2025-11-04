@@ -74,7 +74,7 @@ const PortfolioPage = () => {
 
   const filteredItems = portfolioItems.filter(item => {
     const categoryMatch = categoryFilter === "Todos" || item.category === categoryFilter;
-    const sectorMatch = sectorFilter === "Todos" || item.sector === sectorFilter;
+    const sectorMatch = sectorFilter === "Todos" || item.sector === sectorMatch;
     return categoryMatch && sectorMatch;
   });
 
@@ -105,6 +105,26 @@ const PortfolioPage = () => {
             </AnimatedDiv>
             
             <TabsContent value="websites">
+              <AnimatedDiv className="mb-12">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto text-center">
+                  <div className="bg-card/50 p-6 rounded-lg">
+                    <ShoppingCart className="w-8 h-8 mx-auto mb-3 text-primary" />
+                    <h3 className="font-headline text-lg font-semibold mb-2">E-commerce</h3>
+                    <p className="text-sm text-foreground/70">Plataformas robustas para vender tus productos en línea.</p>
+                  </div>
+                  <div className="bg-card/50 p-6 rounded-lg">
+                    <Send className="w-8 h-8 mx-auto mb-3 text-primary" />
+                    <h3 className="font-headline text-lg font-semibold mb-2">Landing Page</h3>
+                    <p className="text-sm text-foreground/70">Páginas enfocadas en una sola acción para maximizar conversiones.</p>
+                  </div>
+                  <div className="bg-card/50 p-6 rounded-lg">
+                    <LinkIcon className="w-8 h-8 mx-auto mb-3 text-primary" />
+                    <h3 className="font-headline text-lg font-semibold mb-2">Sitio Conectivo</h3>
+                    <p className="text-sm text-foreground/70">Sitios web para presentar tu marca, servicios o información.</p>
+                  </div>
+                </div>
+              </AnimatedDiv>
+
               <AnimatedDiv>
                 <div className="flex flex-col sm:flex-row gap-4 mb-8">
                   <div className="flex-1">
