@@ -3,7 +3,6 @@
 
 import Image from "next/image";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -14,7 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { portfolioItems, portfolioCategories, portfolioSectors } from "@/lib/portfolio-data";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Link as LinkIcon, Send, ShoppingCart } from "lucide-react";
 import AnimatedDiv from "@/components/animated-div";
 import React, { useState } from "react";
 
@@ -37,6 +36,12 @@ const itemVariants = {
       ease: "easeInOut",
     },
   },
+};
+
+const categoryIcons: { [key: string]: React.ReactNode } = {
+  "Ecomerce": <ShoppingCart className="w-4 h-4" />,
+  "Connective": <LinkIcon className="w-4 h-4" />,
+  "Landing": <Send className="w-4 h-4" />,
 };
 
 const PortfolioPage = () => {
@@ -124,7 +129,12 @@ const PortfolioPage = () => {
                       </div>
                     </CardContent>
                     <CardFooter className="p-4 flex flex-col items-start flex-grow">
-                      <Badge variant="secondary" className="mb-2">{item.category}</Badge>
+                      <Badge variant="secondary" className="mb-2">
+                        <div className="flex items-center gap-1.5">
+                            {categoryIcons[item.category] || null}
+                            <span>{item.category}</span>
+                        </div>
+                      </Badge>
                       <h3 className="font-headline font-semibold text-lg flex-grow">{item.title}</h3>
                       <div className="flex items-center text-sm text-primary mt-4 self-start">
                         Ver Proyecto <ArrowRight className="w-4 h-4 ml-2" />
