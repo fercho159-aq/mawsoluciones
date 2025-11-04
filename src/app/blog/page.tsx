@@ -89,7 +89,7 @@ export default function BlogPage() {
                     )}
                     <div className="p-6 flex flex-col flex-grow">
                       <Badge variant="secondary" className="mb-2 w-fit">{post.category}</Badge>
-                      <h3 className="font-headline text-xl font-bold mb-3 flex-grow group-hover:text-primary transition-colors">
+                      <h3 className="font-headline text-lg font-bold mb-3 flex-grow group-hover:text-primary transition-colors">
                         {post.title}
                       </h3>
                       <div className="flex items-center gap-4 text-xs text-foreground/70 mb-4">
