@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import AutomationCalculator from "@/components/automation-calculator";
 
 const ServicePage = () => {
   return (
@@ -60,6 +61,18 @@ const ServicePage = () => {
       </section>
 
       <section className="py-20 md:py-28 bg-card">
+        <div className="container mx-auto px-4 md:px-6">
+           <div className="max-w-3xl mx-auto text-center mb-12">
+            <h2 className="font-headline text-3xl sm:text-4xl font-bold">Diagnóstico de Automatización</h2>
+            <p className="mt-4 text-lg text-foreground/80">
+              Responde unas breves preguntas y descubre el potencial de ahorro de tiempo para tu negocio.
+            </p>
+          </div>
+          <AutomationCalculator />
+        </div>
+      </section>
+
+      <section className="py-20 md:py-28 bg-background">
         <div className="container mx-auto px-4 md:px-6 text-center">
             <h2 className="font-headline text-3xl sm:text-4xl font-bold">¿Listo para poner tu marketing en piloto automático?</h2>
             <p className="mt-4 text-lg text-foreground/80 max-w-2xl mx-auto">
