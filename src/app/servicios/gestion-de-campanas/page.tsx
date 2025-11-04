@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import AdCalculator from "@/components/ad-calculator";
 
 const ServicePage = () => {
   return (
@@ -60,6 +61,18 @@ const ServicePage = () => {
       </section>
 
       <section className="py-20 md:py-28 bg-card">
+        <div className="container mx-auto px-4 md:px-6">
+           <div className="max-w-3xl mx-auto text-center mb-12">
+            <h2 className="font-headline text-3xl sm:text-4xl font-bold">Calcula tu Presupuesto y Alcance</h2>
+            <p className="mt-4 text-lg text-foreground/80">
+              Usa nuestra herramienta interactiva para obtener una estimación de tu próxima campaña publicitaria en minutos.
+            </p>
+          </div>
+          <AdCalculator />
+        </div>
+      </section>
+
+      <section className="py-20 md:py-28 bg-background">
         <div className="container mx-auto px-4 md:px-6 text-center">
             <h2 className="font-headline text-3xl sm:text-4xl font-bold">¿Listo para acelerar tu crecimiento?</h2>
             <p className="mt-4 text-lg text-foreground/80 max-w-2xl mx-auto">
