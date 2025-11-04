@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { blogPosts } from '@/lib/blog-data';
+import { interviews } from '@/lib/interviews-data';
 import { Badge } from '@/components/ui/badge';
 import AnimatedDiv from '@/components/animated-div';
 import { ArrowRight, Calendar, User } from 'lucide-react';
@@ -9,16 +10,18 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Button } from '../ui/button';
 
+const allPosts = [...blogPosts, ...interviews].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
 export default function BlogSection() {
-  const latestPosts = blogPosts.slice(0, 3);
+  const latestPosts = allPosts.slice(0, 3);
 
   return (
     <section id="blog" className="py-20 md:py-28 bg-background">
       <div className="container mx-auto px-4 md:px-6">
         <AnimatedDiv className="max-w-3xl mx-auto text-center mb-16">
-          <h2 className="font-headline text-3xl sm:text-4xl font-bold">Últimas Entradas del Blog</h2>
+          <h2 className="font-headline text-3xl sm:text-4xl font-bold">Últimas Publicaciones del Blog</h2>
           <p className="mt-4 text-lg text-foreground/80">
-            Mantente al día con las últimas tendencias y consejos de marketing digital.
+            Mantente al día con las últimas tendencias, entrevistas y consejos de marketing digital.
           </p>
         </AnimatedDiv>
 
@@ -44,6 +47,10 @@ export default function BlogSection() {
                       {post.title}
                     </h3>
                     <div className="flex items-center gap-4 text-xs text-foreground/70 mb-4">
+                       <div className="flex items-center gap-1.5">
+                        <User className="w-3 h-3" />
+                        <span>{post.author}</span>
+                      </div>
                       <div className="flex items-center gap-1.5">
                         <Calendar className="w-3 h-3" />
                         <time dateTime={post.date}>{format(new Date(post.date), "dd MMM yyyy", { locale: es })}</time>

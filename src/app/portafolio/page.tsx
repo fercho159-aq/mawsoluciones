@@ -18,6 +18,8 @@ import AnimatedDiv from "@/components/animated-div";
 import React, { useState } from "react";
 import TypewriterTitle from "@/components/typewriter-title";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSearchParams } from 'next/navigation';
+
 
 const containerVariants = {
   hidden: {},
@@ -67,6 +69,9 @@ const sectorIcons: { [key: string]: React.ReactNode } = {
 };
 
 const PortfolioPage = () => {
+  const searchParams = useSearchParams();
+  const defaultTab = searchParams.get('tab') || 'websites';
+
   const [categoryFilter, setCategoryFilter] = useState<string>("Todos");
   const [sectorFilter, setSectorFilter] = useState<string>("Todos");
   const [activeTab, setActiveTab] = useState("Sitios Web");
@@ -94,7 +99,7 @@ const PortfolioPage = () => {
             <TypewriterTitle key={activeTab} text={activeTab} />
           </div>
 
-          <Tabs defaultValue="websites" className="w-full" onValueChange={(value) => setActiveTab(value === 'websites' ? 'Sitios Web' : 'Contenido')}>
+          <Tabs defaultValue={defaultTab} className="w-full" onValueChange={(value) => setActiveTab(value === 'websites' ? 'Sitios Web' : 'Contenido')}>
             <AnimatedDiv>
               <div className="flex justify-center mb-8">
                 <TabsList>
@@ -104,7 +109,7 @@ const PortfolioPage = () => {
               </div>
             </AnimatedDiv>
             
-            <TabsContent value="websites">
+            <TabsContent value="websites" id="websites">
               <AnimatedDiv className="mb-12">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto text-center">
                   <div className="bg-card/50 p-6 rounded-lg">
@@ -215,7 +220,7 @@ const PortfolioPage = () => {
               )}
             </TabsContent>
             
-            <TabsContent value="content">
+            <TabsContent value="content" id="content">
                  <AnimatedDiv>
                     <div className="flex flex-col sm:flex-row gap-4 mb-8">
                     <div className="flex-1">

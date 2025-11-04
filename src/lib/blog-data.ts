@@ -5,7 +5,7 @@ export type BlogPostType = {
   id: string;
   slug: string;
   title: string;
-  category: string;
+  category: "Noticias" | "Email Marketing" | "Automatización" | "Desarrollo Web";
   image?: ImagePlaceholder;
   excerpt: string;
   date: string;
@@ -18,7 +18,7 @@ export const blogPosts: BlogPostType[] = [
     id: "omnisearch-optimization-ia-2025",
     slug: "omnisearch-optimization-ia-2025",
     title: "Omnisearch Optimization, IA y Más: Las Estrategias Clave del Marketing Digital para 2025 en México",
-    category: "Marketing Digital",
+    category: "Noticias",
     image: {
       id: "blog-omnisearch",
       description: "Omnisearch optimization and AI concepts",
@@ -89,7 +89,7 @@ export const blogPosts: BlogPostType[] = [
     id: "tendencias-marketing-digital-2025",
     slug: "tendencias-marketing-digital-2025",
     title: "Tendencias de Marketing Digital 2025: La Guía Definitiva para Pymes en México (IA, Comercio Social y Autenticidad)",
-    category: "Marketing Digital",
+    category: "Noticias",
     image: {
       id: "tendencias-marketing-digital-2025",
       description: "tendencias-marketing-digital-2025",
@@ -154,7 +154,7 @@ export const blogPosts: BlogPostType[] = [
     id: "ecommerce-mexico-2025-trinidad-exito",
     slug: "ecommerce-mexico-2025-trinidad-exito",
     title: "E-commerce en México 2025: La Trinidad del Éxito (Venta Social, Publicidad y UGC)",
-    category: "Marketing Digital",
+    category: "Noticias",
     image: {
       id: "ecommerce-mexico-2025-trinidad-exito",
       description: "ecommerce-mexico-2025-trinidad-exito",
@@ -209,7 +209,7 @@ export const blogPosts: BlogPostType[] = [
     id: "estrategias-marketing-2025-contenido-tiktok-cafe",
     slug: "estrategias-marketing-2025-contenido-tiktok-cafe",
     title: "Estrategias de Marketing 2025: Contenido, TikTok y Café en la CDMX",
-    category: "Marketing Digital",
+    category: "Noticias",
     image: {
       id: "estrategias-marketing-2025-contenido-tiktok-cafe",
       description: "estrategias-marketing-2025-contenido-tiktok-cafe",
@@ -286,7 +286,7 @@ export const blogPosts: BlogPostType[] = [
     id: "revolucion-digital-ferreteria-ia",
     slug: "revolucion-digital-ferreteria-ia",
     title: "Revolución Digital en la Ferretería: Cómo la IA está Transformando las Ventas B2B en México",
-    category: "Marketing Digital",
+    category: "Noticias",
     image: {
       id: "revolucion-digital-ferreteria-ia",
       description: "revolucion-digital-ferreteria-ia",
@@ -429,7 +429,7 @@ export const blogPosts: BlogPostType[] = [
     id: "hub-educativo-ia-estrategias-funnel-innovacion-latinoamerica",
     slug: "hub-educativo-ia-estrategias-funnel-innovacion-latinoamerica",
     title: "Hub educativo de IA y estrategias para tu funnel: Innovación que transforma Latinoamérica",
-    category: "Marketing Digital",
+    category: "Noticias",
     image: {
       id: "hub-educativo-ia-estrategias-funnel-innovacion-latinoamerica",
       description: "hub-educativo-ia-estrategias-funnel-innovacion-latinoamerica",
@@ -491,7 +491,7 @@ export const blogPosts: BlogPostType[] = [
     id: "estrategias-trafico-web-instagram-2026",
     slug: "estrategias-trafico-web-instagram-2026",
     title: "Estrategias de Tráfico Web, Sitios Inspiradores y Contenido para Instagram: La Guía 2026 para Emprendedores Mexicanos",
-    category: "Marketing Digital",
+    category: "Noticias",
     image: {
       id: "estrategias-trafico-web-instagram-2026",
       description: "estrategias-trafico-web-instagram-2026",
@@ -609,10 +609,10 @@ export const blogPosts: BlogPostType[] = [
     id: "mapa-marketing-digital-influencers-masters",
     slug: "mapa-marketing-digital-influencers-masters",
     title: "El Mapa Definitivo para Triunfar en Marketing Digital: Influencers, Másters y Formación Online",
-    category: "Marketing Digital",
+    category: "Noticias",
     image: {
-      id: "estrategias-trafico-web-instagram-2026",
-      description: "estrategias-trafico-web-instagram-2026",
+      id: "blog-mapa-marketing",
+      description: "mapa-marketing-digital-influencers-masters",
       imageUrl: "/images/blog/Gemini_Generated_Image_lkv6c4lkv6c4lkv6.png",
       imageHint: "digital marketing"
     },
@@ -694,10 +694,10 @@ export const blogPosts: BlogPostType[] = [
     title: "Checklist Definitivo: 10 Claves para un Sitio Web que Convierta",
     category: "Desarrollo Web",
     image: {
-      id: "estrategias-trafico-web-instagram-2026",
-      description: "estrategias-trafico-web-instagram-2026",
+      id: "blog-checklist",
+      description: "A person writing on a checklist",
       imageUrl: "/images/blog/Gemini_Generated_Image_s9m37as9m37as9m3.png",
-      imageHint: "digital marketing"
+      imageHint: "checklist"
     },
     excerpt: "¿Tu sitio web no genera leads? Transfórmalo con nuestro checklist definitivo. Optimiza UX, velocidad y CTAs para convertir visitantes en clientes.",
     date: "2025-10-20T10:00:00.000Z",
@@ -780,10 +780,10 @@ export const blogPosts: BlogPostType[] = [
     title: "Tu Sitio Web en 2025: El Checklist Definitivo Impulsado por IA",
     category: "Automatización",
     image: {
-      id: "estrategias-trafico-web-instagram-2026",
-      description: "estrategias-trafico-web-instagram-2026",
+      id: "blog-ai-web",
+      description: "Abstract image of artificial intelligence network",
       imageUrl: "/images/blog/Gemini_Generated_Image_dh3in3dh3in3dh3i.png",
-      imageHint: "digital marketing"
+      imageHint: "artificial intelligence"
     },
     excerpt: "Descubre cómo la IA transforma los sitios web en motores de conversión. Checklist con agentes autónomos, hiperpersonalización y herramientas esenciales para 2025.",
     date: "2025-10-19T11:00:00.000Z",
@@ -841,9 +841,9 @@ export const blogPosts: BlogPostType[] = [
     id: "estrategias-marketing-digital-2025-cafe-logistica",
     slug: "estrategias-marketing-digital-2025-cafe-logistica",
     title: "Estrategias de Marketing Digital 2025: Conquistar Mercados desde el Café hasta la Logística en México",
-    category: "Marketing Digital",
+    category: "Noticias",
     image: {
-      id: "estrategias-trafico-web-instagram-2026",
+      id: "blog-cafe-logistica",
       description: "estrategias-trafico-web-instagram-2026",
       imageUrl: "/images/blog/Gemini_Generated_Image_449hap449hap449h.png",
       imageHint: "digital marketing"

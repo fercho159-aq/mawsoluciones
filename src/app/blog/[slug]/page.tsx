@@ -1,4 +1,5 @@
 import { blogPosts } from "@/lib/blog-data";
+import { interviews } from "@/lib/interviews-data";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
@@ -9,15 +10,17 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import AnimatedDiv from "@/components/animated-div";
 
+const allPosts = [...blogPosts, ...interviews];
+
 export default function BlogPostPage({ params }: { params: { slug: string } }) {
-  const post = blogPosts.find((p) => p.slug === params.slug);
+  const post = allPosts.find((p) => p.slug === params.slug);
 
   if (!post) {
     notFound();
   }
 
-  const relatedPosts = blogPosts
-    .filter((p) => p.id !== post.id)
+  const relatedPosts = allPosts
+    .filter((p) => p.id !== post.id && p.category === post.category)
     .slice(0, 3);
 
   return (
@@ -85,7 +88,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         <section className="py-20 md:py-28 border-t">
             <div className="container mx-auto px-4 md:px-6">
                 <AnimatedDiv className="text-center mb-16">
-                    <h2 className="font-headline text-3xl sm:text-4xl font-bold">Noticias relacionadas</h2>
+                    <h2 className="font-headline text-3xl sm:text-4xl font-bold">Lecturas relacionadas</h2>
                 </AnimatedDiv>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
                     {relatedPosts.map((relatedPost) => (
@@ -140,7 +143,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 
 // Generate static paths for each blog post
 export async function generateStaticParams() {
-  return blogPosts.map((post) => ({
+  return allPosts.map((post) => ({
     slug: post.slug,
   }));
 }

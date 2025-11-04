@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Menu, X, ChevronDown, CodeXml, PenSquare, Megaphone, Bot } from "lucide-react";
+import { Menu, X, ChevronDown, CodeXml, PenSquare, Megaphone, Bot, Newspaper, Mic2, LayoutGrid, FileText } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -52,8 +52,38 @@ const servicesLinks = [
   },
 ];
 
+const blogLinks = [
+  { 
+    href: "/blog?tab=news", 
+    label: "Noticias",
+    description: "Análisis y guías sobre las últimas tendencias del marketing digital en México y el mundo.",
+    icon: <Newspaper className="w-5 h-5" />
+  },
+  { 
+    href: "/blog?tab=interviews", 
+    label: "Entrevistas",
+    description: "Conversaciones con líderes de opinión, emprendedores y creativos que están redefiniendo sus industrias.",
+    icon: <Mic2 className="w-5 h-5" />
+  },
+];
+
+const portfolioLinks = [
+  { 
+    href: "/portafolio?tab=websites", 
+    label: "Sitios Web",
+    description: "Explora los proyectos web que hemos construido para una diversidad de clientes e industrias.",
+    icon: <LayoutGrid className="w-5 h-5" />
+  },
+  { 
+    href: "/portafolio?tab=content", 
+    label: "Contenido",
+    description: "Descubre las campañas de contenido y estrategias de redes sociales que hemos creado.",
+    icon: <FileText className="w-5 h-5" />
+  },
+];
+
+
 const navLinks = [
-  { href: "/blog", label: "Blog" },
   { href: "/contacto", label: "Contacto" },
 ];
 
@@ -133,13 +163,41 @@ const Header = () => {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <Link href="/portafolio" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Nuestros clientes
-                  </NavigationMenuLink>
-              </Link>
+              <NavigationMenuTrigger>Nuestros clientes</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                 <ul className="grid w-[400px] gap-3 p-4 md:w-[500px]">
+                  {portfolioLinks.map((link) => (
+                    <ListItem
+                      key={link.label}
+                      title={link.label}
+                      href={link.href}
+                      icon={link.icon}
+                    >
+                      {link.description}
+                    </ListItem>
+                  ))}
+                </ul>
+              </NavigationMenuContent>
             </NavigationMenuItem>
             
+            <NavigationMenuItem>
+              <NavigationMenuTrigger>Blog</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                 <ul className="grid w-[400px] gap-3 p-4 md:w-[500px]">
+                  {blogLinks.map((link) => (
+                    <ListItem
+                      key={link.label}
+                      title={link.label}
+                      href={link.href}
+                      icon={link.icon}
+                    >
+                      {link.description}
+                    </ListItem>
+                  ))}
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+
             {navLinks.map((link) => (
               <NavigationMenuItem key={link.href}>
                 <Link href={link.href} legacyBehavior passHref>
@@ -180,7 +238,7 @@ const Header = () => {
                     </Button>
                   </SheetTrigger>
                 </div>
-                <nav className="mt-8 flex flex-col gap-2">
+                <nav className="mt-8 flex-1 flex-col gap-2 overflow-y-auto">
                    <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="item-1" className="border-b-0">
                       <AccordionTrigger className="text-lg font-medium py-2 hover:no-underline">
@@ -201,10 +259,45 @@ const Header = () => {
                         </div>
                       </AccordionContent>
                     </AccordionItem>
+                    <AccordionItem value="item-2" className="border-b-0">
+                      <AccordionTrigger className="text-lg font-medium py-2 hover:no-underline">
+                        Nuestros Clientes
+                      </AccordionTrigger>
+                      <AccordionContent className="pl-4">
+                        <div className="flex flex-col gap-4 pt-2">
+                          {portfolioLinks.map((link) => (
+                            <Link
+                              key={link.href}
+                              href={link.href}
+                              className="text-base font-medium text-foreground/80"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              {link.label}
+                            </Link>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="item-3" className="border-b-0">
+                      <AccordionTrigger className="text-lg font-medium py-2 hover:no-underline">
+                        Blog
+                      </AccordionTrigger>
+                      <AccordionContent className="pl-4">
+                        <div className="flex flex-col gap-4 pt-2">
+                          {blogLinks.map((link) => (
+                            <Link
+                              key={link.href}
+                              href={link.href}
+                              className="text-base font-medium text-foreground/80"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              {link.label}
+                            </Link>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
                   </Accordion>
-                  <Link href="/portafolio" className="text-lg font-medium px-4 py-2" onClick={() => setIsMobileMenuOpen(false)}>
-                    Nuestros clientes
-                  </Link>
                   {navLinks.map((link) => (
                     <Link
                       key={link.href}
@@ -216,7 +309,7 @@ const Header = () => {
                     </Link>
                   ))}
                 </nav>
-                <div className="mt-auto">
+                <div className="mt-auto pt-4">
                   <Button asChild className="w-full">
                     <Link href="/contacto" onClick={() => setIsMobileMenuOpen(false)}>
                       Reservar Sesión
