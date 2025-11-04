@@ -39,10 +39,29 @@ export default function PortfolioItemPage({
         </div>
       </section>
 
-      <ParallaxImages 
-        laptopImage={item.parallaxImages?.laptop ?? defaultLaptopImage}
-        phoneImage={item.parallaxImages?.phone ?? defaultPhoneImage}
-      />
+      {item.parallaxImages ? (
+         <ParallaxImages 
+            laptopImage={item.parallaxImages.laptop}
+            phoneImage={item.parallaxImages.phone}
+          />
+      ): (
+        item.image && (
+           <section className="py-0 -mt-20">
+            <div className="container mx-auto px-4 md:px-6">
+              <div className="relative aspect-video max-w-5xl mx-auto rounded-lg shadow-2xl overflow-hidden">
+                <Image
+                  src={item.image.imageUrl}
+                  alt={item.title}
+                  fill
+                  className="object-cover"
+                  data-ai-hint={item.image.imageHint}
+                />
+              </div>
+            </div>
+          </section>
+        )
+      )}
+
 
       <section className="py-20 md:py-28">
         <div className="container mx-auto px-4 md:px-6">
@@ -62,6 +81,11 @@ export default function PortfolioItemPage({
               <div>
                 <h3 className="font-headline text-2xl font-bold text-foreground mb-4">Cliente</h3>
                 <p className="text-lg text-foreground/80">{item.client}</p>
+              </div>
+
+               <div>
+                <h3 className="font-headline text-2xl font-bold text-foreground mb-4">Sector</h3>
+                <p className="text-lg text-foreground/80">{item.sector}</p>
               </div>
 
               <div>
