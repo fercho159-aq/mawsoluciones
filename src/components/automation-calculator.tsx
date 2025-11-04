@@ -190,7 +190,7 @@ ${selectedGoalsText}
                                 htmlFor={goal.id}
                                 className="flex items-center gap-4 rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
                             >
-                                {goal.icon}
+                                {React.cloneElement(goal.icon, { className: "w-6 h-6 text-primary" })}
                                 <span className="font-semibold">{goal.label}</span>
                             </Label>
                         </div>

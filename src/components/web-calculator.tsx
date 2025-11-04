@@ -109,7 +109,7 @@ ${formData.competitors || 'No especificados'}
                                 htmlFor={goal.id}
                                 className="flex items-center gap-4 rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
                             >
-                                <span className="text-primary">{goal.icon}</span>
+                                {React.cloneElement(goal.icon, { className: "w-6 h-6 text-primary" })}
                                 <span className="font-semibold">{goal.label}</span>
                             </Label>
                         </div>
@@ -137,7 +137,7 @@ ${formData.competitors || 'No especificados'}
             <div className="text-center py-8">
                 <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 20 }}>
                     <div className="inline-block bg-primary/10 p-6 rounded-full mb-4">
-                        <span className="text-primary h-16 w-16">{recommendedGoal?.icon}</span>
+                        {recommendedGoal?.icon && React.cloneElement(recommendedGoal.icon, { className: "w-16 h-16 text-primary" })}
                     </div>
                     <p className="text-xl text-muted-foreground">Basado en tus respuestas, tu sitio ideal es un</p>
                     <p className="text-5xl sm:text-6xl font-bold text-primary my-2">{recommendation}</p>
