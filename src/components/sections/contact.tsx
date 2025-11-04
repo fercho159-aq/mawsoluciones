@@ -3,13 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Mail, Phone } from "lucide-react";
 import WhatsappIcon from "@/components/icons/whatsapp-icon";
 import AnimatedDiv from "../animated-div";
+import AnimatedChatInvitation from "../animated-chat-invitation";
 
 const Contact = () => {
   return (
     <section id="contact" className="py-20 md:py-28">
       <div className="container mx-auto px-4 md:px-6">
         <AnimatedDiv className="max-w-3xl mx-auto text-center mb-12">
-          <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold">Hablemos</h2>
+          <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold flex items-center justify-center gap-4">
+            Hablemos
+          </h2>
           <p className="mt-4 text-lg text-foreground/80">
             ¿Listo para llevar tu marca al siguiente nivel? Contáctanos o reserva una sesión estratégica.
           </p>
@@ -27,6 +30,7 @@ const Contact = () => {
                 <a href="tel:+123456789" className="hover:text-primary transition-colors">+1 (234) 567-89</a>
               </div>
             </div>
+            <AnimatedChatInvitation />
             <h3 className="font-headline text-2xl font-bold mt-10 mb-4">O contáctanos por WhatsApp</h3>
             <Button asChild className="w-full" size="lg" variant="whatsapp">
               <a href="https://wa.me/1234567890" target="_blank" rel="noopener noreferrer">

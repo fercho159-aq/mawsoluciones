@@ -44,6 +44,7 @@ const ChatBubble = () => {
       >
         <Button
           onClick={() => setIsOpen(!isOpen)}
+          aria-label="Open chat bubble"
           className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full shadow-2xl"
           size="icon"
         >

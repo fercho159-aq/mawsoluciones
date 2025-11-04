@@ -13,7 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { portfolioItems, portfolioCategories, portfolioSectors, contentPortfolioItems } from "@/lib/portfolio-data";
-import { ArrowRight, Link as LinkIcon, Send, ShoppingCart, Briefcase, Building, Film, HeartHandshake, Utensils, Construction, Car, Flower, Hospital, Newspaper } from "lucide-react";
+import { ArrowRight, Link as LinkIcon, Send, ShoppingCart, Briefcase, Building, Film, HeartHandshake, Utensils, Construction, Car, Flower, Hospital, Newspaper, Bot, Camera } from "lucide-react";
 import AnimatedDiv from "@/components/animated-div";
 import React, { useState } from "react";
 import TypewriterTitle from "@/components/typewriter-title";
@@ -44,34 +44,45 @@ const categoryIcons: { [key: string]: React.ReactNode } = {
   "E-commerce": <ShoppingCart className="w-4 h-4" />,
   "Connective": <LinkIcon className="w-4 h-4" />,
   "Landing": <Send className="w-4 h-4" />,
+  "Catálogo": <Briefcase className="w-4 h-4" />,
+  "Servicios": <HeartHandshake className="w-4 h-4" />,
 };
 
 const sectorIcons: { [key: string]: React.ReactNode } = {
     "Servicios Profesionales": <Briefcase className="w-4 h-4" />,
     "Inmobiliaria": <Building className="w-4 h-4" />,
     "Eventos": <Film className="w-4 h-4" />,
-    "Actividades recreativas": <HeartHandshake className="w-4 h-4" />,
-    "Restaurante": <Utensils className="w-4 h-4" />,
-    "Sector industrial": <Construction className="w-4 h-4" />,
-    "Ropa y Calzado": <ShoppingCart className="w-4 h-4" />,
-    "Floreria": <Flower className="w-4 h-4" />,
-    "Medico": <Hospital className="w-4 h-4" />,
+    "Actividades Recreativas": <HeartHandshake className="w-4 h-4" />,
+    "Restaurantes": <Utensils className="w-4 h-4" />,
+    "Industrial": <Construction className="w-4 h-4" />,
+    "Ropa y Moda": <ShoppingCart className="w-4 h-4" />,
+    "Florería": <Flower className="w-4 h-4" />,
+    "Salud": <Hospital className="w-4 h-4" />,
     "Noticias": <Newspaper className="w-4 h-4" />,
-    "Catalogo": <LinkIcon className="w-4 h-4" />,
+    "Catálogo": <LinkIcon className="w-4 h-4" />,
     "Otros": <Briefcase className="w-4 h-4" />,
-    "Ropa": <ShoppingCart className="w-4 h-4" />,
     "Automotriz": <Car className="w-4 h-4" />,
+    "Software": <Bot className="w-4 h-4" />,
+    "Influencers": <Camera className="w-4 h-4" />,
 };
 
 const PortfolioPage = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>("Todos");
   const [sectorFilter, setSectorFilter] = useState<string>("Todos");
   const [activeTab, setActiveTab] = useState("Sitios Web");
+  const [contentSectorFilter, setContentSectorFilter] = useState<string>("Todos");
 
   const filteredItems = portfolioItems.filter(item => {
     const categoryMatch = categoryFilter === "Todos" || item.category === categoryFilter;
     const sectorMatch = sectorFilter === "Todos" || item.sector === sectorFilter;
     return categoryMatch && sectorMatch;
+  });
+
+  const allContentSectors = Array.from(new Set(contentPortfolioItems.map(item => item.sector)));
+
+  const filteredContentItems = contentPortfolioItems.filter(item => {
+    const sectorMatch = contentSectorFilter === "Todos" || item.sector === contentSectorFilter;
+    return sectorMatch;
   });
 
   return (
@@ -119,7 +130,12 @@ const PortfolioPage = () => {
                       <SelectContent>
                         <SelectItem value="Todos">Todos</SelectItem>
                         {portfolioSectors.map(sector => (
-                          <SelectItem key={sector} value={sector}>{sector}</SelectItem>
+                          <SelectItem key={sector} value={sector}>
+                            <div className="flex items-center gap-2">
+                                {sectorIcons[sector as keyof typeof sectorIcons] || <Briefcase className="w-4 h-4" />}
+                                <span>{sector}</span>
+                            </div>
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -154,12 +170,12 @@ const PortfolioPage = () => {
                         <CardFooter className="p-4 flex flex-col items-start flex-grow">
                           <Badge variant="secondary" className="mb-2">
                             <div className="flex items-center gap-1.5">
-                                {categoryIcons[item.category] || null}
+                                {categoryIcons[item.category as keyof typeof categoryIcons] || null}
                                 <span>{item.category}</span>
                             </div>
                           </Badge>
                           <h3 className="font-headline font-semibold text-md flex-grow flex items-center gap-2">
-                             {sectorIcons[item.sector] || <Briefcase className="w-4 h-4" />}
+                             {sectorIcons[item.sector as keyof typeof sectorIcons] || <Briefcase className="w-4 h-4" />}
                             <span>{item.title}</span>
                           </h3>
                           <div className="flex items-center text-sm text-primary mt-4 self-start">
@@ -180,13 +196,36 @@ const PortfolioPage = () => {
             </TabsContent>
             
             <TabsContent value="content">
+                 <AnimatedDiv>
+                    <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                    <div className="flex-1">
+                        <label className="block text-sm font-medium text-foreground/80 mb-2">Filtrar por Sector</label>
+                        <Select value={contentSectorFilter} onValueChange={setContentSectorFilter}>
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Seleccionar Sector" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Todos">Todos</SelectItem>
+                            {allContentSectors.map(sector => (
+                            <SelectItem key={sector} value={sector}>
+                               <div className="flex items-center gap-2">
+                                {sectorIcons[sector as keyof typeof sectorIcons] || <Briefcase className="w-4 h-4" />}
+                                <span>{sector}</span>
+                               </div>
+                            </SelectItem>
+                            ))}
+                        </SelectContent>
+                        </Select>
+                    </div>
+                    </div>
+                </AnimatedDiv>
               <AnimatedDiv
                   className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
                 >
-                  {contentPortfolioItems.map(item => (
+                  {filteredContentItems.map(item => (
                     <AnimatedDiv key={item.id} variants={itemVariants}>
                       <Card className="overflow-hidden group flex flex-col h-full bg-card/50 hover:bg-card border-border/50 hover:border-border transition-all duration-300 ease-in-out transform hover:-translate-y-2 shadow-sm hover:shadow-2xl">
                         <a href={item.url} target="_blank" rel="noopener noreferrer" className="flex flex-col flex-grow">
@@ -206,7 +245,7 @@ const PortfolioPage = () => {
                           </CardContent>
                           <CardFooter className="p-4 flex flex-col items-start flex-grow">
                             <Badge variant="secondary" className="mb-2">
-                              {item.type}
+                              {item.sector}
                             </Badge>
                             <h3 className="font-headline font-semibold text-md flex-grow">
                               {item.title}
@@ -220,9 +259,9 @@ const PortfolioPage = () => {
                     </AnimatedDiv>
                   ))}
                 </AnimatedDiv>
-                {contentPortfolioItems.length === 0 && (
+                {filteredContentItems.length === 0 && (
                    <AnimatedDiv className="text-center py-16">
-                    <p className="text-lg text-foreground/80">La sección de portafolio de contenido estará disponible próximamente.</p>
+                    <p className="text-lg text-foreground/80">No se encontraron proyectos con los filtros seleccionados.</p>
                   </AnimatedDiv>
                 )}
             </TabsContent>
