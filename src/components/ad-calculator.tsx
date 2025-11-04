@@ -84,6 +84,7 @@ const AdCalculator = () => {
     otroMunicipio: '',
     plataformas: ['Facebook', 'Instagram'],
     prevInvestment: 'No',
+    prevInvestmentAmount: '',
     campaignType: 'Performance',
     presupuesto: 4000
   });
@@ -139,6 +140,7 @@ const AdCalculator = () => {
         otroMunicipio: '',
         plataformas: ['Facebook', 'Instagram'],
         prevInvestment: 'No',
+        prevInvestmentAmount: '',
         campaignType: 'Performance',
         presupuesto: 4000
     });
@@ -190,7 +192,7 @@ const AdCalculator = () => {
 *Ubicación:* ${formData.estado} - ${formData.municipios.join(', ')}${formData.otroMunicipio ? `, ${formData.otroMunicipio}`: ''}
 *Plataformas:* ${formData.plataformas.join(', ')}
 *Tipo de Campaña:* ${formData.campaignType}
-*Inversión previa:* ${formData.prevInvestment}
+*Inversión previa:* ${formData.prevInvestment}${formData.prevInvestment === 'Sí' ? ` - ${formData.prevInvestmentAmount}` : ''}
 *Presupuesto mensual estimado:* ${formData.presupuesto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
 \n*Mi número es:* ${whatsappNumber}
     `.trim();
@@ -239,6 +241,21 @@ const AdCalculator = () => {
                     </div>
                 </RadioGroup>
             </div>
+            <AnimatePresence>
+              {formData.prevInvestment === 'Sí' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="space-y-2">
+                    <Label htmlFor="prevInvestmentAmount">¿Cuánto invertías mensualmente? (MXN)</Label>
+                    <Input id="prevInvestmentAmount" type="text" value={formData.prevInvestmentAmount} onChange={(e) => setFormData({...formData, prevInvestmentAmount: e.target.value})} placeholder="Ej. $10,000" />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         );
       case 2:
@@ -412,8 +429,8 @@ const AdCalculator = () => {
   return (
     <Card className="w-full max-w-4xl mx-auto shadow-2xl">
       <CardHeader>
-        <Progress value={(currentStep / steps.length) * 100} className="mb-4" />
         <div className="space-y-2 text-center">
+            <Progress value={(currentStep / steps.length) * 100} className="mb-4" />
             <CardTitle>{steps[currentStep-1].title}</CardTitle>
             <CardDescription>{steps[currentStep-1].description}</CardDescription>
         </div>
@@ -490,3 +507,5 @@ const AdCalculator = () => {
 };
 
 export default AdCalculator;
+
+    
