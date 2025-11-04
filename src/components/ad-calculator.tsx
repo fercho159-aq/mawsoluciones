@@ -39,6 +39,8 @@ const AdCalculator = () => {
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [formData, setFormData] = useState({
     companyName: '',
+    personName: '',
+    jobTitle: '',
     giro: '',
     estado: 'CDMX',
     municipios: ['Benito Juárez'],
@@ -58,8 +60,8 @@ const AdCalculator = () => {
   }, [formData.plataformas]);
 
   const handleNext = () => {
-    if (currentStep === 1 && !formData.companyName) {
-        setError('Por favor, ingresa el nombre de tu empresa.');
+    if (currentStep === 1 && (!formData.companyName || !formData.personName || !formData.jobTitle)) {
+        setError('Por favor, completa todos los campos.');
         return;
     }
     if (currentStep === 3 && formData.plataformas.length === 0) {
@@ -127,15 +129,17 @@ const AdCalculator = () => {
 
   const handleSendToWhatsapp = () => {
     const message = `
-    *¡Hola! Quiero mi cotización de publicidad!*
-    \n*Empresa:* ${formData.companyName}
-    *Giro:* ${formData.giro}
-    *Ubicación:* ${formData.estado} - ${formData.municipios.join(', ')}${formData.otroMunicipio ? `, ${formData.otroMunicipio}`: ''}
-    *Plataformas:* ${formData.plataformas.join(', ')}
-    *Tipo de Campaña:* ${formData.campaignType}
-    *Inversión previa:* ${formData.prevInvestment}
-    *Presupuesto mensual estimado:* ${formData.presupuesto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
-    \n*Mi número es:* ${whatsappNumber}
+*¡Hola! Quiero mi cotización de publicidad!*
+\n*Empresa:* ${formData.companyName}
+*Nombre:* ${formData.personName}
+*Cargo:* ${formData.jobTitle}
+*Giro:* ${formData.giro}
+*Ubicación:* ${formData.estado} - ${formData.municipios.join(', ')}${formData.otroMunicipio ? `, ${formData.otroMunicipio}`: ''}
+*Plataformas:* ${formData.plataformas.join(', ')}
+*Tipo de Campaña:* ${formData.campaignType}
+*Inversión previa:* ${formData.prevInvestment}
+*Presupuesto mensual estimado:* ${formData.presupuesto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+\n*Mi número es:* ${whatsappNumber}
     `;
     const whatsappUrl = `https://wa.me/5542314150?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -144,6 +148,8 @@ const AdCalculator = () => {
     // Reset form
     setFormData({
         companyName: '',
+        personName: '',
+        jobTitle: '',
         giro: '',
         estado: 'CDMX',
         municipios: ['Benito Juárez'],
@@ -164,6 +170,14 @@ const AdCalculator = () => {
             <div>
               <Label htmlFor="companyName">Nombre de tu Empresa</Label>
               <Input id="companyName" value={formData.companyName} onChange={(e) => setFormData({...formData, companyName: e.target.value})} placeholder="Ej. Mi Negocio Increíble" />
+            </div>
+            <div>
+              <Label htmlFor="personName">Tu Nombre</Label>
+              <Input id="personName" value={formData.personName} onChange={(e) => setFormData({...formData, personName: e.target.value})} placeholder="Ej. Juan Pérez" />
+            </div>
+            <div>
+              <Label htmlFor="jobTitle">Tu Cargo</Label>
+              <Input id="jobTitle" value={formData.jobTitle} onChange={(e) => setFormData({...formData, jobTitle: e.target.value})} placeholder="Ej. Director de Marketing" />
             </div>
             <div>
               <Label>Giro del Negocio</Label>
