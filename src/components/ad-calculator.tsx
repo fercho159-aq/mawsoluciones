@@ -7,10 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Progress } from "@/components/ui/progress"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { ArrowLeft, ArrowRight, BarChart, Users, AlertTriangle } from 'lucide-react';
+import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Slider } from "@/components/ui/slider";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ArrowLeft, ArrowRight, BarChart, Users, AlertTriangle, MessageSquare, Building2, TrendingUp, Bullhorn } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import WhatsappIcon from './icons/whatsapp-icon';
 
 // Data from the user's plan
 const girosNegocio = ["Restaurante", "Servicios Profesionales", "Retail/Ropa", "Salud/Medicina", "Bienes Raíces", "Educación", "Entretenimiento", "Turismo", "Automotriz", "Tecnología", "Otro"];
@@ -19,51 +23,63 @@ const estadosMexico: Record<string, string[]> = {
   "Estado de México": ["Todos los municipios"], "Jalisco": ["Guadalajara", "Zapopan", "Tlaquepaque", "Tonalá"], "Nuevo León": ["Monterrey", "San Pedro Garza García", "Guadalupe", "Apodaca"], "Puebla": ["Puebla", "Angelópolis", "Cholula"], "Querétaro": ["Querétaro", "Corregidora", "El Marqués"], "Guanajuato": ["León", "Irapuato", "Celaya", "Salamanca"], "Baja California": ["Tijuana", "Mexicali", "Ensenada"], "Yucatán": ["Mérida", "Progreso", "Umán"], "Otro estado": ["Especificar municipio"]
 };
 const plataformasPauta: Record<string, { minInversion: number }> = { "Facebook": { minInversion: 2000 }, "Instagram": { minInversion: 2000 }, "TikTok": { minInversion: 3000 }, "LinkedIn": { minInversion: 8000 }, "YouTube": { minInversion: 5000 }, "Google Ads": { minInversion: 3000 } };
-const rangosPresupuesto = [{ rango: "4,000 - 8,000 MXN", min: 4000, max: 8000 }, { rango: "8,001 - 20,000 MXN", min: 8001, max: 20000 }, { rango: "20,001 - 150,000 MXN", min: 20001, max: 150000 }];
 const tabuladorAlcance: Record<string, Record<string, string>> = { "4000-8000": { "Facebook": "15,000 - 30,000 personas", "Instagram": "12,000 - 25,000 personas", "TikTok": "20,000 - 40,000 personas", "LinkedIn": "5,000 - 10,000 profesionales", "YouTube": "8,000 - 15,000 visualizaciones", "Google Ads": "500 - 1,200 clics" }, "8001-20000": { "Facebook": "30,000 - 80,000 personas", "Instagram": "25,000 - 60,000 personas", "TikTok": "40,000 - 100,000 personas", "LinkedIn": "10,000 - 25,000 profesionales", "YouTube": "15,000 - 40,000 visualizaciones", "Google Ads": "1,200 - 3,000 clics" }, "20001-150000": { "Facebook": "80,000 - 600,000 personas", "Instagram": "60,000 - 450,000 personas", "TikTok": "100,000 - 750,000 personas", "LinkedIn": "25,000 - 200,000 profesionales", "YouTube": "40,000 - 300,000 visualizaciones", "Google Ads": "3,000 - 22,500 clics" } };
 
 const steps = [
-  { id: 1, title: 'Giro del Negocio', description: 'Ayúdanos a entender tu industria.' },
+  { id: 1, title: 'Tu Negocio', description: 'Cuéntanos sobre tu empresa.' },
   { id: 2, title: 'Ubicación', description: '¿Dónde se encuentran tus clientes?' },
-  { id: 3, title: 'Plataformas', description: 'Elige dónde quieres que aparezcan tus anuncios.' },
+  { id: 3, title: 'Objetivos y Plataformas', description: 'Define qué quieres lograr y dónde.' },
   { id: 4, title: 'Presupuesto', description: 'Define tu inversión mensual para pauta.' },
   { id: 5, title: 'Resultados', description: 'Tu alcance estimado.' }
 ];
 
 const AdCalculator = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+  const [whatsappNumber, setWhatsappNumber] = useState('');
   const [formData, setFormData] = useState({
+    companyName: '',
     giro: '',
     estado: 'CDMX',
     municipios: ['Benito Juárez'],
     otroMunicipio: '',
     plataformas: ['Facebook', 'Instagram'],
+    prevInvestment: 'No',
+    campaignType: 'Performance',
     presupuesto: 4000
   });
   const [error, setError] = useState('');
 
   const minInversion = useMemo(() => {
-    if (formData.plataformas.length === 0) return 0;
-    return Math.max(...formData.plataformas.map(p => plataformasPauta[p]?.minInversion || 0));
+    if (formData.plataformas.length === 0) return 4000;
+    const min = Math.max(...formData.plataformas.map(p => plataformasPauta[p]?.minInversion || 0));
+    return Math.max(4000, min);
   }, [formData.plataformas]);
 
   const handleNext = () => {
+    if (currentStep === 1 && !formData.companyName) {
+        setError('Por favor, ingresa el nombre de tu empresa.');
+        return;
+    }
     if (currentStep === 3 && formData.plataformas.length === 0) {
       setError('Debes seleccionar al menos una plataforma.');
       return;
     }
-    if (currentStep === 4 && formData.presupuesto < minInversion) {
-      setError(`El presupuesto debe ser de al menos ${minInversion.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })} para las plataformas seleccionadas.`);
-      return;
-    }
     setError('');
     if (currentStep < steps.length) {
+      if (currentStep === 4) {
+          // Trigger modal on the last step
+          setIsResultModalOpen(true);
+      }
       setCurrentStep(currentStep + 1);
     }
   };
 
   const handleBack = () => {
     setError('');
+    if (isResultModalOpen) {
+        setIsResultModalOpen(false);
+    }
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
@@ -74,7 +90,12 @@ const AdCalculator = () => {
       const newPlataformas = prev.plataformas.includes(platform)
         ? prev.plataformas.filter(p => p !== platform)
         : [...prev.plataformas, platform];
-      return { ...prev, plataformas: newPlataformas };
+      const newMinInversion = Math.max(4000, ...newPlataformas.map(p => plataformasPauta[p]?.minInversion || 0));
+      return { 
+          ...prev, 
+          plataformas: newPlataformas,
+          presupuesto: Math.max(prev.presupuesto, newMinInversion)
+      };
     });
   };
 
@@ -93,18 +114,68 @@ const AdCalculator = () => {
     return "20001-150000";
   }
 
+  const handleSendToWhatsapp = () => {
+    const message = `
+    *¡Hola! Quiero mi cotización de publicidad!*
+    \n*Empresa:* ${formData.companyName}
+    *Giro:* ${formData.giro}
+    *Ubicación:* ${formData.estado} - ${formData.municipios.join(', ')}${formData.otroMunicipio ? `, ${formData.otroMunicipio}`: ''}
+    *Plataformas:* ${formData.plataformas.join(', ')}
+    *Tipo de Campaña:* ${formData.campaignType}
+    *Inversión previa:* ${formData.prevInvestment}
+    *Presupuesto mensual estimado:* ${formData.presupuesto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+    \n*Mi número es:* ${whatsappNumber}
+    `;
+    const whatsappUrl = `https://wa.me/5542314150?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+    setIsResultModalOpen(false);
+    setCurrentStep(1);
+    // Reset form
+    setFormData({
+        companyName: '',
+        giro: '',
+        estado: 'CDMX',
+        municipios: ['Benito Juárez'],
+        otroMunicipio: '',
+        plataformas: ['Facebook', 'Instagram'],
+        prevInvestment: 'No',
+        campaignType: 'Performance',
+        presupuesto: 4000
+      });
+  };
+
+
   const renderStep = () => {
     switch (currentStep) {
       case 1:
         return (
-          <div className="space-y-4">
-            <Label>Selecciona tu Giro de Negocio</Label>
-            <Select value={formData.giro} onValueChange={(value) => setFormData({ ...formData, giro: value })}>
-              <SelectTrigger><SelectValue placeholder="Ej. Restaurante, Servicios, etc." /></SelectTrigger>
-              <SelectContent>
-                {girosNegocio.map(giro => <SelectItem key={giro} value={giro}>{giro}</SelectItem>)}
-              </SelectContent>
-            </Select>
+          <div className="space-y-6">
+            <div>
+              <Label htmlFor="companyName">Nombre de tu Empresa</Label>
+              <Input id="companyName" value={formData.companyName} onChange={(e) => setFormData({...formData, companyName: e.target.value})} placeholder="Ej. Mi Negocio Increíble" />
+            </div>
+            <div>
+              <Label>Giro del Negocio</Label>
+              <Select value={formData.giro} onValueChange={(value) => setFormData({ ...formData, giro: value })}>
+                <SelectTrigger><SelectValue placeholder="Ej. Restaurante, Servicios, etc." /></SelectTrigger>
+                <SelectContent>
+                  {girosNegocio.map(giro => <SelectItem key={giro} value={giro}>{giro}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+                <Label>¿Has invertido antes en publicidad digital?</Label>
+                <RadioGroup value={formData.prevInvestment} onValueChange={(value) => setFormData({...formData, prevInvestment: value})} className="flex gap-4 mt-2">
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="Sí" id="inv-si" />
+                        <Label htmlFor="inv-si" className='font-normal'>Sí</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="No" id="inv-no" />
+                        <Label htmlFor="inv-no" className='font-normal'>No</Label>
+                    </div>
+                </RadioGroup>
+            </div>
           </div>
         );
       case 2:
@@ -122,7 +193,8 @@ const AdCalculator = () => {
             {formData.estado && estadosMexico[formData.estado] && estadosMexico[formData.estado][0] !== 'Todos los municipios' && formData.estado !== 'Otro estado' && (
             <div>
                 <Label>Alcaldías / Municipios</Label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2">
+                 <p className="text-sm text-muted-foreground">Selecciona tus principales zonas de interés.</p>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2 max-h-48 overflow-y-auto pr-2">
                     {estadosMexico[formData.estado].map(m => (
                         <div key={m} className="flex items-center space-x-2">
                         <Checkbox id={m} checked={formData.municipios.includes(m)} onCheckedChange={() => handleMunicipioChange(m)} />
@@ -142,33 +214,56 @@ const AdCalculator = () => {
         );
       case 3:
         return (
-          <div className="space-y-2">
-             <Label>Plataformas para Anuncios</Label>
-             <p className="text-sm text-muted-foreground">Selecciona una o más opciones.</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-2">
-              {Object.keys(plataformasPauta).map(p => (
-                <div key={p} className="flex items-center space-x-2">
-                  <Checkbox id={p} checked={formData.plataformas.includes(p)} onCheckedChange={() => handlePlatformChange(p)} />
-                  <Label htmlFor={p} className="font-normal">{p}</Label>
+            <div className="space-y-6">
+                 <div>
+                    <Label>¿Cuál es tu objetivo principal?</Label>
+                    <RadioGroup defaultValue="Performance" value={formData.campaignType} onValueChange={(v) => setFormData({...formData, campaignType: v})} className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <RadioGroupItem value="Performance" id="r1" className="peer sr-only" />
+                            <Label htmlFor="r1" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
+                                <TrendingUp className="mb-3 h-6 w-6" />
+                                Performance
+                                <span className="text-xs font-normal text-center text-muted-foreground mt-2">Ideal para generar acciones directas como ventas, leads o registros. Nos enfocamos en el Retorno de Inversión (ROI).</span>
+                            </Label>
+                        </div>
+                        <div>
+                            <RadioGroupItem value="Awareness" id="r2" className="peer sr-only" />
+                            <Label htmlFor="r2" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
+                                <Bullhorn className="mb-3 h-6 w-6" />
+                                Awareness
+                                <span className="text-xs font-normal text-center text-muted-foreground mt-2">Ideal para dar a conocer tu marca, producto o servicio a una audiencia amplia y construir reconocimiento.</span>
+                            </Label>
+                        </div>
+                    </RadioGroup>
                 </div>
-              ))}
+                <div>
+                    <Label>Plataformas para Anuncios</Label>
+                    <p className="text-sm text-muted-foreground">Selecciona una o más opciones.</p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-2">
+                    {Object.keys(plataformasPauta).map(p => (
+                        <div key={p} className="flex items-center space-x-2">
+                        <Checkbox id={p} checked={formData.plataformas.includes(p)} onCheckedChange={() => handlePlatformChange(p)} />
+                        <Label htmlFor={p} className="font-normal">{p}</Label>
+                        </div>
+                    ))}
+                    </div>
+                </div>
             </div>
-            {formData.plataformas.length > 0 && (
-                 <p className="text-sm text-muted-foreground pt-4">Inversión mínima recomendada para tu selección: <strong>{minInversion.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</strong></p>
-            )}
-          </div>
         );
       case 4:
         return (
-            <div className="space-y-4">
-                <Label htmlFor="presupuesto">Inversión Mensual (MXN)</Label>
-                <Input
-                id="presupuesto"
-                type="number"
-                value={formData.presupuesto}
-                onChange={(e) => setFormData({ ...formData, presupuesto: Number(e.target.value) })}
-                min={minInversion}
-                step={500}
+            <div className="space-y-4 pt-4">
+                <div className='flex justify-between items-baseline'>
+                  <Label htmlFor="presupuesto">Inversión Mensual (MXN)</Label>
+                  <span className="text-2xl font-bold text-primary">{formData.presupuesto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
+                </div>
+                <Slider
+                    id="presupuesto"
+                    min={minInversion}
+                    max={150000}
+                    step={500}
+                    value={[formData.presupuesto]}
+                    onValueChange={(value) => setFormData({ ...formData, presupuesto: value[0] })}
                 />
                  <p className="text-sm text-muted-foreground">Recomendado: al menos {minInversion.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}.</p>
             </div>
@@ -177,7 +272,8 @@ const AdCalculator = () => {
         const budgetKey = getBudgetRangeKey(formData.presupuesto);
         const estimatedReach = tabuladorAlcance[budgetKey] || {};
         return (
-            <div className="space-y-6">
+            <div className="space-y-6 relative">
+                 <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10"></div>
                 <Card>
                     <CardHeader>
                         <CardTitle>Resumen de tu Cotización</CardTitle>
@@ -217,7 +313,7 @@ const AdCalculator = () => {
       <CardHeader>
         <CardTitle>{steps[currentStep-1].title}</CardTitle>
         <CardDescription>{steps[currentStep-1].description}</CardDescription>
-        {currentStep < 5 && <Progress value={(currentStep / (steps.length -1)) * 100} className="mt-4" />}
+        <Progress value={(currentStep / (steps.length -1)) * 100} className="mt-4" />
       </CardHeader>
       <CardContent>
         <AnimatePresence mode="wait">
@@ -227,6 +323,7 @@ const AdCalculator = () => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -50 }}
                 transition={{ duration: 0.3 }}
+                className="min-h-[250px]"
             >
                 {renderStep()}
             </motion.div>
@@ -243,24 +340,52 @@ const AdCalculator = () => {
         )}
 
         <div className="flex justify-between mt-8">
-            <Button variant="outline" onClick={handleBack} disabled={currentStep === 1}>
+            <Button variant="outline" onClick={handleBack} disabled={currentStep === 1 && !isResultModalOpen}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Anterior
             </Button>
-            {currentStep < steps.length ? (
+            {currentStep < steps.length - 1 ? (
                 <Button onClick={handleNext}>
-                   {currentStep === steps.length - 1 ? 'Calcular' : 'Siguiente'}
+                   Siguiente
                    <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
-            ) : (
-                <Button onClick={() => setCurrentStep(1)}>
-                    Reiniciar
+            ) : currentStep === steps.length -1 ? (
+                <Button onClick={handleNext}>
+                    Calcular Estimación
+                    <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
-            )}
+            ): null}
         </div>
       </CardContent>
+
+      <Dialog open={isResultModalOpen} onOpenChange={setIsResultModalOpen}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><MessageSquare className="w-6 h-6 text-primary"/>¡Casi listo!</DialogTitle>
+                <DialogDescription>
+                    Ingresa tu número de WhatsApp para enviarte la cotización detallada y que un experto se ponga en contacto contigo.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+                <Label htmlFor="whatsapp-number">Tu número de WhatsApp</Label>
+                <Input 
+                    id="whatsapp-number" 
+                    type="tel" 
+                    placeholder="Ej. 55 1234 5678" 
+                    value={whatsappNumber}
+                    onChange={(e) => setWhatsappNumber(e.target.value)}
+                />
+            </div>
+            <Button onClick={handleSendToWhatsapp} size="lg" className="w-full">
+                <WhatsappIcon className="w-5 h-5 mr-2" />
+                Enviar y Recibir Cotización
+            </Button>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
 
 export default AdCalculator;
+
+    
