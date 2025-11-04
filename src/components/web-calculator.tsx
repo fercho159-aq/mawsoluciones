@@ -10,13 +10,13 @@ import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, ArrowRight, Briefcase, Bot, ShoppingCart, Send, Link as LinkIcon, Building, Palette, Sparkles, Redo } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Briefcase, Bot, ShoppingCart, Send, Link as LinkIcon, Building, Palette, Sparkles, Redo, CircleDollarSign } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import WhatsappIcon from './icons/whatsapp-icon';
 
 const webGoals = [
     { id: 'ecommerce', label: 'Vender productos directamente', icon: <ShoppingCart />, recommendation: 'Sitio E-commerce' },
-    { id: 'connective', label: 'Presentar mi empresa y servicios', icon: <Building />, recommendation: 'Sitio Conectivo/Corporativo' },
+    { id: 'connective', label: 'Presentar mi empresa y servicios', icon: <Building />, recommendation: 'Sitio Conectivo' },
     { id: 'landing', label: 'Promocionar un producto o evento', icon: <Send />, recommendation: 'Landing Page' },
     { id: 'catalog', label: 'Mostrar un catálogo (sin venta directa)', icon: <Briefcase />, recommendation: 'Sitio de Catálogo' },
 ];
@@ -27,13 +27,18 @@ const designStyles = [
     { id: 'animated', label: 'Animado', icon: <Sparkles /> },
 ];
 
-const steps = [
-  { id: 1, title: 'Tu Negocio', description: 'Cuéntanos sobre tu proyecto.' },
-  { id: 2, 'title': 'Tu Objetivo Principal', description: '¿Qué quieres lograr con tu sitio web?' },
-  { id: 3, title: 'Estilo y Diseño', description: 'Define la apariencia que buscas.' },
-  { id: 4, title: 'Inspiración', description: 'Ayúdanos a entender tu visión.' },
-  { id: 5, title: 'Recomendación', description: 'Tu tipo de sitio web ideal.' }
+const productRanges = [
+    { id: '1-20', label: '1 - 20 productos', price: 15000 },
+    { id: '21-50', label: '21 - 50 productos', price: 18000 },
+    { id: '51-200', label: '51 - 200 productos', price: 22000 },
 ];
+
+const basePrices = {
+    'Sitio E-commerce': 15000,
+    'Sitio Conectivo': 12000,
+    'Landing Page': 8000,
+    'Sitio de Catálogo': 12000,
+};
 
 const WebCalculator = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -46,13 +51,30 @@ const WebCalculator = () => {
     competitors: '',
     designStyle: 'minimalist',
     isRedesign: 'No',
+    productRange: '1-20',
   });
   const [error, setError] = useState('');
+
+  const steps = [
+    { id: 1, title: 'Tu Negocio', description: 'Cuéntanos sobre tu proyecto.' },
+    { id: 2, 'title': 'Tu Objetivo Principal', description: '¿Qué quieres lograr con tu sitio web?' },
+    ...(formData.mainGoal === 'ecommerce' ? [{ id: 3, title: 'Tamaño de tu Tienda', description: '¿Cuántos productos planeas vender?' }] : []),
+    { id: formData.mainGoal === 'ecommerce' ? 4 : 3, title: 'Estilo y Diseño', description: 'Define la apariencia que buscas.' },
+    { id: formData.mainGoal === 'ecommerce' ? 5 : 4, title: 'Inspiración', description: 'Ayúdanos a entender tu visión.' },
+    { id: formData.mainGoal === 'ecommerce' ? 6 : 5, title: 'Recomendación', description: 'Tu tipo de sitio web ideal y costo estimado.' }
+  ];
 
   const recommendation = useMemo(() => {
     const goal = webGoals.find(g => g.id === formData.mainGoal);
     return goal?.recommendation || 'Sitio Web';
   }, [formData.mainGoal]);
+
+  const price = useMemo(() => {
+      if (recommendation === 'Sitio E-commerce') {
+          return productRanges.find(r => r.id === formData.productRange)?.price || basePrices['Sitio E-commerce'];
+      }
+      return basePrices[recommendation as keyof typeof basePrices] || 0;
+  }, [recommendation, formData.productRange]);
 
   const handleNext = () => {
     if (currentStep === 1 && (!formData.companyName || !formData.personName)) {
@@ -76,24 +98,30 @@ const WebCalculator = () => {
 
   const handleSendToWhatsapp = () => {
     const designStyleLabel = designStyles.find(d => d.id === formData.designStyle)?.label || 'No especificado';
+    const productRangeLabel = productRanges.find(r => r.id === formData.productRange)?.label || '';
+    
     const message = `
 *¡Hola! Quiero una cotización para mi sitio web!*
 \n*Empresa:* ${formData.companyName}
 *Nombre:* ${formData.personName}
-*Objetivo Principal:* ${recommendation}
+*Tipo de Sitio Recomendado:* ${recommendation}
+${formData.mainGoal === 'ecommerce' ? `*Cantidad de Productos:* ${productRangeLabel}` : ''}
+*Precio Estimado Mostrado:* ${price.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
 *¿Busca rediseño?:* ${formData.isRedesign}
 *Estilo de diseño preferido:* ${designStyleLabel}
 *Sitios de referencia:* 
 ${formData.competitors || 'No especificados'}
 \n*Mi número es:* ${whatsappNumber}
     `;
-    const whatsappUrl = `https://wa.me/5542314150?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/5542314150?text=${encodeURIComponent(message.trim())}`;
     window.open(whatsappUrl, '_blank');
     setIsResultModalOpen(false);
   };
 
   const renderStep = () => {
-    switch (currentStep) {
+    const stepConfig = steps[currentStep-1];
+    
+    switch (stepConfig.id) {
       case 1:
         return (
           <div className="space-y-6">
@@ -130,6 +158,25 @@ ${formData.competitors || 'No especificados'}
             </div>
         );
        case 3:
+        if (formData.mainGoal === 'ecommerce') {
+            return (
+                <div className="space-y-4">
+                    <Label>¿Cuántos productos diferentes planeas vender inicialmente?</Label>
+                    <RadioGroup value={formData.productRange} onValueChange={(value) => setFormData({...formData, productRange: value})} className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                        {productRanges.map(range => (
+                            <div key={range.id}>
+                                <RadioGroupItem value={range.id} id={range.id} className="peer sr-only" />
+                                <Label htmlFor={range.id} className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 h-28 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
+                                    <span className="font-semibold text-center">{range.label}</span>
+                                </Label>
+                            </div>
+                        ))}
+                    </RadioGroup>
+                </div>
+            );
+        }
+        // Fallthrough for non-ecommerce
+      case formData.mainGoal === 'ecommerce' ? 4 : 3:
         return (
             <div className="space-y-8">
                 <div>
@@ -161,11 +208,11 @@ ${formData.competitors || 'No especificados'}
                 </div>
             </div>
         );
-      case 4:
+      case formData.mainGoal === 'ecommerce' ? 5 : 4:
         return (
             <div className="space-y-4">
                 <Label htmlFor="competitors">Inspiración y Competencia</Label>
-                <p className="text-sm text-muted-foreground">Menciona algunos sitios web que te gusten (pueden ser de tu competencia o no). Esto nos ayuda a entender el estilo que buscas. Pega las URLs aquí.</p>
+                <p className="text-sm text-muted-foreground">Menciona algunos sitios web que te gusten (pueden ser de tu competencia o no). Si no tienes, ¡no te preocupes! Déjalo en blanco.</p>
                 <Textarea 
                     id="competitors"
                     value={formData.competitors}
@@ -175,7 +222,7 @@ ${formData.competitors || 'No especificados'}
                 />
             </div>
         );
-      case 5:
+      case formData.mainGoal === 'ecommerce' ? 6 : 5:
         const recommendedGoal = webGoals.find(g => g.id === formData.mainGoal);
         return (
             <div className="text-center py-8">
@@ -187,12 +234,17 @@ ${formData.competitors || 'No especificados'}
                     <p className="text-5xl sm:text-6xl font-bold text-primary my-2">{recommendation}</p>
                     <Card className="mt-6 text-left">
                         <CardHeader>
-                            <CardTitle>¿Qué significa esto?</CardTitle>
+                            <CardTitle className='flex items-center gap-2'><CircleDollarSign /> Inversión Estimada</CardTitle>
                         </CardHeader>
                         <CardContent>
-                             <p className="text-foreground/80">
-                                Un <strong>{recommendation}</strong> está diseñado específicamente para <strong>{recommendedGoal?.label.toLowerCase()}</strong>. Es la herramienta perfecta para alcanzar tus objetivos porque se centra en funcionalidades clave para ello, ya sea un catálogo de productos, un sistema de reservaciones, o una vía directa para generar contactos.
+                             <p className="text-2xl font-bold">
+                                {price.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+                                {recommendation !== 'Sitio E-commerce' && <span className="text-lg font-normal text-muted-foreground ml-2">(desde)</span>}
                              </p>
+                             <p className="text-foreground/80 mt-2">
+                                Un <strong>{recommendation}</strong> está diseñado específicamente para <strong>{recommendedGoal?.label.toLowerCase()}</strong>. Es la herramienta perfecta para alcanzar tus objetivos porque se centra en funcionalidades clave para ello.
+                             </p>
+                              <p className="text-xs text-muted-foreground mt-4">*Este es un precio estimado y puede variar según la complejidad final del proyecto.</p>
                         </CardContent>
                     </Card>
                 </motion.div>
