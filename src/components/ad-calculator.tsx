@@ -12,7 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ArrowLeft, ArrowRight, BarChart, Users, AlertTriangle, MessageSquare, Building2, TrendingUp, Bullhorn } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BarChart, Users, AlertTriangle, MessageSquare, Building2, TrendingUp, Megaphone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import WhatsappIcon from './icons/whatsapp-icon';
 
@@ -240,7 +240,7 @@ const AdCalculator = () => {
                         <div>
                             <RadioGroupItem value="Awareness" id="r2" className="peer sr-only" />
                             <Label htmlFor="r2" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
-                                <Bullhorn className="mb-3 h-6 w-6" />
+                                <Megaphone className="mb-3 h-6 w-6" />
                                 Awareness
                                 <span className="text-xs font-normal text-center text-muted-foreground mt-2">Ideal para dar a conocer tu marca, producto o servicio a una audiencia amplia y construir reconocimiento.</span>
                             </Label>
