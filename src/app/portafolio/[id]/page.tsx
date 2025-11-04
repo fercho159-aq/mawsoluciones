@@ -56,7 +56,7 @@ export default function PortfolioItemPage({
             {/* Columna Derecha: Información */}
             <div className="prose prose-lg max-w-none text-foreground/80 prose-headings:font-headline prose-headings:text-foreground">
               <Badge variant="secondary" className="mb-4">{item.category}</Badge>
-              <h1 className="font-headline text-4xl sm:text-5xl font-bold mb-4">
+              <h1 className="font-headline text-2xl sm:text-3xl font-bold mb-4">
                 {item.title}
               </h1>
               <p className="text-lg sm:text-xl text-foreground/80">
@@ -78,39 +78,6 @@ export default function PortfolioItemPage({
                     </a>
                 </Button>
               </div>
-
-              {item.challenge && (
-                <>
-                  <h2 className="font-headline text-3xl sm:text-4xl font-bold mt-12">
-                    El Desafío
-                  </h2>
-                  <p>{item.challenge}</p>
-                </>
-              )}
-
-              {item.solution && (
-                <>
-                  <h2 className="font-headline text-3xl sm:text-4xl font-bold mt-12">
-                    Nuestra Solución
-                  </h2>
-                  <p>{item.solution}</p>
-                </>
-              )}
-
-              {item.services && item.services.length > 0 && (
-                <>
-                    <h3 className="font-headline text-2xl font-bold mt-12 mb-4">Servicios Prestados</h3>
-                    <ul className="not-prose space-y-3">
-                    {item.services.map(service => (
-                        <li key={service} className="flex items-center text-lg">
-                        <CheckCircle2 className="w-5 h-5 text-primary mr-3 flex-shrink-0" />
-                        <span>{service}</span>
-                        </li>
-                    ))}
-                    </ul>
-                </>
-              )}
-
             </div>
           </div>
 
