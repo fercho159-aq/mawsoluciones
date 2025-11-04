@@ -19,7 +19,12 @@ import WhatsappIcon from './icons/whatsapp-icon';
 const girosNegocioContenido = [ "Restaurante/Gastronomía", "Servicios Profesionales", "Retail/Ropa/Moda", "Salud/Medicina/Bienestar", "Bienes Raíces/Inmobiliario", "Educación/Cursos", "Entretenimiento/Eventos", "Turismo/Hospitalidad", "Automotriz", "Tecnología/Software", "Construcción/Industrial", "Beauty/Cosméticos", "Otro" ];
 const objetivosContenido = [ "Generar ventas directas", "Construir marca/awareness", "Captar leads/clientes potenciales", "Fidelizar clientes actuales", "Posicionamiento de expertos", "Promocionar eventos/lanzamientos" ];
 const publicoObjetivo = [ "Jóvenes 18-25 años", "Adultos jóvenes 26-35 años", "Adultos 36-50 años", "Ejecutivos/Profesionales", "Familias", "Empresas/B2B", "Amas de casa", "Estudiantes" ];
-const recursosDisponibles = [ "Solo teléfono celular", "Cámara básica + edición simple", "Equipo profesional (cámara, audio, iluminación)", "Presupuesto para contenido profesional", "Mix de recursos propios y externos" ];
+const situacionActual = [
+    "No creo contenido actualmente",
+    "Lo hago yo mismo, pero sin consistencia",
+    "Tengo a alguien en mi equipo que me ayuda ocasionalmente",
+    "Busco un equipo profesional que se encargue de todo"
+];
 const frecuenciaPlataformas = { "Instagram": { "Alta": "1-2 posts diarios + Stories cada 4-6 horas", "Media": "4-5 posts semanales + Stories diarias", "Baja": "2-3 posts semanales + Stories 3-4 veces/semana" }, "Facebook": { "Alta": "1-2 posts diarios", "Media": "3-4 posts semanales", "Baja": "1-2 posts semanales" }, "TikTok": { "Alta": "3-5 videos diarios", "Media": "1-2 videos diarios", "Baja": "4-5 videos semanales" }, "LinkedIn": { "Alta": "1 post diario + engagement constante", "Media": "3-4 posts semanales", "Baja": "1-2 posts semanales" }, "YouTube": { "Alta": "2-3 videos semanales", "Media": "1 video semanal", "Baja": "1-2 videos mensuales" }, "Twitter/X": { "Alta": "3-5 tweets diarios", "Media": "1-2 tweets diarios", "Baja": "3-4 tweets semanales" } };
 const contenidoPorGiro: Record<string, Record<string, string[] | string>> = { "Restaurante/Gastronomía": { "Instagram": ["Reels de preparación", "Fotos de platillos", "Stories detrás de cámaras", "Tutoriales rápidos"], "TikTok": ["Videos de cocina speed-up", "Retos foodie", "Tendencias gastronómicas"], "Facebook": ["Fotos del menú", "Reseñas de clientes", "Eventos especiales"], "Recomendación": "Enfócate en contenido visual y emocional, muestra texturas y colores para antojar." }, "Servicios Profesionales": { "LinkedIn": ["Casos de éxito", "Artículos de expertise", "Testimonios clientes"], "Facebook": ["Tips del sector", "Infografías", "Webinars"], "Instagram": ["Carousel educativos", "Reels con consejos rápidos"], "Recomendación": "Genera contenido de valor que te posicione como un experto y construya confianza." }, "Retail/Ropa/Moda": { "Instagram": ["Outfit ideas", "Reels de styling", "User generated content"], "TikTok": ["Hauls", "Try-on hauls", "Tendencias moda"], "Facebook": ["Catálogos", "Ofertas especiales", "Fashion tips"], "Recomendación": "Crea contenido inspiracional y aspiracional que muestre tu producto en acción." }, "Bienes Raíces/Inmobiliario": { "Facebook": ["Tours virtuales", "Fotos de propiedades", "Tips de compra/venta"], "Instagram": ["Reels de propiedades", "Stories Q&A", "Carousel de consejos"], "LinkedIn": ["Análisis de mercado", "Artículos legales", "Casos de éxito"], "Recomendación": "El contenido debe generar confianza y mostrar tu expertise en el mercado." }, "Default": { "Instagram": ["Carruseles informativos", "Reels mostrando tu producto/servicio", "Stories interactivas (encuestas, Q&A)"], "TikTok": ["Videos cortos y entretenidos", "Tutoriales rápidos", "Únete a tendencias"], "Facebook": ["Comparte artículos de tu blog", "Publica testimonios", "Crea eventos"], "Recomendación": "Adapta el contenido a tu audiencia específica, sé auténtico y aporta valor." } };
 const mejoresHorarios: Record<string, string> = { "Instagram": "7-9 AM, 12-2 PM, 5-9 PM", "Facebook": "9 AM-12 PM, 1-4 PM, 7-10 PM", "TikTok": "6-10 AM, 7-11 PM", "LinkedIn": "7-9 AM, 12-2 PM, 5-6 PM", "YouTube": "12-4 PM, 7-10 PM", "Twitter/X": "8-10 AM, 12-2 PM, 6-9 PM" };
@@ -27,7 +32,7 @@ const mejoresHorarios: Record<string, string> = { "Instagram": "7-9 AM, 12-2 PM,
 const steps = [
   { id: 1, title: 'Tu Negocio', description: 'Cuéntanos sobre tu empresa.' },
   { id: 2, title: 'Tu Audiencia y Metas', description: '¿A quién le hablas y qué quieres lograr?' },
-  { id: 3, title: 'Capacidad de Creación', description: 'Seamos realistas con tus recursos.' },
+  { id: 3, title: 'Tu Situación Actual', description: 'Ayúdanos a entender tu capacidad de creación.' },
   { id: 4, title: 'Resultados', description: 'Tu estrategia de contenido inicial.' }
 ];
 
@@ -42,9 +47,8 @@ const ContentRecommender = () => {
     giro: '',
     objetivo: '',
     publico: '',
-    recursos: '',
+    situacion: '',
     plataformas: ['Instagram'],
-    tiempo: '1-3 horas semanales (Baja frecuencia)',
   });
   const [error, setError] = useState('');
 
@@ -57,8 +61,8 @@ const ContentRecommender = () => {
       setError('Por favor, completa todos los campos.');
       return;
     }
-     if (currentStep === 3 && (!formData.recursos || formData.plataformas.length === 0)) {
-      setError('Por favor, selecciona tus recursos y al menos una plataforma.');
+     if (currentStep === 3 && (!formData.situacion || formData.plataformas.length === 0)) {
+      setError('Por favor, selecciona tu situación y al menos una plataforma.');
       return;
     }
     setError('');
@@ -92,8 +96,8 @@ const ContentRecommender = () => {
 
   const generateRecommendation = () => {
     let intensidad = "Media";
-    if (formData.tiempo.includes("1-3 horas")) intensidad = "Baja";
-    if (formData.tiempo.includes("8+ horas")) intensidad = "Alta";
+    if (formData.situacion.includes("sin consistencia")) intensidad = "Baja";
+    if (formData.situacion.includes("profesional")) intensidad = "Alta";
 
     const recomendacion = {
         frecuencia: formData.plataformas.reduce((acc, p) => ({ ...acc, [p]: frecuenciaPlataformas[p as keyof typeof frecuenciaPlataformas][intensidad as keyof typeof frecuenciaPlataformas[keyof typeof frecuenciaPlataformas]] }), {}),
@@ -110,8 +114,7 @@ const ContentRecommender = () => {
 *Estrategia de Contenido para ${formData.companyName}*
 \n*Objetivo:* ${formData.objetivo}
 *Público:* ${formData.publico}
-*Recursos:* ${formData.recursos}
-*Tiempo Semanal:* ${formData.tiempo}
+*Situación Actual:* ${formData.situacion}
 *Plataformas:* ${formData.plataformas.join(', ')}
 `;
 
@@ -119,7 +122,7 @@ const ContentRecommender = () => {
     formData.plataformas.forEach(p => {
         recomendacionTexto += `
 \n*Plataforma: ${p}*
-- *Frecuencia:* ${recomendacion.frecuencia[p as keyof typeof recomendacion.frecuencia]}
+- *Frecuencia Sugerida:* ${recomendacion.frecuencia[p as keyof typeof recomendacion.frecuencia]}
 - *Contenido Sugerido:* ${(recomendacion.tipoContenido[p as keyof typeof recomendacion.tipoContenido] as string[]).slice(0,2).join(', ')}...
 - *Mejores Horarios:* ${recomendacion.mejoresHorarios[p as keyof typeof recomendacion.mejoresHorarios]}
         `;
@@ -193,21 +196,8 @@ ${recomendacionTexto}
       case 3:
         return (
             <div className="space-y-6">
-                <div>
-                    <Label>¿Con qué recursos cuentas para crear contenido?</Label>
-                    <RadioGroup value={formData.recursos} onValueChange={(value) => setFormData({...formData, recursos: value})} className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                        {recursosDisponibles.map(r => (
-                             <div key={r}>
-                                <RadioGroupItem value={r} id={r} className="peer sr-only" />
-                                <Label htmlFor={r} className="flex items-center justify-center text-center rounded-md border-2 border-muted bg-popover p-4 h-24 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
-                                    <span className="font-semibold">{r}</span>
-                                </Label>
-                            </div>
-                        ))}
-                    </RadioGroup>
-                </div>
                  <div>
-                    <Label>¿En qué plataformas quieres estar? (Máximo 3)</Label>
+                    <Label>¿En qué plataformas quieres tener presencia? (Máximo 3)</Label>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-2">
                         {Object.keys(frecuenciaPlataformas).map(p => (
                             <div key={p} className="flex items-center space-x-2">
@@ -218,20 +208,22 @@ ${recomendacionTexto}
                     </div>
                 </div>
                  <div>
-                    <Label>¿Cuánto tiempo puedes dedicar semanalmente a crear contenido?</Label>
-                    <Select value={formData.tiempo} onValueChange={(value) => setFormData({ ...formData, tiempo: value })}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                           <SelectItem value="1-3 horas semanales (Baja frecuencia)">1-3 horas (Bajo)</SelectItem>
-                           <SelectItem value="4-7 horas semanales (Media frecuencia)">4-7 horas (Medio)</SelectItem>
-                           <SelectItem value="8+ horas semanales (Alta frecuencia)">8+ horas (Alto)</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    <Label>¿Cuál es tu situación actual con la creación de contenido?</Label>
+                    <RadioGroup value={formData.situacion} onValueChange={(value) => setFormData({...formData, situacion: value})} className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        {situacionActual.map(r => (
+                             <div key={r}>
+                                <RadioGroupItem value={r} id={r} className="peer sr-only" />
+                                <Label htmlFor={r} className="flex items-center justify-center text-center rounded-md border-2 border-muted bg-popover p-4 h-24 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
+                                    <span className="font-semibold">{r}</span>
+                                </Label>
+                            </div>
+                        ))}
+                    </RadioGroup>
                 </div>
             </div>
         );
       case 4:
-        if (!showResults) return <div className="min-h-[300px] bg-background/50 backdrop-blur-sm" />;
+        if (!showResults) return <div className="min-h-[300px] flex items-center justify-center bg-background/50 backdrop-blur-sm rounded-lg"><p className="text-muted-foreground">Completa los pasos para ver tu recomendación...</p></div>;
         
         const recomendacion = generateRecommendation();
         return (
@@ -348,5 +340,3 @@ ${recomendacionTexto}
 };
 
 export default ContentRecommender;
-
-    
