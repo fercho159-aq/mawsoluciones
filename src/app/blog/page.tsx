@@ -6,6 +6,7 @@ import AnimatedDiv from '@/components/animated-div';
 import { ArrowRight, Calendar, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import TypewriterTitle from '@/components/typewriter-title';
 
 export default function BlogPage() {
   const featuredPost = blogPosts[0];
@@ -16,12 +17,7 @@ export default function BlogPage() {
       <section className="py-24 sm:py-32 md:py-40 bg-card">
         <div className="container mx-auto px-4 md:px-6 text-center">
           <AnimatedDiv className="max-w-3xl mx-auto">
-            <h1 className="font-headline text-4xl sm:text-5xl font-bold">
-              Nuestro Blog
-            </h1>
-            <p className="mt-6 text-lg sm:text-xl text-foreground/80">
-              Ideas, tendencias y estrategias del mundo del marketing digital para ayudarte a crecer.
-            </p>
+            <TypewriterTitle text="Nuestro Blog" />
           </AnimatedDiv>
         </div>
       </section>
