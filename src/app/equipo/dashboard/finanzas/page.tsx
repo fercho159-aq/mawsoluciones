@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Table,
   TableHeader,
@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, ArrowRight, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
+import { ArrowUpDown, ArrowRight, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Wallet, Briefcase, Landmark } from 'lucide-react';
 import WhatsappIcon from '@/components/icons/whatsapp-icon';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,7 +22,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
+import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 // --- Types ---
@@ -58,11 +58,21 @@ const mockCuentasPorCobrar: FinanzasData[] = [
   { cliente: "Polanco Santino", periodo: "1-30 Nov", monto: 9200, metodo: "Whatsapp", whatsapp: "5215555667788" },
 ];
 
-const mockMovimientosDiarios: MovimientoDiario[] = [
-    { id: 'm1', fecha: new Date(), tipo: 'Ingreso', descripcion: 'Pago cliente Biofert', monto: 5000, cuenta: 'Cuenta MAW'},
-    { id: 'm2', fecha: new Date(), tipo: 'Gasto', descripcion: 'Pago de software de diseño', monto: 1200, cuenta: 'Cuenta Paola'},
-    { id: 'm3', fecha: new Date(), tipo: 'Ingreso', descripcion: 'Adelanto proyecto NIU', monto: 4250, cuenta: 'Fer'},
-]
+const generateMonthlyMockData = (): MovimientoDiario[] => {
+    const today = new Date();
+    const start = startOfMonth(today);
+    return [
+        { id: 'm1', fecha: new Date(start.getTime() + 86400000 * 2), tipo: 'Ingreso', descripcion: 'Pago cliente Biofert', monto: 5000, cuenta: 'Cuenta MAW'},
+        { id: 'm2', fecha: new Date(start.getTime() + 86400000 * 3), tipo: 'Gasto', descripcion: 'Pago de software de diseño', monto: 1200, cuenta: 'Cuenta Paola'},
+        { id: 'm3', fecha: new Date(start.getTime() + 86400000 * 5), tipo: 'Ingreso', descripcion: 'Adelanto proyecto NIU', monto: 4250, cuenta: 'Fer'},
+        { id: 'm4', fecha: new Date(start.getTime() + 86400000 * 7), tipo: 'Ingreso', descripcion: 'Pago Polanco Santino', monto: 9200, cuenta: 'Cuenta MAW'},
+        { id: 'm5', fecha: new Date(start.getTime() + 86400000 * 10), tipo: 'Gasto', descripcion: 'Publicidad en Meta', monto: 5000, cuenta: 'Cuenta MAW'},
+        { id: 'm6', fecha: new Date(start.getTime() + 86400000 * 12), tipo: 'Ingreso', descripcion: 'Pago cliente Medical Tower', monto: 12000, cuenta: 'Cuenta Paola'},
+        { id: 'm7', fecha: new Date(start.getTime() + 86400000 * 15), tipo: 'Gasto', descripcion: 'Nómina', monto: 25000, cuenta: 'Cuenta MAW'},
+    ]
+}
+
+const mockMovimientosDiarios: MovimientoDiario[] = generateMonthlyMockData();
 
 // --- Components ---
 const CuentasPorCobrarTab = () => {
@@ -259,70 +269,138 @@ const MovimientoDialog = ({ tipo, onSave, children }: MovimientoDialogProps) => 
     );
 };
 
-const TablaDiariaTab = () => {
-    const [movimientos, setMovimientos] = useState<MovimientoDiario[]>(mockMovimientosDiarios);
+const TablaDiariaTab = ({ movimientos, onAddMovimiento }: { movimientos: MovimientoDiario[], onAddMovimiento: (mov: Omit<MovimientoDiario, 'id'|'fecha'>) => void }) => {
+    
+    const monthlyData = useMemo(() => {
+        const today = new Date();
+        const start = startOfMonth(today);
+        const end = endOfMonth(today);
+        return movimientos.filter(mov => isWithinInterval(mov.fecha, { start, end }));
+    }, [movimientos]);
 
-    const handleAddMovimiento = (nuevoMovimiento: Omit<MovimientoDiario, 'id' | 'fecha'>) => {
-        const fullMovimiento: MovimientoDiario = {
-            id: `mov-${Date.now()}`,
-            fecha: new Date(),
-            ...nuevoMovimiento,
+    const accountSummary = useMemo(() => {
+        const summary = monthlyData.reduce((acc, mov) => {
+            if (mov.tipo === 'Ingreso') {
+                if (!acc[mov.cuenta]) {
+                    acc[mov.cuenta] = 0;
+                }
+                acc[mov.cuenta] += mov.monto;
+            }
+            return acc;
+        }, {} as Record<string, number>);
+
+        const totalGastos = monthlyData.filter(m => m.tipo === 'Gasto').reduce((sum, m) => sum + m.monto, 0);
+        const totalIngresos = Object.values(summary).reduce((sum, val) => sum + val, 0);
+
+        return { 
+            summary, 
+            totalGastos,
+            totalIngresos,
+            balance: totalIngresos - totalGastos,
+            otros: Object.entries(summary).filter(([key]) => key !== 'Cuenta MAW' && key !== 'Cuenta Paola').reduce((sum, [, val]) => sum + val, 0)
         };
-        setMovimientos(prev => [fullMovimiento, ...prev]);
-    }
+    }, [monthlyData]);
+
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Tabla Diaria de Movimientos</CardTitle>
-                <CardDescription>Registro de todos los ingresos y gastos del día.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="border rounded-lg">
-                     <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Fecha</TableHead>
-                                <TableHead>Tipo</TableHead>
-                                <TableHead>Descripción</TableHead>
-                                <TableHead>Cuenta</TableHead>
-                                <TableHead className="text-right">Monto</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {movimientos.map(mov => (
-                                <TableRow key={mov.id}>
-                                    <TableCell>{format(mov.fecha, 'dd MMM yyyy, HH:mm', { locale: es })}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={mov.tipo === 'Ingreso' ? 'default' : 'destructive'} className={cn(
-                                            mov.tipo === 'Ingreso' && 'bg-green-500 hover:bg-green-500/80'
-                                        )}>
-                                            {mov.tipo === 'Ingreso' ? <TrendingUp className="w-4 h-4 mr-1"/> : <TrendingDown className="w-4 h-4 mr-1"/>}
-                                            {mov.tipo}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="font-medium">{mov.descripcion}</TableCell>
-                                    <TableCell>{mov.cuenta}</TableCell>
-                                    <TableCell className={cn("text-right font-bold", mov.tipo === 'Ingreso' ? 'text-green-500' : 'text-destructive')}>
-                                        {mov.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                    {movimientos.length === 0 && (
-                        <div className="text-center p-8 text-foreground/70">
-                            No hay movimientos registrados hoy.
+        <div className='space-y-4'>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                 <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Ingresos Cuenta MAW</CardTitle>
+                        <Landmark className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{accountSummary.summary['Cuenta MAW']?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) ?? '$0.00'}</div>
+                        <p className="text-xs text-muted-foreground">Ingresos del mes</p>
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Ingresos Cuenta Paola</CardTitle>
+                        <Wallet className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{accountSummary.summary['Cuenta Paola']?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) ?? '$0.00'}</div>
+                         <p className="text-xs text-muted-foreground">Ingresos del mes</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Ingresos (Otros)</CardTitle>
+                        <Briefcase className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{accountSummary.otros.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div>
+                         <p className="text-xs text-muted-foreground">Fer, Alma, etc.</p>
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Balance Neto Mensual</CardTitle>
+                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className={cn("text-2xl font-bold", accountSummary.balance >= 0 ? 'text-green-500' : 'text-destructive')}>
+                            {accountSummary.balance.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
                         </div>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
+                         <p className="text-xs text-muted-foreground">Total Ingresos - Total Gastos</p>
+                    </CardContent>
+                </Card>
+            </div>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Movimientos de {format(new Date(), 'MMMM yyyy', { locale: es })}</CardTitle>
+                    <CardDescription>Registro de todos los ingresos y gastos del mes.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="border rounded-lg">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Fecha</TableHead>
+                                    <TableHead>Tipo</TableHead>
+                                    <TableHead>Descripción</TableHead>
+                                    <TableHead>Cuenta</TableHead>
+                                    <TableHead className="text-right">Monto</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {monthlyData.map(mov => (
+                                    <TableRow key={mov.id}>
+                                        <TableCell>{format(mov.fecha, 'dd MMM yyyy, HH:mm', { locale: es })}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={mov.tipo === 'Ingreso' ? 'default' : 'destructive'} className={cn(
+                                                mov.tipo === 'Ingreso' && 'bg-green-500 hover:bg-green-500/80'
+                                            )}>
+                                                {mov.tipo === 'Ingreso' ? <TrendingUp className="w-4 h-4 mr-1"/> : <TrendingDown className="w-4 h-4 mr-1"/>}
+                                                {mov.tipo}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="font-medium">{mov.descripcion}</TableCell>
+                                        <TableCell>{mov.cuenta}</TableCell>
+                                        <TableCell className={cn("text-right font-bold", mov.tipo === 'Ingreso' ? 'text-green-500' : 'text-destructive')}>
+                                            {mov.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                        {monthlyData.length === 0 && (
+                            <div className="text-center p-8 text-foreground/70">
+                                No hay movimientos registrados este mes.
+                            </div>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
     )
 }
 
 export default function FinanzasPage() {
     const [movimientos, setMovimientos] = useState<MovimientoDiario[]>(mockMovimientosDiarios);
+    const [activeTab, setActiveTab] = useState("cuentas-por-cobrar");
     
     const handleAddMovimiento = (nuevoMovimiento: Omit<MovimientoDiario, 'id' | 'fecha'>) => {
         const fullMovimiento: MovimientoDiario = {
@@ -335,36 +413,38 @@ export default function FinanzasPage() {
     
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold font-headline">Gestión Financiera</h1>
-        <div className="flex gap-2">
-            <MovimientoDialog tipo="Ingreso" onSave={(data) => handleAddMovimiento({ ...data, tipo: 'Ingreso' })}>
-                <Button>
-                    <PlusCircle className="w-4 h-4 mr-2" />
-                    Registrar Ingreso
-                </Button>
-            </MovimientoDialog>
-            <MovimientoDialog tipo="Gasto" onSave={(data) => handleAddMovimiento({ ...data, tipo: 'Gasto' })}>
-                <Button variant="destructive">
-                    <MinusCircle className="w-4 h-4 mr-2" />
-                    Registrar Gasto
-                </Button>
-            </MovimientoDialog>
+        <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold font-headline">{activeTab === 'cuentas-por-cobrar' ? 'Gestión de Cobranza' : 'Control Financiero Mensual'}</h1>
+            {activeTab === 'tabla-diaria' && (
+                <div className="flex gap-2">
+                    <MovimientoDialog tipo="Ingreso" onSave={(data) => handleAddMovimiento({ ...data, tipo: 'Ingreso' })}>
+                        <Button>
+                            <PlusCircle className="w-4 h-4 mr-2" />
+                            Registrar Ingreso
+                        </Button>
+                    </MovimientoDialog>
+                    <MovimientoDialog tipo="Gasto" onSave={(data) => handleAddMovimiento({ ...data, tipo: 'Gasto' })}>
+                        <Button variant="destructive">
+                            <MinusCircle className="w-4 h-4 mr-2" />
+                            Registrar Gasto
+                        </Button>
+                    </MovimientoDialog>
+                </div>
+            )}
         </div>
-      </div>
       
-      <Tabs defaultValue="cuentas-por-cobrar" className="w-full">
+        <Tabs defaultValue="cuentas-por-cobrar" className="w-full" onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="cuentas-por-cobrar">Cuentas por Cobrar</TabsTrigger>
                 <TabsTrigger value="tabla-diaria">Tabla Diaria</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="cuentas-por-cobrar">
+            <TabsContent value="cuentas-por-cobrar" className="mt-4">
                <CuentasPorCobrarTab />
             </TabsContent>
 
-            <TabsContent value="tabla-diaria">
-                <TablaDiariaTab />
+            <TabsContent value="tabla-diaria" className="mt-4">
+                <TablaDiariaTab movimientos={movimientos} onAddMovimiento={handleAddMovimiento} />
             </TabsContent>
         </Tabs>
     </div>
