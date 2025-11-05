@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Table,
   TableHeader,
@@ -17,7 +17,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { mockData, type Pendiente, type StatusPendiente } from '@/lib/activities-data';
+import { mockData, type Activity, type StatusPendiente } from '@/lib/activities-data';
 
 const statusColors: Record<StatusPendiente, string> = {
   "Pendiente del cliente": "bg-orange-500",
@@ -29,7 +29,7 @@ const encargados = Array.from(new Set(mockData.map(item => item.encargado))).sor
 const statuses = Array.from(new Set(mockData.map(item => item.status)));
 
 
-const PendientesTable = ({ data }: { data: Pendiente[] }) => {
+const PendientesTable = ({ data }: { data: Activity[] }) => {
     if (data.length === 0) {
         return (
             <div className="text-center p-8 text-foreground/70">
@@ -79,31 +79,44 @@ const PendientesTable = ({ data }: { data: Pendiente[] }) => {
 
 
 export default function PendientesPage() {
+    const [pendientes, setPendientes] = useState<Activity[]>(mockData);
     const [encargadoFilter, setEncargadoFilter] = useState('Todos');
     const [ejecutorFilter, setEjecutorFilter] = useState('Todos');
     const [statusFilter, setStatusFilter] = useState('Todos');
     const [searchFilter, setSearchFilter] = useState('');
 
+    useEffect(() => {
+        try {
+            const storedPendientes = localStorage.getItem('pendientes');
+            if (storedPendientes) {
+                setPendientes(JSON.parse(storedPendientes));
+            }
+        } catch (e) {
+            console.error("Failed to load pendientes from local storage", e);
+            setPendientes(mockData);
+        }
+    }, []);
+
     const ejecutoresDisponibles = useMemo(() => {
         if (encargadoFilter === 'Todos') {
-            return Array.from(new Set(mockData.map(item => item.ejecutor))).sort();
+            return Array.from(new Set(pendientes.map(item => item.ejecutor))).sort();
         }
-        return Array.from(new Set(mockData.filter(item => item.encargado === encargadoFilter).map(item => item.ejecutor))).sort();
-    }, [encargadoFilter]);
+        return Array.from(new Set(pendientes.filter(item => item.encargado === encargadoFilter).map(item => item.ejecutor))).sort();
+    }, [encargadoFilter, pendientes]);
 
     React.useEffect(() => {
         setEjecutorFilter('Todos');
     }, [encargadoFilter]);
 
     const filteredData = useMemo(() => {
-        return mockData.filter(item => {
+        return pendientes.filter(item => {
             const encargadoMatch = encargadoFilter === 'Todos' || item.encargado === encargadoFilter;
             const ejecutorMatch = ejecutorFilter === 'Todos' || item.ejecutor === ejecutorFilter;
             const statusMatch = statusFilter === 'Todos' || item.status === statusFilter;
             const searchMatch = searchFilter === '' || item.cliente.toLowerCase().includes(searchFilter.toLowerCase()) || item.pendientePrincipal.toLowerCase().includes(searchFilter.toLowerCase());
             return encargadoMatch && ejecutorMatch && statusMatch && searchMatch;
         });
-    }, [encargadoFilter, ejecutorFilter, statusFilter, searchFilter]);
+    }, [encargadoFilter, ejecutorFilter, statusFilter, searchFilter, pendientes]);
 
   return (
     <div>
