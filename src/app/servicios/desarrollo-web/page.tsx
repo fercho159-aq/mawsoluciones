@@ -1,9 +1,34 @@
+
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, CodeXml, Send, Link as LinkIcon, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import ParallaxImages from "@/components/sections/parallax-images";
 import Link from "next/link";
 import WebCalculator from "@/components/web-calculator";
+import { Card, CardContent } from "@/components/ui/card";
+import AnimatedDiv from "@/components/animated-div";
+
+const siteTypes = [
+  {
+    title: "Landing Page",
+    icon: <Send className="w-10 h-10 text-primary" />,
+    description: "Páginas de aterrizaje optimizadas para una sola acción, diseñadas para maximizar la conversión de tus campañas.",
+    category: "Landing",
+  },
+  {
+    title: "Sitio Conectivo",
+    icon: <LinkIcon className="w-10 h-10 text-primary" />,
+    description: "Sitios web corporativos para presentar tu marca, mostrar tus servicios y conectar con tu audiencia de manera profesional.",
+    category: "Connective",
+  },
+  {
+    title: "E-commerce",
+    icon: <ShoppingCart className="w-10 h-10 text-primary" />,
+    description: "Plataformas robustas y seguras para vender tus productos en línea, con carritos de compra y pasarelas de pago.",
+    category: "E-commerce",
+  },
+];
+
 
 const ServicePage = () => {
   return (
@@ -21,7 +46,7 @@ const ServicePage = () => {
               />
             </div>
             <div className="prose prose-lg max-w-none text-foreground/80">
-              <h2 className="font-headline text-3xl sm:text-4xl font-bold text-foreground">Tu Negocio, Tu Sitio Web, Tus Reglas.</h2>
+              <h1 className="font-headline text-3xl sm:text-4xl font-bold text-foreground">Tu Negocio, Tu Sitio Web, Tus Reglas.</h1>
               <p>
                 Tu sitio web es más que una tarjeta de presentación digital; es tu principal herramienta de ventas y marketing. En MAW Soluciones, construimos experiencias web a medida que no solo se ven increíbles, sino que también están diseñadas estratégicamente para atraer, enganchar y convertir a tus visitantes en clientes.
               </p>
@@ -48,15 +73,37 @@ const ServicePage = () => {
         </div>
       </section>
 
-      <section className="py-20 md:py-28 bg-card">
+       <section className="py-20 md:py-28 bg-card">
         <div className="container mx-auto px-4 md:px-6">
-           <div className="max-w-3xl mx-auto text-center mb-12">
+          <div className="max-w-5xl mx-auto text-center mb-12">
             <h2 className="font-headline text-3xl sm:text-4xl font-bold">Descubre tu Sitio Web Ideal</h2>
             <p className="mt-4 text-lg text-foreground/80">
-              Responde unas breves preguntas y obtén una recomendación sobre el tipo de sitio web perfecto para tu negocio.
+              Responde unas breves preguntas y obtén una recomendación sobre el tipo de sitio web perfecto para tu negocio y una cotización al instante.
             </p>
           </div>
-          <WebCalculator />
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+             <WebCalculator />
+             <div className="flex flex-col gap-8">
+               {siteTypes.map((type) => (
+                <AnimatedDiv key={type.title} className="group relative rounded-lg p-6 bg-background/50 hover:bg-background border border-border/50 hover:border-primary/50 transition-all duration-300 ease-in-out">
+                    <div className="flex flex-col items-center text-center">
+                       <div className="transition-all duration-300 group-hover:opacity-0 group-hover:scale-90">
+                           {type.icon}
+                           <h3 className="font-headline text-2xl mt-4 font-bold">{type.title}</h3>
+                       </div>
+                       <div className="absolute inset-0 p-6 flex flex-col items-center justify-center text-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out">
+                            <p className="text-foreground/80 mb-4">{type.description}</p>
+                            <Button variant="link" asChild>
+                                <Link href={`/portafolio?tab=websites&category=${type.category}`}>
+                                    Ver proyectos <ArrowRight className="w-4 h-4 ml-2"/>
+                                </Link>
+                            </Button>
+                       </div>
+                    </div>
+                </AnimatedDiv>
+              ))}
+             </div>
+          </div>
         </div>
       </section>
 

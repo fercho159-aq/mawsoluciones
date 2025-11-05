@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import Image from "next/image";
@@ -71,10 +72,11 @@ const sectorIcons: { [key: string]: React.ReactNode } = {
 function PortfolioPageContent() {
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get('tab') || 'websites';
+  const initialCategory = searchParams.get('category') || 'Todos';
 
-  const [categoryFilter, setCategoryFilter] = useState<string>("Todos");
+  const [categoryFilter, setCategoryFilter] = useState<string>(initialCategory);
   const [sectorFilter, setSectorFilter] = useState<string>("Todos");
-  const [activeTab, setActiveTab] = useState("Sitios Web");
+  const [activeTab, setActiveTab] = useState(defaultTab === 'websites' ? 'Sitios Web' : 'Contenido');
   const [contentSectorFilter, setContentSectorFilter] = useState<string>("Todos");
 
   const filteredItems = portfolioItems.filter(item => {
@@ -179,7 +181,7 @@ function PortfolioPageContent() {
                       <div className="relative aspect-video bg-muted">
                         {item.image && (
                           <Image
-                            src={item.image}
+                            src={item.image.imageUrl}
                             alt={item.title}
                             fill
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
