@@ -1,0 +1,163 @@
+
+{
+  "entities": {
+    "client": {
+      "title": "Client",
+      "description": "Represents a client of the marketing agency.",
+      "type": "object",
+      "properties": {
+        "clientName": {
+          "type": "string",
+          "description": "The unique name of the client."
+        },
+        "accountManager": {
+          "type": "string",
+          "description": "The account manager responsible for the client."
+        },
+        "contentCreator": {
+          "type": "string",
+          "description": "The content creator working on the client's account."
+        },
+        "corte": {
+          "type": "number",
+          "description": "The billing cut-off day."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the client."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of when the client was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of the last update."
+        }
+      },
+      "required": ["clientName", "accountManager", "status"]
+    },
+    "content_plan": {
+      "title": "Content Plan",
+      "description": "Defines the content strategy for a client.",
+      "type": "object",
+      "properties": {
+        "clientId": {
+          "type": "string",
+          "description": "Reference to the client."
+        },
+        "monthlyContent": {
+          "type": "object",
+          "properties": {
+            "posts": { "type": "number" },
+            "videos": { "type": "number" },
+            "carousels": { "type": "number" },
+            "stories": { "type": "number" }
+          }
+        },
+        "weeklySchedule": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "day": { "type": "string" },
+              "contentType": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          }
+        },
+        "lastVisit": { "type": "string", "format": "date-time" },
+        "nextVisit": { "type": "string", "format": "date-time" },
+        "scheduledContent": { "type": "string", "format": "date-time" }
+      }
+    },
+    "advertising_campaign": {
+      "title": "Advertising Campaign",
+      "description": "Details of a specific ad campaign for a client.",
+      "type": "object",
+      "properties": {
+        "clientId": { "type": "string" },
+        "platform": { "type": "string" },
+        "budget": { "type": "number" },
+        "objective": { "type": "string" },
+        "target": { "type": "string" },
+        "startDate": { "type": "string", "format": "date-time" },
+        "endDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string" },
+        "paymentMethod": { "type": "string" },
+        "pautaManager": { "type": "string" }
+      }
+    },
+    "task": {
+      "title": "Task",
+      "description": "A specific task assigned for a client.",
+      "type": "object",
+      "properties": {
+        "clientId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "assignedTo": { "type": "string" },
+        "priority": { "type": "string", "enum": ["Alta", "Media", "Baja"] },
+        "dueDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["Pendiente", "En Progreso", "Completado"] },
+        "category": { "type": "string" }
+      }
+    },
+    "team_member": {
+      "title": "Team Member",
+      "description": "A member of the marketing agency team.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "active": { "type": "boolean" },
+        "clientsCount": { "type": "number" }
+      }
+    },
+    "client_credential": {
+      "title": "Client Credential",
+      "description": "Stores client credentials for various platforms.",
+      "type": "object",
+      "properties": {
+        "clientId": { "type": "string" },
+        "platform": { "type": "string" },
+        "email": { "type": "string" },
+        "password": { "type": "string" },
+        "accessDetails": { "type": "string" },
+        "lastUpdated": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "firestore": {
+    "/clients/{clientId}": {
+      "schema": { "$ref": "#/entities/client" },
+      "description": "Stores client information."
+    },
+    "/content_plans/{planId}": {
+      "schema": { "$ref": "#/entities/content_plan" },
+      "description": "Content plans for each client."
+    },
+    "/advertising_campaigns/{campaignId}": {
+      "schema": { "$ref": "#/entities/advertising_campaign" },
+      "description": "Advertising campaigns for clients."
+    },
+    "/tasks/{taskId}": {
+      "schema": { "$ref": "#/entities/task" },
+      "description": "Tasks assigned for each client."
+    },
+    "/team_members/{memberId}": {
+      "schema": { "$ref": "#/entities/team_member" },
+      "description": "Team member information."
+    },
+    "/client_credentials/{credentialId}": {
+      "schema": { "$ref": "#/entities/client_credential" },
+      "description": "Client platform credentials."
+    }
+  },
+  "auth": {
+    "providers": ["email"]
+  }
+}

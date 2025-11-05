@@ -1,9 +1,11 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from "@/components/ui/toaster"
 import ChatBubble from '@/components/chat-bubble';
 import { ThemeProvider } from '@/components/theme-provider';
+import { FirebaseProvider } from '@/firebase/provider';
 
 export const metadata: Metadata = {
   title: 'MAW Soluciones | Agencia de Marketing Digital',
@@ -29,9 +31,11 @@ export default function RootLayout({
             enableSystem={false}
             disableTransitionOnChange
         >
-          {children}
-          <ChatBubble />
-          <Toaster />
+          <FirebaseProvider>
+            {children}
+            <ChatBubble />
+            <Toaster />
+          </FirebaseProvider>
         </ThemeProvider>
       </body>
     </html>
