@@ -1,4 +1,3 @@
-
 import ContactForm from "@/components/contact-form";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone } from "lucide-react";
@@ -31,14 +30,16 @@ const Contact = () => {
                 <a href="tel:+123456789" className="hover:text-primary transition-colors">+1 (234) 567-89</a>
               </div>
             </div>
+            <div className="my-8">
+              <h3 className="font-headline text-2xl font-bold mt-10 mb-4">O contáctanos por WhatsApp</h3>
+              <Button asChild className="w-full" size="lg" variant="whatsapp">
+                <a href="https://wa.me/1234567890" target="_blank" rel="noopener noreferrer">
+                  <WhatsappIcon className="w-6 h-6 mr-2" />
+                  Enviar Mensaje
+                </a>
+              </Button>
+            </div>
             <AnimatedChatInvitation />
-            <h3 className="font-headline text-2xl font-bold mt-10 mb-4">O contáctanos por WhatsApp</h3>
-            <Button asChild className="w-full" size="lg" variant="whatsapp">
-              <a href="https://wa.me/1234567890" target="_blank" rel="noopener noreferrer">
-                <WhatsappIcon className="w-6 h-6 mr-2" />
-                Enviar Mensaje
-              </a>
-            </Button>
           </AnimatedDiv>
           <AnimatedDiv id="booking" className="bg-card p-8 rounded-lg shadow-lg" transition={{ delay: 0.4 }}>
             <h3 className="font-headline text-2xl font-bold mb-6">Envíanos un mensaje</h3>
