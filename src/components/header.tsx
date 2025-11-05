@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Menu, X, ChevronDown, CodeXml, PenSquare, Megaphone, Bot, Newspaper, Mic2, LayoutGrid, FileText, GraduationCap, Target, Wallet, BarChart4, DollarSign, Database } from "lucide-react";
+import { Menu, X, ChevronDown, CodeXml, PenSquare, Megaphone, Bot, Newspaper, Mic2, LayoutGrid, FileText, GraduationCap, Target, Wallet, BarChart4, DollarSign, Database, Users } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -279,6 +279,13 @@ const Header = () => {
                 </NavigationMenuLink>
               </NavigationMenuItem>
             ))}
+            <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                    <Link href="/equipo" className={navigationMenuTriggerStyle()}>
+                        Equipo
+                    </Link>
+                </NavigationMenuLink>
+            </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
 
@@ -399,6 +406,13 @@ const Header = () => {
                       {link.label}
                     </Link>
                   ))}
+                  <Link
+                    href="/equipo"
+                    className="block text-lg font-medium px-4 py-2"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Equipo
+                  </Link>
                 </nav>
                 <div className="mt-auto pt-4">
                   <Button asChild className="w-full">
