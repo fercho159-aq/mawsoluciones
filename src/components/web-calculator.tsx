@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, ArrowRight, Briefcase, Bot, ShoppingCart, Send, Link as LinkIcon, Building, Palette, Sparkles, Redo, CircleDollarSign } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Briefcase, Bot, ShoppingCart, Send, Link as LinkIcon, Building, Palette, Sparkles, Circle, CircleDollarSign } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import WhatsappIcon from './icons/whatsapp-icon';
 import { cn } from '@/lib/utils';
@@ -23,7 +23,7 @@ const webGoals = [
 ];
 
 const designStyles = [
-    { id: 'minimalist', label: 'Minimalista', icon: <div className="w-6 h-6 border-2 border-primary rounded-full"></div> },
+    { id: 'minimalist', label: 'Minimalista', icon: <Circle /> },
     { id: 'bold', label: 'Colores Fuertes / Gen Z', icon: <Palette /> },
     { id: 'animated', label: 'Animado', icon: <Sparkles /> },
 ];
@@ -59,7 +59,7 @@ const WebCalculator = () => {
   const [error, setError] = useState('');
 
   const steps = [
-    { id: 1, title: 'Tu Negocio', description: 'Cuéntanos sobre tu proyecto.' },
+    { id: 1, title: 'Tu Negocio', description: 'Cuéntanos sobre tu empresa.' },
     { id: 2, 'title': 'Tu Objetivo Principal', description: '¿Qué quieres lograr con tu sitio web?' },
     ...(formData.mainGoal === 'ecommerce' ? [{ id: 3, title: 'Tamaño de tu Tienda', description: '¿Cuántos productos planeas vender?' }] : []),
     { id: formData.mainGoal === 'ecommerce' ? 4 : 3, title: 'Estilo y Diseño', description: 'Define la apariencia que buscas.' },
@@ -91,6 +91,13 @@ const WebCalculator = () => {
       setIsResultModalOpen(true);
     }
   };
+
+  useEffect(() => {
+    const lastRegularStepId = formData.mainGoal === 'ecommerce' ? 5 : 4;
+    if (currentStep === lastRegularStepId && formData.competitors !== '') {
+        handleNext();
+    }
+  }, [formData.competitors, currentStep]);
 
   const handleBack = () => {
     setError('');
@@ -131,7 +138,7 @@ ${formData.competitors || 'No especificados'}
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label htmlFor="companyName">Nombre de tu Empresa o Proyecto</Label>
+                  <Label htmlFor="companyName">Nombre de tu Empresa</Label>
                   <Input id="companyName" value={formData.companyName} onChange={(e) => setFormData({...formData, companyName: e.target.value})} placeholder="Ej. Mi Marca Increíble" />
                 </div>
                 <div>
@@ -261,7 +268,7 @@ ${formData.competitors || 'No especificados'}
                             {recommendedGoal?.icon && React.cloneElement(recommendedGoal.icon, { className: "w-16 h-16 text-primary" })}
                         </div>
                         <p className="text-xl text-muted-foreground">Basado en tus respuestas, tu sitio ideal es un</p>
-                        <p className="text-5xl sm:text-6xl font-bold text-primary my-2">{recommendation}</p>
+                        <p className="text-3xl font-bold text-primary my-2">{recommendation}</p>
                         <Card className="mt-6 text-left">
                             <CardHeader>
                                 <CardTitle className='flex items-center gap-2'><CircleDollarSign /> Inversión Estimada</CardTitle>
@@ -357,5 +364,3 @@ ${formData.competitors || 'No especificados'}
 };
 
 export default WebCalculator;
-
-    

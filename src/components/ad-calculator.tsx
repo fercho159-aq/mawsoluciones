@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -116,6 +116,12 @@ const AdCalculator = () => {
       }
     }
   };
+  
+   useEffect(() => {
+    if (currentStep === 4 && !isResultModalOpen) {
+      setIsResultModalOpen(true);
+    }
+  }, [currentStep, isResultModalOpen]);
 
   const handleBack = () => {
     setError('');
@@ -507,5 +513,3 @@ const AdCalculator = () => {
 };
 
 export default AdCalculator;
-
-    

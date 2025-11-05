@@ -17,20 +17,20 @@ const ParallaxImages = ({ laptopImage, phoneImage }: ParallaxImagesProps) => {
   });
 
   // Laptop Animation
-  const laptopScale = useTransform(scrollYProgress, [0.3, 0.6], [0.8, 1]);
-  const laptopOpacity = useTransform(scrollYProgress, [0.25, 0.4], [0, 1]);
-  const laptopY = useTransform(scrollYProgress, [0.3, 0.6], ['10vh', '0vh']);
+  const laptopScale = useTransform(scrollYProgress, [0, 0.5], [0.8, 1]);
+  const laptopOpacity = useTransform(scrollYProgress, [0, 0.25], [0, 1]);
+  const laptopY = useTransform(scrollYProgress, [0, 0.5], ['10vh', '0vh']);
   
   // Phone Animation
-  const phoneScale = useTransform(scrollYProgress, [0.4, 0.7], [0.5, 1]);
-  const phoneOpacity = useTransform(scrollYProgress, [0.4, 0.55], [0, 1]);
-  const phoneY = useTransform(scrollYProgress, [0.4, 0.7], ['0vh', '5vh']);
-  const phoneX = useTransform(scrollYProgress, [0.4, 0.7], ['-50vw', '-15vw']);
+  const phoneScale = useTransform(scrollYProgress, [0.1, 0.6], [0.5, 1]);
+  const phoneOpacity = useTransform(scrollYProgress, [0.1, 0.35], [0, 1]);
+  const phoneY = useTransform(scrollYProgress, [0.1, 0.6], ['0vh', '5vh']);
+  const phoneX = useTransform(scrollYProgress, [0.1, 0.6], ['-50vw', '-15vw']);
 
 
   return (
-    <section ref={containerRef} className="relative h-[200vh] bg-background">
-      <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
+    <div ref={containerRef} className="relative h-full w-full">
+      <div className="sticky top-1/4 h-full w-full flex items-center justify-center overflow-hidden">
         <motion.div 
             className="absolute w-[100vw] h-[100vh] max-w-[1300px] max-h-[800px]"
             style={{
@@ -68,7 +68,7 @@ const ParallaxImages = ({ laptopImage, phoneImage }: ParallaxImagesProps) => {
           />
         </motion.div>
       </div>
-    </section>
+    </div>
   );
 };
 

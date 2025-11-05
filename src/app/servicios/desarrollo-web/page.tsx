@@ -36,13 +36,10 @@ const ServicePage = () => {
       <section className="py-20 md:py-28">
         <div className="container mx-auto px-4 md:px-6">
           <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="relative aspect-square">
-               <Image
-                src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx3ZWIlMjBkZXZlbG9wbWVudHxlbnwwfHx8fDE3NjIwOTM0MTF8MA&ixlib=rb-4.1.0&q=80&w=1080"
-                alt="Desarrollo Web"
-                fill
-                className="rounded-lg object-cover shadow-xl"
-                data-ai-hint="web development"
+            <div className="relative h-[60vh]">
+               <ParallaxImages 
+                laptopImage="/images/desarrollo web/2.png"
+                phoneImage="/images/desarrollo web/4.png"
               />
             </div>
             <div className="prose prose-lg max-w-none text-foreground/80">
@@ -106,11 +103,6 @@ const ServicePage = () => {
           </div>
         </div>
       </section>
-
-      <ParallaxImages 
-        laptopImage="/images/desarrollo web/2.png"
-        phoneImage="/images/desarrollo web/4.png"
-      />
       
       <section className="py-20 md:py-28 bg-background">
         <div className="container mx-auto px-4 md:px-6 text-center">
