@@ -1,32 +1,88 @@
 
+
 import { addDays, startOfMonth } from 'date-fns';
 
-export type Evento = {
+export type EventType = "grabacion" | "cita_venta";
+
+export type ActivityEvent = {
   id: string;
-  date: Date;
-  title: string;
-  client: string;
-  type: 'grabacion' | 'cita' | 'llamada';
-  responsable: 'Alma' | 'Julio' | 'Fany' | 'Luis' | 'Carlos' | 'Fer' | string;
+  type: EventType;
+  clientName: string;
+  assignedTo: string;
+  assignedToName: string;
+  assignedToColor: string;
+  fullStart: Date;
+  fullEnd: Date;
+  location: string;
+  locationType: "estudio" | "exterior" | "oficina_cliente" | "videollamada" | "presencial";
+  project?: string;
+  assignedEquipment?: string[];
+  equipmentNames?: string[];
 };
 
-const today = new Date();
-const startOfToday = startOfMonth(today);
 
-export const mockEvents: Evento[] = [
-  { id: "evt1", date: addDays(startOfToday, 2), title: "Grabación Biofert", client: "Biofert", type: 'grabacion', responsable: 'Fany' },
-  { id: "evt2", date: addDays(startOfToday, 2), title: "Videollamada con Prospecto 'Tacos El Veloz'", client: "Tacos El Veloz", type: 'cita', responsable: 'Julio' },
-  { id: "evt3", date: addDays(startOfToday, 4), title: "Llamada de seguimiento 'Constructora Edifica'", client: "Constructora Edifica", type: 'llamada', responsable: 'Alma' },
-  { id: "evt4", date: addDays(startOfToday, 9), title: "Grabación UROLOGO", client: "UROLOGO", type: 'grabacion', responsable: 'Luis' },
-  { id: "evt5", date: addDays(startOfToday, 9), title: "Cita de cierre 'Clínica Dental Sonrisa'", client: "Clínica Dental Sonrisa", type: 'cita', responsable: 'Fer' },
-  { id: "evt6", date: addDays(startOfToday, 15), title: "Grabación Benja", client: "Benja", type: 'grabacion', responsable: 'Fany' },
-  { id: "evt7", date: addDays(startOfToday, 17), title: "Videollamada de Demo 'Restaurante La Toscana'", client: "Restaurante La Toscana", type: 'cita', responsable: 'Julio' },
-  { id: "evt8", date: addDays(startOfToday, 24), title: "Grabación para Redes", client: "Redes Internas", type: 'grabacion', responsable: 'Carlos' },
+export const initialEvents: ActivityEvent[] = [
+    {
+        id: `rec-1730812800000`,
+        type: "grabacion",
+        clientName: "Biofert",
+        assignedTo: "luis-01",
+        assignedToName: "Luis",
+        assignedToColor: '#2563EB',
+        fullStart: new Date('2024-11-05T10:00:00'),
+        fullEnd: new Date('2024-11-05T12:00:00'),
+        location: "Estudio Principal",
+        locationType: "estudio",
+        assignedEquipment: ["eq1", "eq2"],
+        equipmentNames: ["Micrófono Hollyland", "Cámara Sony FX3"],
+        project: "Videos testimoniales para Q4"
+    },
+     {
+        id: `rec-1730985600000`,
+        type: "grabacion",
+        clientName: "Constructora Edifica",
+        assignedTo: "luis-01",
+        assignedToName: "Luis",
+        assignedToColor: '#2563EB',
+        fullStart: new Date('2024-11-07T14:00:00'),
+        fullEnd: new Date('2024-11-07T16:30:00'),
+        location: "Oficinas del Cliente",
+        locationType: "oficina_cliente",
+        assignedEquipment: ["eq5"],
+        equipmentNames: ["iPhone 15 Pro"],
+        project: "Entrevistas para video corporativo"
+    },
+    {
+        id: `cita-1730812800000`,
+        type: "cita_venta",
+        clientName: "Tacos El Veloz",
+        assignedTo: "julio-01",
+        assignedToName: "Julio",
+        assignedToColor: '#D97706',
+        fullStart: new Date('2024-11-06T11:00:00'),
+        fullEnd: new Date('2024-11-06T12:00:00'),
+        location: "meet.google.com/xyz-abc",
+        locationType: "videollamada",
+        project: "Videollamada de seguimiento"
+    },
+     {
+        id: `cita-1730985600000`,
+        type: "cita_venta",
+        clientName: "Clínica Dental Sonrisa",
+        assignedTo: "alma-01",
+        assignedToName: "Alma",
+        assignedToColor: '#DB2777',
+        fullStart: new Date('2024-11-08T16:00:00'),
+        fullEnd: new Date('2024-11-08T17:00:00'),
+        location: "Oficinas del cliente",
+        locationType: "presencial",
+        project: "Cita de cierre"
+    }
 ];
 
 export type StatusPendiente = "Pendiente del cliente" | "Trabajando" | "No tenemos pendiente";
 
-export interface Pendiente {
+export interface Activity {
     id: string;
     cliente: string;
     encargado: string;
@@ -34,10 +90,10 @@ export interface Pendiente {
     fechaCorte: number;
     status: StatusPendiente;
     pendientePrincipal: string;
-    categoria: 'Contenido' | 'Ads' | 'Web';
+    categoria: 'Contenido' | 'Ads' | 'Web' | 'Ventas';
 }
 
-export const mockData: Pendiente[] = [
+export const mockData: Activity[] = [
   // Contenido
   { id: "c1", cliente: "DELICIAS", encargado: "Fany", ejecutor: "Aldair", fechaCorte: 15, status: "Trabajando", pendientePrincipal: "Revisar estrategia de contenido Q4", categoria: 'Contenido' },
   { id: "c2", cliente: "DEASA", encargado: "Luis", ejecutor: "Alexis", fechaCorte: 30, status: "Pendiente del cliente", pendientePrincipal: "Aprobación de parrilla de noviembre", categoria: 'Contenido' },
