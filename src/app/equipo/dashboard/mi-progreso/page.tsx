@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -7,12 +6,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { CheckCircle, Clock, XCircle, BarChart2, TrendingUp, Target, Calendar, DollarSign } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, BarChart2, TrendingUp, Target, Calendar, DollarSign, TrendingDown, Wallet, Briefcase } from 'lucide-react';
 import { useAuth } from '@/lib/auth-provider';
 import AnimatedDiv from '@/components/animated-div';
-import { Button } from '@/components/ui/button';
-import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, format } from 'date-fns';
+import { addDays, startOfMonth, endOfMonth, isWithinInterval, format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { DateRange } from 'react-day-picker';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+
 
 // --- Mock Data Simulation ---
 
@@ -56,20 +60,21 @@ const generateMockActivities = () => {
     return activities;
 };
 
-const generateMockFinancials = (): { fecha: Date, tipo: 'Ingreso' | 'Gasto', monto: number }[] => {
+const generateMockFinancials = (): { fecha: Date, tipo: 'Ingreso' | 'Gasto', monto: number, categoria?: string, nombreOtro?: string }[] => {
+    const startOfCurrentMonth = startOfMonth(new Date());
     return [
-        // Current month incomes
-        { fecha: new Date(currentMonthStart.getTime() + 86400000 * 2), tipo: 'Ingreso', monto: 100000 },
-        { fecha: new Date(currentMonthStart.getTime() + 86400000 * 5), tipo: 'Ingreso', monto: 88864 },
-        { fecha: new Date(currentMonthStart.getTime() + 86400000 * 7), tipo: 'Ingreso', monto: 100000 },
-        { fecha: new Date(currentMonthStart.getTime() + 86400000 * 12), tipo: 'Ingreso', monto: 100000 },
-        { fecha: new Date(currentMonthStart.getTime() + 86400000 * 1), tipo: 'Ingreso', monto: 105624 },
-        { fecha: new Date(currentMonthStart.getTime() + 86400000 * 4), tipo: 'Ingreso', monto: 88864 },
-        
-        // Current month expenses
-        { fecha: new Date(currentMonthStart.getTime() + 86400000 * 3), tipo: 'Gasto', monto: 1200 },
-        { fecha: new Date(currentMonthStart.getTime() + 86400000 * 10), tipo: 'Gasto', monto: 50000 },
-        { fecha: new Date(currentMonthStart.getTime() + 86400000 * 15), tipo: 'Gasto', monto: 100000 },
+        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 2), tipo: 'Ingreso', monto: 100000, categoria: 'Iguala Mensual' },
+        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 5), tipo: 'Ingreso', monto: 88864, categoria: 'Proyecto' },
+        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 7), tipo: 'Ingreso', monto: 100000, categoria: 'Iguala Mensual' },
+        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 12), tipo: 'Ingreso', monto: 100000, categoria: 'Proyecto' },
+        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 1), tipo: 'Ingreso', monto: 105624, categoria: 'Proyecto' },
+        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 4), tipo: 'Ingreso', monto: 88864, categoria: 'Iguala Mensual' },
+        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 3), tipo: 'Gasto', monto: 1200, categoria: 'Otros', nombreOtro: 'Software' },
+        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 10), tipo: 'Gasto', monto: 50000, categoria: 'Publicidad' },
+        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 15), tipo: 'Gasto', monto: 100000, categoria: 'Sueldos' },
+        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 18), tipo: 'Gasto', monto: 25000, categoria: 'Comisiones' },
+        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 20), tipo: 'Gasto', monto: 15000, categoria: 'Impuestos' },
+        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 22), tipo: 'Gasto', monto: 5000, categoria: 'Personales', nombreOtro: 'Fany' },
     ];
 };
 
@@ -82,8 +87,6 @@ const mockPunctuality = teamMembers.map(member => ({
 const mockFinancials = generateMockFinancials();
 // --- End of Mock Data Simulation ---
 
-
-type TimeFrame = 'day' | 'week' | 'month';
 
 const PunctualityBadge = ({ status }: { status: string }) => {
     return (
@@ -103,56 +106,65 @@ const PunctualityBadge = ({ status }: { status: string }) => {
 
 export default function MiProgresoPage() {
     const { user } = useAuth();
-    const [timeFrame, setTimeFrame] = useState<TimeFrame>('month');
-
-    const dateRange = useMemo(() => {
-        const now = new Date();
-        if (timeFrame === 'day') {
-            return { start: new Date(now.setHours(0,0,0,0)), end: new Date(now.setHours(23,59,59,999)) };
-        }
-        if (timeFrame === 'week') {
-            return { start: startOfWeek(now, { weekStartsOn: 1 }), end: endOfWeek(now, { weekStartsOn: 1 }) };
-        }
-        // month
-        return { start: startOfMonth(now), end: endOfMonth(now) };
-    }, [timeFrame]);
+    
+    const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
+      from: startOfMonth(new Date()),
+      to: endOfMonth(new Date()),
+    });
 
     const teamProgressData = useMemo(() => {
+        const range = dateRange?.from && dateRange?.to ? { start: dateRange.from, end: dateRange.to } : { start: new Date(), end: new Date() };
+
         return teamMembers.map(member => {
             const memberTasks = mockTasks.filter(t => t.ejecutor === member.name);
             const memberActivities = mockActivities.filter(a => a.responsable === member.name);
 
-            const tasksInFrame = memberTasks.filter(t => isWithinInterval(t.completedAt, dateRange));
+            const tasksInFrame = memberTasks.filter(t => isWithinInterval(t.completedAt, range));
             const completedTasks = tasksInFrame.filter(t => t.status === 'Completado').length;
-            const totalTasks = tasksInFrame.length || 1; // Avoid division by zero
+            const totalTasks = tasksInFrame.length || 1;
             
-            const activitiesInFrame = memberActivities.filter(a => isWithinInterval(a.date, dateRange)).length;
+            const activitiesInFrame = memberActivities.filter(a => isWithinInterval(a.date, range)).length;
 
             const punctuality = mockPunctuality.find(p => p.name === member.name)?.status || 'N/A';
             
-            // Calculate Performance Score
             const taskScore = (completedTasks / totalTasks) * 100;
-            const activityScore = Math.min(activitiesInFrame * 10, 100); // 10 points per activity, max 100
+            const activityScore = Math.min(activitiesInFrame * 10, 100);
             const performanceScore = Math.round((taskScore * 0.7) + (activityScore * 0.3));
 
             return {
                 name: member.name,
                 punctuality: punctuality,
                 tasksCompleted: completedTasks,
-                totalTasks: tasksInFrame.length, // use length of filtered tasks
+                totalTasks: tasksInFrame.length,
                 activities: activitiesInFrame,
                 performanceScore: performanceScore,
             };
         });
     }, [dateRange]);
 
-    const financialSummary = useMemo(() => {
-        const financialsInFrame = mockFinancials.filter(f => isWithinInterval(f.fecha, dateRange));
-        const totalIncome = financialsInFrame
-            .filter(f => f.tipo === 'Ingreso')
-            .reduce((sum, f) => sum + f.monto, 0);
-        return { totalIncome };
+     const financialSummary = useMemo(() => {
+        if (!dateRange?.from || !dateRange?.to) return { totalIncome: 0, totalExpenses: 0, incomeByCategory: {}, expensesByCategory: {}, profit: 0 };
+
+        const financialsInFrame = mockFinancials.filter(f => isWithinInterval(f.fecha, { start: dateRange.from!, end: dateRange.to! }));
+        
+        const totalIncome = financialsInFrame.filter(f => f.tipo === 'Ingreso').reduce((sum, f) => sum + f.monto, 0);
+        const totalExpenses = financialsInFrame.filter(f => f.tipo === 'Gasto').reduce((sum, f) => sum + f.monto, 0);
+
+        const incomeByCategory = financialsInFrame.filter(f => f.tipo === 'Ingreso').reduce((acc, f) => {
+            const category = f.categoria || 'Sin Categoría';
+            acc[category] = (acc[category] || 0) + f.monto;
+            return acc;
+        }, {} as Record<string, number>);
+
+        const expensesByCategory = financialsInFrame.filter(f => f.tipo === 'Gasto').reduce((acc, f) => {
+            const category = f.categoria || 'Sin Categoría';
+            acc[category] = (acc[category] || 0) + f.monto;
+            return acc;
+        }, {} as Record<string, number>);
+        
+        return { totalIncome, totalExpenses, incomeByCategory, expensesByCategory, profit: totalIncome - totalExpenses };
     }, [dateRange]);
+
 
     if (!user) {
         return <div className="text-center text-foreground/70">Cargando datos de usuario...</div>
@@ -164,36 +176,123 @@ export default function MiProgresoPage() {
     <div>
         <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold font-headline">Mi Progreso</h1>
-            <div className="flex items-center gap-2 bg-card p-1 rounded-lg">
-                <Button variant={timeFrame === 'day' ? 'secondary' : 'ghost'} onClick={() => setTimeFrame('day')}>Día</Button>
-                <Button variant={timeFrame === 'week' ? 'secondary' : 'ghost'} onClick={() => setTimeFrame('week')}>Semana</Button>
-                <Button variant={timeFrame === 'month' ? 'secondary' : 'ghost'} onClick={() => setTimeFrame('month')}>Mes</Button>
-            </div>
+             {user.role === 'admin' && (
+                <Popover>
+                    <PopoverTrigger asChild>
+                    <Button
+                        id="date"
+                        variant={"outline"}
+                        className={cn(
+                        "w-[300px] justify-start text-left font-normal",
+                        !dateRange && "text-muted-foreground"
+                        )}
+                    >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateRange?.from ? (
+                        dateRange.to ? (
+                            <>
+                            {format(dateRange.from, "LLL dd, y", { locale: es })} -{" "}
+                            {format(dateRange.to, "LLL dd, y", { locale: es })}
+                            </>
+                        ) : (
+                            format(dateRange.from, "LLL dd, y")
+                        )
+                        ) : (
+                        <span>Elige una fecha</span>
+                        )}
+                    </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="end">
+                    <CalendarComponent
+                        initialFocus
+                        mode="range"
+                        defaultMonth={dateRange?.from}
+                        selected={dateRange}
+                        onSelect={setDateRange}
+                        numberOfMonths={2}
+                    />
+                    </PopoverContent>
+                </Popover>
+            )}
         </div>
       
       {user.role === 'admin' ? (
         <>
-            <p className="mt-4 text-foreground/80 mb-8">
-                Como administrador, puedes ver un resumen del rendimiento de todo el equipo para el periodo seleccionado: <span className='font-bold text-primary'>{format(dateRange.start, 'd MMM', {locale: es})} - {format(dateRange.end, 'd MMM yyyy', {locale: es})}</span>.
+             <p className="mt-4 text-foreground/80 mb-8">
+                Como administrador, puedes ver un resumen del rendimiento y las finanzas del equipo para el periodo seleccionado.
             </p>
-             <AnimatedDiv className="mb-8">
+
+            <AnimatedDiv className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total de Ingresos Generados</CardTitle>
+                        <CardTitle className="text-sm font-medium">Total de Ingresos</CardTitle>
+                        <TrendingUp className="h-4 w-4 text-green-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-green-500">{financialSummary.totalIncome.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div>
+                        <p className="text-xs text-muted-foreground">Ingresos brutos en el periodo</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Total de Gastos</CardTitle>
+                        <TrendingDown className="h-4 w-4 text-red-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-red-500">{financialSummary.totalExpenses.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div>
+                        <p className="text-xs text-muted-foreground">Gastos totales en el periodo</p>
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Utilidad Neta</CardTitle>
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold text-green-500">
-                            {financialSummary.totalIncome.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
-                        </div>
-                        <p className="text-xs text-muted-foreground">Ingresos totales del periodo seleccionado.</p>
+                        <div className={cn("text-2xl font-bold", financialSummary.profit >= 0 ? 'text-blue-500' : 'text-destructive')}>{financialSummary.profit.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div>
+                        <p className="text-xs text-muted-foreground">Ingresos - Gastos</p>
                     </CardContent>
                 </Card>
             </AnimatedDiv>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Desglose de Ingresos</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-2">
+                            {Object.entries(financialSummary.incomeByCategory).map(([category, amount]) => (
+                                <div key={category} className="flex justify-between">
+                                    <span className="text-muted-foreground">{category}</span>
+                                    <span className="font-medium">{amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Desglose de Gastos</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                         <div className="space-y-2">
+                            {Object.entries(financialSummary.expensesByCategory).map(([category, amount]) => (
+                                <div key={category} className="flex justify-between">
+                                    <span className="text-muted-foreground">{category}</span>
+                                    <span className="font-medium">{amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
             <AnimatedDiv>
                 <Card>
                     <CardHeader>
                         <CardTitle>Reporte de Rendimiento del Equipo</CardTitle>
+                        <CardDescription>Datos basados en el periodo seleccionado.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="border rounded-lg">
@@ -241,7 +340,7 @@ export default function MiProgresoPage() {
       ) : (
         <>
              <p className="mt-4 text-foreground/80 mb-8">
-                Resumen de tu rendimiento personal para el periodo seleccionado: <span className='font-bold text-primary'>{format(dateRange.start, 'd MMM', {locale: es})} - {format(dateRange.end, 'd MMM yyyy', {locale: es})}</span>.
+                Resumen de tu rendimiento personal para el periodo seleccionado.
             </p>
              {userProgress ? (
                 <AnimatedDiv>
