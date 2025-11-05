@@ -1,11 +1,9 @@
+
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { LogIn } from 'lucide-react';
 import Logo from '@/components/logo';
@@ -13,31 +11,35 @@ import { teamMembers } from '@/lib/team-data';
 import { useAuth } from '@/lib/auth-provider';
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const router = useRouter();
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    const user = teamMembers.find(member => member.username === username && member.password === password);
-
+  useEffect(() => {
+    // Si ya hay un usuario, redirigir directamente.
     if (user) {
-      login(user);
+      router.push('/equipo/dashboard');
+      return;
+    }
+
+    // Iniciar sesión automáticamente con el primer usuario admin como default
+    const defaultAdmin = teamMembers.find(member => member.role === 'admin');
+
+    if (defaultAdmin) {
+      login(defaultAdmin);
       toast({
-        title: 'Inicio de sesión exitoso',
-        description: `Bienvenido, ${user.name}.`,
+        title: 'Inicio de sesión automático',
+        description: `Accediendo como ${defaultAdmin.name}.`,
       });
       router.push('/equipo/dashboard');
     } else {
       toast({
         variant: 'destructive',
-        title: 'Error de autenticación',
-        description: 'Usuario o contraseña incorrectos.',
+        title: 'Error de configuración',
+        description: 'No se encontró un usuario administrador por defecto.',
       });
     }
-  };
+  }, [login, router, toast, user]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
@@ -47,36 +49,13 @@ export default function LoginPage() {
                  <Logo />
             </div>
           <CardTitle>Acceso Interno</CardTitle>
-          <CardDescription>Introduce tus credenciales para acceder al panel de equipo.</CardDescription>
+          <CardDescription>Iniciando sesión automáticamente...</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="username">Usuario</Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="tu.usuario"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full">
-              <LogIn className="w-4 h-4 mr-2" />
-              Entrar
-            </Button>
-          </form>
+          <div className="flex items-center justify-center text-muted-foreground">
+            <LogIn className="w-5 h-5 mr-2 animate-spin" />
+            <p>Redirigiendo al panel...</p>
+          </div>
         </CardContent>
       </Card>
     </div>
