@@ -35,52 +35,60 @@ export default function PortfolioItemPage({
 
   return (
     <div className="bg-background">
-      <section className="py-24 sm:py-32">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="grid md:grid-cols-2 gap-12 max-w-7xl mx-auto items-start">
-            
-            {/* Columna Izquierda: Imagen */}
-            <div className="sticky top-28">
-              {item.image && (
-                <div className="relative aspect-video rounded-lg shadow-2xl overflow-hidden">
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              )}
+       <section className="py-24 sm:py-32 relative">
+        {item.parallaxImages && item.parallaxImages.laptop && item.parallaxImages.phone && (
+            <div className="absolute inset-0 z-0">
+                <ParallaxImages 
+                    laptopImage={item.parallaxImages.laptop}
+                    phoneImage={item.parallaxImages.phone}
+                />
             </div>
-
-            {/* Columna Derecha: Información */}
-            <div className="prose prose-lg max-w-none text-foreground/80 prose-headings:font-headline prose-headings:text-foreground">
-              <Badge variant="secondary" className="mb-4">{item.category}</Badge>
-              <h1 className="font-headline text-2xl sm:text-3xl font-bold mb-4">
-                {item.title}
-              </h1>
-              <p className="text-lg sm:text-xl text-foreground/80">
-                {item.description}
-              </p>
-              
-              <div className="not-prose flex flex-col sm:flex-row gap-4 my-8">
-                {item.website && (
-                    <Button asChild>
-                        <a href={item.website} target="_blank" rel="noopener noreferrer">
-                            Visitar Sitio Web <ExternalLink className="w-4 h-4 ml-2" />
-                        </a>
-                    </Button>
+        )}
+        <div className="relative z-10 container mx-auto px-4 md:px-6">
+          <div className="max-w-7xl mx-auto items-start bg-background/80 backdrop-blur-sm p-8 rounded-lg">
+            <div className="grid md:grid-cols-2 gap-12">
+              {/* Columna Izquierda: Imagen */}
+              <div className="sticky top-28">
+                {item.image && (
+                  <div className="relative aspect-video rounded-lg shadow-2xl overflow-hidden">
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
                 )}
-                 <Button asChild variant="whatsapp">
-                    <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-                        <WhatsappIcon className="w-5 h-5 mr-2" />
-                        Cotizar un sitio como este
-                    </a>
-                </Button>
+              </div>
+
+              {/* Columna Derecha: Información */}
+              <div className="prose prose-lg max-w-none text-foreground/80 prose-headings:font-headline prose-headings:text-foreground">
+                <Badge variant="secondary" className="mb-4">{item.category}</Badge>
+                <h1 className="font-headline text-2xl sm:text-3xl font-bold mb-4">
+                  {item.title}
+                </h1>
+                <p className="text-lg sm:text-xl text-foreground/80">
+                  {item.description}
+                </p>
+                
+                <div className="not-prose flex flex-col sm:flex-row gap-4 my-8">
+                  {item.website && (
+                      <Button asChild>
+                          <a href={item.website} target="_blank" rel="noopener noreferrer">
+                              Visitar Sitio Web <ExternalLink className="w-4 h-4 ml-2" />
+                          </a>
+                      </Button>
+                  )}
+                  <Button asChild variant="whatsapp">
+                      <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+                          <WhatsappIcon className="w-5 h-5 mr-2" />
+                          Cotizar un sitio como este
+                      </a>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
-
           <div className="text-center mt-20">
               <Button variant="outline" asChild>
                   <Link href="/portafolio">
@@ -91,13 +99,6 @@ export default function PortfolioItemPage({
           </div>
         </div>
       </section>
-
-      {item.parallaxImages && item.parallaxImages.laptop && item.parallaxImages.phone && (
-          <ParallaxImages 
-              laptopImage={item.parallaxImages.laptop}
-              phoneImage={item.parallaxImages.phone}
-          />
-      )}
 
       {similarProjects.length > 0 && (
         <section className="py-20 md:py-28 border-t bg-card">
