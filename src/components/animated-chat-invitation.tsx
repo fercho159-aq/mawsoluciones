@@ -1,7 +1,11 @@
+
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
+
+const services = ["Sitios Web", "Creación de Contenido", "Ads", "Automatización"];
 
 const chatVariants = {
   hidden: { opacity: 0, y: 20, scale: 0.95 },
@@ -9,6 +13,22 @@ const chatVariants = {
 };
 
 const AnimatedChatInvitation = () => {
+  const count = useMotionValue(0);
+  const rounded = useTransform(count, (latest) => Math.round(latest));
+  const serviceIndex = useTransform(rounded, (latest) => latest % services.length);
+  const displayText = useTransform(serviceIndex, (latest) => services[latest]);
+
+  useEffect(() => {
+    const controls = animate(count, services.length, {
+      duration: services.length * 2,
+      ease: "easeInOut",
+      repeat: Infinity,
+      repeatType: "loop",
+    });
+
+    return controls.stop;
+  }, []);
+
   return (
     <motion.div
       initial="hidden"
@@ -18,7 +38,8 @@ const AnimatedChatInvitation = () => {
           transition: {
             staggerChildren: 0.8,
             repeat: Infinity,
-            repeatDelay: 2,
+            repeatType: 'reverse',
+            repeatDelay: 4,
           },
         },
       }}
@@ -28,11 +49,11 @@ const AnimatedChatInvitation = () => {
         Desafía a nuestro Asistente Virtual
       </h3>
 
-      <div className="flex flex-col items-center gap-4 min-h-[160px]">
+      <div className="flex flex-col items-center gap-4 min-h-[220px]">
         <motion.div
           key="msg1"
           variants={chatVariants}
-          className="bg-secondary text-secondary-foreground p-3 rounded-lg rounded-bl-none max-w-xs self-start shadow-md"
+           className="bg-secondary text-secondary-foreground p-3 rounded-lg rounded-bl-none max-w-xs self-start shadow-md"
         >
           <p>Hola, quiero más informes</p>
         </motion.div>
@@ -46,13 +67,20 @@ const AnimatedChatInvitation = () => {
         </motion.div>
 
         <motion.div
+          key="msg3"
+          variants={chatVariants}
+          className="bg-secondary text-secondary-foreground p-3 rounded-lg rounded-bl-none max-w-xs self-start shadow-md"
+        >
+          <p>Quiero saber más sobre <motion.span className="font-bold text-primary">{displayText}</motion.span></p>
+        </motion.div>
+
+        <motion.div
           key="button"
           variants={chatVariants}
-          className="w-full"
+          className="w-full mt-4"
         >
           <Button
             onClick={() => {
-              // This is a bit of a hack, but it's the easiest way to trigger the bubble
               const chatBubbleButton = document.querySelector('[aria-label="Open chat bubble"]') as HTMLElement;
               if (chatBubbleButton) {
                 chatBubbleButton.click();

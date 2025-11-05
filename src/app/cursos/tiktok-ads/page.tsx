@@ -30,6 +30,7 @@ import Footer from '@/components/footer';
 import WhatsappIcon from '@/components/icons/whatsapp-icon';
 import { Card, CardContent } from '@/components/ui/card';
 import AnimatedProgress from '@/components/animated-progress';
+import Image from 'next/image';
 
 const sectionIcons: Record<number, React.ReactNode> = {
   1: <Eye className="w-5 h-5 mr-3 text-primary" />,
@@ -391,6 +392,14 @@ export default function CoursePage() {
                                     <div className="aspect-video bg-muted rounded-md flex items-center justify-center mb-6 relative overflow-hidden">
                                         {currentTopic.video_url ? (
                                             <video controls src={currentTopic.video_url} className="w-full h-full object-cover" />
+                                        ) : currentTopic.image ? (
+                                            <Image 
+                                                src={currentTopic.image.imageUrl} 
+                                                alt={currentTopic.title} 
+                                                fill 
+                                                className="object-cover"
+                                                data-ai-hint={currentTopic.image.imageHint}
+                                            />
                                         ) : (
                                             <div className="text-center text-muted-foreground">
                                                 <PlayCircle className="w-16 h-16 mx-auto mb-2" />
