@@ -64,29 +64,7 @@ const mockCuentasPorCobrar: FinanzasData[] = [
   { cliente: "Polanco Santino", periodo: "1-30 Nov", monto: 9200, metodo: "Whatsapp", whatsapp: "5215555667788" },
 ];
 
-const generateMonthlyMockData = (): MovimientoDiario[] => {
-    const today = new Date();
-    const startOfCurrentMonth = startOfMonth(today);
-    const startOfLastMonth = startOfMonth(new Date(today.getFullYear(), today.getMonth() - 1, 1));
-    return [
-        // Current month - Matching the target balances
-        { id: 'm1', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 2), tipo: 'Ingreso', descripcion: 'Pago cliente Biofert', monto: 100000, cuenta: 'Cuenta MAW', categoria: 'Iguala Mensual'},
-        { id: 'm2', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 3), tipo: 'Gasto', descripcion: 'Pago de software de diseño', monto: 1200, cuenta: 'Cuenta Paola', categoria: 'Otros', nombreOtro: 'Software'},
-        { id: 'm3', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 5), tipo: 'Ingreso', descripcion: 'Adelanto proyecto NIU', monto: 88864, cuenta: 'Fer', categoria: 'Proyecto'},
-        { id: 'm4', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 7), tipo: 'Ingreso', descripcion: 'Pago Polanco Santino', monto: 100000, cuenta: 'Cuenta MAW', categoria: 'Iguala Mensual'},
-        { id: 'm5', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 10), tipo: 'Gasto', descripcion: 'Publicidad en Meta', monto: 50000, cuenta: 'Cuenta MAW', categoria: 'Publicidad'},
-        { id: 'm6', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 12), tipo: 'Ingreso', descripcion: 'Pago cliente Medical Tower', monto: 100000, cuenta: 'Cuenta Paola', categoria: 'Iguala Mensual'},
-        { id: 'm7', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 15), tipo: 'Gasto', descripcion: 'Nómina', monto: 100000, cuenta: 'Cuenta MAW', categoria: 'Sueldos'},
-        { id: 'm10', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 1), tipo: 'Ingreso', descripcion: 'Pago Cliente Y', monto: 105624, cuenta: 'Cuenta MAW', categoria: 'Proyecto'},
-        { id: 'm11', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 4), tipo: 'Ingreso', descripcion: 'Pago Cliente Z', monto: 88864, cuenta: 'Cuenta Paola', categoria: 'Proyecto'},
-        
-        // Last month
-        { id: 'm8', fecha: new Date(startOfLastMonth.getTime() + 86400000 * 5), tipo: 'Ingreso', descripcion: 'Pago mes anterior Cliente X', monto: 7500, cuenta: 'Cuenta MAW', categoria: 'Iguala Mensual'},
-        { id: 'm9', fecha: new Date(startOfLastMonth.getTime() + 86400000 * 18), tipo: 'Gasto', descripcion: 'Renta oficina mes anterior', monto: 15000, cuenta: 'Cuenta MAW', categoria: 'Otros', nombreOtro: 'Renta'},
-    ]
-}
-
-const mockMovimientosDiarios: MovimientoDiario[] = generateMonthlyMockData();
+const mockMovimientosDiarios: MovimientoDiario[] = [];
 
 // --- Components ---
 const CuentasPorCobrarTab = () => {
@@ -351,7 +329,11 @@ const TablaDiariaTab = ({ movimientos, onAddMovimiento }: { movimientos: Movimie
         const uniqueMonths = new Set(
             movimientos.map(mov => format(startOfMonth(mov.fecha), 'yyyy-MM-dd'))
         );
-        uniqueMonths.add(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
+        // Ensure current month is always an option
+        const currentMonthStart = format(startOfMonth(new Date()), 'yyyy-MM-dd');
+        if (!uniqueMonths.has(currentMonthStart)) {
+            uniqueMonths.add(currentMonthStart);
+        }
     
         return Array.from(uniqueMonths).sort((a, b) => b.localeCompare(a));
     }, [movimientos]);
@@ -363,60 +345,74 @@ const TablaDiariaTab = ({ movimientos, onAddMovimiento }: { movimientos: Movimie
     }, [movimientos, selectedMonth]);
 
     const accountSummary = useMemo(() => {
-        const summary = monthlyData.reduce((acc, mov) => {
+        const initialBalancePaola = 188864;
+        const initialBalanceMaw = 305624;
+
+        const monthlyTotals = monthlyData.reduce((acc, mov) => {
+            const amount = mov.monto;
             if (mov.tipo === 'Ingreso') {
-                if (!acc[mov.cuenta]) {
-                    acc[mov.cuenta] = 0;
+                acc.totalIngresos += amount;
+                if (!acc.ingresosPorCuenta[mov.cuenta]) {
+                    acc.ingresosPorCuenta[mov.cuenta] = 0;
                 }
-                acc[mov.cuenta] += mov.monto;
+                acc.ingresosPorCuenta[mov.cuenta] += amount;
+            } else { // Gasto
+                acc.totalGastos += amount;
             }
             return acc;
-        }, {} as Record<string, number>);
+        }, {
+            totalIngresos: 0,
+            totalGastos: 0,
+            ingresosPorCuenta: {} as Record<string, number>
+        });
 
-        const totalGastos = monthlyData.filter(m => m.tipo === 'Gasto').reduce((sum, m) => sum + m.monto, 0);
-        const totalIngresos = Object.values(summary).reduce((sum, val) => sum + val, 0);
+        const totalPaola = initialBalancePaola + (monthlyTotals.ingresosPorCuenta['Cuenta Paola'] || 0);
+        const totalMaw = initialBalanceMaw + (monthlyTotals.ingresosPorCuenta['Cuenta MAW'] || 0);
+        const totalOtros = Object.entries(monthlyTotals.ingresosPorCuenta)
+            .filter(([key]) => key !== 'Cuenta MAW' && key !== 'Cuenta Paola')
+            .reduce((sum, [, val]) => sum + val, 0);
+
+        const balanceFinal = (totalPaola + totalMaw + totalOtros) - monthlyTotals.totalGastos;
+
 
         return { 
-            summary, 
-            totalGastos,
-            totalIngresos,
-            balance: totalIngresos - totalGastos,
-            otros: Object.entries(summary).filter(([key]) => key !== 'Cuenta MAW' && key !== 'Cuenta Paola').reduce((sum, [, val]) => sum + val, 0)
+            totalPaola,
+            totalMaw,
+            totalOtros,
+            totalGastos: monthlyTotals.totalGastos,
+            totalIngresos: monthlyTotals.totalIngresos + initialBalanceMaw + initialBalancePaola,
+            balance: balanceFinal
         };
     }, [monthlyData]);
 
 
     return (
         <div className='space-y-4'>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                  <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Ingresos Cuenta MAW</CardTitle>
-                        <Landmark className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium">Ingresos Totales</CardTitle>
+                        <TrendingUp className="h-4 w-4 text-green-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{accountSummary.summary['Cuenta MAW']?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) ?? '$0.00'}</div>
-                        <p className="text-xs text-muted-foreground">Ingresos del mes</p>
+                        <div className="text-2xl font-bold text-green-500">{accountSummary.totalIngresos.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div>
+                        <p className="text-xs text-muted-foreground">Saldo inicial + ingresos del mes</p>
+                        <hr className="my-2" />
+                        <div className="text-sm space-y-1">
+                            <p className='flex justify-between'><span>Cuenta MAW:</span> <strong>{accountSummary.totalMaw.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</strong></p>
+                            <p className='flex justify-between'><span>Cuenta Paola:</span> <strong>{accountSummary.totalPaola.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</strong></p>
+                            <p className='flex justify-between'><span>Otras Cuentas:</span> <strong>{accountSummary.totalOtros.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</strong></p>
+                        </div>
                     </CardContent>
                 </Card>
                  <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Ingresos Cuenta Paola</CardTitle>
-                        <Wallet className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium">Gastos Totales</CardTitle>
+                        <TrendingDown className="h-4 w-4 text-destructive" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{accountSummary.summary['Cuenta Paola']?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) ?? '$0.00'}</div>
-                         <p className="text-xs text-muted-foreground">Ingresos del mes</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Ingresos (Otros)</CardTitle>
-                        <Briefcase className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{accountSummary.otros.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div>
-                         <p className="text-xs text-muted-foreground">Fer, Alma, etc.</p>
+                        <div className="text-2xl font-bold text-destructive">{accountSummary.totalGastos.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div>
+                         <p className="text-xs text-muted-foreground">Gastos del mes seleccionado</p>
                     </CardContent>
                 </Card>
                  <Card>
@@ -425,10 +421,10 @@ const TablaDiariaTab = ({ movimientos, onAddMovimiento }: { movimientos: Movimie
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className={cn("text-2xl font-bold", accountSummary.balance >= 0 ? 'text-green-500' : 'text-destructive')}>
+                        <div className={cn("text-2xl font-bold", accountSummary.balance >= 0 ? 'text-blue-500' : 'text-destructive')}>
                             {accountSummary.balance.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
                         </div>
-                         <p className="text-xs text-muted-foreground">Total Ingresos - Total Gastos</p>
+                         <p className="text-xs text-muted-foreground">Ingresos Totales - Gastos Totales</p>
                     </CardContent>
                 </Card>
             </div>
