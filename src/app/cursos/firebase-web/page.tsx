@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useRef } from 'react';
@@ -140,7 +141,7 @@ const QuizComponent = ({ topic, onComplete }: { topic: Topic; onComplete: (score
             <div className="space-y-8 mt-8">
                 {topic.questions.map((q, qIndex) => (
                     <div key={qIndex} className="p-4 border rounded-lg">
-                        <p className="font-semibold">{qIndex + 1}. {q.question}</p>
+                        <p className="font-semibold">${qIndex + 1}. ${q.question}</p>
                         <RadioGroup onValueChange={(value) => handleAnswerChange(qIndex, parseInt(value))}>
                             <div className="space-y-2 mt-4">
                                 {q.options.map((option, oIndex) => (
@@ -168,13 +169,13 @@ const QuizResult = ({ result, incorrectAnswers, score, total }: { result: 'win' 
                 <>
                     <h2 className="text-5xl font-bold text-green-500">YOU WIN</h2>
                     <p className="text-lg mt-4">¡Felicidades! Aprobaste la sección.</p>
-                    <p className="font-bold text-2xl text-green-500">{score} / {total}</p>
+                    <p className="font-bold text-2xl text-green-500">${score} / ${total}</p>
                 </>
             ) : (
                 <>
                     <h2 className="text-5xl font-bold text-destructive flex items-center justify-center gap-4">GAME OVER <Frown /></h2>
                     <p className="text-lg mt-4">¡No te rindas! Repasa los temas y vuelve a intentarlo.</p>
-                    <p className="font-bold text-2xl text-destructive">{score} / {total}</p>
+                    <p className="font-bold text-2xl text-destructive">${score} / ${total}</p>
                     
                     <div className="mt-8 text-left max-w-2xl mx-auto">
                         <h4 className="font-headline text-xl font-bold mb-4">Repasa estos puntos:</h4>
@@ -291,11 +292,10 @@ export default function CoursePage() {
        // Add to sales pipeline
       const newLeads = JSON.parse(localStorage.getItem('newLeads') || '[]');
       const newLead = {
-        id: `lead-${Date.now()}`,
         cliente: data.company || 'Lead de Curso',
         origen: 'Sitio Web',
-        status: 'Lead Nuevo',
-        responsable: 'Alma Fer',
+        telefono: data.phone,
+        email: '',
       };
       newLeads.push(newLead);
       localStorage.setItem('newLeads', JSON.stringify(newLeads));
@@ -452,3 +452,4 @@ export default function CoursePage() {
     </div>
   );
 }
+

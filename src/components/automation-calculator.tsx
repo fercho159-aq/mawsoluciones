@@ -116,11 +116,10 @@ ${selectedGoalsText}
     // Add to sales pipeline
     const newLeads = JSON.parse(localStorage.getItem('newLeads') || '[]');
     const newLead = {
-      id: `lead-${Date.now()}`,
       cliente: formData.companyName || 'Lead de Calculadora Automatización',
       origen: 'Sitio Web',
-      status: 'Lead Nuevo',
-      responsable: 'Alma Fer',
+      telefono: whatsappNumber,
+      email: '' // Not collected in this form
     };
     newLeads.push(newLead);
     localStorage.setItem('newLeads', JSON.stringify(newLeads));
@@ -220,7 +219,7 @@ ${selectedGoalsText}
                     {showResults ? (
                         <>
                             <div className="text-center mb-6">
-                                <h3 className="text-xl font-semibold">¡Hola, {formData.personName} de {formData.companyName}!</h3>
+                                <h3 className="text-xl font-semibold">¡Hola, ${formData.personName} de ${formData.companyName}!</h3>
                                 <p className="text-muted-foreground">Gracias a tu información, aquí tienes tu diagnóstico personalizado.</p>
                             </div>
                             <div className="inline-block bg-primary/10 p-6 rounded-full mb-4">
@@ -329,3 +328,4 @@ ${selectedGoalsText}
 export default AutomationCalculator;
 
     
+

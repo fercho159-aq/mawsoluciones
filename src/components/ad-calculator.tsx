@@ -208,11 +208,10 @@ const AdCalculator = () => {
     // Add to sales pipeline
     const newLeads = JSON.parse(localStorage.getItem('newLeads') || '[]');
     const newLead = {
-      id: `lead-${Date.now()}`,
       cliente: formData.companyName || 'Lead de Calculadora Ads',
       origen: 'Sitio Web',
-      status: 'Lead Nuevo',
-      responsable: 'Alma Fer',
+      telefono: whatsappNumber,
+      email: '' // Not collected in this form
     };
     newLeads.push(newLead);
     localStorage.setItem('newLeads', JSON.stringify(newLeads));
@@ -389,13 +388,13 @@ const AdCalculator = () => {
                 transition={{ duration: 0.5 }}
             >
                 <div className="text-center">
-                    <h3 className="text-xl font-semibold">¡Hola, {formData.personName} de {formData.companyName}!</h3>
+                    <h3 className="text-xl font-semibold">¡Hola, ${formData.personName} de ${formData.companyName}!</h3>
                     <p className="text-muted-foreground">Gracias a tu información, aquí tienes tu estimación personalizada.</p>
                 </div>
                 <Card>
                     <CardHeader>
                         <CardTitle>Resumen de tu Cotización</CardTitle>
-                        <CardDescription>Basado en una inversión de {formData.presupuesto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })} mensuales.</CardDescription>
+                        <CardDescription>Basado en una inversión de ${formData.presupuesto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })} mensuales.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div>
@@ -418,7 +417,7 @@ const AdCalculator = () => {
                     <CardTitle>Recomendaciones Personalizadas</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4 text-sm">
-                    <p>Para un negocio de <strong>{formData.giro}</strong> como el tuyo, las plataformas que elegiste son una excelente opción. Aquí te explicamos por qué:</p>
+                    <p>Para un negocio de <strong>${formData.giro}</strong> como el tuyo, las plataformas que elegiste son una excelente opción. Aquí te explicamos por qué:</p>
                         <ul className="list-disc list-inside space-y-2 text-foreground/80">
                         {formData.plataformas.map(p => (
                             <li key={p}><strong>{p}:</strong> {advantages[p] || platformAdvantages['Default'][p]}</li>
@@ -526,3 +525,4 @@ const AdCalculator = () => {
 };
 
 export default AdCalculator;
+

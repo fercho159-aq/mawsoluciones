@@ -145,11 +145,10 @@ ${recomendacionTexto}
     // Add to sales pipeline
     const newLeads = JSON.parse(localStorage.getItem('newLeads') || '[]');
     const newLead = {
-      id: `lead-${Date.now()}`,
       cliente: formData.companyName || 'Lead de Recomendador Contenido',
       origen: 'Sitio Web',
-      status: 'Lead Nuevo',
-      responsable: 'Alma Fer',
+      telefono: whatsappNumber,
+      email: '' // Not collected
     };
     newLeads.push(newLead);
     localStorage.setItem('newLeads', JSON.stringify(newLeads));
@@ -247,7 +246,7 @@ ${recomendacionTexto}
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}
             >
                 <div className="text-center">
-                    <h3 className="text-xl font-semibold">¡Hola, {formData.personName} de {formData.companyName}!</h3>
+                    <h3 className="text-xl font-semibold">¡Hola, ${formData.personName} de ${formData.companyName}!</h3>
                     <p className="text-muted-foreground">Gracias a tu información, aquí tienes tu estrategia de contenido inicial.</p>
                 </div>
                 <Card>
@@ -255,9 +254,9 @@ ${recomendacionTexto}
                         <CardTitle className='flex items-center gap-2'><BadgeInfo className="w-5 h-5 text-primary"/> Resumen de tu Estrategia</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2 text-sm">
-                        <p><strong className="text-primary">Objetivo Principal:</strong> {formData.objetivo}</p>
-                        <p><strong className="text-primary">Público Objetivo:</strong> {formData.publico}</p>
-                        <p><strong className="text-primary">Consejo Estratégico:</strong> {recomendacion.consejoPrincipal}</p>
+                        <p><strong className="text-primary">Objetivo Principal:</strong> ${formData.objetivo}</p>
+                        <p><strong className="text-primary">Público Objetivo:</strong> ${formData.publico}</p>
+                        <p><strong className="text-primary">Consejo Estratégico:</strong> ${recomendacion.consejoPrincipal}</p>
                     </CardContent>
                 </Card>
 
@@ -271,9 +270,9 @@ ${recomendacionTexto}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-2 text-sm text-foreground/80">
-                                <p><strong className='text-foreground'>Frecuencia:</strong> {recomendacion.frecuencia[p as keyof typeof recomendacion.frecuencia]}</p>
-                                <p><strong className='text-foreground'>Contenido:</strong> {(recomendacion.tipoContenido[p as keyof typeof recomendacion.tipoContenido] as string[]).slice(0, 2).join(', ')}...</p>
-                                <p><strong className='text-foreground'>Horarios:</strong> {recomendacion.mejoresHorarios[p as keyof typeof recomendacion.mejoresHorarios]}</p>
+                                <p><strong className='text-foreground'>Frecuencia:</strong> ${recomendacion.frecuencia[p as keyof typeof recomendacion.frecuencia]}</p>
+                                <p><strong className='text-foreground'>Contenido:</strong> ${(recomendacion.tipoContenido[p as keyof typeof recomendacion.tipoContenido] as string[]).slice(0, 2).join(', ')}...</p>
+                                <p><strong className='text-foreground'>Horarios:</strong> ${recomendacion.mejoresHorarios[p as keyof typeof recomendacion.mejoresHorarios]}</p>
                             </CardContent>
                         </Card>
                     ))}
@@ -359,3 +358,4 @@ export default ContentRecommender;
 
 
     
+
