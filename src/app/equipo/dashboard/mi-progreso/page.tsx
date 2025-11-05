@@ -17,7 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { initialMovimientosDiarios } from '../finanzas/page';
+import { initialMovimientosDiarios } from '@/lib/finanzas-data';
 
 
 // --- Mock Data Simulation ---
