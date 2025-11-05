@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { CheckCircle, Clock, XCircle, BarChart2, TrendingUp, Target, Calendar } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, BarChart2, TrendingUp, Target, Calendar, DollarSign } from 'lucide-react';
 import { useAuth } from '@/lib/auth-provider';
 import AnimatedDiv from '@/components/animated-div';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,6 @@ import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, for
 import { es } from 'date-fns/locale';
 
 // --- Mock Data Simulation ---
-// These functions generate more realistic, time-based mock data for demonstration.
 
 const today = new Date();
 const currentMonthStart = startOfMonth(today);
@@ -57,12 +56,30 @@ const generateMockActivities = () => {
     return activities;
 };
 
+const generateMockFinancials = (): { fecha: Date, tipo: 'Ingreso' | 'Gasto', monto: number }[] => {
+    return [
+        // Current month incomes
+        { fecha: new Date(currentMonthStart.getTime() + 86400000 * 2), tipo: 'Ingreso', monto: 100000 },
+        { fecha: new Date(currentMonthStart.getTime() + 86400000 * 5), tipo: 'Ingreso', monto: 88864 },
+        { fecha: new Date(currentMonthStart.getTime() + 86400000 * 7), tipo: 'Ingreso', monto: 100000 },
+        { fecha: new Date(currentMonthStart.getTime() + 86400000 * 12), tipo: 'Ingreso', monto: 100000 },
+        { fecha: new Date(currentMonthStart.getTime() + 86400000 * 1), tipo: 'Ingreso', monto: 105624 },
+        { fecha: new Date(currentMonthStart.getTime() + 86400000 * 4), tipo: 'Ingreso', monto: 88864 },
+        
+        // Current month expenses
+        { fecha: new Date(currentMonthStart.getTime() + 86400000 * 3), tipo: 'Gasto', monto: 1200 },
+        { fecha: new Date(currentMonthStart.getTime() + 86400000 * 10), tipo: 'Gasto', monto: 50000 },
+        { fecha: new Date(currentMonthStart.getTime() + 86400000 * 15), tipo: 'Gasto', monto: 100000 },
+    ];
+};
+
 const mockTasks = generateMockTasks();
 const mockActivities = generateMockActivities();
 const mockPunctuality = teamMembers.map(member => ({
     name: member.name,
     status: Math.random() > 0.8 ? 'Tarde' : (Math.random() > 0.95 ? 'Falta' : 'Puntual'),
 }));
+const mockFinancials = generateMockFinancials();
 // --- End of Mock Data Simulation ---
 
 
@@ -129,6 +146,14 @@ export default function MiProgresoPage() {
         });
     }, [dateRange]);
 
+    const financialSummary = useMemo(() => {
+        const financialsInFrame = mockFinancials.filter(f => isWithinInterval(f.fecha, dateRange));
+        const totalIncome = financialsInFrame
+            .filter(f => f.tipo === 'Ingreso')
+            .reduce((sum, f) => sum + f.monto, 0);
+        return { totalIncome };
+    }, [dateRange]);
+
     if (!user) {
         return <div className="text-center text-foreground/70">Cargando datos de usuario...</div>
     }
@@ -151,6 +176,20 @@ export default function MiProgresoPage() {
             <p className="mt-4 text-foreground/80 mb-8">
                 Como administrador, puedes ver un resumen del rendimiento de todo el equipo para el periodo seleccionado: <span className='font-bold text-primary'>{format(dateRange.start, 'd MMM', {locale: es})} - {format(dateRange.end, 'd MMM yyyy', {locale: es})}</span>.
             </p>
+             <AnimatedDiv className="mb-8">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Total de Ingresos Generados</CardTitle>
+                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-3xl font-bold text-green-500">
+                            {financialSummary.totalIncome.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+                        </div>
+                        <p className="text-xs text-muted-foreground">Ingresos totales del periodo seleccionado.</p>
+                    </CardContent>
+                </Card>
+            </AnimatedDiv>
             <AnimatedDiv>
                 <Card>
                     <CardHeader>
