@@ -9,8 +9,8 @@ export type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo" | "Efectivo";
 export interface Client {
   id: string;
   name: string;
-  representativeName?: string;
-  whatsapp?: string;
+  representativeName: string;
+  whatsapp: string;
   email?: string;
 }
 

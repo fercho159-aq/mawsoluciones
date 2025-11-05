@@ -27,9 +27,9 @@ import { teamMembers } from '@/lib/team-data';
 import { mockData as pendientesData, type Activity, type StatusPendiente } from '@/lib/activities-data';
 import { Separator } from '@/components/ui/separator';
 
-const contenidoTeam = teamMembers.filter(m => ['Fany', 'Luis', 'Carlos', 'Julio', 'Paola', 'Cristian', 'Daniel', 'Bere'].includes(m.name));
-const adsTeam = teamMembers.filter(m => ['Luis', 'Carlos', 'Julio', 'Paola', 'Cristian', 'Daniel', 'Bere'].includes(m.name));
-const webTeam = teamMembers.filter(m => ['Fernando', 'Alexis'].includes(m.name));
+const contenidoTeam = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel'].includes(m.name));
+const adsTeam = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel'].includes(m.name));
+const webTeam = teamMembers.filter(m => ['Julio', 'Fernando', 'Alexis'].includes(m.name));
 
 
 const AddClientDialog = ({ onAdd, children }: { onAdd: (client: Omit<Client, 'id'>, pendientes: Omit<Activity, 'id'>[]) => void, children: React.ReactNode }) => {
@@ -40,7 +40,6 @@ const AddClientDialog = ({ onAdd, children }: { onAdd: (client: Omit<Client, 'id
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
 
-    // New state for services
     const [serviceType, setServiceType] = useState<'Iguala' | 'Proyecto' | 'Ambos' | ''>('');
     const [areas, setAreas] = useState<string[]>([]);
     const [responsables, setResponsables] = useState<{
@@ -55,8 +54,17 @@ const AddClientDialog = ({ onAdd, children }: { onAdd: (client: Omit<Client, 'id
     }
 
     const handleSave = () => {
-        if (!name) {
-            toast({ title: "Error", description: "El nombre del cliente es obligatorio.", variant: "destructive" });
+        if (!name || !representativeName || !whatsapp || !serviceType || areas.length === 0) {
+            toast({ title: "Error", description: "Todos los campos son obligatorios, incluyendo tipo y áreas de servicio.", variant: "destructive" });
+            return;
+        }
+
+        if (
+            (areas.includes('Contenido') && (!responsables.contenido?.encargado || !responsables.contenido?.ejecutor)) ||
+            (areas.includes('Ads') && !responsables.ads?.responsable) ||
+            (areas.includes('Web') && !responsables.web?.responsable)
+        ) {
+            toast({ title: "Error", description: "Debes asignar responsables para todas las áreas seleccionadas.", variant: "destructive" });
             return;
         }
 
@@ -107,14 +115,14 @@ const AddClientDialog = ({ onAdd, children }: { onAdd: (client: Omit<Client, 'id
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader><DialogTitle>Nuevo Cliente</DialogTitle></DialogHeader>
                 <div className="grid gap-4 py-4">
-                    <Input value={name} onChange={e => setName(e.target.value)} placeholder="Nombre de la Empresa Cliente" />
-                    <Input value={representativeName} onChange={e => setRepresentativeName(e.target.value)} placeholder="Nombre del Representante" />
-                    <Input value={whatsapp} onChange={e => setWhatsapp(e.target.value)} placeholder="WhatsApp (Ej. 52155...)" />
-                    <Input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" />
+                    <Input value={name} onChange={e => setName(e.target.value)} placeholder="Nombre de la Empresa*" />
+                    <Input value={representativeName} onChange={e => setRepresentativeName(e.target.value)} placeholder="Nombre del Representante*" />
+                    <Input value={whatsapp} onChange={e => setWhatsapp(e.target.value)} placeholder="WhatsApp* (Ej. 52155...)" />
+                    <Input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email (Opcional)" />
                     <Separator className="my-2"/>
-                    <h4 className="font-medium">Configuración de Servicios</h4>
+                    <h4 className="font-medium">Configuración de Servicios*</h4>
                     <Select value={serviceType} onValueChange={(v) => setServiceType(v as any)}>
-                        <SelectTrigger><SelectValue placeholder="Tipo de Servicio"/></SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder="Tipo de Servicio*"/></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="Iguala">Iguala</SelectItem>
                             <SelectItem value="Proyecto">Proyecto</SelectItem>
@@ -123,7 +131,7 @@ const AddClientDialog = ({ onAdd, children }: { onAdd: (client: Omit<Client, 'id
                     </Select>
                     
                     <div>
-                        <Label>Áreas a Gestionar en Pendientes</Label>
+                        <Label>Áreas a Gestionar en Pendientes*</Label>
                         <div className="grid grid-cols-3 gap-4 mt-2">
                            {['Contenido', 'Ads', 'Web'].map(area => (
                                <div key={area} className="flex items-center space-x-2">
@@ -135,31 +143,31 @@ const AddClientDialog = ({ onAdd, children }: { onAdd: (client: Omit<Client, 'id
                     </div>
                     {areas.includes('Contenido') && (
                         <div className="grid grid-cols-2 gap-4 border p-3 rounded-md">
-                           <Label className="col-span-2 font-semibold">Responsables Contenido</Label>
+                           <Label className="col-span-2 font-semibold">Responsables Contenido*</Label>
                            <Select onValueChange={(v) => setResponsables(p => ({...p, contenido: {...p.contenido!, encargado: v}}))}>
-                                <SelectTrigger><SelectValue placeholder="Encargado" /></SelectTrigger>
+                                <SelectTrigger><SelectValue placeholder="Encargado*" /></SelectTrigger>
                                 <SelectContent>{contenidoTeam.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
                            </Select>
                            <Select onValueChange={(v) => setResponsables(p => ({...p, contenido: {...p.contenido!, ejecutor: v}}))}>
-                                <SelectTrigger><SelectValue placeholder="Ejecutor" /></SelectTrigger>
+                                <SelectTrigger><SelectValue placeholder="Ejecutor*" /></SelectTrigger>
                                 <SelectContent>{contenidoTeam.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
                            </Select>
                         </div>
                     )}
                     {areas.includes('Ads') && (
                         <div className="border p-3 rounded-md space-y-2">
-                           <Label className="font-semibold">Responsable Ads</Label>
+                           <Label className="font-semibold">Responsable Ads*</Label>
                            <Select onValueChange={(v) => setResponsables(p => ({...p, ads: {responsable: v}}))}>
-                                <SelectTrigger><SelectValue placeholder="Seleccionar responsable" /></SelectTrigger>
+                                <SelectTrigger><SelectValue placeholder="Seleccionar responsable*" /></SelectTrigger>
                                 <SelectContent>{adsTeam.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
                            </Select>
                         </div>
                     )}
                      {areas.includes('Web') && (
                         <div className="border p-3 rounded-md space-y-2">
-                           <Label className="font-semibold">Responsable Web</Label>
+                           <Label className="font-semibold">Responsable Web*</Label>
                            <Select onValueChange={(v) => setResponsables(p => ({...p, web: {responsable: v}}))}>
-                                <SelectTrigger><SelectValue placeholder="Seleccionar responsable" /></SelectTrigger>
+                                <SelectTrigger><SelectValue placeholder="Seleccionar responsable*" /></SelectTrigger>
                                 <SelectContent>{webTeam.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
                            </Select>
                         </div>
@@ -243,7 +251,7 @@ export default function ClientesPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Empresa Cliente</TableHead>
+                                    <TableHead>Nombre de la Empresa</TableHead>
                                     <TableHead>Nombre Representante</TableHead>
                                     <TableHead>Teléfono</TableHead>
                                     <TableHead>Email</TableHead>
