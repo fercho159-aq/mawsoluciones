@@ -123,7 +123,7 @@ export default function VentasPage() {
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-right">
-                                     <Button variant="gooeyLeft" size="sm" onClick={() => handleConvertClick(lead)}>
+                                     <Button variant="default" size="sm" onClick={() => handleConvertClick(lead)}>
                                         <Sparkles className="w-4 h-4 mr-2" />
                                         Convertir en Cliente
                                     </Button>

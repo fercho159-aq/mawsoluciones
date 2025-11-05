@@ -39,7 +39,7 @@ const mockData: FinanzasData[] = [
 
 export default function FinanzasPage() {
     const [searchFilter, setSearchFilter] = useState('');
-    const [sortConfig, setSortConfig] = useState<{ key: keyof FinanzasData | null; direction: 'ascending' | 'descending' }>({ key: null, direction: 'ascending' });
+    const [sortConfig, setSortConfig] = useState<{ key: keyof FinanzasData | null; direction: 'ascending' | 'descending' }>({ key: 'cliente', direction: 'ascending' });
 
     const filteredData = useMemo(() => {
         return mockData.filter(item => 
@@ -54,7 +54,7 @@ export default function FinanzasPage() {
                 if (a[sortConfig.key!] < b[sortConfig.key!]) {
                     return sortConfig.direction === 'ascending' ? -1 : 1;
                 }
-                if (a[sortConfig.key!] > b[sort.key!]) {
+                if (a[sortConfig.key!] > b[sortConfig.key!]) {
                     return sortConfig.direction === 'ascending' ? 1 : -1;
                 }
                 return 0;
