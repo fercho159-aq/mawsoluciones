@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { CheckCircle, Clock, XCircle, TrendingUp, Target, Calendar, DollarSign, TrendingDown } from 'lucide-react';
 import { useAuth } from '@/lib/auth-provider';
 import AnimatedDiv from '@/components/animated-div';
-import { addDays, startOfMonth, endOfMonth, isWithinInterval, format } from 'date-fns';
+import { addDays, startOfMonth, endOfMonth, isWithinInterval, format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { DateRange } from 'react-day-picker';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -128,7 +128,9 @@ export default function MiProgresoPage() {
      const financialSummary = useMemo(() => {
         if (!dateRange?.from || !dateRange?.to) return { totalIncome: 0, totalExpenses: 0, incomeByCategory: {}, expensesByCategory: {}, profit: 0 };
 
-        const financialsInFrame = initialMovimientosDiarios.filter(f => isWithinInterval(f.fecha, { start: dateRange.from!, end: dateRange.to! }));
+        const financialsInFrame = initialMovimientosDiarios.filter(f => 
+            isWithinInterval(new Date(f.fecha), { start: dateRange.from!, end: dateRange.to! })
+        );
         
         const totalIncome = financialsInFrame.filter(f => f.tipo === 'Ingreso').reduce((sum, f) => sum + f.monto, 0);
         const totalExpenses = financialsInFrame.filter(f => f.tipo === 'Gasto').reduce((sum, f) => sum + f.monto, 0);
@@ -245,12 +247,12 @@ export default function MiProgresoPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-2">
-                            {Object.entries(financialSummary.incomeByCategory).map(([category, amount]) => (
+                            {Object.entries(financialSummary.incomeByCategory).length > 0 ? Object.entries(financialSummary.incomeByCategory).map(([category, amount]) => (
                                 <div key={category} className="flex justify-between">
                                     <span className="text-muted-foreground">{category}</span>
                                     <span className="font-medium">{amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
                                 </div>
-                            ))}
+                            )) : <p className="text-sm text-muted-foreground">No hay ingresos en este periodo.</p>}
                         </div>
                     </CardContent>
                 </Card>
@@ -260,12 +262,12 @@ export default function MiProgresoPage() {
                     </CardHeader>
                     <CardContent>
                          <div className="space-y-2">
-                            {Object.entries(financialSummary.expensesByCategory).map(([category, amount]) => (
+                            {Object.entries(financialSummary.expensesByCategory).length > 0 ? Object.entries(financialSummary.expensesByCategory).map(([category, amount]) => (
                                 <div key={category} className="flex justify-between">
                                     <span className="text-muted-foreground">{category}</span>
                                     <span className="font-medium">{amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
                                 </div>
-                            ))}
+                            )) : <p className="text-sm text-muted-foreground">No hay gastos en este periodo.</p>}
                         </div>
                     </CardContent>
                 </Card>
