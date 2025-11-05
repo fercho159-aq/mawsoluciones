@@ -2,9 +2,9 @@
 "use client";
 
 import { useState } from 'react';
-import { courseData, Topic, Section } from '@/lib/course-data';
+import { courseData, Topic, Section, Question } from '@/lib/course-data';
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Circle, PlayCircle, Eye, Bullseye, Users, Wand, TrendingUp, Bot, Calendar, Phone, Building, Send, ChevronRight } from "lucide-react";
+import { CheckCircle, Circle, PlayCircle, Eye, Bullseye, Users, Wand, TrendingUp, Bot, Calendar, Phone, Building, Send, ChevronRight, X, ThumbsDown } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -27,6 +27,8 @@ import { cn } from '@/lib/utils';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import WhatsappIcon from '@/components/icons/whatsapp-icon';
+import GlitchTitle from '@/components/glitch-title';
+import DonkeyIcon from '@/components/icons/donkey-icon';
 
 const sectionIcons: Record<number, React.ReactNode> = {
   1: <Eye className="w-5 h-5 mr-3 text-primary" />,
@@ -121,14 +123,62 @@ const LeadCaptureDialog = ({ trigger }: { trigger: React.ReactNode }) => {
     );
 };
 
+const QuizComponent = ({ topic, onComplete }: { topic: Topic; onComplete: (score: number) => void; }) => {
+    const [answers, setAnswers] = useState<{[key: number]: number}>({});
+    
+    const handleAnswerChange = (questionIndex: number, optionIndex: number) => {
+        setAnswers(prev => ({...prev, [questionIndex]: optionIndex}));
+    };
+
+    const handleSubmit = () => {
+        let score = 0;
+        topic.questions.forEach((q, index) => {
+            if (answers[index] === q.correct) {
+                score++;
+            }
+        });
+        onComplete(score);
+    };
+
+    return (
+        <div className="prose prose-lg max-w-none text-foreground/80 prose-headings:font-headline prose-headings:text-foreground prose-strong:text-foreground">
+            <h3 className="font-bold">Examen Final de Sección</h3>
+            <p>Es hora de poner a prueba tus conocimientos. Responde las siguientes preguntas.</p>
+            <div className="space-y-8 mt-8">
+                {topic.questions.map((q, qIndex) => (
+                    <div key={qIndex} className="p-4 border rounded-lg">
+                        <p className="font-semibold">{qIndex + 1}. {q.question}</p>
+                        <RadioGroup onValueChange={(value) => handleAnswerChange(qIndex, parseInt(value))}>
+                            <div className="space-y-2 mt-4">
+                                {q.options.map((option, oIndex) => (
+                                    <div key={oIndex} className="flex items-center">
+                                        <RadioGroupItem value={oIndex.toString()} id={`q${qIndex}o${oIndex}`} />
+                                        <Label htmlFor={`q${qIndex}o${oIndex}`} className="ml-2 font-normal">{option}</Label>
+                                    </div>
+                                ))}
+                            </div>
+                        </RadioGroup>
+                    </div>
+                ))}
+            </div>
+            <Button onClick={handleSubmit} size="lg" className="mt-8" disabled={Object.keys(answers).length !== topic.questions.length}>
+                Verificar Respuestas
+            </Button>
+        </div>
+    );
+};
+
 
 export default function CoursePage() {
   const [currentTopic, setCurrentTopic] = useState<Topic>(courseData.sections[0].topics[0]);
   const [completedTopics, setCompletedTopics] = useState<string[]>([]);
   const progress = (completedTopics.length / courseData.total_topics) * 100;
+  
+  const [quizResult, setQuizResult] = useState<'win' | 'lose' | null>(null);
 
   const handleTopicClick = (topic: Topic) => {
     setCurrentTopic(topic);
+    setQuizResult(null); 
   };
 
   const handleCompleteTopic = () => {
@@ -136,6 +186,17 @@ export default function CoursePage() {
       setCompletedTopics([...completedTopics, currentTopic.topic_id]);
     }
   };
+
+  const handleQuizComplete = (score: number) => {
+      if (score > 4) {
+          setQuizResult('win');
+          handleCompleteTopic();
+      } else {
+          setQuizResult('lose');
+      }
+  };
+
+  const isQuiz = currentTopic.questions && currentTopic.questions.length > 0;
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -195,39 +256,61 @@ export default function CoursePage() {
                     <main className="w-full md:w-2/3 lg:w-3/4">
                         <div className="bg-card p-6 rounded-lg shadow-lg">
                              <h2 className="font-headline text-2xl sm:text-3xl font-bold mb-4">{currentTopic.title}</h2>
-                            <div className="aspect-video bg-muted rounded-md flex items-center justify-center mb-6 relative overflow-hidden">
-                                {currentTopic.video_url ? (
-                                    <video controls src={currentTopic.video_url} className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="text-center text-muted-foreground">
-                                        <PlayCircle className="w-16 h-16 mx-auto mb-2" />
-                                        <p>Video no disponible.</p>
+                            
+                             {isQuiz ? (
+                                <>
+                                {quizResult === 'win' && (
+                                    <div className="text-center py-10">
+                                        <GlitchTitle text="YOU WIN" />
                                     </div>
                                 )}
-                            </div>
+                                {quizResult === 'lose' && (
+                                    <div className="text-center py-10">
+                                        <GlitchTitle text="GAME OVER" />
+                                        <DonkeyIcon className="w-24 h-24 mx-auto mt-4 text-primary" />
+                                    </div>
+                                )}
+                                {quizResult === null && (
+                                    <QuizComponent topic={currentTopic} onComplete={handleQuizComplete} />
+                                )}
+                                </>
+                             ) : (
+                                <>
+                                    <div className="aspect-video bg-muted rounded-md flex items-center justify-center mb-6 relative overflow-hidden">
+                                        {currentTopic.video_url ? (
+                                            <video controls src={currentTopic.video_url} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="text-center text-muted-foreground">
+                                                <PlayCircle className="w-16 h-16 mx-auto mb-2" />
+                                                <p>Video no disponible.</p>
+                                            </div>
+                                        )}
+                                    </div>
 
-                            <div className="prose prose-lg max-w-none text-foreground/80 prose-headings:font-headline prose-headings:text-foreground prose-strong:text-foreground mb-8">
-                                <h3 className="font-bold">Habilidades que ganarás:</h3>
-                                <ul className="list-disc list-inside space-y-1">
-                                    {currentTopic.summary.map((point, index) => (
-                                        <li key={index}><span className="font-semibold">{point.split(':')[0]}:</span>{point.split(':')[1]}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                            
-                             <div className="flex flex-col sm:flex-row gap-4">
-                                <Button onClick={handleCompleteTopic} disabled={completedTopics.includes(currentTopic.topic_id)} size="lg">
-                                    {completedTopics.includes(currentTopic.topic_id) ? 'Lección Completada' : 'Marcar como Completada'}
-                                </Button>
-                                <LeadCaptureDialog 
-                                    trigger={
-                                        <Button variant="outline" size="lg">
-                                            <Calendar className="w-4 h-4 mr-2" />
-                                            Quiero Agendar una Sesión
+                                    <div className="prose prose-lg max-w-none text-foreground/80 prose-headings:font-headline prose-headings:text-foreground prose-strong:text-foreground mb-8">
+                                        <h3 className="font-bold">Habilidades que ganarás:</h3>
+                                        <ul className="list-disc list-inside space-y-1">
+                                            {currentTopic.summary.map((point, index) => (
+                                                <li key={index}><span className="font-semibold">{point.split(':')[0]}:</span>{point.split(':')[1]}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                    
+                                     <div className="flex flex-col sm:flex-row gap-4">
+                                        <Button onClick={handleCompleteTopic} disabled={completedTopics.includes(currentTopic.topic_id)} size="lg">
+                                            {completedTopics.includes(currentTopic.topic_id) ? 'Lección Completada' : 'Marcar como Completada'}
                                         </Button>
-                                    }
-                                />
-                            </div>
+                                        <LeadCaptureDialog 
+                                            trigger={
+                                                <Button variant="outline" size="lg">
+                                                    <Calendar className="w-4 h-4 mr-2" />
+                                                    Quiero Agendar una Sesión
+                                                </Button>
+                                            }
+                                        />
+                                    </div>
+                                </>
+                             )}
                         </div>
                     </main>
                 </div>
