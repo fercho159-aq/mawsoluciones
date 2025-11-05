@@ -173,8 +173,8 @@ export default function VentasPage() {
         let lastSellerIndex = parseInt(localStorage.getItem('lastAssignedSellerIndex') || '0');
         
         const leadsToAdd: Lead[] = newLeadsData.map((newLeadData) => {
-            const newSeller = responsables[lastSellerIndex];
-            lastSellerIndex = (lastSellerIndex + 1) % responsables.length;
+            const newSeller = responsables[lastSellerIndex % responsables.length];
+            lastSellerIndex++;
             return {
                 id: `lead-${Date.now()}-${Math.random()}`,
                 ...newLeadData,
@@ -184,12 +184,14 @@ export default function VentasPage() {
         });
 
         localStorage.setItem('lastAssignedSellerIndex', lastSellerIndex.toString());
-
         setLeads(prev => [...leadsToAdd, ...prev]);
-        toast({
-            title: "Prospectos Añadidos",
-            description: `${leadsToAdd.length} nuevos prospectos se han añadido al pipeline.`,
-        });
+        
+        if (newLeadsData.length > 0) {
+            toast({
+                title: "Prospectos Añadidos",
+                description: `${leadsToAdd.length} nuevos prospectos se han añadido al pipeline.`,
+            });
+        }
     };
 
     useEffect(() => {
@@ -200,10 +202,6 @@ export default function VentasPage() {
                 if (Array.isArray(newLeadsFromStorage) && newLeadsFromStorage.length > 0) {
                     handleAddLeads(newLeadsFromStorage); 
                     localStorage.removeItem('newLeads');
-                     toast({
-                        title: "¡Nuevos Prospectos!",
-                        description: `Se han añadido ${newLeadsFromStorage.length} nuevos prospectos desde el sitio web.`,
-                    });
                 }
             } catch (e) {
                 console.error("Error parsing new leads from localStorage", e);
