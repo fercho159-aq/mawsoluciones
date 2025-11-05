@@ -12,6 +12,7 @@ import { es } from 'date-fns/locale';
 import TypewriterTitle from '@/components/typewriter-title';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
 const allPosts = [...blogPosts, ...interviews].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 const newsPosts = blogPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -59,13 +60,47 @@ const PostCard = ({ post }: { post: (typeof allPosts)[0] }) => (
   </AnimatedDiv>
 );
 
-
-export default function BlogPage() {
+function BlogPageContent() {
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get('tab') || 'all';
 
-  const featuredPost = allPosts[0];
-  
+  return (
+     <Tabs defaultValue={defaultTab} className="w-full">
+        <AnimatedDiv className="flex justify-center mb-12">
+            <TabsList>
+            <TabsTrigger value="all">Todas</TabsTrigger>
+            <TabsTrigger value="news">Noticias</TabsTrigger>
+            <TabsTrigger value="interviews">Entrevistas</TabsTrigger>
+            </TabsList>
+        </AnimatedDiv>
+
+        <TabsContent value="all">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {allPosts.map((post) => (
+                <PostCard key={post.id} post={post} />
+            ))}
+            </div>
+        </TabsContent>
+        <TabsContent value="news">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {newsPosts.map((post) => (
+                <PostCard key={post.id} post={post} />
+            ))}
+            </div>
+        </TabsContent>
+        <TabsContent value="interviews">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {interviewPosts.map((post) => (
+                <PostCard key={post.id} post={post} />
+            ))}
+            </div>
+        </TabsContent>
+    </Tabs>
+  )
+}
+
+
+export default function BlogPage() {
   return (
     <div className="bg-background">
       <section className="py-20 md:py-28 bg-card">
@@ -78,39 +113,9 @@ export default function BlogPage() {
 
       <section className="py-20 md:py-28">
         <div className="container mx-auto px-4 md:px-6">
-
-          <Tabs defaultValue={defaultTab} className="w-full">
-            <AnimatedDiv className="flex justify-center mb-12">
-              <TabsList>
-                <TabsTrigger value="all">Todas</TabsTrigger>
-                <TabsTrigger value="news">Noticias</TabsTrigger>
-                <TabsTrigger value="interviews">Entrevistas</TabsTrigger>
-              </TabsList>
-            </AnimatedDiv>
-
-            <TabsContent value="all">
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {allPosts.map((post) => (
-                  <PostCard key={post.id} post={post} />
-                ))}
-              </div>
-            </TabsContent>
-            <TabsContent value="news">
-               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {newsPosts.map((post) => (
-                  <PostCard key={post.id} post={post} />
-                ))}
-              </div>
-            </TabsContent>
-            <TabsContent value="interviews">
-               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {interviewPosts.map((post) => (
-                  <PostCard key={post.id} post={post} />
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
-
+            <Suspense fallback={<div>Cargando...</div>}>
+                <BlogPageContent />
+            </Suspense>
         </div>
       </section>
     </div>
