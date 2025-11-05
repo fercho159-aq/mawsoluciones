@@ -110,13 +110,14 @@
       "type": "object",
       "properties": {
         "name": { "type": "string" },
-        "type": { "type": "string", "enum": ["audio", "video", "iluminacion", "soporte"] },
+        "category": { "type": "string", "enum": ["audio", "video", "iluminacion", "soporte"] },
+        "type": { "type": "string", "enum": ["micrófono", "cámara", "teléfono", "luz", "estabilizador", "teleprompter"] },
+        "model": { "type": "string" },
         "available": { "type": "boolean" },
-        "assignedTo": { "type": "string", "description": "User ID" },
-        "assignedDate": { "type": "string", "format": "date-time" },
-        "assignedUntil": { "type": "string", "format": "date-time" },
         "condition": { "type": "string", "enum": ["excelente", "bueno", "regular", "necesita_mantenimiento"] },
-        "notes": { "type": "string" }
+        "notes": { "type": "string" },
+        "maintenanceDate": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["name", "type", "available", "condition"]
     },
@@ -133,6 +134,29 @@
         "location": { "type": "string" }
       },
       "required": ["userId", "date", "loginTime", "status"]
+    },
+    "recording_event": {
+      "title": "Recording Event",
+      "description": "Represents a scheduled recording session.",
+      "type": "object",
+      "properties": {
+        "clientId": { "type": "string" },
+        "clientName": { "type": "string" },
+        "assignedTo": { "type": "string" },
+        "assignedToName": { "type": "string" },
+        "startDate": { "type": "string", "format": "date" },
+        "startTime": { "type": "string", "format": "time" },
+        "endDate": { "type": "string", "format": "date" },
+        "endTime": { "type": "string", "format": "time" },
+        "fullStart": { "type": "string", "format": "date-time" },
+        "fullEnd": { "type": "string", "format": "date-time" },
+        "location": { "type": "string" },
+        "locationType": { "type": "string", "enum": ["estudio", "exterior", "oficina_cliente"] },
+        "assignedEquipment": { "type": "array", "items": { "type": "string" } },
+        "equipmentNames": { "type": "array", "items": { "type": "string" } },
+        "project": { "type": "string" }
+      },
+      "required": ["clientName", "assignedToName", "fullStart", "fullEnd"]
     }
   },
   "firestore": {
@@ -151,6 +175,10 @@
     "/attendance/{attendanceId}": {
       "schema": { "$ref": "#/entities/attendance" },
       "description": "Logs user attendance records."
+    },
+    "/recording_events/{eventId}": {
+      "schema": { "$ref": "#/entities/recording_event" },
+      "description": "Stores details about scheduled recording events."
     }
   },
   "auth": {
