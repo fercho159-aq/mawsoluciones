@@ -10,10 +10,10 @@ export type TeamMember = {
 
 export const teamMembers: TeamMember[] = [
     // Encargados (Admins)
-    { id: '1', name: 'Fany', username: 'fany', password: 'fany2025', role: 'admin', email: 'fany@maw.com' },
-    { id: '2', name: 'Luis', username: 'luis', password: 'luis2025', role: 'admin', email: 'luis@maw.com' },
-    { id: '3', name: 'Carlos', username: 'carlos', password: 'carlos2025', role: 'admin', email: 'carlos@maw.com' },
-    { id: '4', name: 'Julio', username: 'julio', password: 'julio2025', role: 'admin', email: 'julio@maw.com' },
+    { id: '1', name: 'Fany', username: 'fany', password: 'admin2025', role: 'admin', email: 'fany@maw.com' },
+    { id: '2', name: 'Luis', username: 'luis', password: 'admin2025', role: 'admin', email: 'luis@maw.com' },
+    { id: '3', name: 'Carlos', username: 'carlos', password: 'admin2025', role: 'admin', email: 'carlos@maw.com' },
+    { id: '4', name: 'Julio', username: 'julio', password: 'admin2025', role: 'admin', email: 'julio@maw.com' },
 
     // Ejecutores (Users)
     { id: '5', name: 'Aldair', username: 'aldair', password: 'aldair2025', role: 'user', email: 'aldair@maw.com' },
