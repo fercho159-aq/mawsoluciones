@@ -24,12 +24,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 // --- Types ---
 type Periodo = "1-31 Oct" | "15 Oct - 15 Nov" | "1-30 Nov";
 type MetodoContacto = "Whatsapp" | "Email";
 type MovimientoTipo = "Ingreso" | "Gasto";
 type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Otra";
+type CategoriaIngreso = "Proyecto" | "Iguala Mensual";
+type CategoriaGasto = "Publicidad" | "Sueldos" | "Comisiones" | "Impuestos" | "Personales" | "Otros";
+
 
 interface FinanzasData {
   cliente: string;
@@ -46,6 +50,8 @@ interface MovimientoDiario {
   descripcion: string;
   monto: number;
   cuenta: Cuenta | string;
+  categoria?: CategoriaIngreso | CategoriaGasto;
+  nombreOtro?: string;
 }
 
 // --- Mock Data ---
@@ -63,17 +69,20 @@ const generateMonthlyMockData = (): MovimientoDiario[] => {
     const startOfCurrentMonth = startOfMonth(today);
     const startOfLastMonth = startOfMonth(new Date(today.getFullYear(), today.getMonth() - 1, 1));
     return [
-        // Current month
-        { id: 'm1', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 2), tipo: 'Ingreso', descripcion: 'Pago cliente Biofert', monto: 5000, cuenta: 'Cuenta MAW'},
-        { id: 'm2', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 3), tipo: 'Gasto', descripcion: 'Pago de software de diseño', monto: 1200, cuenta: 'Cuenta Paola'},
-        { id: 'm3', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 5), tipo: 'Ingreso', descripcion: 'Adelanto proyecto NIU', monto: 4250, cuenta: 'Fer'},
-        { id: 'm4', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 7), tipo: 'Ingreso', descripcion: 'Pago Polanco Santino', monto: 9200, cuenta: 'Cuenta MAW'},
-        { id: 'm5', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 10), tipo: 'Gasto', descripcion: 'Publicidad en Meta', monto: 5000, cuenta: 'Cuenta MAW'},
-        { id: 'm6', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 12), tipo: 'Ingreso', descripcion: 'Pago cliente Medical Tower', monto: 12000, cuenta: 'Cuenta Paola'},
-        { id: 'm7', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 15), tipo: 'Gasto', descripcion: 'Nómina', monto: 25000, cuenta: 'Cuenta MAW'},
+        // Current month - Matching the target balances
+        { id: 'm1', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 2), tipo: 'Ingreso', descripcion: 'Pago cliente Biofert', monto: 100000, cuenta: 'Cuenta MAW', categoria: 'Iguala Mensual'},
+        { id: 'm2', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 3), tipo: 'Gasto', descripcion: 'Pago de software de diseño', monto: 1200, cuenta: 'Cuenta Paola', categoria: 'Otros', nombreOtro: 'Software'},
+        { id: 'm3', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 5), tipo: 'Ingreso', descripcion: 'Adelanto proyecto NIU', monto: 88864, cuenta: 'Fer', categoria: 'Proyecto'},
+        { id: 'm4', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 7), tipo: 'Ingreso', descripcion: 'Pago Polanco Santino', monto: 100000, cuenta: 'Cuenta MAW', categoria: 'Iguala Mensual'},
+        { id: 'm5', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 10), tipo: 'Gasto', descripcion: 'Publicidad en Meta', monto: 50000, cuenta: 'Cuenta MAW', categoria: 'Publicidad'},
+        { id: 'm6', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 12), tipo: 'Ingreso', descripcion: 'Pago cliente Medical Tower', monto: 100000, cuenta: 'Cuenta Paola', categoria: 'Iguala Mensual'},
+        { id: 'm7', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 15), tipo: 'Gasto', descripcion: 'Nómina', monto: 100000, cuenta: 'Cuenta MAW', categoria: 'Sueldos'},
+        { id: 'm10', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 1), tipo: 'Ingreso', descripcion: 'Pago Cliente Y', monto: 105624, cuenta: 'Cuenta MAW', categoria: 'Proyecto'},
+        { id: 'm11', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 4), tipo: 'Ingreso', descripcion: 'Pago Cliente Z', monto: 88864, cuenta: 'Cuenta Paola', categoria: 'Proyecto'},
+        
         // Last month
-        { id: 'm8', fecha: new Date(startOfLastMonth.getTime() + 86400000 * 5), tipo: 'Ingreso', descripcion: 'Pago mes anterior Cliente X', monto: 7500, cuenta: 'Cuenta MAW'},
-        { id: 'm9', fecha: new Date(startOfLastMonth.getTime() + 86400000 * 18), tipo: 'Gasto', descripcion: 'Renta oficina mes anterior', monto: 15000, cuenta: 'Cuenta MAW'},
+        { id: 'm8', fecha: new Date(startOfLastMonth.getTime() + 86400000 * 5), tipo: 'Ingreso', descripcion: 'Pago mes anterior Cliente X', monto: 7500, cuenta: 'Cuenta MAW', categoria: 'Iguala Mensual'},
+        { id: 'm9', fecha: new Date(startOfLastMonth.getTime() + 86400000 * 18), tipo: 'Gasto', descripcion: 'Renta oficina mes anterior', monto: 15000, cuenta: 'Cuenta MAW', categoria: 'Otros', nombreOtro: 'Renta'},
     ]
 }
 
@@ -195,11 +204,16 @@ interface MovimientoDialogProps {
   children: React.ReactNode;
 }
 
+const gastoCategorias: CategoriaGasto[] = ["Publicidad", "Sueldos", "Comisiones", "Impuestos", "Personales", "Otros"];
+
 const MovimientoDialog = ({ tipo, onSave, children }: MovimientoDialogProps) => {
     const [descripcion, setDescripcion] = useState('');
     const [monto, setMonto] = useState('');
     const [cuenta, setCuenta] = useState<Cuenta | ''>('');
     const [otraCuenta, setOtraCuenta] = useState('');
+    const [categoriaIngreso, setCategoriaIngreso] = useState<CategoriaIngreso>('Proyecto');
+    const [categoriaGasto, setCategoriaGasto] = useState<CategoriaGasto | ''>('');
+    const [nombreOtroGasto, setNombreOtroGasto] = useState('');
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
 
@@ -208,22 +222,40 @@ const MovimientoDialog = ({ tipo, onSave, children }: MovimientoDialogProps) => 
             toast({ title: "Error", description: "Todos los campos son obligatorios.", variant: "destructive" });
             return;
         }
-        if (cuenta === 'Otra' && !otraCuenta) {
-            toast({ title: "Error", description: "Debes especificar el nombre de la otra cuenta.", variant: "destructive" });
-            return;
-        }
 
-        onSave({
+        const datosMovimiento: Omit<MovimientoDiario, 'id' | 'fecha' | 'tipo'> = {
             descripcion,
             monto: parseFloat(monto),
             cuenta: cuenta === 'Otra' ? otraCuenta : cuenta,
-        });
+        };
+
+        if (tipo === 'Ingreso') {
+            datosMovimiento.categoria = categoriaIngreso;
+        } else {
+            if (!categoriaGasto) {
+                toast({ title: "Error", description: "Debes seleccionar una categoría de gasto.", variant: "destructive" });
+                return;
+            }
+            datosMovimiento.categoria = categoriaGasto;
+            if (['Personales', 'Otros'].includes(categoriaGasto) && !nombreOtroGasto) {
+                toast({ title: "Error", description: "Debes especificar el nombre para esta categoría.", variant: "destructive" });
+                return;
+            }
+            if (['Personales', 'Otros'].includes(categoriaGasto)) {
+                datosMovimiento.nombreOtro = nombreOtroGasto;
+            }
+        }
+        
+        onSave(datosMovimiento);
 
         // Reset form
         setDescripcion('');
         setMonto('');
         setCuenta('');
         setOtraCuenta('');
+        setCategoriaIngreso('Proyecto');
+        setCategoriaGasto('');
+        setNombreOtroGasto('');
         setOpen(false);
         toast({ title: "Éxito", description: `${tipo} registrado correctamente.` });
     };
@@ -245,6 +277,43 @@ const MovimientoDialog = ({ tipo, onSave, children }: MovimientoDialogProps) => 
                         <Label htmlFor="monto">Monto (MXN)</Label>
                         <Input id="monto" type="number" value={monto} onChange={e => setMonto(e.target.value)} placeholder="Ej. 5000" />
                     </div>
+
+                    {tipo === 'Ingreso' ? (
+                        <div className="space-y-2">
+                            <Label>Tipo de Ingreso</Label>
+                            <RadioGroup value={categoriaIngreso} onValueChange={(value) => setCategoriaIngreso(value as CategoriaIngreso)} className='flex gap-4'>
+                               <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="Proyecto" id="r-proyecto" />
+                                    <Label htmlFor="r-proyecto" className="font-normal">Proyecto</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="Iguala Mensual" id="r-iguala" />
+                                    <Label htmlFor="r-iguala" className="font-normal">Iguala Mensual</Label>
+                                </div>
+                            </RadioGroup>
+                        </div>
+                    ) : (
+                        <div className="space-y-2">
+                            <Label htmlFor="categoria-gasto">Categoría de Gasto</Label>
+                            <Select value={categoriaGasto} onValueChange={(value) => setCategoriaGasto(value as CategoriaGasto)}>
+                                <SelectTrigger id="categoria-gasto">
+                                    <SelectValue placeholder="Seleccionar categoría" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {gastoCategorias.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
+                    
+                    {(categoriaGasto === 'Personales' || categoriaGasto === 'Otros') && (
+                        <div className="space-y-2">
+                            <Label htmlFor="nombre-otro-gasto">Nombre Específico</Label>
+                            <Input id="nombre-otro-gasto" value={nombreOtroGasto} onChange={e => setNombreOtroGasto(e.target.value)} placeholder="Ej. Fany, Compra de café" />
+                        </div>
+                    )}
+
+
                     <div className="space-y-2">
                         <Label htmlFor="cuenta">Cuenta</Label>
                         <Select value={cuenta} onValueChange={(value) => setCuenta(value as Cuenta)}>
@@ -392,6 +461,7 @@ const TablaDiariaTab = ({ movimientos, onAddMovimiento }: { movimientos: Movimie
                                     <TableHead>Fecha</TableHead>
                                     <TableHead>Tipo</TableHead>
                                     <TableHead>Descripción</TableHead>
+                                    <TableHead>Categoría / Detalle</TableHead>
                                     <TableHead>Cuenta</TableHead>
                                     <TableHead className="text-right">Monto</TableHead>
                                 </TableRow>
@@ -409,6 +479,7 @@ const TablaDiariaTab = ({ movimientos, onAddMovimiento }: { movimientos: Movimie
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="font-medium">{mov.descripcion}</TableCell>
+                                        <TableCell>{mov.categoria}{mov.nombreOtro ? ` (${mov.nombreOtro})` : ''}</TableCell>
                                         <TableCell>{mov.cuenta}</TableCell>
                                         <TableCell className={cn("text-right font-bold", mov.tipo === 'Ingreso' ? 'text-green-500' : 'text-destructive')}>
                                             {mov.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
@@ -481,4 +552,3 @@ export default function FinanzasPage() {
     </div>
   );
 }
-
