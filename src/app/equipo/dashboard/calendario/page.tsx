@@ -1,14 +1,14 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, subWeeks, addWeeks, isWithinInterval } from 'date-fns';
+import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, subWeeks, addWeeks, isWithinInterval, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { PlusCircle, Video, Camera, Phone, User, Monitor, Mic, Lightbulb, Grip, X, ChevronLeft, ChevronRight, Users } from 'lucide-react';
+import { PlusCircle, Video, Camera, Phone, User, Monitor, Mic, Lightbulb, Grip, X, ChevronLeft, ChevronRight, Users, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,20 +19,23 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+
 
 // Mocks - estos serían reemplazados por datos de Firebase
 const mockEquipment = [
-  { id: 'eq1', name: 'Micrófono Hollyland', category: 'audio', available: true },
-  { id: 'eq2', name: 'Cámara Sony FX3', category: 'video', available: true },
-  { id: 'eq3', name: 'Luz Aputure 600d', category: 'iluminacion', available: true },
-  { id: 'eq4', name: 'Estabilizador DJI Ronin', category: 'soporte', available: false },
-  { id: 'eq5', name: 'iPhone 15 Pro', category: 'video', available: true },
-  { id: 'eq6',name: 'Teleprompter', category: 'soporte', available: true}
+  { id: 'eq1', name: 'Micrófono Hollyland', category: 'audio' as const, available: true },
+  { id: 'eq2', name: 'Cámara Sony FX3', category: 'video' as const, available: true },
+  { id: 'eq3', name: 'Luz Aputure 600d', category: 'iluminacion' as const, available: true },
+  { id: 'eq4', name: 'Estabilizador DJI Ronin', category: 'soporte' as const, available: false },
+  { id: 'eq5', name: 'iPhone 15 Pro', category: 'video'as const, available: true },
+  { id: 'eq6',name: 'Teleprompter', category: 'soporte' as const, available: true}
 ];
 
 type RecordingEvent = {
   id: string;
   clientName: string;
+  assignedTo: string;
   assignedToName: string;
   fullStart: Date;
   fullEnd: Date;
@@ -47,6 +50,7 @@ const initialEvents: RecordingEvent[] = [
     {
         id: `rec-1730812800000`,
         clientName: "Biofert",
+        assignedTo: "fany-01",
         assignedToName: "Fany",
         fullStart: new Date('2024-11-05T10:00:00'),
         fullEnd: new Date('2024-11-05T12:00:00'),
@@ -59,6 +63,7 @@ const initialEvents: RecordingEvent[] = [
      {
         id: `rec-1730985600000`,
         clientName: "Constructora Edifica",
+        assignedTo: "luis-01",
         assignedToName: "Luis",
         fullStart: new Date('2024-11-07T14:00:00'),
         fullEnd: new Date('2024-11-07T16:30:00'),
@@ -78,7 +83,17 @@ const equipmentCategoryIcons = {
     soporte: <Grip className="w-4 h-4" />
 };
 
-const AddRecordingEventDialog = ({ onAddEvent }: { onAddEvent: (event: RecordingEvent) => void }) => {
+const EventDialog = ({ 
+    event, 
+    onSave, 
+    onDelete, 
+    children 
+}: { 
+    event?: RecordingEvent | null, 
+    onSave: (event: Omit<RecordingEvent, 'id' | 'equipmentNames' | 'assignedToName'>) => void, 
+    onDelete?: (id: string) => void, 
+    children: React.ReactNode 
+}) => {
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
     const [clientName, setClientName] = useState('');
@@ -92,50 +107,65 @@ const AddRecordingEventDialog = ({ onAddEvent }: { onAddEvent: (event: Recording
     const [assignedEquipment, setAssignedEquipment] = useState<string[]>([]);
     const [project, setProject] = useState('');
 
+    useEffect(() => {
+        if (event) {
+            setClientName(event.clientName);
+            setAssignedTo(event.assignedTo);
+            setStartDate(format(event.fullStart, 'yyyy-MM-dd'));
+            setStartTime(format(event.fullStart, 'HH:mm'));
+            setEndDate(format(event.fullEnd, 'yyyy-MM-dd'));
+            setEndTime(format(event.fullEnd, 'HH:mm'));
+            setLocation(event.location);
+            setLocationType(event.locationType);
+            setAssignedEquipment(event.assignedEquipment);
+            setProject(event.project);
+        } else {
+             // Reset form for new event
+            setClientName(''); setAssignedTo(''); setStartDate(''); setStartTime(''); setEndDate(''); setEndTime('');
+            setLocation(''); setLocationType('estudio'); setAssignedEquipment([]); setProject('');
+        }
+    }, [event, open]);
+    
+
     const handleSave = () => {
         if (!clientName || !assignedTo || !startDate || !startTime || !endDate || !endTime) {
             toast({ title: "Error", description: "Completa todos los campos de fecha y asignación.", variant: "destructive" });
             return;
         }
 
-        const fullStart = new Date(`${startDate}T${startTime}`);
-        const fullEnd = new Date(`${endDate}T${endTime}`);
-        
-        const newEvent: RecordingEvent = {
-            id: `rec-${Date.now()}`,
+        const newEventData = {
             clientName,
-            assignedToName: teamMembers.find(m => m.id === assignedTo)?.name || '',
-            fullStart,
-            fullEnd,
+            assignedTo,
+            fullStart: new Date(`${startDate}T${startTime}`),
+            fullEnd: new Date(`${endDate}T${endTime}`),
             location,
             locationType,
             assignedEquipment,
-            equipmentNames: assignedEquipment.map(id => mockEquipment.find(eq => eq.id === id)?.name || 'Equipo no encontrado'),
             project
         };
 
-        onAddEvent(newEvent);
+        onSave(newEventData);
         
-        toast({ title: "Éxito", description: `Evento de grabación para "${clientName}" agendado.` });
+        toast({ title: "Éxito", description: `Evento de grabación para "${clientName}" ${event ? 'actualizado' : 'agendado'}.` });
         setOpen(false);
-        // Reset form
-        setClientName(''); setAssignedTo(''); setStartDate(''); setStartTime(''); setEndDate(''); setEndTime('');
-        setLocation(''); setLocationType('estudio'); setAssignedEquipment([]); setProject('');
     };
+
+    const handleDelete = () => {
+        if(event && onDelete) {
+            onDelete(event.id);
+            toast({ title: "Eliminado", description: "El evento de grabación ha sido eliminado." });
+            setOpen(false);
+        }
+    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button>
-                    <PlusCircle className="w-4 h-4 mr-2" />
-                    Agendar Grabación
-                </Button>
-            </DialogTrigger>
+            <DialogTrigger asChild>{children}</DialogTrigger>
             <DialogContent className="sm:max-w-[600px]">
                 <DialogHeader>
-                    <DialogTitle>Agendar Nueva Grabación</DialogTitle>
+                    <DialogTitle>{event ? 'Editar Grabación' : 'Agendar Nueva Grabación'}</DialogTitle>
                     <DialogDescription>
-                        Planifica una nueva sesión, asigna responsables y reserva el equipo necesario.
+                        {event ? 'Modifica los detalles de la sesión.' : 'Planifica una nueva sesión, asigna responsables y reserva el equipo necesario.'}
                     </DialogDescription>
                 </DialogHeader>
                 <ScrollArea className="max-h-[70vh] p-4">
@@ -199,7 +229,7 @@ const AddRecordingEventDialog = ({ onAddEvent }: { onAddEvent: (event: Recording
                                 {mockEquipment.map((item) => (
                                     <div key={item.id} className="flex items-center space-x-2">
                                         <Checkbox
-                                            id={`eq-${item.id}`}
+                                            id={`eq-${item.id}-${event?.id || 'new'}`}
                                             checked={assignedEquipment.includes(item.id)}
                                             onCheckedChange={(checked) => {
                                                 setAssignedEquipment(prev => 
@@ -208,9 +238,9 @@ const AddRecordingEventDialog = ({ onAddEvent }: { onAddEvent: (event: Recording
                                             }}
                                             disabled={!item.available}
                                         />
-                                        <Label htmlFor={`eq-${item.id}`} className={cn("flex-1", !item.available && "text-muted-foreground line-through")}>
+                                        <Label htmlFor={`eq-${item.id}-${event?.id || 'new'}`} className={cn("flex-1", !item.available && "text-muted-foreground line-through")}>
                                             <div className="flex items-center gap-2">
-                                                {equipmentCategoryIcons[item.category as keyof typeof equipmentCategoryIcons]}
+                                                {equipmentCategoryIcons[item.category]}
                                                 {item.name}
                                                 {!item.available && <Badge variant="destructive" className="ml-auto">Ocupado</Badge>}
                                             </div>
@@ -223,9 +253,35 @@ const AddRecordingEventDialog = ({ onAddEvent }: { onAddEvent: (event: Recording
                        </div>
                   </div>
                 </ScrollArea>
-                <DialogFooter>
-                    <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                    <Button onClick={handleSave}>Agendar Grabación</Button>
+                <DialogFooter className="justify-between">
+                    <div>
+                        {event && onDelete && (
+                           <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="destructive">
+                                        <Trash2 className="w-4 h-4 mr-2" />
+                                        Eliminar
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                    <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Esta acción no se puede deshacer. Se eliminará permanentemente el evento de grabación.
+                                    </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleDelete}>Continuar</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        )}
+                    </div>
+                    <div className="flex gap-2">
+                        <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                        <Button onClick={handleSave}>{event ? 'Guardar Cambios' : 'Agendar Grabación'}</Button>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -236,27 +292,57 @@ export default function CalendarioPage() {
     const [currentDate, setCurrentDate] = useState(new Date('2024-11-05'));
     const [events, setEvents] = useState<RecordingEvent[]>(initialEvents);
     const [pendientes, setPendientes] = useState<Pendiente[]>(mockPendientesData);
+    const [selectedEvent, setSelectedEvent] = useState<RecordingEvent | null>(null);
+    const [memberFilter, setMemberFilter] = useState('Todos');
 
     const weekStartsOn = 1; // Monday
     const currentWeekStart = startOfWeek(currentDate, { weekStartsOn });
     const currentWeekEnd = endOfWeek(currentDate, { weekStartsOn });
     const daysInWeek = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd });
 
-    const handleAddEvent = (newEvent: RecordingEvent) => {
-        setEvents(prev => [...prev, newEvent].sort((a, b) => a.fullStart.getTime() - b.fullStart.getTime()));
-        
-        const newPendiente: Pendiente = {
-            id: `pend-${Date.now()}`,
-            cliente: newEvent.clientName,
-            encargado: newEvent.assignedToName, 
-            ejecutor: newEvent.assignedToName,
-            fechaCorte: 15,
-            status: 'Trabajando' as StatusPendiente,
-            pendientePrincipal: newEvent.project || `Grabación para ${newEvent.clientName}`,
-            categoria: 'Contenido'
+    const filteredEvents = useMemo(() => {
+        return events.filter(event => memberFilter === 'Todos' || event.assignedToName === memberFilter);
+    }, [events, memberFilter]);
+
+
+    const handleAddOrUpdateEvent = (eventData: Omit<RecordingEvent, 'id' | 'equipmentNames' | 'assignedToName'>, existingId?: string) => {
+        const fullEventData = {
+            ...eventData,
+            id: existingId || `rec-${Date.now()}`,
+            assignedToName: teamMembers.find(m => m.id === eventData.assignedTo)?.name || 'N/A',
+            equipmentNames: eventData.assignedEquipment.map(id => mockEquipment.find(eq => eq.id === id)?.name || 'Equipo no encontrado'),
         };
-        setPendientes(prev => [...prev, newPendiente]);
+
+        setEvents(prev => {
+            const existingIndex = prev.findIndex(e => e.id === existingId);
+            if (existingIndex > -1) {
+                const updatedEvents = [...prev];
+                updatedEvents[existingIndex] = fullEventData;
+                return updatedEvents.sort((a, b) => a.fullStart.getTime() - b.fullStart.getTime());
+            }
+            return [...prev, fullEventData].sort((a, b) => a.fullStart.getTime() - b.fullStart.getTime());
+        });
+        
+        // Add to pendientes if it's a new event
+        if (!existingId) {
+            const newPendiente: Pendiente = {
+                id: `pend-${Date.now()}`,
+                cliente: eventData.clientName,
+                encargado: fullEventData.assignedToName, 
+                ejecutor: fullEventData.assignedToName,
+                fechaCorte: 15,
+                status: 'Trabajando' as StatusPendiente,
+                pendientePrincipal: eventData.project || `Grabación para ${eventData.clientName}`,
+                categoria: 'Contenido'
+            };
+            setPendientes(prev => [...prev, newPendiente]);
+        }
     }
+
+    const handleDeleteEvent = (id: string) => {
+        setEvents(prev => prev.filter(e => e.id !== id));
+    }
+
 
     const goToPreviousWeek = () => setCurrentDate(subWeeks(currentDate, 1));
     const goToNextWeek = () => setCurrentDate(addWeeks(currentDate, 1));
@@ -269,7 +355,7 @@ export default function CalendarioPage() {
             summary[member.name] = 0;
         });
 
-        const eventsInWeek = events.filter(event => 
+        const eventsInWeek = filteredEvents.filter(event => 
             isWithinInterval(event.fullStart, { start: currentWeekStart, end: currentWeekEnd })
         );
 
@@ -280,7 +366,7 @@ export default function CalendarioPage() {
         });
 
         return summary;
-    }, [currentWeekStart, currentWeekEnd, events]);
+    }, [currentWeekStart, currentWeekEnd, filteredEvents]);
 
 
     return (
@@ -293,16 +379,30 @@ export default function CalendarioPage() {
                 </p>
             </div>
             <div className="flex items-center gap-2">
+                <Select value={memberFilter} onValueChange={setMemberFilter}>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Filtrar por responsable" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="Todos">Todos los Miembros</SelectItem>
+                        {teamMembers.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}
+                    </SelectContent>
+                </Select>
                 <Button variant="outline" onClick={goToPreviousWeek}><ChevronLeft className="w-4 h-4 mr-2" /> Semana Anterior</Button>
                 <Button variant="ghost" onClick={goToCurrentWeek}>Semana Actual</Button>
                 <Button variant="outline" onClick={goToNextWeek}>Siguiente Semana <ChevronRight className="w-4 h-4 ml-2" /></Button>
-                <AddRecordingEventDialog onAddEvent={handleAddEvent} />
+                <EventDialog onSave={(data) => handleAddOrUpdateEvent(data)} >
+                    <Button>
+                        <PlusCircle className="w-4 h-4 mr-2" />
+                        Agendar Grabación
+                    </Button>
+                </EventDialog>
             </div>
           </header>
 
           <div className="grid grid-cols-7 flex-grow border-t border-l rounded-t-lg overflow-hidden bg-card">
                 {daysInWeek.map(day => {
-                    const dayEvents = events.filter(event => isSameDay(event.fullStart, day)).sort((a, b) => a.fullStart.getTime() - b.fullStart.getTime());
+                    const dayEvents = filteredEvents.filter(event => isSameDay(event.fullStart, day)).sort((a, b) => a.fullStart.getTime() - b.fullStart.getTime());
                     return (
                         <div key={day.toString()} className="border-r border-b flex flex-col">
                             <div className="p-2 border-b text-center">
@@ -313,19 +413,26 @@ export default function CalendarioPage() {
                                 <div className="p-2 space-y-2">
                                 {dayEvents.length > 0 ? (
                                     dayEvents.map(event => (
-                                    <Card key={event.id} className="p-3 bg-background/50 hover:bg-background transition-colors">
-                                        <CardHeader className="p-0 mb-2">
-                                            <CardTitle className="text-sm">{event.project}</CardTitle>
-                                            <CardDescription className="text-xs">{event.clientName}</CardDescription>
-                                        </CardHeader>
-                                        <CardContent className="p-0 text-xs space-y-1">
-                                            <p className="flex items-center gap-1.5 text-muted-foreground"><User className="w-3 h-3" /> {event.assignedToName}</p>
-                                            <p className="font-semibold">{format(event.fullStart, 'HH:mm')} - {format(event.fullEnd, 'HH:mm')}</p>
-                                            <div className="flex flex-wrap gap-1 pt-1">
-                                                {event.equipmentNames.map(name => <Badge key={name} variant="secondary" className="text-xs">{name}</Badge>)}
-                                            </div>
-                                        </CardContent>
-                                    </Card>
+                                    <EventDialog 
+                                        key={event.id}
+                                        event={event} 
+                                        onSave={(data) => handleAddOrUpdateEvent(data, event.id)}
+                                        onDelete={handleDeleteEvent}
+                                    >
+                                        <Card className="p-3 bg-background/50 hover:bg-background transition-colors cursor-pointer">
+                                            <CardHeader className="p-0 mb-2">
+                                                <CardTitle className="text-sm">{event.project}</CardTitle>
+                                                <CardDescription className="text-xs">{event.clientName}</CardDescription>
+                                            </CardHeader>
+                                            <CardContent className="p-0 text-xs space-y-1">
+                                                <p className="flex items-center gap-1.5 text-muted-foreground"><User className="w-3 h-3" /> {event.assignedToName}</p>
+                                                <p className="font-semibold">{format(event.fullStart, 'HH:mm')} - {format(event.fullEnd, 'HH:mm')}</p>
+                                                <div className="flex flex-wrap gap-1 pt-1">
+                                                    {event.equipmentNames.map(name => <Badge key={name} variant="secondary" className="text-xs">{name}</Badge>)}
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </EventDialog>
                                     ))
                                 ) : (
                                     <div className="text-center text-xs text-muted-foreground pt-10">
