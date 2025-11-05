@@ -1,9 +1,12 @@
+
+"use client";
+
 import { portfolioItems } from "@/lib/portfolio-data";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle2, ExternalLink, ArrowRight, Frown } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ExternalLink, ArrowRight, Frown, ThumbsDown } from "lucide-react";
 import Link from "next/link";
 import WhatsappIcon from "@/components/icons/whatsapp-icon";
 import AnimatedDiv from "@/components/animated-div";
@@ -129,13 +132,8 @@ const QuoteDialog = ({ itemTitle }: { itemTitle: string }) => {
   );
 }
 
-export default function PortfolioItemPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+function PortfolioItemPageContent({ params }: { params: { id: string } }) {
   const item = portfolioItems.find((p) => p.id === params.id);
-  
 
   if (!item) {
     notFound();
@@ -149,7 +147,6 @@ export default function PortfolioItemPage({
     <div className="bg-background">
       <section className="relative py-24 sm:py-32">
         <div className="container mx-auto px-4 md:px-6">
-          
           <div className="grid md:grid-cols-12 gap-12 items-start">
             <div className="md:col-span-6 md:sticky top-28">
               <div className="relative aspect-video rounded-lg shadow-2xl overflow-hidden mb-8">
@@ -265,6 +262,10 @@ export default function PortfolioItemPage({
 }
 
 // Generate static paths for each portfolio item
+export default function Page({ params }: { params: { id: string } }) {
+  return <PortfolioItemPageContent params={params} />;
+}
+
 export async function generateStaticParams() {
   return portfolioItems.map((item) => ({
     id: item.id,
