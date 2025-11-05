@@ -2,32 +2,72 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Usuarios autenticados pueden leer casi todo
-    match /{document=**} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null 
-        && request.auth.token.role in ['admin', 'manager'];
+    // Función para verificar acceso a sección
+    function hasSectionAccess(section) {
+      return request.auth != null 
+        && request.auth.token.sections[section] == true;
     }
     
-    // Credenciales solo para administradores
-    match /credentials/{credentialId} {
-      allow read, write: if request.auth != null 
-        && request.auth.token.role == 'admin';
+    // Función para verificar permiso específico
+    function hasPermission(module, action) {
+      return request.auth != null 
+        && request.auth.token.permissions[module][action] == true;
     }
     
-    // Team members pueden editar sus tareas
-    match /tasks/{taskId} {
-      allow read: if request.auth != null;
-      allow create, update: if request.auth != null 
-        && (request.auth.token.role in ['admin', 'manager'] 
-            || resource.data.assignedTo == request.auth.token.name);
+    // Función para verificar si es propietario del recurso
+    function isOwner(userId) {
+      return request.auth != null 
+        && request.auth.uid == userId;
     }
     
-    // Clientes solo editables por managers y admin
-    match /clients/{clientId} {
+    // Función para verificar si está asignado al recurso
+    function isAssigned(assignedUserId) {
+      return request.auth != null 
+        && request.auth.uid == assignedUserId;
+    }
+    
+    // REGLAS PARA USUARIOS
+    match /users/{userId} {
       allow read: if request.auth != null;
-      allow write: if request.auth != null 
-        && request.auth.token.role in ['admin', 'manager'];
+      allow write: if hasPermission('accesos', 'ajustarAccesos') 
+        || isOwner(userId);
+    }
+    
+    // REGLAS PARA FINANZAS
+    match /finances/{financeId} {
+      allow read, write: if hasSectionAccess('finanzas') 
+        && hasPermission('finanzas', 'agregarPagos');
+    }
+    
+    // REGLAS PARA VENTAS/PROSPECTOS
+    match /prospects/{prospectId} {
+      allow read: if hasSectionAccess('ventas');
+      allow create: if hasPermission('ventas', 'agregarProspectosDirecto');
+      allow update: if hasPermission('ventas', 'cambiarStatusProspectos') 
+        && (hasPermission('ventas', 'cambiarStatusSoloAsignados') 
+            ? isAssigned(resource.data.assignedTo) 
+            : true);
+    }
+    
+    // REGLAS PARA CALENDARIO
+    match /calendar/{eventId} {
+      allow read: if hasSectionAccess('calendario');
+      allow write: if hasPermission('calendario', 'cambiarFechas') 
+        && (hasPermission('calendario', 'cambiarFechasSoloAsignados') 
+            ? isAssigned(resource.data.assignedTo) 
+            : true);
+    }
+    
+    // REGLAS PARA EQUIPOS
+    match /equipment/{equipmentId} {
+      allow read: if hasSectionAccess('calendario');
+      allow write: if hasPermission('calendario', 'asignarEquipos');
+    }
+    
+    // REGLAS PARA ASISTENCIA
+    match /attendance/{attendanceId} {
+      allow read: if hasSectionAccess('miProgreso');
+      allow write: if isOwner(resource.data.userId);
     }
   }
 }

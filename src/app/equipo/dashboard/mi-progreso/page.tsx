@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -43,7 +44,8 @@ const generateMockActivities = () => {
     for (const member of teamMembers) {
         for (let i = 0; i < 10; i++) {
              const activityDate = new Date(currentMonthStart.getTime() + Math.random() * (today.getTime() - currentMonthStart.getTime()));
-            if(member.role === 'admin') { // Assume only sales/admins have visits
+            // Admins and specific roles have client-facing activities
+            if(['admin', 'julio', 'alma', 'fernando'].includes(member.role)) {
                  activities.push({
                     id: `act-${member.id}-${i}`,
                     responsable: member.name,
@@ -120,7 +122,7 @@ export default function MiProgresoPage() {
                 name: member.name,
                 punctuality: punctuality,
                 tasksCompleted: completedTasks,
-                totalTasks: totalTasks,
+                totalTasks: tasksInFrame.length, // use length of filtered tasks
                 activities: activitiesInFrame,
                 performanceScore: performanceScore,
             };
@@ -174,7 +176,7 @@ export default function MiProgresoPage() {
                                                 <PunctualityBadge status={member.punctuality} />
                                             </TableCell>
                                             <TableCell>
-                                                <span className={cn(member.tasksCompleted === member.totalTasks ? 'text-green-500' : 'text-foreground')}>
+                                                <span className={cn(member.tasksCompleted === member.totalTasks && member.totalTasks > 0 ? 'text-green-500' : 'text-foreground')}>
                                                     {member.tasksCompleted} / {member.totalTasks}
                                                 </span>
                                             </TableCell>

@@ -1,175 +1,156 @@
 
 {
   "entities": {
-    "client": {
-      "title": "Client",
-      "description": "Represents a client of the marketing agency.",
+    "user": {
+      "title": "User",
+      "description": "Represents a user of the agency's internal system.",
       "type": "object",
       "properties": {
-        "clientName": {
-          "type": "string",
-          "description": "The unique name of the client."
-        },
-        "accountManager": {
-          "type": "string",
-          "description": "The account manager responsible for the client."
-        },
-        "contentCreator": {
-          "type": "string",
-          "description": "The content creator working on the client's account."
-        },
-        "corte": {
-          "type": "number",
-          "description": "The billing cut-off day."
-        },
-        "status": {
-          "type": "string",
-          "enum": ["Activo", "Inactivo", "Nueva", "Se quiere ir"],
-          "description": "The current status of the client."
-        },
-        "standardTasks": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Standard recurring tasks for the client."
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Timestamp of when the client was created."
-        },
-        "updatedAt": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Timestamp of the last update."
-        }
-      },
-      "required": ["clientName", "accountManager", "status"]
-    },
-    "content_plan": {
-      "title": "Content Plan",
-      "description": "Defines the content strategy for a client.",
-      "type": "object",
-      "properties": {
-        "clientId": {
-          "type": "string",
-          "description": "Reference to the client."
-        },
-        "monthlyContent": {
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "username": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "contabilidad", "ventas", "team_member", "julio", "alma", "fernando", "luis"] },
+        "isActive": { "type": "boolean" },
+        "accessSections": {
           "type": "object",
           "properties": {
-            "posts": { "type": "number" },
-            "videos": { "type": "number" },
-            "carousels": { "type": "number" },
-            "stories": { "type": "number" }
+            "nosotros": { "type": "boolean" },
+            "introduccion": { "type": "boolean" },
+            "pendientes": { "type": "boolean" },
+            "finanzas": { "type": "boolean" },
+            "ventas": { "type": "boolean" },
+            "accesos": { "type": "boolean" },
+            "calendario": { "type": "boolean" },
+            "miProgreso": { "type": "boolean" }
           }
         },
-        "weeklySchedule": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "day": { "type": "string" },
-              "contentType": { "type": "string" },
-              "description": { "type": "string" }
+        "permissions": {
+          "type": "object",
+          "properties": {
+            "finanzas": {
+              "type": "object",
+              "properties": {
+                "agregarPagos": { "type": "boolean" },
+                "agregarGastos": { "type": "boolean" },
+                "agregarCuentasPorCobrar": { "type": "boolean" }
+              }
+            },
+            "ventas": {
+              "type": "object",
+              "properties": {
+                "agregarProspectosDirecto": { "type": "boolean" },
+                "cambiarStatusProspectos": { "type": "boolean" },
+                "cambiarStatusSoloAsignados": { "type": "boolean" },
+                "verTodosProspectos": { "type": "boolean" }
+              }
+            },
+            "accesos": {
+              "type": "object",
+              "properties": {
+                "ajustarAccesos": { "type": "boolean" },
+                "agregarNuevosAccesos": { "type": "boolean" }
+              }
+            },
+            "calendario": {
+              "type": "object",
+              "properties": {
+                "cambiarFechas": { "type": "boolean" },
+                "cambiarFechasSoloAsignados": { "type": "boolean" },
+                "verCalendarioTodos": { "type": "boolean" },
+                "modificarCalendarioTodos": { "type": "boolean" },
+                "asignarEquipos": { "type": "boolean" }
+              }
+            },
+            "pendientes": {
+              "type": "object",
+              "properties": {
+                "moverPendientes": { "type": "boolean" },
+                "reasignarResponsables": { "type": "boolean" }
+              }
             }
           }
         },
-        "lastVisit": { "type": "string", "format": "date-time" },
-        "nextVisit": { "type": "string", "format": "date-time" },
-        "contentScheduled": { "type": "string", "format": "date-time" }
+        "progressConfig": {
+          "type": "object",
+          "properties": {
+            "registroLlegadasTemprano": { "type": "boolean" },
+            "diasCompletadosPendientes": { "type": "boolean" },
+            "salidasGrabacion": { "type": "boolean" },
+            "ventasCerradas": { "type": "boolean" },
+            "statusVentas": { "type": "boolean" },
+            "resumenVentasMes": { "type": "boolean" },
+            "gananciasPerdidas": { "type": "boolean" },
+            "desempenioOtrosUsuarios": { "type": "boolean" },
+            "proximasGrabaciones": { "type": "boolean" },
+            "llegadasTarde": { "type": "boolean" }
+          }
+        },
+        "lastLogin": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["clientId"]
+      "required": ["email", "username", "role", "isActive"]
     },
-    "advertising_campaign": {
-      "title": "Advertising Campaign",
-      "description": "Details of a specific ad campaign for a client.",
+    "user_role": {
+      "title": "User Role",
+      "description": "Template for user roles and permissions.",
       "type": "object",
       "properties": {
-        "clientId": { "type": "string" },
-        "platform": { "type": "string", "enum": ["Facebook", "TikTok", "Google Ads", "LinkedIn"] },
-        "budget": { "type": "number" },
-        "objective": { "type": "string", "enum": ["INTERACCION", "MENSAJES", "REGISTROS", "TRAFICO"] },
-        "target": { "type": "string" },
-        "startDate": { "type": "string", "format": "date-time" },
-        "endDate": { "type": "string", "format": "date-time" },
-        "status": { "type": "string" },
-        "paymentMethod": { "type": "string" },
-        "pautaManager": { "type": "string" }
-      },
-      "required": ["clientId", "platform", "budget", "objective"]
-    },
-    "task": {
-      "title": "Task",
-      "description": "A specific task assigned for a client.",
-      "type": "object",
-      "properties": {
-        "clientId": { "type": "string" },
-        "title": { "type": "string" },
+        "roleName": { "type": "string" },
         "description": { "type": "string" },
-        "assignedTo": { "type": "string" },
-        "priority": { "type": "string", "enum": ["Alta", "Media", "Baja"] },
-        "dueDate": { "type": "string", "format": "date-time" },
-        "status": { "type": "string", "enum": ["Pendiente", "En Progreso", "Completado"] },
-        "category": { "type": "string" }
+        "accessTemplate": { "$ref": "#/entities/user/properties/accessSections" },
+        "permissionsTemplate": { "$ref": "#/entities/user/properties/permissions" },
+        "progressTemplate": { "$ref": "#/entities/user/properties/progressConfig" }
       },
-       "required": ["clientId", "title", "assignedTo", "status"]
+      "required": ["roleName"]
     },
-    "team_member": {
-      "title": "Team Member",
-      "description": "A member of the marketing agency team.",
+    "equipment": {
+      "title": "Equipment",
+      "description": "Represents a piece of equipment for agency use.",
       "type": "object",
       "properties": {
         "name": { "type": "string" },
-        "role": { "type": "string", "enum": ["Account Manager", "Creador de Contenido", "Manager de Pauta"] },
-        "email": { "type": "string", "format": "email" },
-        "active": { "type": "boolean" },
-        "currentClients": { "type": "number" },
-        "platforms": {
-          "type": "array",
-          "items": {"type": "string"}
-        }
+        "type": { "type": "string", "enum": ["audio", "video", "iluminacion", "soporte"] },
+        "available": { "type": "boolean" },
+        "assignedTo": { "type": "string", "description": "User ID" },
+        "assignedDate": { "type": "string", "format": "date-time" },
+        "assignedUntil": { "type": "string", "format": "date-time" },
+        "condition": { "type": "string", "enum": ["excelente", "bueno", "regular", "necesita_mantenimiento"] },
+        "notes": { "type": "string" }
       },
-      "required": ["name", "role", "email", "active"]
+      "required": ["name", "type", "available", "condition"]
     },
-    "client_credential": {
-      "title": "Client Credential",
-      "description": "Stores client credentials for various platforms.",
+    "attendance": {
+      "title": "Attendance",
+      "description": "Record of user attendance.",
       "type": "object",
       "properties": {
-        "clientId": { "type": "string" },
-        "platform": { "type": "string" },
-        "email": { "type": "string" },
-        "password": { "type": "string" },
-        "accessDetails": { "type": "string" },
-        "lastUpdated": { "type": "string", "format": "date-time" }
+        "userId": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "loginTime": { "type": "string", "format": "time" },
+        "loginIp": { "type": "string", "format": "ipv4" },
+        "status": { "type": "string", "enum": ["temprano", "puntual", "tarde"] },
+        "location": { "type": "string" }
       },
-       "required": ["clientId", "platform", "email", "password"]
+      "required": ["userId", "date", "loginTime", "status"]
     }
   },
   "firestore": {
-    "/clients/{clientId}": {
-      "schema": { "$ref": "#/entities/client" },
-      "description": "Stores client information."
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/user" },
+      "description": "Stores individual user data and their specific permissions."
     },
-    "/content_plans/{planId}": {
-      "schema": { "$ref": "#/entities/content_plan" },
-      "description": "Content plans for each client."
+    "/user_roles/{roleId}": {
+      "schema": { "$ref": "#/entities/user_role" },
+      "description": "Stores role templates for easy permission assignment."
     },
-    "/advertising_campaigns/{campaignId}": {
-      "schema": { "$ref": "#/entities/advertising_campaign" },
-      "description": "Advertising campaigns for clients."
+    "/equipment/{equipmentId}": {
+      "schema": { "$ref": "#/entities/equipment" },
+      "description": "Manages the inventory and assignment of company equipment."
     },
-    "/tasks/{taskId}": {
-      "schema": { "$ref": "#/entities/task" },
-      "description": "Tasks assigned for each client."
-    },
-    "/team_members/{memberId}": {
-      "schema": { "$ref": "#/entities/team_member" },
-      "description": "Team member information."
-    },
-    "/credentials/{credentialId}": {
-      "schema": { "$ref": "#/entities/client_credential" },
-      "description": "Client platform credentials."
+    "/attendance/{attendanceId}": {
+      "schema": { "$ref": "#/entities/attendance" },
+      "description": "Logs user attendance records."
     }
   },
   "auth": {
