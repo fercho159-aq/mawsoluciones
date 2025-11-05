@@ -8,36 +8,6 @@ import WebCalculator from "@/components/web-calculator";
 const ServicePage = () => {
   return (
     <div className="bg-background">
-      <section className="py-24 sm:py-32 md:py-40 bg-card">
-        <div className="container mx-auto px-4 md:px-6 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="font-headline text-4xl sm:text-5xl font-bold">
-              Desarrollo Web
-            </h1>
-            <p className="mt-6 text-lg sm:text-xl text-foreground/80">
-              Diseñamos y desarrollamos sitios web modernos, rápidos, responsivos y optimizados para la conversión que funcionan como el centro de tu ecosistema digital.
-            </p>
-          </div>
-        </div>
-      </section>
-      
-      <section className="py-20 md:py-28 bg-background">
-        <div className="container mx-auto px-4 md:px-6">
-           <div className="max-w-3xl mx-auto text-center mb-12">
-            <h2 className="font-headline text-3xl sm:text-4xl font-bold">Descubre tu Sitio Web Ideal</h2>
-            <p className="mt-4 text-lg text-foreground/80">
-              Responde unas breves preguntas y obtén una recomendación sobre el tipo de sitio web perfecto para tu negocio.
-            </p>
-          </div>
-          <WebCalculator />
-        </div>
-      </section>
-
-      <ParallaxImages 
-        laptopImage="/images/desarrollo web/2.png"
-        phoneImage="/images/desarrollo web/4.png"
-      />
-
       <section className="py-20 md:py-28">
         <div className="container mx-auto px-4 md:px-6">
           <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -79,6 +49,23 @@ const ServicePage = () => {
       </section>
 
       <section className="py-20 md:py-28 bg-card">
+        <div className="container mx-auto px-4 md:px-6">
+           <div className="max-w-3xl mx-auto text-center mb-12">
+            <h2 className="font-headline text-3xl sm:text-4xl font-bold">Descubre tu Sitio Web Ideal</h2>
+            <p className="mt-4 text-lg text-foreground/80">
+              Responde unas breves preguntas y obtén una recomendación sobre el tipo de sitio web perfecto para tu negocio.
+            </p>
+          </div>
+          <WebCalculator />
+        </div>
+      </section>
+
+      <ParallaxImages 
+        laptopImage="/images/desarrollo web/2.png"
+        phoneImage="/images/desarrollo web/4.png"
+      />
+      
+      <section className="py-20 md:py-28 bg-background">
         <div className="container mx-auto px-4 md:px-6 text-center">
             <h2 className="font-headline text-3xl sm:text-4xl font-bold">¿Listo para construir tu presencia online?</h2>
             <p className="mt-4 text-lg text-foreground/80 max-w-2xl mx-auto">
