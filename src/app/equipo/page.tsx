@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -9,52 +9,49 @@ import { LogIn } from 'lucide-react';
 import Logo from '@/components/logo';
 import { teamMembers } from '@/lib/team-data';
 import { useAuth } from '@/lib/auth-provider';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { login, user } = useAuth();
+  const { login } = useAuth();
 
-  useEffect(() => {
-    // Si ya hay un usuario, redirigir directamente.
-    if (user) {
-      router.push('/equipo/dashboard');
-      return;
-    }
-
-    // Iniciar sesión automáticamente con el primer usuario admin como default
-    const defaultAdmin = teamMembers.find(member => member.role === 'admin');
-
-    if (defaultAdmin) {
-      login(defaultAdmin);
-      toast({
-        title: 'Inicio de sesión automático',
-        description: `Accediendo como ${defaultAdmin.name}.`,
-      });
-      router.push('/equipo/dashboard');
-    } else {
-      toast({
-        variant: 'destructive',
-        title: 'Error de configuración',
-        description: 'No se encontró un usuario administrador por defecto.',
-      });
-    }
-  }, [login, router, toast, user]);
+  const handleLogin = (user: typeof teamMembers[0]) => {
+    login(user);
+    toast({
+      title: 'Inicio de Sesión Exitoso',
+      description: `Accediendo como ${user.name}.`,
+    });
+    router.push('/equipo/dashboard');
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
-      <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-md">
         <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
                  <Logo />
             </div>
-          <CardTitle>Acceso Interno</CardTitle>
-          <CardDescription>Iniciando sesión automáticamente...</CardDescription>
+          <CardTitle>Selección de Usuario (Pruebas)</CardTitle>
+          <CardDescription>Haz clic en un usuario para iniciar sesión y probar su vista.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center text-muted-foreground">
-            <LogIn className="w-5 h-5 mr-2 animate-spin" />
-            <p>Redirigiendo al panel...</p>
+        <CardContent className="max-h-[60vh] overflow-y-auto">
+          <div className="grid grid-cols-2 gap-4">
+            {teamMembers.map((member) => (
+              <Button 
+                key={member.id} 
+                variant="outline" 
+                className="flex flex-col h-auto p-4 gap-2"
+                onClick={() => handleLogin(member)}
+              >
+                <span className="font-bold text-lg">{member.name}</span>
+                <Badge variant={member.role === 'admin' ? 'destructive' : 'secondary'}>
+                    {member.role}
+                </Badge>
+              </Button>
+            ))}
           </div>
         </CardContent>
       </Card>
