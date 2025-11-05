@@ -157,7 +157,7 @@ const AddLeadDialog = ({ onAddLeads }: { onAddLeads: (leads: Omit<Lead, 'id' | '
 }
 
 export default function VentasPage() {
-    const [leads, setLeads] = useState(mockLeads);
+    const [leads, setLeads] = useState<Lead[]>(mockLeads);
     const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
     const [isConvertModalOpen, setIsConvertModalOpen] = useState(false);
     const [pautaOption, setPautaOption] = useState<'si' | 'no' | 'ambos'>('si');
