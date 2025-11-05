@@ -168,26 +168,6 @@ export default function VentasPage() {
     const [origenFilter, setOrigenFilter] = useState('Todos');
     const [searchFilter, setSearchFilter] = useState('');
 
-    useEffect(() => {
-        const newLeadsJSON = localStorage.getItem('newLeads');
-        if (newLeadsJSON) {
-            try {
-                const newLeads = JSON.parse(newLeadsJSON);
-                if (newLeads.length > 0) {
-                    handleAddLeads(newLeads); // Use the same logic to distribute
-                    localStorage.removeItem('newLeads');
-                     toast({
-                        title: "¡Nuevos Prospectos!",
-                        description: `Se han añadido ${newLeads.length} nuevos prospectos desde el sitio web.`,
-                    });
-                }
-            } catch (e) {
-                console.error("Error parsing new leads from localStorage", e);
-                localStorage.removeItem('newLeads');
-            }
-        }
-    }, [toast]);
-
     const handleAddLeads = (newLeadsData: Omit<Lead, 'id' | 'status' | 'responsable'>[]) => {
         let lastSeller = localStorage.getItem('lastAssignedSeller') || 'Julio';
         
@@ -210,6 +190,29 @@ export default function VentasPage() {
             description: `${leadsToAdd.length} nuevos prospectos se han añadido al pipeline.`,
         });
     };
+
+    useEffect(() => {
+        const newLeadsJSON = localStorage.getItem('newLeads');
+        if (newLeadsJSON) {
+            try {
+                const newLeadsFromStorage = JSON.parse(newLeadsJSON);
+                if (Array.isArray(newLeadsFromStorage) && newLeadsFromStorage.length > 0) {
+                    // We use the same handleAddLeads function to ensure leads are distributed
+                    handleAddLeads(newLeadsFromStorage); 
+                    localStorage.removeItem('newLeads');
+                     toast({
+                        title: "¡Nuevos Prospectos!",
+                        description: `Se han añadido ${newLeadsFromStorage.length} nuevos prospectos desde el sitio web.`,
+                    });
+                }
+            } catch (e) {
+                console.error("Error parsing new leads from localStorage", e);
+                localStorage.removeItem('newLeads');
+            }
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
 
     const handleConvertClick = (lead: Lead) => {
         setSelectedLead(lead);
@@ -367,5 +370,3 @@ export default function VentasPage() {
     </div>
   );
 }
-
-    
