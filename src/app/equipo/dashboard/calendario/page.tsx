@@ -83,6 +83,9 @@ const equipmentCategoryIcons = {
     soporte: <Grip className="w-4 h-4" />
 };
 
+const relevantTeamMembers = teamMembers.filter(member => member.role !== 'admin' && member.accessSections?.calendario);
+
+
 const EventDialog = ({ 
     event, 
     onSave, 
@@ -183,7 +186,7 @@ const EventDialog = ({
                           <Select value={assignedTo} onValueChange={setAssignedTo}>
                               <SelectTrigger><SelectValue placeholder="Seleccionar miembro del equipo..." /></SelectTrigger>
                               <SelectContent>
-                                  {teamMembers.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
+                                  {relevantTeamMembers.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
                               </SelectContent>
                           </Select>
                       </div>
@@ -253,7 +256,7 @@ const EventDialog = ({
                        </div>
                   </div>
                 </ScrollArea>
-                <DialogFooter className="justify-between">
+                <DialogFooter className="justify-between pt-4">
                     <div>
                         {event && onDelete && (
                            <AlertDialog>
@@ -351,7 +354,7 @@ export default function CalendarioPage() {
     const weeklySummary = useMemo(() => {
         const summary: { [key: string]: number } = {};
         
-        teamMembers.forEach(member => {
+        relevantTeamMembers.forEach(member => {
             summary[member.name] = 0;
         });
 
@@ -385,7 +388,7 @@ export default function CalendarioPage() {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="Todos">Todos los Miembros</SelectItem>
-                        {teamMembers.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}
+                        {relevantTeamMembers.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}
                     </SelectContent>
                 </Select>
                 <Button variant="outline" onClick={goToPreviousWeek}><ChevronLeft className="w-4 h-4 mr-2" /> Semana Anterior</Button>
