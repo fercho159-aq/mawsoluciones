@@ -20,12 +20,13 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
       const firebaseInstances = await initializeFirebase();
       setFirebase(firebaseInstances);
     };
-    init();
-  }, []);
+    if (!firebase) {
+      init();
+    }
+  }, [firebase]);
 
   if (!firebase) {
-    // Optionally, return a loading spinner or some placeholder
-    return null; 
+    return <>{children}</>;
   }
 
   return (
