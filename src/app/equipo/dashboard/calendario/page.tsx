@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -13,12 +14,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { mockEvents, mockData as mockPendientesData, type Evento, type Pendiente, type StatusPendiente } from '@/lib/activities-data';
+import { mockData as mockPendientesData, type Pendiente, type StatusPendiente } from '@/lib/activities-data';
 import { teamMembers } from '@/lib/team-data';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
+import { addDays, startOfMonth } from 'date-fns';
+
 
 // Mocks - estos serían reemplazados por datos de Firebase
 const mockEquipment = [
@@ -43,11 +46,22 @@ type RecordingEvent = {
   project: string;
 };
 
-const eventTypeConfig = {
-    grabacion: { icon: <Camera className="w-4 h-4 mr-2"/>, color: "bg-blue-500" },
-    cita: { icon: <Video className="w-4 h-4 mr-2"/>, color: "bg-green-500" },
-    llamada: { icon: <Phone className="w-4 h-4 mr-2"/>, color: "bg-purple-500" }
-}
+// ** NEW MOCK DATA **
+const initialEvents: RecordingEvent[] = [
+    {
+        id: `rec-${Date.now()}`,
+        clientName: "Biofert",
+        assignedToName: "Fany",
+        fullStart: addDays(startOfMonth(new Date('2024-11-05')), 4), // Approx Nov 5th
+        fullEnd: addDays(startOfMonth(new Date('2024-11-05')), 4),
+        location: "Estudio Principal",
+        locationType: "estudio",
+        assignedEquipment: ["eq1", "eq2"],
+        equipmentNames: ["Micrófono Hollyland", "Cámara Sony FX3"],
+        project: "Videos testimoniales para Q4"
+    }
+];
+
 
 const equipmentCategoryIcons = {
     audio: <Mic className="w-4 h-4" />,
@@ -212,7 +226,7 @@ const AddRecordingEventDialog = ({ onAddEvent }: { onAddEvent: (event: Recording
 
 export default function CalendarioPage() {
   const [date, setDate] = useState<Date | undefined>(new Date('2024-11-05'));
-  const [events, setEvents] = useState<RecordingEvent[]>([]);
+  const [events, setEvents] = useState<RecordingEvent[]>(initialEvents);
   const [pendientes, setPendientes] = useState<Pendiente[]>(mockPendientesData);
 
   const handleAddEvent = (newEvent: RecordingEvent) => {
@@ -273,7 +287,7 @@ export default function CalendarioPage() {
                     components={{ Day: DayCell }}
                     modifiers={{ events: events.map(e => e.fullStart) }}
                     modifiersClassNames={{ events: 'font-bold' }}
-                    defaultMonth={new Date()}
+                    defaultMonth={new Date('2024-11-01')}
                 />
             </div>
             <div className="lg:col-span-1 p-4 bg-card/30">
@@ -316,3 +330,4 @@ export default function CalendarioPage() {
     </div>
   );
 }
+
