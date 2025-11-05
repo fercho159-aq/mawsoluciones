@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { courseData, Topic, Section, Question } from '@/lib/course-data';
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Circle, PlayCircle, Eye, Bullseye, Users, Wand, TrendingUp, Bot, Calendar, Phone, Building, Send, ChevronRight, X, ThumbsDown } from "lucide-react";
+import { CheckCircle, Circle, PlayCircle, Eye, Target, Users, Wand, TrendingUp, Bot, Calendar, Phone, Building, Send, ChevronRight, X, ThumbsDown } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -34,7 +34,7 @@ const sectionIcons: Record<number, React.ReactNode> = {
   1: <Eye className="w-5 h-5 mr-3 text-primary" />,
   2: <Users className="w-5 h-5 mr-3 text-primary" />,
   3: <Wand className="w-5 h-5 mr-3 text-primary" />,
-  4: <Bullseye className="w-5 h-5 mr-3 text-primary" />,
+  4: <Target className="w-5 h-5 mr-3 text-primary" />,
   5: <TrendingUp className="w-5 h-5 mr-3 text-primary" />,
   6: <Bot className="w-5 h-5 mr-3 text-primary" />,
 };
@@ -57,7 +57,8 @@ const LeadCaptureDialog = ({ trigger }: { trigger: React.ReactNode }) => {
     const handleSendToWhatsapp = () => {
         const message = `
 *¡Hola! Quiero agendar una sesión con un experto.*
-\n*Nombre:* ${formData.name}
+
+*Nombre:* ${formData.name}
 *Celular:* ${formData.phone}
 *Empresa:* ${formData.company}
 *Motivo de contacto:* ${formData.reason}
