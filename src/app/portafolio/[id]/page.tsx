@@ -6,7 +6,7 @@ import { notFound, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle2, ExternalLink, ArrowRight } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ExternalLink, ArrowRight, Frown } from "lucide-react";
 import Link from "next/link";
 import WhatsappIcon from "@/components/icons/whatsapp-icon";
 import AnimatedDiv from "@/components/animated-div";
@@ -131,6 +131,16 @@ const QuoteDialog = ({ itemTitle }: { itemTitle: string }) => {
   );
 }
 
+const BackButton = () => {
+    const router = useRouter();
+    return (
+        <Button variant="outline" onClick={() => router.back()} className="mb-8">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Volver a Clientes
+        </Button>
+    )
+}
+
 
 export default function PortfolioItemPage({
   params,
@@ -138,7 +148,7 @@ export default function PortfolioItemPage({
   params: { id: string };
 }) {
   const item = portfolioItems.find((p) => p.id === params.id);
-  const router = useRouter();
+  
 
   if (!item) {
     notFound();
@@ -163,10 +173,7 @@ export default function PortfolioItemPage({
                   className="object-contain"
                 />
               </div>
-              <Button variant="outline" onClick={() => router.back()} className="mb-8">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Volver a Clientes
-              </Button>
+              <BackButton />
             </div>
             
             <div className="md:col-span-6">
