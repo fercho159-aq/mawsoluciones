@@ -448,10 +448,10 @@ export const portfolioItems: PortfolioItemType[] = [
     },
     {
       "id": "epicrides",
-      "title": "EpicRides - Plataforma Digital para Eventos de Motociclismo",
+      "title": "EpicRides - Plataforma Digital para Eventos",
       "category": "Ecomerce",
       "sector": "Eventos",
-      "image": "/images/screenshots/epicrides.com.mxepicrides10@gmail.com/137.png",
+      "image": "/images/screenshots/epicrides.com.mx/137.png",
       "description": "Desarrollo integral del sitio web para EpicRides, una empresa especializada en eventos de motociclismo extremo, enfocado en ofrecer una experiencia online emocionante y funcional para sus usuarios.",
       "services": [
         "Diseño y desarrollo web a medida",
@@ -1112,7 +1112,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo y Diseño del Sitio Web www.bhdmx.com",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/images/screenshots/www.bhdmx.com/145.png",
+      "image": "/images/screenshots/bhdmx.com/145.png",
       "description": "Desarrollo integral del sitio web para BHDMX, una empresa del sector de servicios profesionales, con enfoque en la experiencia de usuario, funcionalidad y adaptabilidad.",
       "services": [
         "Diseño web personalizado",
@@ -1193,10 +1193,10 @@ export const portfolioItems: PortfolioItemType[] = [
     },
     {
       "id": "cuestiondepolemica",
-      "title": "Desarrollo del sitio web www.cuestiondepolemica.com",
+      "title": "Desarrollo del sitio web cuestiondepolemica.com",
       "category": "Connective",
       "sector": "Noticias",
-      "image": "/images/screenshots/www.cuestiondepolemica.com/169.png",
+      "image": "/images/screenshots/cuestiondepolemica.com/169.png",
       "description": "Creación integral del sitio web para Cuestión de Polémica, un portal de noticias dinámico y atractivo.",
       "services": [
         "Diseño web responsivo",
@@ -1210,8 +1210,8 @@ export const portfolioItems: PortfolioItemType[] = [
       "client": "Cuestión de Polémica",
       "challenge": "El principal desafío fue desarrollar una plataforma de noticias que pueda manejar grandes volúmenes de contenido en tiempo real, garantizando a la vez una experiencia de usuario fluida y atractiva. Además, fue vital crear un sistema que permitiera una fácil actualización y gestión de noticias por parte del equipo editorial sin necesidad de conocimientos técnicos avanzados.",
       "solution": "Desarrollamos un sitio web robusto con un CMS personalizado para facilitar la publicación y gestión de contenido. Implementamos un diseño responsivo para acceso óptimo desde cualquier dispositivo y optimizamos la estructura del sitio para mejorar el posicionamiento en buscadores. Se incorporaron medidas de seguridad avanzadas para proteger tanto los datos como la integridad del sitio, y se brindó soporte continuo para asegurar la estabilidad y actualización del sistema.",
-      "laptop": "/public/images/screenshots/www.cuestiondepolemica.com/170.png",
-      "phone": "/public/images/screenshots/www.cuestiondepolemica.com/172.png"
+      "laptop": "/public/images/screenshots/cuestiondepolemica.com/170.png",
+      "phone": "/public/images/screenshots/cuestiondepolemica.com/172.png"
     },
     {
       "id": "valor-compartido",
@@ -1239,7 +1239,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Diseño y Desarrollo Web para NIU Coliving",
       "category": "Connective",
       "sector": "Inmobiliaria",
-      "image": "/images/screenshots/niu-coliving.comes//201.png",
+      "image": "/images/screenshots/niu-coliving.com/201.png",
       "description": "Desarrollo integral de un sitio web para NIU Coliving, una empresa inmobiliaria especializada en espacios compartidos y coliving.",
       "services": [
         "Diseño UX/UI personalizado",
@@ -1345,7 +1345,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo Web para SIFSA",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/images/screenshots/www.sifsa.mx/209.png",
+      "image": "/images/screenshots/sifsa.mx/209.png",
       "description": "Creación y puesta en marcha del sitio web www.sifsa.mx, diseñado para ofrecer servicios profesionales en línea con una imagen corporativa sólida y funcionalidad óptima.",
       "services": [
         "Diseño web a medida",

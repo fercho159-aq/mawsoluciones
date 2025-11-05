@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import Image from "next/image";
@@ -79,7 +80,7 @@ const PortfolioPage = () => {
 
   const filteredItems = portfolioItems.filter(item => {
     const categoryMatch = categoryFilter === "Todos" || item.category === categoryFilter;
-    const sectorMatch = sectorFilter === "Todos" || item.sector === sectorMatch;
+    const sectorMatch = sectorFilter === "Todos" || item.sector === sectorFilter;
     return categoryMatch && sectorMatch;
   });
 
