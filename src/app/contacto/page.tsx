@@ -29,15 +29,10 @@ const ContactPage = () => {
                 <Phone className="w-5 h-5 text-primary" />
                 <a href="tel:+123456789" className="hover:text-primary transition-colors">+1 (234) 567-89</a>
               </div>
-            </div>
-            <div className="my-8">
-              <h3 className="font-headline text-2xl font-bold mt-10 mb-4">O contáctanos por WhatsApp</h3>
-              <Button asChild className="w-full" size="lg" variant="whatsapp">
-                <a href="https://wa.me/1234567890" target="_blank" rel="noopener noreferrer">
-                  <WhatsappIcon className="w-6 h-6 mr-2" />
-                  Enviar Mensaje
-                </a>
-              </Button>
+               <div className="flex items-center gap-4">
+                <WhatsappIcon className="w-5 h-5 text-primary" />
+                <a href="https://wa.me/1234567890" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">+1 (234) 567-890</a>
+              </div>
             </div>
             <AnimatedChatInvitation />
           </AnimatedDiv>
