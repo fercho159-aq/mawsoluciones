@@ -79,7 +79,7 @@ export default function FinanzasPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold font-headline mb-8">Panel de Finanzas</h1>
+      <h1 className="text-3xl font-bold font-headline mb-8">Gestión de Cobranza</h1>
        <Card className="mb-8">
         <CardHeader>
             <CardTitle>Control de Pagos</CardTitle>

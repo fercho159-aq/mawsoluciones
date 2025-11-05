@@ -15,18 +15,20 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Check, Send, Sparkles } from 'lucide-react';
+import { Check, Send, Sparkles, PlusCircle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter
+  DialogFooter,
+  DialogTrigger
 } from "@/components/ui/dialog";
 import { useToast } from '@/hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type OrigenLead = "Facebook" | "TikTok" | "Referencia" | "Sitio Web";
 type StatusLead = "Lead Nuevo" | "Contactado" | "Videollamada" | "En Negociación" | "Convertido" | "No Interesado";
@@ -34,18 +36,20 @@ type StatusLead = "Lead Nuevo" | "Contactado" | "Videollamada" | "En Negociació
 interface Lead {
   id: string;
   cliente: string;
+  email?: string;
+  telefono?: string;
   origen: OrigenLead;
   status: StatusLead;
   responsable: "Alma Fer" | "Julio";
 }
 
 const mockLeads: Lead[] = [
-  { id: 'lead1', cliente: "Gimnasio FitnessPro", origen: "Facebook", status: "Videollamada", responsable: "Alma Fer" },
-  { id: 'lead2', cliente: "Tacos El Veloz", origen: "TikTok", status: "Lead Nuevo", responsable: "Julio" },
-  { id: 'lead3', cliente: "Clínica Dental Sonrisa", origen: "Referencia", status: "En Negociación", responsable: "Alma Fer" },
-  { id: 'lead4', cliente: "Ecommerce de Ropa 'Moda Hoy'", origen: "Facebook", status: "Contactado", responsable: "Julio" },
-  { id: 'lead5', cliente: "Constructora Edifica", origen: "Sitio Web", status: "No Interesado", responsable: "Alma Fer" },
-  { id: 'lead6', cliente: "Restaurante La Toscana", origen: "TikTok", status: "Videollamada", responsable: "Julio" },
+  { id: 'lead1', cliente: "Gimnasio FitnessPro", email: "contacto@fitnesspro.com", telefono: "5511223344", origen: "Facebook", status: "Videollamada", responsable: "Alma Fer" },
+  { id: 'lead2', cliente: "Tacos El Veloz", email: "info@tacoselveloz.com", telefono: "5522334455", origen: "TikTok", status: "Lead Nuevo", responsable: "Julio" },
+  { id: 'lead3', cliente: "Clínica Dental Sonrisa", email: "hola@dentalsonrisa.mx", telefono: "5533445566", origen: "Referencia", status: "En Negociación", responsable: "Alma Fer" },
+  { id: 'lead4', cliente: "Ecommerce de Ropa 'Moda Hoy'", email: "ventas@modahoy.com", telefono: "5544556677", origen: "Facebook", status: "Contactado", responsable: "Julio" },
+  { id: 'lead5', cliente: "Constructora Edifica", email: "proyectos@edifica.com", telefono: "5555667788", origen: "Sitio Web", status: "No Interesado", responsable: "Alma Fer" },
+  { id: 'lead6', cliente: "Restaurante La Toscana", email: "reservas@latoscana.com", telefono: "5566778899", origen: "TikTok", status: "Videollamada", responsable: "Julio" },
 ];
 
 const statusColors: Record<StatusLead, string> = {
@@ -57,6 +61,71 @@ const statusColors: Record<StatusLead, string> = {
     "No Interesado": "bg-gray-500",
 };
 
+const origenes: OrigenLead[] = ["Facebook", "TikTok", "Referencia", "Sitio Web"];
+const responsables = ["Alma Fer", "Julio"];
+const statuses: StatusLead[] = ["Lead Nuevo", "Contactado", "Videollamada", "En Negociación", "Convertido", "No Interesado"];
+
+const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Omit<Lead, 'id' | 'status' | 'responsable'>) => void }) => {
+    const [newLead, setNewLead] = useState({ cliente: '', email: '', telefono: '', origen: 'Referencia' as OrigenLead });
+    const [open, setOpen] = useState(false);
+
+    const handleAdd = () => {
+        if (newLead.cliente && newLead.email) {
+            onAddLead(newLead);
+            setNewLead({ cliente: '', email: '', telefono: '', origen: 'Referencia' });
+            setOpen(false);
+        }
+    }
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <Button>
+                    <PlusCircle className="w-4 h-4 mr-2" />
+                    Añadir Prospecto
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Añadir Nuevo Prospecto</DialogTitle>
+                    <DialogDescription>
+                        Ingresa los datos del nuevo cliente potencial. Se le asignará un responsable automáticamente.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="cliente" className="text-right">Cliente</Label>
+                        <Input id="cliente" value={newLead.cliente} onChange={(e) => setNewLead({...newLead, cliente: e.target.value})} className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="email" className="text-right">Email</Label>
+                        <Input id="email" type="email" value={newLead.email} onChange={(e) => setNewLead({...newLead, email: e.target.value})} className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="telefono" className="text-right">Teléfono</Label>
+                        <Input id="telefono" type="tel" value={newLead.telefono} onChange={(e) => setNewLead({...newLead, telefono: e.target.value})} className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="origen" className="text-right">Origen</Label>
+                        <Select value={newLead.origen} onValueChange={(v) => setNewLead({...newLead, origen: v as OrigenLead})}>
+                            <SelectTrigger className="col-span-3">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {origenes.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                    <Button onClick={handleAdd}>Añadir Prospecto</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
 export default function VentasPage() {
     const [leads, setLeads] = useState(mockLeads);
     const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -64,20 +133,49 @@ export default function VentasPage() {
     const [pautaOption, setPautaOption] = useState<'si' | 'no' | 'ambos'>('si');
     const { toast } = useToast();
 
+    // Filtros
+    const [responsableFilter, setResponsableFilter] = useState('Todos');
+    const [statusFilter, setStatusFilter] = useState('Todos');
+    const [origenFilter, setOrigenFilter] = useState('Todos');
+    const [searchFilter, setSearchFilter] = useState('');
+
     useEffect(() => {
         const newLeadsJSON = localStorage.getItem('newLeads');
         if (newLeadsJSON) {
-            const newLeads = JSON.parse(newLeadsJSON);
-            if (newLeads.length > 0) {
-                setLeads(prevLeads => [...prevLeads, ...newLeads]);
-                localStorage.removeItem('newLeads'); // Clear after adding
-                 toast({
-                    title: "¡Nuevos Prospectos!",
-                    description: `Se han añadido ${newLeads.length} nuevos prospectos desde el sitio web.`,
-                });
+            try {
+                const newLeads = JSON.parse(newLeadsJSON);
+                if (newLeads.length > 0) {
+                    setLeads(prevLeads => [...prevLeads, ...newLeads]);
+                    localStorage.removeItem('newLeads');
+                     toast({
+                        title: "¡Nuevos Prospectos!",
+                        description: `Se han añadido ${newLeads.length} nuevos prospectos desde el sitio web.`,
+                    });
+                }
+            } catch (e) {
+                console.error("Error parsing new leads from localStorage", e);
+                localStorage.removeItem('newLeads');
             }
         }
     }, []);
+
+    const handleAddLead = (newLeadData: Omit<Lead, 'id' | 'status' | 'responsable'>) => {
+        const lastSeller = localStorage.getItem('lastAssignedSeller') || 'Julio';
+        const newSeller = lastSeller === 'Julio' ? 'Alma Fer' : 'Julio';
+        localStorage.setItem('lastAssignedSeller', newSeller);
+
+        const leadToAdd: Lead = {
+            id: `lead-${Date.now()}`,
+            ...newLeadData,
+            status: 'Lead Nuevo',
+            responsable: newSeller,
+        };
+        setLeads(prev => [leadToAdd, ...prev]);
+        toast({
+            title: "Prospecto Añadido",
+            description: `${newLeadData.cliente} ha sido añadido al pipeline.`,
+        });
+    };
 
     const handleConvertClick = (lead: Lead) => {
         setSelectedLead(lead);
@@ -106,16 +204,56 @@ export default function VentasPage() {
         }
     }
 
+    const filteredLeads = useMemo(() => {
+        return leads.filter(lead => {
+            const searchMatch = searchFilter === '' || lead.cliente.toLowerCase().includes(searchFilter.toLowerCase());
+            const responsableMatch = responsableFilter === 'Todos' || lead.responsable === responsableFilter;
+            const statusMatch = statusFilter === 'Todos' || lead.status === statusFilter;
+            const origenMatch = origenFilter === 'Todos' || lead.origen === origenFilter;
+            return searchMatch && responsableMatch && statusMatch && origenMatch;
+        });
+    }, [leads, searchFilter, responsableFilter, statusFilter, origenFilter]);
 
   return (
     <div>
-      <h1 className="text-3xl font-bold font-headline mb-8">Pipeline de Ventas</h1>
+        <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold font-headline">Pipeline de Ventas</h1>
+            <AddLeadDialog onAddLead={handleAddLead} />
+        </div>
        <Card>
         <CardHeader>
             <CardTitle>Nuevos Prospectos</CardTitle>
             <CardDescription>Gestiona los leads desde el primer contacto hasta la conversión.</CardDescription>
         </CardHeader>
         <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <Input 
+                    placeholder="Buscar por cliente..."
+                    value={searchFilter}
+                    onChange={(e) => setSearchFilter(e.target.value)}
+                />
+                <Select value={responsableFilter} onValueChange={setResponsableFilter}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="Todos">Todos los Responsables</SelectItem>
+                        {responsables.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+                 <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="Todos">Todos los Status</SelectItem>
+                        {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+                <Select value={origenFilter} onValueChange={setOrigenFilter}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="Todos">Todos los Orígenes</SelectItem>
+                        {origenes.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+            </div>
             <div className="border rounded-lg">
                 <Table>
                     <TableHeader>
@@ -128,7 +266,7 @@ export default function VentasPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {leads.filter(l => l.status !== 'Convertido' && l.status !== 'No Interesado').map((lead) => (
+                        {filteredLeads.filter(l => l.status !== 'Convertido' && l.status !== 'No Interesado').map((lead) => (
                             <TableRow key={lead.id}>
                                 <TableCell className="font-medium">{lead.cliente}</TableCell>
                                 <TableCell>{lead.origen}</TableCell>
@@ -148,9 +286,9 @@ export default function VentasPage() {
                         ))}
                     </TableBody>
                 </Table>
-                 {leads.filter(l => l.status !== 'Convertido' && l.status !== 'No Interesado').length === 0 && (
+                 {filteredLeads.filter(l => l.status !== 'Convertido' && l.status !== 'No Interesado').length === 0 && (
                     <div className="text-center p-8 text-muted-foreground">
-                        No hay prospectos activos en el pipeline.
+                        No hay prospectos activos con los filtros seleccionados.
                     </div>
                 )}
             </div>
