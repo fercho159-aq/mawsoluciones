@@ -7,6 +7,7 @@ import type { TeamMember } from './team-data';
 
 interface AuthContextType {
   user: TeamMember | null;
+  loading: boolean;
   login: (user: TeamMember) => void;
   logout: () => void;
 }
@@ -45,23 +46,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       localStorage.removeItem('team-user');
       setUser(null);
-      router.push('/');
+      router.push('/equipo');
     } catch (error) {
       console.error("Failed to remove user from localStorage", error);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
+      {loading ? (
+        <div className="flex items-center justify-center min-h-screen bg-background">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 };

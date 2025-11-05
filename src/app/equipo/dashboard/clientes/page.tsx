@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Table,
   TableHeader,
@@ -173,19 +173,17 @@ const AddClientDialog = ({ onAdd, children }: { onAdd: (client: Omit<Client, 'id
 }
 
 export default function ClientesPage() {
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
     const router = useRouter();
     const [clients, setClients] = useState<Client[]>(initialClients);
     const [cuentasPorCobrar, setCuentasPorCobrar] = useState<CuentasPorCobrar[]>(initialCuentasPorCobrar);
-    
-    const isAdminOrContabilidad = useMemo(() => user?.role === 'admin' || user?.role === 'contabilidad', [user]);
 
-    // Redirect if user does not have access
-    React.useEffect(() => {
-        if (user && !(user.accessSections?.clientes)) {
+    // Redirect if user does not have access. Waits for user data to be loaded.
+    useEffect(() => {
+        if (!loading && user && !user.accessSections?.clientes) {
             router.push('/equipo/dashboard');
         }
-    }, [user, router]);
+    }, [user, loading, router]);
 
     const handleAddClient = (newClientData: Omit<Client, 'id'>, nuevosPendientes: Omit<Activity, 'id'>[]) => {
         const newClient: Client = { id: `client-${Date.now()}`, ...newClientData };
@@ -212,7 +210,11 @@ export default function ClientesPage() {
         return balances;
     }, [clients, cuentasPorCobrar]);
 
-    if (!user || !(user.accessSections?.clientes)) {
+    if (loading) {
+         return <div className="text-center p-8">Cargando...</div>;
+    }
+
+    if (!user || !user.accessSections?.clientes) {
         return <div className="text-center p-8">No tienes permiso para ver esta sección.</div>;
     }
 
