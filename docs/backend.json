@@ -21,7 +21,8 @@
             "ventas": { "type": "boolean" },
             "accesos": { "type": "boolean" },
             "calendario": { "type": "boolean" },
-            "miProgreso": { "type": "boolean" }
+            "miProgreso": { "type": "boolean" },
+            "clientes": { "type": "boolean" }
           }
         },
         "permissions": {
@@ -66,6 +67,14 @@
               "properties": {
                 "moverPendientes": { "type": "boolean" },
                 "reasignarResponsables": { "type": "boolean" }
+              }
+            },
+             "clientes": {
+              "type": "object",
+              "properties": {
+                "agregarClientes": { "type": "boolean" },
+                "editarClientes": { "type": "boolean" },
+                "verSaldo": { "type": "boolean" }
               }
             }
           }

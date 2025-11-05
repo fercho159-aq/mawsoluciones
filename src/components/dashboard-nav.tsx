@@ -11,6 +11,7 @@ import { useAuth } from "@/lib/auth-provider";
 const navItems = [
     { href: "/equipo/dashboard/nosotros", label: "Nosotros", icon: <Users className="w-4 h-4" />, section: 'nosotros' },
     { href: "/equipo/dashboard/introduccion", label: "Introducción", icon: <BookOpen className="w-4 h-4" />, section: 'introduccion' },
+    { href: "/equipo/dashboard/clientes", label: "Clientes", icon: <Users className="w-4 h-4" />, section: 'clientes' },
     { href: "/equipo/dashboard/pendientes", label: "Pendientes", icon: <ListTodo className="w-4 h-4" />, section: 'pendientes' },
     { href: "/equipo/dashboard/finanzas", label: "Finanzas", icon: <DollarSign className="w-4 h-4" />, section: 'finanzas' },
     { href: "/equipo/dashboard/ventas", label: "Ventas", icon: <Handshake className="w-4 h-4" />, section: 'ventas' },
@@ -24,10 +25,10 @@ export default function DashboardNav() {
     const { user } = useAuth();
 
     const userHasAccess = (section: string) => {
-        if (!user || !user.accessSections) {
-            if(user?.role === 'admin') return true;
-            return false;
-        }
+        if (!user) return false;
+        if (user.role === 'admin') return true;
+        if (!user.accessSections) return false;
+
         return user.accessSections[section] === true;
     };
 

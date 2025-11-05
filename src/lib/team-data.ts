@@ -24,13 +24,14 @@ export const teamMembers: TeamMember[] = [
         role: 'admin', 
         email: 'admin@agencia.com',
         color: '#7C3AED', // purple-600
-        accessSections: { nosotros: true, introduccion: true, pendientes: true, finanzas: true, ventas: true, accesos: true, calendario: true, miProgreso: true },
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, finanzas: true, ventas: true, accesos: true, calendario: true, miProgreso: true, clientes: true },
         permissions: {
             finanzas: { agregarPagos: true, agregarGastos: true, agregarCuentasPorCobrar: true },
             ventas: { agregarProspectosDirecto: true, cambiarStatusProspectos: true, cambiarStatusSoloAsignados: false, verTodosProspectos: true },
             accesos: { ajustarAccesos: true, agregarNuevosAccesos: true },
             calendario: { cambiarFechas: true, cambiarFechasSoloAsignados: false, verCalendarioTodos: true, modificarCalendarioTodos: true, asignarEquipos: true },
-            pendientes: { moverPendientes: true, reasignarResponsables: true }
+            pendientes: { moverPendientes: true, reasignarResponsables: true },
+            clientes: { agregarClientes: true, editarClientes: true, verSaldo: true },
         },
         progressConfig: { resumenVentasMes: true, gananciasPerdidas: true, desempenioOtrosUsuarios: true, proximasGrabaciones: true, llegadasTarde: true }
     },
@@ -42,9 +43,10 @@ export const teamMembers: TeamMember[] = [
         role: 'contabilidad', 
         email: 'conta@agencia.com',
         color: '#6B7280', // gray-500
-        accessSections: { nosotros: true, introduccion: true, pendientes: false, finanzas: true, ventas: false, accesos: false, calendario: false, miProgreso: false },
+        accessSections: { nosotros: true, introduccion: true, pendientes: false, finanzas: true, ventas: false, accesos: false, calendario: false, miProgreso: false, clientes: true },
         permissions: {
-            finanzas: { agregarPagos: true, agregarGastos: true, agregarCuentasPorCobrar: true }
+            finanzas: { agregarPagos: true, agregarGastos: true, agregarCuentasPorCobrar: true },
+            clientes: { agregarClientes: true, editarClientes: true, verSaldo: true },
         },
         progressConfig: {}
     },
@@ -56,7 +58,7 @@ export const teamMembers: TeamMember[] = [
         role: 'ventas', 
         email: 'ventas@agencia.com',
         color: '#2563EB', // blue-600
-        accessSections: { nosotros: false, introduccion: false, pendientes: false, finanzas: false, ventas: true, accesos: false, calendario: false, miProgreso: false },
+        accessSections: { nosotros: false, introduccion: false, pendientes: false, finanzas: false, ventas: true, accesos: false, calendario: false, miProgreso: false, clientes: false },
         permissions: {
             ventas: { agregarProspectosDirecto: true, cambiarStatusProspectos: true, cambiarStatusSoloAsignados: false, verTodosProspectos: true }
         },
@@ -70,7 +72,7 @@ export const teamMembers: TeamMember[] = [
         role: 'julio', 
         email: 'julio@agencia.com',
         color: '#D97706', // amber-600
-        accessSections: { nosotros: true, introduccion: true, pendientes: true, finanzas: false, ventas: true, accesos: true, calendario: true, miProgreso: true },
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, finanzas: false, ventas: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
         permissions: {
             ventas: { cambiarStatusProspectos: true, cambiarStatusSoloAsignados: true },
             accesos: { ajustarAccesos: true, agregarNuevosAccesos: true },
@@ -87,7 +89,7 @@ export const teamMembers: TeamMember[] = [
         role: 'alma', 
         email: 'alma@agencia.com',
         color: '#DB2777', // pink-600
-        accessSections: { nosotros: true, introduccion: true, pendientes: false, finanzas: false, ventas: true, accesos: true, calendario: true, miProgreso: true },
+        accessSections: { nosotros: true, introduccion: true, pendientes: false, finanzas: false, ventas: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
         permissions: {
             ventas: { cambiarStatusProspectos: true, cambiarStatusSoloAsignados: true },
             accesos: { ajustarAccesos: true, agregarNuevosAccesos: true },
@@ -103,7 +105,7 @@ export const teamMembers: TeamMember[] = [
         role: 'fernando', 
         email: 'fer@agencia.com',
         color: '#059669', // emerald-600
-        accessSections: { nosotros: true, introduccion: true, pendientes: true, finanzas: false, ventas: true, accesos: true, calendario: true, miProgreso: true },
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, finanzas: false, ventas: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
         permissions: {
             ventas: { cambiarStatusProspectos: true, cambiarStatusSoloAsignados: true },
             accesos: { ajustarAccesos: true, agregarNuevosAccesos: true },
@@ -120,7 +122,7 @@ export const teamMembers: TeamMember[] = [
         role: 'luis', 
         email: 'luis@agencia.com',
         color: '#2563EB', // blue-600
-        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true },
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
         permissions: {
             calendario: { cambiarFechas: true, cambiarFechasSoloAsignados: true, verCalendarioTodos: true },
              pendientes: { moverPendientes: true, reasignarResponsables: false }
