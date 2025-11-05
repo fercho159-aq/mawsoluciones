@@ -157,7 +157,7 @@ const AddLeadDialog = ({ onAddLeads }: { onAddLeads: (leads: Omit<Lead, 'id' | '
 }
 
 export default function VentasPage() {
-    const [leads, setLeads] = useState<Lead[]>(mockLeads);
+    const [leads, setLeads] = useState<Lead[]>([]);
     const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
     const [isConvertModalOpen, setIsConvertModalOpen] = useState(false);
     const [pautaOption, setPautaOption] = useState<'si' | 'no' | 'ambos'>('si');
@@ -170,44 +170,68 @@ export default function VentasPage() {
     const [searchFilter, setSearchFilter] = useState('');
 
     const handleAddLeads = (newLeadsData: Omit<Lead, 'id' | 'status' | 'responsable'>[]) => {
-        let lastSellerIndex = parseInt(localStorage.getItem('lastAssignedSellerIndex') || '0');
-        
-        const leadsToAdd: Lead[] = newLeadsData.map((newLeadData) => {
-            const newSeller = responsables[lastSellerIndex % responsables.length];
-            lastSellerIndex++;
-            return {
-                id: `lead-${Date.now()}-${Math.random()}`,
-                ...newLeadData,
-                status: 'Lead Nuevo',
-                responsable: newSeller,
-            }
-        });
-
-        localStorage.setItem('lastAssignedSellerIndex', lastSellerIndex.toString());
-        setLeads(prev => [...leadsToAdd, ...prev]);
-        
-        if (newLeadsData.length > 0) {
-            toast({
-                title: "Prospectos Añadidos",
-                description: `${leadsToAdd.length} nuevos prospectos se han añadido al pipeline.`,
+        setLeads(prevLeads => {
+            let lastSellerIndex = parseInt(localStorage.getItem('lastAssignedSellerIndex') || '0');
+            
+            const leadsToAdd: Lead[] = newLeadsData.map((newLeadData) => {
+                const newSeller = responsables[lastSellerIndex % responsables.length];
+                lastSellerIndex++;
+                return {
+                    id: `lead-${Date.now()}-${Math.random()}`,
+                    ...newLeadData,
+                    status: 'Lead Nuevo',
+                    responsable: newSeller,
+                }
             });
-        }
+    
+            localStorage.setItem('lastAssignedSellerIndex', lastSellerIndex.toString());
+            
+            if (leadsToAdd.length > 0) {
+                toast({
+                    title: "Prospectos Añadidos",
+                    description: `${leadsToAdd.length} nuevos prospectos se han añadido al pipeline.`,
+                });
+            }
+            return [...leadsToAdd, ...prevLeads];
+        });
     };
 
     useEffect(() => {
-        const newLeadsJSON = localStorage.getItem('newLeads');
-        if (newLeadsJSON) {
-            try {
-                const newLeadsFromStorage = JSON.parse(newLeadsJSON);
-                if (Array.isArray(newLeadsFromStorage) && newLeadsFromStorage.length > 0) {
-                    handleAddLeads(newLeadsFromStorage); 
+        // This effect runs only once on mount to load initial and stored leads.
+        const loadLeads = () => {
+            let initialLeads = [...mockLeads];
+            const newLeadsJSON = localStorage.getItem('newLeads');
+
+            if (newLeadsJSON) {
+                try {
+                    const newLeadsFromStorage: Omit<Lead, 'id' | 'status' | 'responsable'>[] = JSON.parse(newLeadsJSON);
+                    if (Array.isArray(newLeadsFromStorage) && newLeadsFromStorage.length > 0) {
+                        let lastSellerIndex = parseInt(localStorage.getItem('lastAssignedSellerIndex') || '0');
+                        
+                        const leadsToAdd: Lead[] = newLeadsFromStorage.map((newLeadData) => {
+                            const newSeller = responsables[lastSellerIndex % responsables.length];
+                            lastSellerIndex++;
+                            return {
+                                id: `lead-${Date.now()}-${Math.random()}`,
+                                ...newLeadData,
+                                status: 'Lead Nuevo',
+                                responsable: newSeller,
+                            };
+                        });
+
+                        initialLeads = [...leadsToAdd, ...initialLeads];
+                        localStorage.setItem('lastAssignedSellerIndex', lastSellerIndex.toString());
+                        localStorage.removeItem('newLeads');
+                    }
+                } catch (e) {
+                    console.error("Error parsing new leads from localStorage", e);
                     localStorage.removeItem('newLeads');
                 }
-            } catch (e) {
-                console.error("Error parsing new leads from localStorage", e);
-                localStorage.removeItem('newLeads');
             }
-        }
+            setLeads(initialLeads);
+        };
+
+        loadLeads();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
