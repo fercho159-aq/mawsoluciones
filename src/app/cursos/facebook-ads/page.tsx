@@ -1,10 +1,10 @@
 
 "use client";
 
-import { useState } from 'react';
-import { courseData, Topic, Section, Question } from '@/lib/course-data';
+import { useState, useRef } from 'react';
+import { courseData, Topic, Question } from '@/lib/course-data';
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Circle, PlayCircle, Eye, Target, Users, Wand, TrendingUp, Bot, Calendar, Phone, Building, Send, ChevronRight, X, ThumbsDown } from "lucide-react";
+import { CheckCircle, Circle, PlayCircle, Eye, Target, Users, Wand, TrendingUp, Bot, Calendar, ChevronRight, X, AlertTriangle } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -29,6 +29,7 @@ import Footer from '@/components/footer';
 import WhatsappIcon from '@/components/icons/whatsapp-icon';
 import GlitchTitle from '@/components/glitch-title';
 import DonkeyIcon from '@/components/icons/donkey-icon';
+import { Card, CardContent } from '@/components/ui/card';
 
 const sectionIcons: Record<number, React.ReactNode> = {
   1: <Eye className="w-5 h-5 mr-3 text-primary" />,
@@ -46,7 +47,7 @@ interface LeadFormData {
     reason: string;
 }
 
-const LeadCaptureDialog = ({ trigger }: { trigger: React.ReactNode }) => {
+const LeadCaptureDialog = ({ trigger, onWhatsappSubmit }: { trigger: React.ReactNode, onWhatsappSubmit: (data: LeadFormData) => void }) => {
     const [formData, setFormData] = useState<LeadFormData>({
         name: '',
         phone: '',
@@ -55,17 +56,7 @@ const LeadCaptureDialog = ({ trigger }: { trigger: React.ReactNode }) => {
     });
 
     const handleSendToWhatsapp = () => {
-        const message = `
-*¡Hola! Quiero agendar una sesión con un experto.*
-
-*Nombre:* ${formData.name}
-*Celular:* ${formData.phone}
-*Empresa:* ${formData.company}
-*Motivo de contacto:* ${formData.reason}
-        `.trim().replace(/\n\s*\n/g, '\n');
-        
-        const whatsappUrl = `https://wa.me/525542314150?text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, '_blank');
+        onWhatsappSubmit(formData);
     };
 
     return (
@@ -124,7 +115,7 @@ const LeadCaptureDialog = ({ trigger }: { trigger: React.ReactNode }) => {
     );
 };
 
-const QuizComponent = ({ topic, onComplete }: { topic: Topic; onComplete: (score: number) => void; }) => {
+const QuizComponent = ({ topic, onComplete }: { topic: Topic; onComplete: (score: number, incorrect: Question[]) => void; }) => {
     const [answers, setAnswers] = useState<{[key: number]: number}>({});
     
     const handleAnswerChange = (questionIndex: number, optionIndex: number) => {
@@ -133,12 +124,15 @@ const QuizComponent = ({ topic, onComplete }: { topic: Topic; onComplete: (score
 
     const handleSubmit = () => {
         let score = 0;
+        const incorrect: Question[] = [];
         topic.questions.forEach((q, index) => {
             if (answers[index] === q.correct) {
                 score++;
+            } else {
+                incorrect.push(q);
             }
         });
-        onComplete(score);
+        onComplete(score, incorrect);
     };
 
     return (
@@ -162,12 +156,96 @@ const QuizComponent = ({ topic, onComplete }: { topic: Topic; onComplete: (score
                     </div>
                 ))}
             </div>
-            <Button onClick={handleSubmit} size="lg" className="mt-8" disabled={Object.keys(answers).length !== topic.questions.length}>
+             <Button onClick={handleSubmit} size="lg" className="mt-8" disabled={Object.keys(answers).length !== topic.questions.length}>
                 Verificar Respuestas
             </Button>
         </div>
     );
 };
+
+const QuizResult = ({ result, incorrectAnswers, score, total }: { result: 'win' | 'lose', incorrectAnswers: Question[], score: number, total: number }) => {
+    return (
+        <div className="text-center py-10">
+            {result === 'win' ? (
+                <>
+                    <GlitchTitle text="YOU WIN" />
+                    <p className="text-lg mt-4">¡Felicidades! Aprobaste la sección.</p>
+                    <p className="font-bold text-2xl text-green-500">{score} / {total}</p>
+                </>
+            ) : (
+                <>
+                    <GlitchTitle text="GAME OVER" />
+                    <DonkeyIcon className="w-24 h-24 mx-auto mt-4 text-primary" />
+                    <p className="text-lg mt-4">¡No te rindas! Repasa los temas y vuelve a intentarlo.</p>
+                    <p className="font-bold text-2xl text-destructive">{score} / {total}</p>
+                    
+                    <div className="mt-8 text-left max-w-2xl mx-auto">
+                        <h4 className="font-headline text-xl font-bold mb-4">Repasa estos puntos:</h4>
+                        <Card className="bg-card/50">
+                            <CardContent className="p-6">
+                                <ul className="space-y-4">
+                                    {incorrectAnswers.map((q, index) => (
+                                        <li key={index} className="border-b pb-4 last:border-b-0">
+                                            <p className="font-semibold">{q.question}</p>
+                                            <p className="text-sm text-green-400 mt-2">
+                                                <strong>Respuesta correcta:</strong> {q.options[q.correct]}
+                                            </p>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </>
+            )}
+        </div>
+    )
+}
+
+interface QuizLeadFormData {
+  name: string;
+  phone: string;
+  company: string;
+}
+
+const QuizLeadCaptureDialog = ({ open, onOpenChange, onWhatsappSubmit, score, total }: { open: boolean; onOpenChange: (open: boolean) => void; onWhatsappSubmit: (data: QuizLeadFormData) => void, score: number, total: number }) => {
+    const [formData, setFormData] = useState<QuizLeadFormData>({ name: '', phone: '', company: '' });
+
+    const handleSubmit = () => {
+        onWhatsappSubmit(formData);
+    }
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>¡Examen Terminado!</DialogTitle>
+                    <DialogDescription>
+                        Ingresa tus datos para ver tu calificación y que un experto se ponga en contacto contigo para los siguientes pasos.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="quiz-name" className="text-right">Nombre</Label>
+                        <Input id="quiz-name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="quiz-phone" className="text-right">Celular</Label>
+                        <Input id="quiz-phone" type="tel" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="quiz-company" className="text-right">Empresa</Label>
+                        <Input id="quiz-company" value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})} className="col-span-3" />
+                    </div>
+                </div>
+                <Button onClick={handleSubmit} type="submit" size="lg" className="w-full">
+                    <WhatsappIcon className="w-5 h-5 mr-2" />
+                    Enviar y Ver Mi Calificación
+                </Button>
+            </DialogContent>
+        </Dialog>
+    )
+}
 
 
 export default function CoursePage() {
@@ -175,11 +253,17 @@ export default function CoursePage() {
   const [completedTopics, setCompletedTopics] = useState<string[]>([]);
   const progress = (completedTopics.length / courseData.total_topics) * 100;
   
+  const [quizScore, setQuizScore] = useState(0);
+  const [incorrectAnswers, setIncorrectAnswers] = useState<Question[]>([]);
   const [quizResult, setQuizResult] = useState<'win' | 'lose' | null>(null);
+  const [isQuizLeadModalOpen, setIsQuizLeadModalOpen] = useState(false);
+  const mainContentRef = useRef<HTMLDivElement>(null);
+
 
   const handleTopicClick = (topic: Topic) => {
     setCurrentTopic(topic);
     setQuizResult(null); 
+    setIncorrectAnswers([]);
   };
 
   const handleCompleteTopic = () => {
@@ -188,13 +272,52 @@ export default function CoursePage() {
     }
   };
 
-  const handleQuizComplete = (score: number) => {
-      if (score > 4) {
+  const handleQuizComplete = (score: number, incorrect: Question[]) => {
+      setQuizScore(score);
+      setIncorrectAnswers(incorrect);
+      setIsQuizLeadModalOpen(true);
+  };
+  
+  const handleQuizLeadSubmit = (data: QuizLeadFormData) => {
+      const message = `
+*¡Hola! He completado un examen del curso de Facebook Ads.*
+
+*Nombre:* ${data.name}
+*Celular:* ${data.phone}
+*Empresa:* ${data.company}
+*Resultado:* ${quizScore} / ${currentTopic.questions.length} respuestas correctas.
+      `.trim().replace(/\n\s*\n/g, '\n');
+      
+      const whatsappUrl = `https://wa.me/525542314150?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+      
+      setIsQuizLeadModalOpen(false);
+
+      if (quizScore >= 3) {
           setQuizResult('win');
           handleCompleteTopic();
       } else {
           setQuizResult('lose');
       }
+
+      setTimeout(() => {
+        mainContentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+  };
+
+
+  const handleLeadFormSubmit = (formData: LeadFormData) => {
+      const message = `
+*¡Hola! Quiero agendar una sesión con un experto.*
+
+*Nombre:* ${formData.name}
+*Celular:* ${formData.phone}
+*Empresa:* ${formData.company}
+*Motivo de contacto:* ${formData.reason}
+      `.trim().replace(/\n\s*\n/g, '\n');
+      
+      const whatsappUrl = `https://wa.me/525542314150?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
   };
 
   const isQuiz = currentTopic.questions && currentTopic.questions.length > 0;
@@ -254,26 +377,17 @@ export default function CoursePage() {
                         </div>
                     </aside>
 
-                    <main className="w-full md:w-2/3 lg:w-3/4">
+                    <main ref={mainContentRef} className="w-full md:w-2/3 lg:w-3/4 scroll-mt-24">
                         <div className="bg-card p-6 rounded-lg shadow-lg">
                              <h2 className="font-headline text-2xl sm:text-3xl font-bold mb-4">{currentTopic.title}</h2>
                             
                              {isQuiz ? (
                                 <>
-                                {quizResult === 'win' && (
-                                    <div className="text-center py-10">
-                                        <GlitchTitle text="YOU WIN" />
-                                    </div>
-                                )}
-                                {quizResult === 'lose' && (
-                                    <div className="text-center py-10">
-                                        <GlitchTitle text="GAME OVER" />
-                                        <DonkeyIcon className="w-24 h-24 mx-auto mt-4 text-primary" />
-                                    </div>
-                                )}
-                                {quizResult === null && (
-                                    <QuizComponent topic={currentTopic} onComplete={handleQuizComplete} />
-                                )}
+                                    {quizResult ? (
+                                        <QuizResult result={quizResult} incorrectAnswers={incorrectAnswers} score={quizScore} total={currentTopic.questions.length} />
+                                    ) : (
+                                        <QuizComponent topic={currentTopic} onComplete={handleQuizComplete} />
+                                    )}
                                 </>
                              ) : (
                                 <>
@@ -290,9 +404,9 @@ export default function CoursePage() {
 
                                     <div className="prose prose-lg max-w-none text-foreground/80 prose-headings:font-headline prose-headings:text-foreground prose-strong:text-foreground mb-8">
                                         <h3 className="font-bold">Habilidades que ganarás:</h3>
-                                        <ul className="list-disc list-inside space-y-1">
+                                        <ul className="list-disc list-inside space-y-2">
                                             {currentTopic.summary.map((point, index) => (
-                                                <li key={index}><span className="font-semibold">{point.split(':')[0]}:</span>{point.split(':')[1]}</li>
+                                                <li key={index} dangerouslySetInnerHTML={{ __html: point.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
                                             ))}
                                         </ul>
                                     </div>
@@ -308,6 +422,7 @@ export default function CoursePage() {
                                                     Quiero Agendar una Sesión
                                                 </Button>
                                             }
+                                            onWhatsappSubmit={handleLeadFormSubmit}
                                         />
                                     </div>
                                 </>
@@ -318,6 +433,13 @@ export default function CoursePage() {
             </div>
         </div>
         <Footer />
+         <QuizLeadCaptureDialog 
+            open={isQuizLeadModalOpen}
+            onOpenChange={setIsQuizLeadModalOpen}
+            onWhatsappSubmit={handleQuizLeadSubmit}
+            score={quizScore}
+            total={currentTopic.questions.length}
+        />
     </div>
   );
 }
