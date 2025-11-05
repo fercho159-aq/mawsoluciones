@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { introduccionCourseData, type Section } from '@/lib/introduccion-data';
+import { introduccionCourseData, type Topic } from '@/lib/introduccion-data';
 import { CodeXml, PenSquare, Megaphone, Bot } from "lucide-react";
 import {
   Accordion,
@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/accordion"
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 
@@ -22,7 +21,6 @@ const sectionIcons: Record<number, React.ReactNode> = {
   4: <Bot className="w-5 h-5 mr-3 text-primary" />,
 };
 
-type Topic = Section['topics'][0];
 
 export default function IntroduccionPage() {
   const [currentTopic, setCurrentTopic] = useState<Topic>(introduccionCourseData.sections[0].topics[0]);
