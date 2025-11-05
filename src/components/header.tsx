@@ -217,7 +217,7 @@ const Header = () => {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuTrigger>Nuestros clientes</NavigationMenuTrigger>
+              <NavigationMenuTrigger>Casos de Éxito</NavigationMenuTrigger>
               <NavigationMenuContent>
                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px]">
                   {portfolioLinks.map((link) => (
@@ -333,7 +333,7 @@ const Header = () => {
                     </AccordionItem>
                     <AccordionItem value="item-2" className="border-b-0">
                       <AccordionTrigger className="text-lg font-medium py-2 hover:no-underline">
-                        Nuestros Clientes
+                        Casos de Éxito
                       </AccordionTrigger>
                       <AccordionContent className="pl-4">
                         <div className="flex flex-col gap-4 pt-2">
@@ -417,3 +417,5 @@ const Header = () => {
 };
 
 export default Header;
+
+    
