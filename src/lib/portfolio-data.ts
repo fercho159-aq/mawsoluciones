@@ -782,7 +782,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Property Traders - Plataforma Inmobiliaria Online",
       "category": "Connective",
       "sector": "Inmobiliaria",
-      "image": "/images/screenshots/propertytraders.online//81.png",
+      "image": "/images/screenshots/propertytraders.online/81.png",
       "description": "Desarrollo integral de un sitio web para Property Traders, una empresa del sector inmobiliario que necesitaba una plataforma moderna, intuitiva y eficiente para conectar compradores y vendedores.",
       "services": [
         "Diseño y desarrollo web responsivo",
@@ -1510,7 +1510,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo Web para Toshiba México",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/images/screenshots/www.toshiba.com.mx/225.png",
+      "image": "/images/screenshots/toshiba.com.mx/225.png",
       "description": "Proyecto integral de desarrollo web para Toshiba México enfocado en el sector de servicios profesionales, con el objetivo de mejorar la presencia digital y la experiencia del usuario.",
       "services": [
         "Diseño web personalizado",
@@ -1531,7 +1531,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo Integral del Sitio Web de Meigas",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/images/screenshots/www.meigas.es/229.png",
+      "image": "/images/screenshots/meigas.es/229.png",
       "description": "Proyecto de desarrollo web completo para Meigas, una empresa del sector de Servicios Profesionales, implementando una plataforma moderna y eficiente que refleja su identidad corporativa y facilita la interacción con sus clientes.",
       "services": [
         "Diseño web personalizado",
