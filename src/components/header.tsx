@@ -200,7 +200,7 @@ const Header = () => {
 
             {navLinks.map((link) => (
               <NavigationMenuItem key={link.href}>
-                <Link href={link.href} passHref>
+                <Link href={link.href} legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                     {link.label}
                   </NavigationMenuLink>
@@ -302,7 +302,7 @@ const Header = () => {
                     <Link
                       key={link.href}
                       href={link.href}
-                      className="text-lg font-medium px-4 py-2"
+                      className="block text-lg font-medium px-4 py-2"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       {link.label}
