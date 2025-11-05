@@ -5,7 +5,7 @@ import { useState, useRef } from 'react';
 import { courseData } from '@/lib/n8n-course-data';
 import type { Topic, Question } from '@/lib/course-data';
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Circle, PlayCircle, Eye, Bot, BrainCircuit, Link, SlidersHorizontal, Calendar, ChevronRight, X, AlertTriangle } from "lucide-react";
+import { CheckCircle, Circle, PlayCircle, Eye, Bot, BrainCircuit, Link, SlidersHorizontal, Calendar, ChevronRight, X, AlertTriangle, Frown } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -28,9 +28,8 @@ import { cn } from '@/lib/utils';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import WhatsappIcon from '@/components/icons/whatsapp-icon';
-import GlitchTitle from '@/components/glitch-title';
-import DonkeyIcon from '@/components/icons/donkey-icon';
 import { Card, CardContent } from '@/components/ui/card';
+import AnimatedProgress from '@/components/animated-progress';
 
 const sectionIcons: Record<number, React.ReactNode> = {
   1: <Bot className="w-5 h-5 mr-3 text-primary" />,
@@ -167,14 +166,13 @@ const QuizResult = ({ result, incorrectAnswers, score, total }: { result: 'win' 
         <div className="text-center py-10">
             {result === 'win' ? (
                 <>
-                    <GlitchTitle text="YOU WIN" />
+                    <h2 className="text-5xl font-bold text-green-500">YOU WIN</h2>
                     <p className="text-lg mt-4">¡Felicidades! Aprobaste la sección.</p>
                     <p className="font-bold text-2xl text-green-500">{score} / {total}</p>
                 </>
             ) : (
                 <>
-                    <GlitchTitle text="GAME OVER" />
-                    <DonkeyIcon className="w-24 h-24 mx-auto mt-4 text-primary" />
+                    <h2 className="text-5xl font-bold text-destructive flex items-center justify-center gap-4">GAME OVER <Frown /></h2>
                     <p className="text-lg mt-4">¡No te rindas! Repasa los temas y vuelve a intentarlo.</p>
                     <p className="font-bold text-2xl text-destructive">{score} / {total}</p>
                     
@@ -329,7 +327,7 @@ export default function CoursePage() {
                 <div className="container mx-auto px-4 md:px-6 py-4">
                     <h1 className="text-xl md:text-2xl font-bold font-headline">{courseData.title}</h1>
                     <div className="flex items-center gap-4 mt-2">
-                        <Progress value={progress} className="w-full" />
+                        <AnimatedProgress value={progress} />
                         <span className="text-sm font-semibold whitespace-nowrap">{Math.round(progress)}% Completado</span>
                     </div>
                 </div>
@@ -442,5 +440,3 @@ export default function CoursePage() {
     </div>
   );
 }
-
-    

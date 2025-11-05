@@ -2,10 +2,10 @@
 "use client";
 
 import { useState, useRef } from 'react';
-import { courseData } from '@/lib/tiktok-ads-course-data';
+import { courseData } from '@/lib/finanzas-personales-course-data';
 import type { Topic, Question } from '@/lib/course-data';
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Circle, PlayCircle, Eye, Wallet, Lightbulb, Users, Target, Calendar, ChevronRight, X, AlertTriangle, Frown } from "lucide-react";
+import { CheckCircle, Circle, PlayCircle, BrainCircuit, PiggyBank, Handshake, Landmark, Calendar, ChevronRight, X, AlertTriangle, Frown } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -32,10 +32,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import AnimatedProgress from '@/components/animated-progress';
 
 const sectionIcons: Record<number, React.ReactNode> = {
-  1: <Eye className="w-5 h-5 mr-3 text-primary" />,
-  2: <Lightbulb className="w-5 h-5 mr-3 text-primary" />,
-  3: <Users className="w-5 h-5 mr-3 text-primary" />,
-  4: <Target className="w-5 h-5 mr-3 text-primary" />,
+  1: <BrainCircuit className="w-5 h-5 mr-3 text-primary" />,
+  2: <PiggyBank className="w-5 h-5 mr-3 text-primary" />,
+  3: <Handshake className="w-5 h-5 mr-3 text-primary" />,
+  4: <Landmark className="w-5 h-5 mr-3 text-primary" />,
+  5: <Landmark className="w-5 h-5 mr-3 text-primary" />,
 };
 
 interface LeadFormData {
@@ -277,7 +278,7 @@ export default function CoursePage() {
   
   const handleQuizLeadSubmit = (data: QuizLeadFormData) => {
       const message = `
-*¡Hola! He completado un examen del curso de TikTok Ads.*
+*¡Hola! He completado un examen del curso de Finanzas Personales.*
 
 *Nombre:* ${data.name}
 *Celular:* ${data.phone}
@@ -342,7 +343,7 @@ export default function CoursePage() {
                                     <AccordionItem value={`section-${section.section_id}`} key={section.section_id}>
                                         <AccordionTrigger className="font-headline text-lg hover:no-underline">
                                            <div className="flex items-center">
-                                                {sectionIcons[section.section_id as keyof typeof sectionIcons] || <Eye className="w-5 h-5 mr-3 text-primary" />}
+                                                {sectionIcons[section.section_id as keyof typeof sectionIcons] || <PiggyBank className="w-5 h-5 mr-3 text-primary" />}
                                                 <span>{section.title}</span>
                                            </div>
                                         </AccordionTrigger>
