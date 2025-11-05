@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Menu, X, ChevronDown, CodeXml, PenSquare, Megaphone, Bot, Newspaper, Mic2, LayoutGrid, FileText } from "lucide-react";
+import { Menu, X, ChevronDown, CodeXml, PenSquare, Megaphone, Bot, Newspaper, Mic2, LayoutGrid, FileText, GraduationCap } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -80,6 +80,15 @@ const portfolioLinks = [
     description: "Descubre las campañas de contenido y estrategias de redes sociales que hemos creado.",
     icon: <FileText className="w-5 h-5" />
   },
+];
+
+const coursesLinks = [
+  {
+    href: "/cursos/facebook-ads",
+    label: "Facebook Ads para Principiantes",
+    description: "Aprende desde cero a crear campañas efectivas y a optimizar tu presupuesto en la plataforma de Meta.",
+    icon: <Megaphone className="w-5 h-5" />
+  }
 ];
 
 
@@ -181,6 +190,24 @@ const Header = () => {
             </NavigationMenuItem>
             
             <NavigationMenuItem>
+              <NavigationMenuTrigger>Cursos</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                 <ul className="grid w-[400px] gap-3 p-4 md:w-[500px]">
+                  {coursesLinks.map((link) => (
+                    <ListItem
+                      key={link.label}
+                      title={link.label}
+                      href={link.href}
+                      icon={link.icon}
+                    >
+                      {link.description}
+                    </ListItem>
+                  ))}
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+            
+            <NavigationMenuItem>
               <NavigationMenuTrigger>Blog</NavigationMenuTrigger>
               <NavigationMenuContent>
                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px]">
@@ -200,11 +227,11 @@ const Header = () => {
 
             {navLinks.map((link) => (
               <NavigationMenuItem key={link.href}>
-                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                  <Link href={link.href}>
+                 <Link href={link.href} legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                     {link.label}
-                  </Link>
-                </NavigationMenuLink>
+                  </NavigationMenuLink>
+                </Link>
               </NavigationMenuItem>
             ))}
           </NavigationMenuList>
@@ -266,6 +293,25 @@ const Header = () => {
                       <AccordionContent className="pl-4">
                         <div className="flex flex-col gap-4 pt-2">
                           {portfolioLinks.map((link) => (
+                            <Link
+                              key={link.href}
+                              href={link.href}
+                              className="text-base font-medium text-foreground/80"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              {link.label}
+                            </Link>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                     <AccordionItem value="item-4" className="border-b-0">
+                      <AccordionTrigger className="text-lg font-medium py-2 hover:no-underline">
+                        Cursos
+                      </AccordionTrigger>
+                      <AccordionContent className="pl-4">
+                        <div className="flex flex-col gap-4 pt-2">
+                          {coursesLinks.map((link) => (
                             <Link
                               key={link.href}
                               href={link.href}
