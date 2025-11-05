@@ -1,5 +1,6 @@
 import { portfolioItems } from "@/lib/portfolio-data";
 import PortfolioItemPageContent from './portfolio-item-content';
+import { notFound } from "next/navigation";
 
 // Generate static paths for each portfolio item
 export async function generateStaticParams() {
@@ -9,5 +10,11 @@ export async function generateStaticParams() {
 }
 
 export default function Page({ params }: { params: { id: string } }) {
-  return <PortfolioItemPageContent params={params} />;
+  const item = portfolioItems.find((p) => p.id === params.id);
+
+  if (!item) {
+    notFound();
+  }
+
+  return <PortfolioItemPageContent item={item} />;
 }

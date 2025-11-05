@@ -1,7 +1,6 @@
 "use client";
 
-import { portfolioItems } from "@/lib/portfolio-data";
-import { notFound } from "next/navigation";
+import { portfolioItems, type PortfolioItemType } from "@/lib/portfolio-data";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -131,12 +130,7 @@ const QuoteDialog = ({ itemTitle }: { itemTitle: string }) => {
   );
 }
 
-export default function PortfolioItemPageContent({ params }: { params: { id: string } }) {
-  const item = portfolioItems.find((p) => p.id === params.id);
-
-  if (!item) {
-    notFound();
-  }
+export default function PortfolioItemPageContent({ item }: { item: PortfolioItemType }) {
 
   const similarProjects = portfolioItems
     .filter(p => p.id !== item.id && p.category === item.category)
@@ -150,7 +144,7 @@ export default function PortfolioItemPageContent({ params }: { params: { id: str
             <div className="md:col-span-6 md:sticky top-28">
               <div className="relative aspect-video rounded-lg shadow-2xl overflow-hidden mb-8">
                 <Image
-                  src={item.image ?? '/images/placeholder.png'}
+                  src={item.image?.imageUrl ?? '/images/placeholder.png'}
                   alt={item.title}
                   fill
                   className="object-contain"
@@ -228,7 +222,7 @@ export default function PortfolioItemPageContent({ params }: { params: { id: str
                               <div className="relative aspect-video">
                                   {project.image && (
                                   <Image
-                                      src={project.image}
+                                      src={project.image.imageUrl}
                                       alt={project.title}
                                       fill
                                       sizes="(max-width: 640px) 100vw, 50vw"
