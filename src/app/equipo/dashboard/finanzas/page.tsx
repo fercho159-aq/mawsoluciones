@@ -43,7 +43,7 @@ interface CuentasPorCobrar {
   tipo: CategoriaIngreso;
 }
 
-interface MovimientoDiario {
+export interface MovimientoDiario {
   id: string;
   fecha: Date;
   tipo: MovimientoTipo;
@@ -59,7 +59,7 @@ const initialCuentasPorCobrar: CuentasPorCobrar[] = [
   { id: 'cpc1', cliente: "Bateiras", periodo: "15 Nov - 15 Dic", monto: 3944, metodo: "Whatsapp", whatsapp: "5215512345678", tipo: "Ads" },
 ];
 
-const mockMovimientosDiarios: MovimientoDiario[] = [
+export const mockMovimientosDiarios: MovimientoDiario[] = [
     // Ingreso
     { id: 'mov1', fecha: new Date('2024-11-04T10:00:00'), tipo: 'Ingreso', descripcion: 'Pago cliente Bateiras', monto: 3944, cuenta: 'Cuenta MAW', categoria: 'Ads' },
     // Gastos Aldo
@@ -79,7 +79,7 @@ const mockMovimientosDiarios: MovimientoDiario[] = [
 ];
 
 // --- Components ---
-const CuentasPorCobrarTab = ({ data: cuentasPorCobrar }: { data: CuentasPorCobrar[] }) => {
+const CuentasPorCobrarTab = ({ data: cuentasPorCobrar, onUpdateCpc }: { data: CuentasPorCobrar[], onUpdateCpc: (cpcs: CuentasPorCobrar[]) => void }) => {
     const [searchFilter, setSearchFilter] = useState('');
     const [sortConfig, setSortConfig] = useState<{ key: keyof CuentasPorCobrar | null; direction: 'ascending' | 'descending' }>({ key: 'cliente', direction: 'ascending' });
 
@@ -397,13 +397,15 @@ const TablaDiariaTab = ({ movimientos, onAddMovimiento, onAddGasto, cuentasPorCo
     const handleRegisterIngreso = (pago: { cpc: CuentasPorCobrar, cuenta: Cuenta | string }) => {
         const { cpc, cuenta } = pago;
         
-        onAddMovimiento({
+        const newMovimiento = {
             descripcion: `Pago cliente ${cpc.cliente}`,
             monto: cpc.monto,
             cuenta: cuenta,
             tipo: 'Ingreso',
             categoria: cpc.tipo,
-        });
+        };
+
+        onAddMovimiento(newMovimiento);
 
         let updatedCpc = cuentasPorCobrar.filter(item => item.id !== cpc.id);
         
@@ -440,14 +442,14 @@ const TablaDiariaTab = ({ movimientos, onAddMovimiento, onAddGasto, cuentasPorCo
 
     const monthOptions = useMemo(() => {
         const uniqueMonths = new Set(
-            movimientos.map(mov => format(startOfMonth(mov.fecha), 'yyyy-MM-dd'))
+            mockMovimientosDiarios.map(mov => format(startOfMonth(mov.fecha), 'yyyy-MM-dd'))
         );
         const currentMonthStart = format(startOfMonth(new Date(2024, 10, 1)), 'yyyy-MM-dd');
         if (!uniqueMonths.has(currentMonthStart)) {
             uniqueMonths.add(currentMonthStart);
         }
         return Array.from(uniqueMonths).sort((a, b) => b.localeCompare(a));
-    }, [movimientos]);
+    }, []);
 
     const monthlyData = useMemo(() => {
         const start = parse(selectedMonth, 'yyyy-MM-dd', new Date());
@@ -618,22 +620,6 @@ export default function FinanzasPage() {
     <div>
         <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold font-headline">{activeTab === 'cuentas-por-cobrar' ? 'Gestión de Cobranza' : 'Control Financiero Mensual'}</h1>
-             {activeTab === 'tabla-diaria' && (
-                <div className="flex gap-2">
-                    <RegistrarIngresoDialog cuentasPorCobrar={cuentasPorCobrar} onSave={pago => handleAddMovimiento(pago)}>
-                        <Button>
-                            <PlusCircle className="w-4 h-4 mr-2" />
-                            Registrar Ingreso
-                        </Button>
-                    </RegistrarIngresoDialog>
-                    <RegistrarGastoDialog onSave={(gasto) => handleAddMovimiento({ ...gasto, tipo: 'Gasto' })}>
-                        <Button variant="destructive">
-                            <MinusCircle className="w-4 h-4 mr-2" />
-                            Registrar Gasto
-                        </Button>
-                    </RegistrarGastoDialog>
-                </div>
-            )}
         </div>
       
         <Tabs defaultValue="cuentas-por-cobrar" className="w-full" onValueChange={setActiveTab}>
@@ -643,7 +629,7 @@ export default function FinanzasPage() {
             </TabsList>
             
             <TabsContent value="cuentas-por-cobrar" className="mt-4">
-               <CuentasPorCobrarTab data={cuentasPorCobrar} />
+               <CuentasPorCobrarTab data={cuentasPorCobrar} onUpdateCpc={setCuentasPorCobrar} />
             </TabsContent>
 
             <TabsContent value="tabla-diaria" className="mt-4">

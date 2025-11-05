@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { CheckCircle, Clock, XCircle, BarChart2, TrendingUp, Target, Calendar, DollarSign, TrendingDown, Wallet, Briefcase } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, TrendingUp, Target, Calendar, DollarSign, TrendingDown } from 'lucide-react';
 import { useAuth } from '@/lib/auth-provider';
 import AnimatedDiv from '@/components/animated-div';
 import { addDays, startOfMonth, endOfMonth, isWithinInterval, format } from 'date-fns';
@@ -16,6 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { mockMovimientosDiarios } from '../finanzas/page';
 
 
 // --- Mock Data Simulation ---
@@ -60,31 +61,12 @@ const generateMockActivities = () => {
     return activities;
 };
 
-const generateMockFinancials = (): { fecha: Date, tipo: 'Ingreso' | 'Gasto', monto: number, categoria?: string, nombreOtro?: string }[] => {
-    const startOfCurrentMonth = startOfMonth(new Date());
-    return [
-        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 2), tipo: 'Ingreso', monto: 100000, categoria: 'Iguala Mensual' },
-        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 5), tipo: 'Ingreso', monto: 88864, categoria: 'Proyecto' },
-        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 7), tipo: 'Ingreso', monto: 100000, categoria: 'Iguala Mensual' },
-        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 12), tipo: 'Ingreso', monto: 100000, categoria: 'Proyecto' },
-        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 1), tipo: 'Ingreso', monto: 105624, categoria: 'Proyecto' },
-        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 4), tipo: 'Ingreso', monto: 88864, categoria: 'Iguala Mensual' },
-        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 3), tipo: 'Gasto', monto: 1200, categoria: 'Otros', nombreOtro: 'Software' },
-        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 10), tipo: 'Gasto', monto: 50000, categoria: 'Publicidad' },
-        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 15), tipo: 'Gasto', monto: 100000, categoria: 'Sueldos' },
-        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 18), tipo: 'Gasto', monto: 25000, categoria: 'Comisiones' },
-        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 20), tipo: 'Gasto', monto: 15000, categoria: 'Impuestos' },
-        { fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 22), tipo: 'Gasto', monto: 5000, categoria: 'Personales', nombreOtro: 'Fany' },
-    ];
-};
-
 const mockTasks = generateMockTasks();
 const mockActivities = generateMockActivities();
 const mockPunctuality = teamMembers.map(member => ({
     name: member.name,
     status: Math.random() > 0.8 ? 'Tarde' : (Math.random() > 0.95 ? 'Falta' : 'Puntual'),
 }));
-const mockFinancials = generateMockFinancials();
 // --- End of Mock Data Simulation ---
 
 
@@ -145,7 +127,7 @@ export default function MiProgresoPage() {
      const financialSummary = useMemo(() => {
         if (!dateRange?.from || !dateRange?.to) return { totalIncome: 0, totalExpenses: 0, incomeByCategory: {}, expensesByCategory: {}, profit: 0 };
 
-        const financialsInFrame = mockFinancials.filter(f => isWithinInterval(f.fecha, { start: dateRange.from!, end: dateRange.to! }));
+        const financialsInFrame = mockMovimientosDiarios.filter(f => isWithinInterval(f.fecha, { start: dateRange.from!, end: dateRange.to! }));
         
         const totalIncome = financialsInFrame.filter(f => f.tipo === 'Ingreso').reduce((sum, f) => sum + f.monto, 0);
         const totalExpenses = financialsInFrame.filter(f => f.tipo === 'Gasto').reduce((sum, f) => sum + f.monto, 0);
@@ -222,7 +204,7 @@ export default function MiProgresoPage() {
                 Como administrador, puedes ver un resumen del rendimiento y las finanzas del equipo para el periodo seleccionado.
             </p>
 
-            <AnimatedDiv className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+            <AnimatedDiv className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total de Ingresos</CardTitle>
