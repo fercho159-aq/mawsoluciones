@@ -8,14 +8,31 @@ import { createContext, useContext, ReactNode, Suspense } from 'react';
 import { FirebaseClientProvider } from './client-provider';
 
 const FirebaseAppContext = createContext<FirebaseApp | undefined>(undefined);
-const AuthContext = createContext<Auth | undefined>(undefined);
-const FirestoreContext = createContext<Firestore | undefined>(undefined);
+export const AuthContext = createContext<Auth | undefined>(undefined);
+export const FirestoreContext = createContext<Firestore | undefined>(undefined);
 
 export function FirebaseProvider({
   children,
+  app,
+  auth,
+  firestore,
 }: {
   children: ReactNode;
+  app?: FirebaseApp;
+  auth?: Auth;
+  firestore?: Firestore;
 }) {
+  if (app && auth && firestore) {
+    return (
+      <FirebaseAppContext.Provider value={app}>
+        <AuthContext.Provider value={auth}>
+          <FirestoreContext.Provider value={firestore}>
+            {children}
+          </FirestoreContext.Provider>
+        </AuthContext.Provider>
+      </FirebaseAppContext.Provider>
+    );
+  }
   return (
     <Suspense>
       <FirebaseClientProvider>{children}</FirebaseClientProvider>
