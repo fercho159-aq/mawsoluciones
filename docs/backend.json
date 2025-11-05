@@ -24,7 +24,13 @@
         },
         "status": {
           "type": "string",
+          "enum": ["Activo", "Inactivo", "Nueva", "Se quiere ir"],
           "description": "The current status of the client."
+        },
+        "standardTasks": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Standard recurring tasks for the client."
         },
         "createdAt": {
           "type": "string",
@@ -70,8 +76,9 @@
         },
         "lastVisit": { "type": "string", "format": "date-time" },
         "nextVisit": { "type": "string", "format": "date-time" },
-        "scheduledContent": { "type": "string", "format": "date-time" }
-      }
+        "contentScheduled": { "type": "string", "format": "date-time" }
+      },
+      "required": ["clientId"]
     },
     "advertising_campaign": {
       "title": "Advertising Campaign",
@@ -79,16 +86,17 @@
       "type": "object",
       "properties": {
         "clientId": { "type": "string" },
-        "platform": { "type": "string" },
+        "platform": { "type": "string", "enum": ["Facebook", "TikTok", "Google Ads", "LinkedIn"] },
         "budget": { "type": "number" },
-        "objective": { "type": "string" },
+        "objective": { "type": "string", "enum": ["INTERACCION", "MENSAJES", "REGISTROS", "TRAFICO"] },
         "target": { "type": "string" },
         "startDate": { "type": "string", "format": "date-time" },
         "endDate": { "type": "string", "format": "date-time" },
         "status": { "type": "string" },
         "paymentMethod": { "type": "string" },
         "pautaManager": { "type": "string" }
-      }
+      },
+      "required": ["clientId", "platform", "budget", "objective"]
     },
     "task": {
       "title": "Task",
@@ -103,7 +111,8 @@
         "dueDate": { "type": "string", "format": "date-time" },
         "status": { "type": "string", "enum": ["Pendiente", "En Progreso", "Completado"] },
         "category": { "type": "string" }
-      }
+      },
+       "required": ["clientId", "title", "assignedTo", "status"]
     },
     "team_member": {
       "title": "Team Member",
@@ -111,11 +120,16 @@
       "type": "object",
       "properties": {
         "name": { "type": "string" },
-        "role": { "type": "string" },
+        "role": { "type": "string", "enum": ["Account Manager", "Creador de Contenido", "Manager de Pauta"] },
         "email": { "type": "string", "format": "email" },
         "active": { "type": "boolean" },
-        "clientsCount": { "type": "number" }
-      }
+        "currentClients": { "type": "number" },
+        "platforms": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      },
+      "required": ["name", "role", "email", "active"]
     },
     "client_credential": {
       "title": "Client Credential",
@@ -128,7 +142,8 @@
         "password": { "type": "string" },
         "accessDetails": { "type": "string" },
         "lastUpdated": { "type": "string", "format": "date-time" }
-      }
+      },
+       "required": ["clientId", "platform", "email", "password"]
     }
   },
   "firestore": {
@@ -152,7 +167,7 @@
       "schema": { "$ref": "#/entities/team_member" },
       "description": "Team member information."
     },
-    "/client_credentials/{credentialId}": {
+    "/credentials/{credentialId}": {
       "schema": { "$ref": "#/entities/client_credential" },
       "description": "Client platform credentials."
     }
