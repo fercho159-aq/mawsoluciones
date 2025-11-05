@@ -290,6 +290,18 @@ export default function CoursePage() {
       const whatsappUrl = `https://wa.me/525542314150?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
       
+      // Add to sales pipeline
+      const newLeads = JSON.parse(localStorage.getItem('newLeads') || '[]');
+      const newLead = {
+        id: `lead-${Date.now()}`,
+        cliente: data.company || 'Lead de Curso',
+        origen: 'Sitio Web',
+        status: 'Lead Nuevo',
+        responsable: 'Alma Fer',
+      };
+      newLeads.push(newLead);
+      localStorage.setItem('newLeads', JSON.stringify(newLeads));
+
       setIsQuizLeadModalOpen(false);
 
       if (quizScore >= 3) {

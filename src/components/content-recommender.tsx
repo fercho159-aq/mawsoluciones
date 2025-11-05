@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useMemo } from 'react';
@@ -140,6 +141,19 @@ ${recomendacionTexto}
     `.trim().replace(/\n\s*\n/g, '\n');
     const whatsappUrl = `https://wa.me/5542314150?text=${encodeURIComponent(message.trim())}`;
     window.open(whatsappUrl, '_blank');
+    
+    // Add to sales pipeline
+    const newLeads = JSON.parse(localStorage.getItem('newLeads') || '[]');
+    const newLead = {
+      id: `lead-${Date.now()}`,
+      cliente: formData.companyName || 'Lead de Recomendador Contenido',
+      origen: 'Sitio Web',
+      status: 'Lead Nuevo',
+      responsable: 'Alma Fer',
+    };
+    newLeads.push(newLead);
+    localStorage.setItem('newLeads', JSON.stringify(newLeads));
+
     setIsResultModalOpen(false);
     setShowResults(true);
     setCurrentStep(steps.length);

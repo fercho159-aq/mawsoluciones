@@ -1,6 +1,7 @@
+
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Table,
   TableHeader,
@@ -62,6 +63,21 @@ export default function VentasPage() {
     const [isConvertModalOpen, setIsConvertModalOpen] = useState(false);
     const [pautaOption, setPautaOption] = useState<'si' | 'no' | 'ambos'>('si');
     const { toast } = useToast();
+
+    useEffect(() => {
+        const newLeadsJSON = localStorage.getItem('newLeads');
+        if (newLeadsJSON) {
+            const newLeads = JSON.parse(newLeadsJSON);
+            if (newLeads.length > 0) {
+                setLeads(prevLeads => [...prevLeads, ...newLeads]);
+                localStorage.removeItem('newLeads'); // Clear after adding
+                 toast({
+                    title: "¡Nuevos Prospectos!",
+                    description: `Se han añadido ${newLeads.length} nuevos prospectos desde el sitio web.`,
+                });
+            }
+        }
+    }, []);
 
     const handleConvertClick = (lead: Lead) => {
         setSelectedLead(lead);
@@ -132,6 +148,11 @@ export default function VentasPage() {
                         ))}
                     </TableBody>
                 </Table>
+                 {leads.filter(l => l.status !== 'Convertido' && l.status !== 'No Interesado').length === 0 && (
+                    <div className="text-center p-8 text-muted-foreground">
+                        No hay prospectos activos en el pipeline.
+                    </div>
+                )}
             </div>
         </CardContent>
        </Card>

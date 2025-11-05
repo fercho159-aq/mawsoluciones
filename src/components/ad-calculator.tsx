@@ -204,6 +204,19 @@ const AdCalculator = () => {
     `.trim();
     const whatsappUrl = `https://wa.me/5542314150?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
+    
+    // Add to sales pipeline
+    const newLeads = JSON.parse(localStorage.getItem('newLeads') || '[]');
+    const newLead = {
+      id: `lead-${Date.now()}`,
+      cliente: formData.companyName || 'Lead de Calculadora Ads',
+      origen: 'Sitio Web',
+      status: 'Lead Nuevo',
+      responsable: 'Alma Fer',
+    };
+    newLeads.push(newLead);
+    localStorage.setItem('newLeads', JSON.stringify(newLeads));
+
     setIsResultModalOpen(false);
     setShowResults(true); // Show results after sending
     setCurrentStep(currentStep + 1); // Move to final step
