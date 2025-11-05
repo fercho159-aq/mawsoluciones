@@ -24,15 +24,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { format, startOfMonth, endOfMonth, isWithinInterval, parse, addMonths, getDaysInMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 // --- Types ---
-type Periodo = "1-31 Oct" | "15 Oct - 15 Nov" | "1-30 Nov";
+type Periodo = "15 Oct - 15 Nov" | "15 Nov - 15 Dic";
 type MetodoContacto = "Whatsapp" | "Email";
 type MovimientoTipo = "Ingreso" | "Gasto";
-type CategoriaIngreso = "Proyecto" | "Iguala Mensual";
-type CategoriaGasto = "Publicidad" | "Sueldos" | "Comisiones" | "Impuestos" | "Personales" | "Otros";
-type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Otra";
+type CategoriaIngreso = "Proyecto" | "Iguala Mensual" | "Ads";
+type CategoriaGasto = "Publicidad" | "Sueldos" | "Comisiones" | "Impuestos" | "Personales" | "Otros" | "Renta";
+type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo";
 
 interface CuentasPorCobrar {
   id: string;
@@ -57,13 +56,27 @@ interface MovimientoDiario {
 
 // --- Initial Data ---
 const initialCuentasPorCobrar: CuentasPorCobrar[] = [
-  { id: 'cpc1', cliente: "Biofert", periodo: "1-31 Oct", monto: 5000, metodo: "Whatsapp", whatsapp: "5215512345678", tipo: "Iguala Mensual" },
-  { id: 'cpc2', cliente: "Medical Tower", periodo: "15 Oct - 15 Nov", monto: 12000, metodo: "Email", whatsapp: "", tipo: "Proyecto" },
-  { id: 'cpc3', cliente: "NIU Coliving", periodo: "1-31 Oct", monto: 8500, metodo: "Whatsapp", whatsapp: "5215587654321", tipo: "Iguala Mensual" },
-  { id: 'cpc4', cliente: "Cenote San Isidro", periodo: "1-30 Nov", monto: 3500, metodo: "Whatsapp", whatsapp: "5215511223344", tipo: "Proyecto" },
+  { id: 'cpc1', cliente: "Bateiras", periodo: "15 Nov - 15 Dic", monto: 3944, metodo: "Whatsapp", whatsapp: "5215512345678", tipo: "Ads" },
 ];
 
-const mockMovimientosDiarios: MovimientoDiario[] = [];
+const mockMovimientosDiarios: MovimientoDiario[] = [
+    // Ingreso
+    { id: 'mov1', fecha: new Date('2024-11-04T10:00:00'), tipo: 'Ingreso', descripcion: 'Pago cliente Bateiras', monto: 3944, cuenta: 'Cuenta MAW', categoria: 'Ads' },
+    // Gastos Aldo
+    { id: 'mov2', fecha: new Date('2024-11-01T09:00:00'), tipo: 'Gasto', descripcion: 'Pago Dani', monto: 9000, cuenta: 'Cuenta Aldo', categoria: 'Sueldos' },
+    { id: 'mov3', fecha: new Date('2024-11-01T09:01:00'), tipo: 'Gasto', descripcion: 'Pago Didi Den', monto: 9900, cuenta: 'Cuenta Aldo', categoria: 'Sueldos' },
+    { id: 'mov4', fecha: new Date('2024-11-01T09:02:00'), tipo: 'Gasto', descripcion: 'Renta Abajo', monto: 4500, cuenta: 'Cuenta Aldo', categoria: 'Renta' },
+    // Gastos MAW
+    { id: 'mov5', fecha: new Date('2024-11-01T10:00:00'), tipo: 'Gasto', descripcion: 'Paypal google', monto: 779, cuenta: 'Cuenta MAW', categoria: 'Publicidad' },
+    { id: 'mov6', fecha: new Date('2024-11-01T10:01:00'), tipo: 'Gasto', descripcion: 'Paypal facebook', monto: 1188, cuenta: 'Cuenta MAW', categoria: 'Publicidad' },
+    { id: 'mov7', fecha: new Date('2024-11-01T10:02:00'), tipo: 'Gasto', descripcion: 'Paypal facebook', monto: 1000, cuenta: 'Cuenta MAW', categoria: 'Publicidad' },
+    { id: 'mov8', fecha: new Date('2024-11-01T10:03:00'), tipo: 'Gasto', descripcion: 'Paypal shopify', monto: 370, cuenta: 'Cuenta MAW', categoria: 'Otros' },
+    { id: 'mov9', fecha: new Date('2024-11-01T10:04:00'), tipo: 'Gasto', descripcion: 'Paypal facebook', monto: 1141, cuenta: 'Cuenta MAW', categoria: 'Publicidad' },
+    { id: 'mov10', fecha: new Date('2024-11-01T10:05:00'), tipo: 'Gasto', descripcion: 'Encuadre por centavos', monto: 2, cuenta: 'Cuenta MAW', categoria: 'Otros' },
+    { id: 'mov11', fecha: new Date('2024-11-03T11:00:00'), tipo: 'Gasto', descripcion: 'Pago Kari', monto: 500, cuenta: 'Cuenta MAW', categoria: 'Otros' },
+    { id: 'mov12', fecha: new Date('2024-11-03T11:01:00'), tipo: 'Gasto', descripcion: 'Paypal facebook', monto: 1303, cuenta: 'Cuenta MAW', categoria: 'Publicidad' },
+    { id: 'mov13', fecha: new Date('2024-11-05T12:00:00'), tipo: 'Gasto', descripcion: 'Tiktok MAW', monto: 4640, cuenta: 'Cuenta MAW', categoria: 'Publicidad' },
+];
 
 // --- Components ---
 const CuentasPorCobrarTab = ({ data: cuentasPorCobrar }: { data: CuentasPorCobrar[] }) => {
@@ -188,6 +201,11 @@ const RegistrarIngresoDialog = ({ cuentasPorCobrar, onSave, children }: { cuenta
             toast({ title: "Error", description: "Debes seleccionar un cliente y una cuenta de destino.", variant: "destructive" });
             return;
         }
+        
+        if (cuentaDestino === 'Otra' && !otraCuenta) {
+            toast({ title: "Error", description: "Debes especificar el nombre de la otra cuenta.", variant: "destructive" });
+            return;
+        }
 
         const pago = {
             cpc: selectedCpc,
@@ -244,6 +262,7 @@ const RegistrarIngresoDialog = ({ cuentasPorCobrar, onSave, children }: { cuenta
                             <SelectContent>
                                 <SelectItem value="Cuenta Paola">Cuenta Paola</SelectItem>
                                 <SelectItem value="Cuenta MAW">Cuenta MAW</SelectItem>
+                                <SelectItem value="Cuenta Aldo">Cuenta Aldo</SelectItem>
                                 <SelectItem value="Otra">Otra</SelectItem>
                             </SelectContent>
                         </Select>
@@ -273,7 +292,7 @@ const RegistrarGastoDialog = ({ onSave, children }: { onSave: (gasto: Omit<Movim
     const [nombreOtro, setNombreOtro] = useState('');
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
-    const gastoCategorias: CategoriaGasto[] = ["Publicidad", "Sueldos", "Comisiones", "Impuestos", "Personales", "Otros"];
+    const gastoCategorias: CategoriaGasto[] = ["Publicidad", "Sueldos", "Comisiones", "Impuestos", "Personales", "Renta", "Otros"];
 
     const handleSave = () => {
          if (!descripcion || !monto || !cuenta || !categoriaGasto) {
@@ -352,6 +371,7 @@ const RegistrarGastoDialog = ({ onSave, children }: { onSave: (gasto: Omit<Movim
                             <SelectContent>
                                 <SelectItem value="Cuenta Paola">Cuenta Paola</SelectItem>
                                 <SelectItem value="Cuenta MAW">Cuenta MAW</SelectItem>
+                                <SelectItem value="Cuenta Aldo">Cuenta Aldo</SelectItem>
                                 <SelectItem value="Otra">Otra</SelectItem>
                             </SelectContent>
                         </Select>
@@ -372,10 +392,9 @@ const RegistrarGastoDialog = ({ onSave, children }: { onSave: (gasto: Omit<Movim
     )
 }
 
-const TablaDiariaTab = ({ movimientos, onAddMovimiento, onAddGasto }: { movimientos: MovimientoDiario[], onAddMovimiento: (pago: any) => void, onAddGasto: (gasto: any) => void }) => {
-    const [cuentasPorCobrar, setCuentasPorCobrar] = useState(initialCuentasPorCobrar);
-
-     const handleRegisterIngreso = (pago: any) => {
+const TablaDiariaTab = ({ movimientos, onAddMovimiento, onAddGasto, cuentasPorCobrar, onUpdateCpc }: { movimientos: MovimientoDiario[], onAddMovimiento: (pago: any) => void, onAddGasto: (gasto: any) => void, cuentasPorCobrar: CuentasPorCobrar[], onUpdateCpc: (cpcs: CuentasPorCobrar[]) => void }) => {
+    
+    const handleRegisterIngreso = (pago: { cpc: CuentasPorCobrar, cuenta: Cuenta | string }) => {
         const { cpc, cuenta } = pago;
         
         onAddMovimiento({
@@ -386,24 +405,24 @@ const TablaDiariaTab = ({ movimientos, onAddMovimiento, onAddGasto }: { movimien
             categoria: cpc.tipo,
         });
 
-        // Remove the paid CPC
         let updatedCpc = cuentasPorCobrar.filter(item => item.id !== cpc.id);
         
-        // If it's a recurring payment, add the next one
-        if (cpc.tipo === 'Iguala Mensual') {
-            const periodRegex = /(\d{1,2}) (?:al|de) (\w+)/;
-            const match = cpc.periodo.match(periodRegex);
-            
-            if (match) {
-                const monthName = match[2];
-                const monthIndex = es.localize?.month(es.locale.match.months.exec(monthName)!.index, { width: 'abbreviated' });
+        if (cpc.tipo === 'Iguala Mensual' || cpc.tipo === 'Ads') {
+            const periodRegex = /(\d{1,2})\s+de\s+(\w+)/g;
+            const dates = Array.from(cpc.periodo.matchAll(periodRegex)).map(match => {
+                const day = parseInt(match[1]);
+                const monthName = match[2].toLowerCase();
+                const monthIndex = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'].indexOf(monthName.substring(0,3));
+                return new Date(2024, monthIndex, day);
+            });
 
-                const currentPeriodDate = parse(`01 ${monthIndex} 2024`, 'dd MMM yyyy', new Date(), { locale: es });
-                const nextPeriodDate = addMonths(currentPeriodDate, 1);
-                const nextMonthName = format(nextPeriodDate, 'MMM', { locale: es });
-                const daysInNextMonth = getDaysInMonth(nextPeriodDate);
+            if(dates.length === 2){
+                const nextStartDate = addMonths(dates[0], 1);
+                const nextEndDate = addMonths(dates[1], 1);
+                
+                const formatDayMonth = (d:Date) => format(d, "d 'de' MMM", {locale: es}).toLowerCase();
 
-                const newPeriodo = `1-${daysInNextMonth} ${nextMonthName}` as Periodo;
+                const newPeriodo = `${formatDayMonth(nextStartDate)} - ${formatDayMonth(nextEndDate)}` as Periodo;
                 
                 const newIguala: CuentasPorCobrar = {
                     ...cpc,
@@ -414,16 +433,16 @@ const TablaDiariaTab = ({ movimientos, onAddMovimiento, onAddGasto }: { movimien
             }
         }
         
-        setCuentasPorCobrar(updatedCpc);
+        onUpdateCpc(updatedCpc);
     };
 
-    const [selectedMonth, setSelectedMonth] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
+    const [selectedMonth, setSelectedMonth] = useState(format(new Date(2024, 10, 1), 'yyyy-MM-dd'));
 
     const monthOptions = useMemo(() => {
         const uniqueMonths = new Set(
             movimientos.map(mov => format(startOfMonth(mov.fecha), 'yyyy-MM-dd'))
         );
-        const currentMonthStart = format(startOfMonth(new Date()), 'yyyy-MM-dd');
+        const currentMonthStart = format(startOfMonth(new Date(2024, 10, 1)), 'yyyy-MM-dd');
         if (!uniqueMonths.has(currentMonthStart)) {
             uniqueMonths.add(currentMonthStart);
         }
@@ -437,32 +456,31 @@ const TablaDiariaTab = ({ movimientos, onAddMovimiento, onAddGasto }: { movimien
     }, [movimientos, selectedMonth]);
 
     const accountSummary = useMemo(() => {
-        const initialBalancePaola = 188864;
         const initialBalanceMaw = 305624;
+        const initialBalancePaola = 188864;
 
         const totals = monthlyData.reduce((acc, mov) => {
+             const cuenta = mov.cuenta;
             if (mov.tipo === 'Ingreso') {
                 acc.totalIngresos += mov.monto;
-                if (mov.cuenta === 'Cuenta Paola') acc.ingresosPaola += mov.monto;
-                else if (mov.cuenta === 'Cuenta MAW') acc.ingresosMaw += mov.monto;
-                else acc.ingresosOtros += mov.monto;
+                if (cuenta === 'Cuenta Paola') acc.ingresosPaola += mov.monto;
+                else if (cuenta === 'Cuenta MAW') acc.ingresosMaw += mov.monto;
+                else {
+                    acc.ingresosOtros[cuenta] = (acc.ingresosOtros[cuenta] || 0) + mov.monto;
+                }
             } else {
                 acc.totalGastos += mov.monto;
             }
             return acc;
-        }, { totalIngresos: 0, totalGastos: 0, ingresosPaola: 0, ingresosMaw: 0, ingresosOtros: 0 });
-
-        const balancePaola = initialBalancePaola + totals.ingresosPaola;
-        const balanceMaw = initialBalanceMaw + totals.ingresosMaw;
-        const balanceFinal = balancePaola + balanceMaw + totals.ingresosOtros - totals.totalGastos;
+        }, { totalIngresos: 0, totalGastos: 0, ingresosPaola: 0, ingresosMaw: 0, ingresosOtros: {} as Record<string, number> });
 
         return {
             totalIngresos: totals.totalIngresos,
             totalGastos: totals.totalGastos,
-            balance: balanceFinal,
-            balancePaola,
-            balanceMaw,
-            balanceOtros: totals.ingresosOtros
+            balance: totals.totalIngresos - totals.totalGastos,
+            balancePaola: initialBalancePaola,
+            balanceMaw: initialBalanceMaw,
+            ingresosOtros: totals.ingresosOtros
         };
     }, [monthlyData]);
 
@@ -470,7 +488,7 @@ const TablaDiariaTab = ({ movimientos, onAddMovimiento, onAddGasto }: { movimien
     return (
         <div className='space-y-4'>
             <div className="flex justify-end gap-2">
-                <RegistrarIngresoDialog cuentasPorCobrar={cuentasPorCobrar.filter(c => c.tipo === "Proyecto" || c.tipo === "Iguala Mensual")} onSave={handleRegisterIngreso}>
+                <RegistrarIngresoDialog cuentasPorCobrar={cuentasPorCobrar} onSave={handleRegisterIngreso}>
                     <Button>
                         <PlusCircle className="w-4 h-4 mr-2" />
                         Registrar Ingreso
@@ -504,12 +522,12 @@ const TablaDiariaTab = ({ movimientos, onAddMovimiento, onAddGasto }: { movimien
                 </Card>
                  <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Balance Neto Mensual</CardTitle>
+                        <CardTitle className="text-sm font-medium">Utilidad Neta Mensual</CardTitle>
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className={cn("text-2xl font-bold", accountSummary.balance >= 0 ? 'text-blue-500' : 'text-destructive')}>
-                           {(accountSummary.totalIngresos - accountSummary.totalGastos).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+                           {accountSummary.balance.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
                         </div>
                     </CardContent>
                 </Card>
@@ -595,45 +613,6 @@ export default function FinanzasPage() {
         };
         setMovimientos(prev => [fullMovimiento, ...prev].sort((a,b) => b.fecha.getTime() - a.fecha.getTime()));
     };
-
-    const handleRegisterPago = (pago: { cpc: CuentasPorCobrar, cuenta: Cuenta | string }) => {
-        const { cpc, cuenta } = pago;
-        handleAddMovimiento({
-            descripcion: `Pago cliente ${cpc.cliente}`,
-            monto: cpc.monto,
-            cuenta: cuenta,
-            tipo: 'Ingreso',
-            categoria: cpc.tipo,
-        });
-
-        let updatedCpc = cuentasPorCobrar.filter(item => item.id !== cpc.id);
-
-        if (cpc.tipo === 'Iguala Mensual') {
-             const periodRegex = /(\d{1,2})-(\d{1,2})\s(\w+)/;
-             const match = cpc.periodo.match(periodRegex);
-
-             if (match) {
-                 const monthName = match[3];
-                 // A simple way to get month index. Could be improved with a map.
-                 const monthIndex = new Date(Date.parse(monthName +" 1, 2024")).getMonth();
-
-                 const currentPeriodDate = new Date(2024, monthIndex, 1);
-                 const nextPeriodDate = addMonths(currentPeriodDate, 1);
-                 const nextMonthName = format(nextPeriodDate, 'MMM', { locale: es });
-                 const daysInNextMonth = getDaysInMonth(nextPeriodDate);
-
-                 const newPeriodo = `1-${daysInNextMonth} ${nextMonthName}` as Periodo;
-                
-                 const newIguala: CuentasPorCobrar = {
-                     ...cpc,
-                     id: `cpc-${Date.now()}`,
-                     periodo: newPeriodo,
-                 };
-                 updatedCpc.push(newIguala);
-             }
-        }
-        setCuentasPorCobrar(updatedCpc);
-    }
     
   return (
     <div>
@@ -641,7 +620,7 @@ export default function FinanzasPage() {
             <h1 className="text-3xl font-bold font-headline">{activeTab === 'cuentas-por-cobrar' ? 'Gestión de Cobranza' : 'Control Financiero Mensual'}</h1>
              {activeTab === 'tabla-diaria' && (
                 <div className="flex gap-2">
-                    <RegistrarIngresoDialog cuentasPorCobrar={cuentasPorCobrar} onSave={handleRegisterPago}>
+                    <RegistrarIngresoDialog cuentasPorCobrar={cuentasPorCobrar} onSave={pago => handleAddMovimiento(pago)}>
                         <Button>
                             <PlusCircle className="w-4 h-4 mr-2" />
                             Registrar Ingreso
@@ -668,10 +647,9 @@ export default function FinanzasPage() {
             </TabsContent>
 
             <TabsContent value="tabla-diaria" className="mt-4">
-                <TablaDiariaTab movimientos={movimientos} onAddMovimiento={handleRegisterPago} onAddGasto={handleAddMovimiento} />
+                <TablaDiariaTab movimientos={movimientos} onAddMovimiento={handleAddMovimiento} onAddGasto={handleAddMovimiento} cuentasPorCobrar={cuentasPorCobrar} onUpdateCpc={setCuentasPorCobrar} />
             </TabsContent>
         </Tabs>
     </div>
   );
 }
-
