@@ -49,7 +49,7 @@ const Footer = () => {
         <div className="mt-12 border-t pt-8 text-center text-sm text-foreground/60">
           <p>&copy; {new Date().getFullYear()} MAW Soluciones. Todos los derechos reservados.</p>
           <p className="mt-2">
-            <Link href="/equipo" className="hover:text-primary transition-colors">Equipo Interno</Link>
+            <Link href="/equipo" className="hover:text-primary transition-colors">admin interna</Link>
           </p>
         </div>
       </div>
