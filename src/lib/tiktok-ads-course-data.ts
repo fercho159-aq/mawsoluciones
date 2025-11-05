@@ -340,13 +340,13 @@ const courseTopics: Topic[] = [
     {
         topic_id: "tt_4_1",
         section_id: 4,
-        title: "Métricas Clave en TikTok Ads",
+        title: "Introducción a TikTok Shop",
         video_url: "",
         duration: "15 min",
         summary: [
-            "**Métricas de Rendimiento:** Entenderás el significado de CPA, CPC, CPM, CTR y CVR.",
-            "**Métricas de Video:** Analizarás el tiempo de visualización promedio y la tasa de finalización para medir el engagement.",
-            "**Personalización de Reportes:** Aprenderás a configurar tu panel de informes para ver los datos que realmente importan.",
+            "**¿Qué es TikTok Shop?:** Entenderás cómo funciona el e-commerce integrado de TikTok.",
+            "**Configuración de tu Tienda:** Aprenderás a registrarte, conectar tus cuentas y configurar tu tienda.",
+            "**Subida de Productos:** Conocerás el proceso para subir tu catálogo de productos a la plataforma.",
         ],
         questions: [],
         completed: false,
@@ -356,13 +356,13 @@ const courseTopics: Topic[] = [
     {
         topic_id: "tt_4_2",
         section_id: 4,
-        title: "Estrategias de Pruebas A/B",
+        title: "Estrategias de Venta en TikTok Shop",
         video_url: "",
         duration: "15 min",
         summary: [
-            "**Testeo de Creatividades:** Aprenderás a probar diferentes ganchos, músicas y llamadas a la acción.",
-            "**Testeo de Audiencias:** Descubrirás cómo enfrentar diferentes audiencias para encontrar tu nicho más rentable.",
-            "**Análisis de Resultados:** Sabrás cómo interpretar los resultados de tus pruebas para tomar decisiones basadas en datos.",
+            "**Video Shopping Ads:** Aprenderás a crear anuncios que permiten a los usuarios comprar directamente desde el video.",
+            "**LIVE Shopping:** Descubrirás el poder de las transmisiones en vivo para mostrar productos y generar ventas en tiempo real.",
+            "**Promoción de Productos:** Conocerás las herramientas para destacar productos específicos en tus videos orgánicos.",
         ],
         questions: [],
         completed: false,
@@ -372,13 +372,13 @@ const courseTopics: Topic[] = [
     {
         topic_id: "tt_4_3",
         section_id: 4,
-        title: "Escalado de Campañas Exitosas",
+        title: "Optimización y Análisis de tu Tienda",
         video_url: "",
         duration: "15 min",
         summary: [
-            "**Escalado Vertical:** Aprenderás a aumentar el presupuesto de tus campañas ganadoras sin afectar su rendimiento.",
-            "**Escalado Horizontal:** Descubrirás cómo duplicar tus conjuntos de anuncios para llegar a nuevas audiencias.",
-            "**Reglas de Optimización:** Crearás reglas automatizadas para pausar anuncios de bajo rendimiento o escalar los que funcionan bien.",
+            "**Métricas de TikTok Shop:** Analizarás los datos de ventas, tráfico y conversión de tu tienda.",
+            "**Optimización de Fichas de Producto:** Aprenderás a crear títulos, descripciones e imágenes que venden.",
+            "**Marketing de Afiliados:** Descubrirás cómo puedes colaborar con creadores para que vendan tus productos a cambio de una comisión.",
         ],
         questions: [],
         completed: false,
@@ -388,60 +388,60 @@ const courseTopics: Topic[] = [
     {
         topic_id: "tt_4_4",
         section_id: 4,
-        title: "Examen Final: El Maestro de TikTok Ads",
+        title: "Examen Final: El Vendedor de TikTok",
         video_url: "",
         duration: "10 min",
         summary: [],
         questions: [
             {
-                "question": "El 'CVR' (Conversion Rate) mide:",
+                "question": "¿Qué son los 'Video Shopping Ads'?",
                 "options": [
-                    "El porcentaje de gente que ve tu anuncio.",
-                    "El porcentaje de gente que hace clic en tu anuncio y luego completa una acción deseada (ej. compra).",
-                    "El costo de tu anuncio.",
-                    "El número de comentarios en tu video."
+                    "Anuncios que solo se muestran en YouTube.",
+                    "Anuncios en formato video dentro de TikTok que tienen un enlace directo para comprar el producto mostrado.",
+                    "Videos orgánicos que no se pueden promocionar.",
+                    "Anuncios que aparecen solo en la sección de mensajes."
                 ],
                 "correct": 1
             },
             {
-                "question": "Si el 'tiempo de visualización promedio' de tu video de 30 segundos es de solo 2 segundos, ¿qué indica probablemente?",
+                "question": "Una de las grandes ventajas de LIVE Shopping es:",
                 "options": [
-                    "Que tu video es un éxito.",
-                    "Que tu 'hook' (gancho) inicial no es lo suficientemente fuerte para retener la atención.",
-                    "Que la audiencia es incorrecta.",
-                    "Que el sonido no funciona."
+                    "Que solo se puede hacer una vez al mes.",
+                    "La capacidad de interactuar con la audiencia en tiempo real, responder preguntas y crear un sentido de urgencia para comprar.",
+                    "Que no necesitas mostrar los productos.",
+                    "Que es completamente automático."
                 ],
                 "correct": 1
             },
             {
-                "question": "El 'escalado vertical' de una campaña consiste en:",
+                "question": "El marketing de afiliados en TikTok Shop permite a:",
                 "options": [
-                    "Crear muchas campañas nuevas.",
-                    "Aumentar gradualmente el presupuesto de un conjunto de anuncios que está funcionando bien.",
-                    "Cambiar la creatividad del anuncio todos los días.",
-                    "Dirigirse a un nuevo país."
+                    "Cualquier usuario obtener tus productos gratis.",
+                    "Los creadores de contenido promocionar tus productos y ganar una comisión por cada venta.",
+                    "Tu competencia vender tus productos.",
+                    "Vender tus productos en otras plataformas."
                 ],
                 "correct": 1
             },
             {
-                "question": "Al realizar una prueba A/B, la mejor práctica es:",
+                "question": "Para configurar tu TikTok Shop, el primer paso es:",
                 "options": [
-                    "Cambiar la creatividad, la audiencia y el texto, todo al mismo tiempo.",
-                    "Probar dos anuncios idénticos.",
-                    "Cambiar solo una variable a la vez (ej. probar dos ganchos diferentes con la misma audiencia).",
-                    "Usar siempre el mismo presupuesto."
+                    "Tener 1 millón de seguidores.",
+                    "Registrarte en el TikTok Shop Seller Center y vincular tus cuentas.",
+                    "Crear un video viral.",
+                    "Enviar tus productos a las oficinas de TikTok."
                 ],
-                "correct": 2
+                "correct": 1
             },
             {
-                "question": "El 'CPA' (Costo Por Adquisición) ideal es:",
+                "question": "Optimizar la 'ficha de producto' en TikTok Shop implica:",
                 "options": [
-                    "Siempre el más alto posible.",
-                    "Siempre el más bajo posible.",
-                    "Un costo que sea sostenible y rentable para tu negocio.",
-                    "El mismo para todas las industrias."
+                    "Poner el precio lo más alto posible.",
+                    "Usar títulos claros, descripciones detalladas y fotos de alta calidad.",
+                    "Ocultar la información de envío.",
+                    "Escribir todo en mayúsculas."
                 ],
-                "correct": 2
+                "correct": 1
             }
         ],
         completed: false,
@@ -450,15 +450,15 @@ const courseTopics: Topic[] = [
 ];
 
 export const courseData: Course = {
-  title: "Curso de Publicidad en TikTok",
-  description: "Descubre cómo crear anuncios virales y conectar con la Generación Z en la plataforma de video corto.",
+  title: "Curso Básico de TikTok: Ads y Shop",
+  description: "Aprende a crear contenido, lanzar anuncios y vender productos en la plataforma de video corto.",
   total_sections: 4,
   total_topics: 16,
   total_duration: "4 horas",
   sections: [
     {
       section_id: 1,
-      title: "Introducción a TikTok Ads",
+      title: "Conociendo el Terreno de Juego",
       order: 1,
       duration: "1h",
       completed: false,
@@ -466,7 +466,7 @@ export const courseData: Course = {
     },
     {
         section_id: 2,
-        title: "Creación de Anuncios Nativos",
+        title: "Contenido que Conecta y Vende",
         order: 2,
         duration: "1h 15min",
         completed: false,
@@ -474,7 +474,7 @@ export const courseData: Course = {
     },
     {
         section_id: 3,
-        title: "Segmentación y Presupuesto",
+        title: "Publicidad Pagada (TikTok Ads)",
         order: 3,
         duration: "1h",
         completed: false,
@@ -482,7 +482,7 @@ export const courseData: Course = {
     },
     {
         section_id: 4,
-        title: "Análisis y Optimización",
+        title: "Tu Tienda en TikTok (TikTok Shop)",
         order: 4,
         duration: "45min",
         completed: false,

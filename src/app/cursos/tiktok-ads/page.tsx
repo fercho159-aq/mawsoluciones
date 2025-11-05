@@ -5,7 +5,7 @@ import { useState, useRef } from 'react';
 import { courseData } from '@/lib/tiktok-ads-course-data';
 import type { Topic, Question } from '@/lib/course-data';
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Circle, PlayCircle, Eye, Wallet, Lightbulb, Users, Target, Calendar, ChevronRight, X, AlertTriangle, Frown } from "lucide-react";
+import { CheckCircle, Circle, PlayCircle, Eye, Wallet, Lightbulb, Users, Target, Calendar, ChevronRight, X, AlertTriangle, Frown, ShoppingCart } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -35,8 +35,8 @@ import Image from 'next/image';
 const sectionIcons: Record<number, React.ReactNode> = {
   1: <Eye className="w-5 h-5 mr-3 text-primary" />,
   2: <Lightbulb className="w-5 h-5 mr-3 text-primary" />,
-  3: <Users className="w-5 h-5 mr-3 text-primary" />,
-  4: <Target className="w-5 h-5 mr-3 text-primary" />,
+  3: <Target className="w-5 h-5 mr-3 text-primary" />,
+  4: <ShoppingCart className="w-5 h-5 mr-3 text-primary" />,
 };
 
 interface LeadFormData {
