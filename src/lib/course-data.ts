@@ -392,7 +392,7 @@ export const courseData: Course = {
     },
     {
         section_id: 4,
-        title: "Presupuesto y Estrategias de Puja",
+        title: "Presupuesto y Pujas",
         order: 4,
         duration: "1h",
         completed: false,
@@ -400,13 +400,13 @@ export const courseData: Course = {
             {
                 topic_id: "4_1",
                 section_id: 4,
-                title: "Presupuesto Diario vs. Presupuesto Total",
+                title: "¿Cuánto Invertir? Presupuesto Diario vs. Total",
                 video_url: "",
                 duration: "15 min",
                 summary: [
-                    "**Gestión de Inversión:** Sabrás cuándo es mejor usar un presupuesto diario o uno total para tu campaña.",
-                    "**Cálculo de Presupuesto Inicial:** Aprenderás un método para definir cuánto invertir al empezar.",
-                    "**Escalado Controlado:** Conocerás estrategias para aumentar tu presupuesto de forma segura y rentable."
+                    "**Control de Gasto:** Aprenderás a decidir entre un presupuesto diario (flexible) o total (fijo).",
+                    "**Cálculo de Presupuesto Inicial:** Descubrirás un método simple para saber cuánto invertir al empezar sin arriesgar de más.",
+                    "**Escalado Seguro:** Conocerás cómo aumentar tu inversión de forma rentable cuando una campaña funciona."
                 ],
                 questions: [],
                 completed: false,
@@ -415,13 +415,13 @@ export const courseData: Course = {
             {
                 topic_id: "4_2",
                 section_id: 4,
-                title: "Estrategias de Puja Automáticas vs. Manuales",
+                title: "Entendiendo las Pujas: ¿Subasta de Anuncios?",
                 video_url: "",
                 duration: "20 min",
                 summary: [
-                    "**Dominio de Estrategias de Puja:** Entenderás las pujas por menor costo, costo objetivo y retorno de la inversión (ROAS).",
-                    "**Uso de IA para Pujas:** Aprenderás a sacar provecho de las pujas automáticas de Advantage+.",
-                    "**Control Manual:** Sabrás en qué situaciones específicas puede ser útil tomar el control manual de las pujas."
+                    "**Concepto de Puja:** Entenderás que Facebook es una subasta y cómo compites por la atención del usuario.",
+                    "**Puja Automática (Menor Costo):** Aprenderás a dejar que el algoritmo de Meta encuentre el costo más bajo por resultado.",
+                    "**Cuándo Usar Pujas Manuales:** Sabrás en qué situaciones específicas puede ser útil tomar el control y fijar un costo máximo."
                 ],
                 questions: [],
                 completed: false,
@@ -430,13 +430,13 @@ export const courseData: Course = {
             {
                 topic_id: "4_3",
                 section_id: 4,
-                title: "Optimización del Presupuesto de la Campaña (CBO)",
+                title: "Optimización del Presupuesto (CBO)",
                 video_url: "",
                 duration: "15 min",
                 summary: [
-                    "**Funcionamiento de CBO:** Comprenderás cómo el algoritmo de Meta distribuye tu presupuesto automáticamente.",
-                    "**Mejores Prácticas con CBO:** Aplicarás las estrategias correctas para maximizar los resultados con CBO.",
-                    "**Prevención de Errores:** Evitarás los errores más comunes que limitan la eficacia de la optimización de presupuesto."
+                    "**¿Qué es CBO?:** Comprenderás cómo el algoritmo distribuye tu presupuesto entre los públicos que mejor funcionan.",
+                    "**Ventajas de CBO:** Descubrirás por qué CBO simplifica la gestión y maximiza los resultados.",
+                    "**Errores Comunes:** Evitarás los fallos más habituales que limitan la eficacia de CBO."
                 ],
                 questions: [],
                 completed: false,
@@ -471,14 +471,14 @@ export const courseData: Course = {
                         "correct": 1
                     },
                     {
-                        "question": "La estrategia de puja de 'ROAS objetivo' (Return On Ad Spend) busca:",
+                        "question": "La estrategia de puja de 'Menor Costo' busca:",
                         "options": [
-                            "Conseguir el mayor número de clics posible.",
-                            "Gastar el presupuesto lo más rápido posible.",
-                            "Maximizar el valor de conversión, buscando un retorno específico por cada peso invertido.",
+                            "Conseguir el mayor número de clics posible, sin importar el precio.",
+                            "Gastar el presupuesto obteniendo la mayor cantidad de resultados al menor costo posible.",
+                            "Maximizar el valor de conversión, buscando un retorno específico.",
                             "Mostrar el anuncio a la mayor cantidad de gente."
                         ],
-                        "correct": 2
+                        "correct": 1
                     },
                     {
                         "question": "¿Qué es una ventaja de usar pujas automáticas (Advantage+)?",

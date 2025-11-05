@@ -1,5 +1,8 @@
+
+"use client";
+
 import { portfolioItems } from "@/lib/portfolio-data";
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,7 +12,124 @@ import WhatsappIcon from "@/components/icons/whatsapp-icon";
 import AnimatedDiv from "@/components/animated-div";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import ParallaxImages from "@/components/sections/parallax-images";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { motion, AnimatePresence } from "framer-motion";
+
+interface QuoteFormData {
+  name: string;
+  company: string;
+  phone: string;
+  hasWebsite: "Sí" | "No" | "";
+  currentWebsite: string;
+}
+
+const QuoteDialog = ({ itemTitle }: { itemTitle: string }) => {
+  const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState<QuoteFormData>({
+    name: '',
+    company: '',
+    phone: '',
+    hasWebsite: '',
+    currentWebsite: ''
+  });
+
+  const handleSendToWhatsapp = () => {
+    let message = `
+*¡Hola! Quiero cotizar un sitio como '${itemTitle}'.*
+
+*Nombre:* ${formData.name}
+*Empresa:* ${formData.company}
+*Celular:* ${formData.phone}
+*¿Tiene sitio web actual?:* ${formData.hasWebsite}
+    `.trim();
+
+    if (formData.hasWebsite === 'Sí') {
+      message += `\n*Sitio web actual:* ${formData.currentWebsite}`;
+    }
+
+    const whatsappUrl = `https://wa.me/525542314150?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+    setOpen(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="whatsapp">
+          <WhatsappIcon className="w-5 h-5 mr-2" />
+          Cotizar un sitio como este
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[480px]">
+        <DialogHeader>
+          <DialogTitle>Cotizar un Sitio Similar a {itemTitle}</DialogTitle>
+          <DialogDescription>
+            Completa el formulario para que uno de nuestros expertos te contacte a la brevedad.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="name" className="text-right">Nombre</Label>
+            <Input id="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="company" className="text-right">Empresa</Label>
+            <Input id="company" value={formData.company} onChange={(e) => setFormData({ ...formData, company: e.target.value })} className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="phone" className="text-right">Celular</Label>
+            <Input id="phone" type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label className="text-right">¿Sitio web actual?</Label>
+            <RadioGroup
+              value={formData.hasWebsite}
+              onValueChange={(value) => setFormData({ ...formData, hasWebsite: value as "Sí" | "No" })}
+              className="col-span-3 flex gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="Sí" id="ws-yes" />
+                <Label htmlFor="ws-yes">Sí</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="No" id="ws-no" />
+                <Label htmlFor="ws-no">No</Label>
+              </div>
+            </RadioGroup>
+          </div>
+          <AnimatePresence>
+            {formData.hasWebsite === 'Sí' && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="grid grid-cols-4 items-center gap-4"
+              >
+                <Label htmlFor="currentWebsite" className="text-right">URL</Label>
+                <Input
+                  id="currentWebsite"
+                  value={formData.currentWebsite}
+                  onChange={(e) => setFormData({ ...formData, currentWebsite: e.target.value })}
+                  placeholder="www.misitio.com"
+                  className="col-span-3"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+        <Button onClick={handleSendToWhatsapp} type="submit" size="lg" className="w-full">
+          <WhatsappIcon className="w-5 h-5 mr-2" />
+          Enviar por WhatsApp
+        </Button>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 
 export default function PortfolioItemPage({
@@ -18,6 +138,7 @@ export default function PortfolioItemPage({
   params: { id: string };
 }) {
   const item = portfolioItems.find((p) => p.id === params.id);
+  const router = useRouter();
 
   if (!item) {
     notFound();
@@ -27,43 +148,59 @@ export default function PortfolioItemPage({
     .filter(p => p.id !== item.id && p.category === item.category)
     .slice(0, 4);
 
-  const whatsappNumber = "5542314150";
-  const whatsappMessage = `Hola, estoy interesado en cotizar un sitio web similar a '${item.title}'. ¿Podemos hablar?`;
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-    whatsappMessage
-  )}`;
-
   return (
     <div className="bg-background">
-       <section className="py-24 sm:py-32 relative">
-        <div className="relative z-10 container mx-auto px-4 md:px-6">
-          <div className="max-w-7xl mx-auto items-center">
-            <div className="grid md:grid-cols-12 gap-12 items-center">
-              {/* Columna Izquierda: Imagen */}
-              <div className="w-full md:col-span-6">
-                {item.image && (
-                  <div className="relative aspect-video rounded-lg shadow-2xl overflow-hidden">
-                    <Image
-                      src={item.image}
-                      alt={item.title}
-                      fill
-                      className="object-contain"
-                    />
-                  </div>
-                )}
+      <section className="relative py-24 sm:py-32">
+        <div className="container mx-auto px-4 md:px-6">
+          
+          <div className="grid md:grid-cols-12 gap-12 items-start">
+            <div className="md:col-span-6 md:sticky top-28">
+              <div className="relative aspect-video rounded-lg shadow-2xl overflow-hidden mb-8">
+                <Image
+                  src={item.image ?? '/images/placeholder.png'}
+                  alt={item.title}
+                  fill
+                  className="object-contain"
+                />
               </div>
-
-              {/* Columna Derecha: Información */}
-              <div className="prose prose-lg max-w-none text-foreground/80 prose-headings:font-headline prose-headings:text-foreground md:col-span-6">
+              <Button variant="outline" onClick={() => router.back()} className="mb-8">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Volver a Clientes
+              </Button>
+            </div>
+            
+            <div className="md:col-span-6">
                 <Badge variant="secondary" className="mb-4">{item.category}</Badge>
-                <h1 className="font-headline text-2xl sm:text-3xl font-bold mb-4">
+                <h1 className="font-headline text-3xl sm:text-4xl font-bold mb-4">
                   {item.title}
                 </h1>
-                <p className="text-lg sm:text-xl text-foreground/80">
+                <p className="text-lg text-foreground/80">
                   {item.description}
                 </p>
+
+                <div className="my-8">
+                  <h3 className="font-headline text-xl font-bold mb-4">El Reto</h3>
+                  <p className="text-foreground/80">{item.challenge}</p>
+                </div>
+
+                <div className="my-8">
+                  <h3 className="font-headline text-xl font-bold mb-4">Nuestra Solución</h3>
+                  <p className="text-foreground/80">{item.solution}</p>
+                </div>
                 
-                <div className="not-prose flex flex-col sm:flex-row gap-4 my-8">
+                <div className="my-8">
+                  <h3 className="font-headline text-xl font-bold mb-4">Servicios Incluidos</h3>
+                  <ul className="grid grid-cols-2 gap-x-6 gap-y-3">
+                    {item.services.map(service => (
+                      <li key={service} className="flex items-center gap-2 text-foreground/80">
+                        <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
+                        <span>{service}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row gap-4 my-8">
                   {item.website && (
                       <Button asChild>
                           <a href={item.website} target="_blank" rel="noopener noreferrer">
@@ -71,23 +208,9 @@ export default function PortfolioItemPage({
                           </a>
                       </Button>
                   )}
-                  <Button asChild variant="whatsapp">
-                      <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-                          <WhatsappIcon className="w-5 h-5 mr-2" />
-                          Cotizar un sitio como este
-                      </a>
-                  </Button>
+                  <QuoteDialog itemTitle={item.title} />
                 </div>
               </div>
-            </div>
-          </div>
-          <div className="text-center mt-20">
-              <Button variant="outline" asChild>
-                  <Link href="/portafolio">
-                      <ArrowLeft className="w-4 h-4 mr-2" />
-                      Volver a Clientes
-                  </Link>
-              </Button>
           </div>
         </div>
       </section>
