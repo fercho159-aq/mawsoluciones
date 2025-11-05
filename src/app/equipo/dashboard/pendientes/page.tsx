@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 
 type StatusCliente = "Activo" | "Se quiere ir" | "Esta entrando" | "Ya se fue";
 
@@ -147,7 +148,12 @@ export default function PendientesPage() {
                                     {item.status}
                                 </Badge>
                             </TableCell>
-                             <TableCell>{item.pendientePrincipal}</TableCell>
+                             <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Checkbox id={`task-${item.id}`} />
+                                  <label htmlFor={`task-${item.id}`}>{item.pendientePrincipal}</label>
+                                </div>
+                              </TableCell>
                              <TableCell>{item.contenidoProgramadoHasta}</TableCell>
                              <TableCell>{item.proximaVisita || "N/A"}</TableCell>
                         </TableRow>
@@ -181,3 +187,5 @@ export default function PendientesPage() {
     </div>
   );
 }
+
+    
