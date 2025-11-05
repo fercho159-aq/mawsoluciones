@@ -45,6 +45,15 @@ const getNextImage = () => {
 
 export const contentPortfolioItems: ContentPortfolioItemType[] = [
   {
+    "id": "plaza-azul",
+    "title": "Plaza Azul",
+    "type": "Reel",
+    "sector": "Ropa y Moda",
+    "client": "Plaza Azul",
+    "image": PlaceHolderImages.find(img => img.id === 'content-ropa-3'),
+    "url": "https://www.tiktok.com/@plaza_azul"
+  },
+  {
     "id": "biofert",
     "title": "Biofert",
     "type": "Campaña de Fotos",
@@ -812,7 +821,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "services": [
         "Diseño web personalizado",
         "Desarrollo front-end y back-end",
-        "Optimización SEO",
+        "Optimización para SEO",
         "Integración de sistemas de contacto y soporte",
         "Testing y puesta en marcha"
       ],
@@ -967,21 +976,21 @@ export const portfolioItems: PortfolioItemType[] = [
     },
     {
       "id": "maestrosdelmedia",
-      "title": "Desarrollo y Lanzamiento de MaestrosDelMedia.com",
+      "title": "Desarrollo Integral del Sitio Web maestrodelmedia.com",
       "category": "Connective",
       "sector": "Servicios",
-      "description": "Creación integral del sitio web MaestrosDelMedia.com para fortalecer la presencia online y mejorar la interacción con usuarios en el sector Active.",
+      "description": "Creación y desarrollo de un sitio web profesional para maestrodelmedia.com, enfocada en reforzar la presencia digital del cliente en el sector de Servicios Profesionales mediante un diseño moderno y funcionalidad optimizada.",
       "services": [
-        "Diseño web personalizado",
-        "Desarrollo front-end y back-end",
+        "Diseño Web Personalizado",
+        "Desarrollo Frontend y Backend",
         "Optimización SEO",
-        "Integración de sistemas",
-        "Consultoría en experiencia de usuario"
+        "Integración de Sistemas de Contacto",
+        "Hosting y Mantenimiento Web"
       ],
       "website": "maestrosdelmedia.com",
       "client": "MaestrosDelMedia.com",
-      "challenge": "El desafío principal fue diseñar y desarrollar un sitio web dinámico y accesible que representara fielmente la identidad de MaestrosDelMedia.com en el sector Active, asegurando una experiencia de usuario óptima y una plataforma escalable para futuras expandiones.",
-      "solution": "Nuestra solución consistió en llevar a cabo un proceso completo que incluyó análisis de requerimientos, diseño de interfaz intuitiva y atractiva, desarrollo robusto tanto en front-end como back-end, implementación de SEO para mejorar visibilidad, y pruebas exhaustivas para garantizar un rendimiento fluido y seguro de la plataforma.",
+      "challenge": "El desafío principal fue crear una plataforma digital profesional que reflejara la calidad y experiencia del cliente en el sector de servicios profesionales, asegurando una navegación amigable, diseño atractivo y adaptabilidad en dispositivos móviles, además de la integración eficiente de herramientas para la captación y gestión de clientes potenciales.",
+      "solution": "Desarrollamos un sitio web completamente personalizado desde cero, implementando un diseño responsive y moderno que garantiza una experiencia de usuario excelente en todos los dispositivos. Integramos funcionalidades clave para la comunicación directa con clientes, optimizamos el contenido para motores de búsqueda y establecimos un sistema de mantenimiento continuo para asegurar el rendimiento y la seguridad del sitio.",
     },
     {
       "id": "smallbumpers",

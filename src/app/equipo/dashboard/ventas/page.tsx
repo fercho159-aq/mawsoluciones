@@ -29,7 +29,6 @@ import { useToast } from '@/hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { format, getMonth, getYear } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -70,89 +69,74 @@ const origenes: OrigenLead[] = ["Facebook", "TikTok", "Referencia", "Sitio Web"]
 const responsables: ResponsableVentas[] = ["Alma", "Fer", "Julio"];
 const statuses: StatusLead[] = ["Lead Nuevo", "Contactado", "Videollamada", "En Negociación", "Convertido", "No Interesado"];
 
-const AddLeadDialog = ({ onAddLeads }: { onAddLeads: (leads: Omit<Lead, 'id' | 'status' | 'responsable' | 'createdAt'>[]) => void }) => {
-    const [leadsText, setLeadsText] = useState('');
+const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Omit<Lead, 'id' | 'status' | 'responsable' | 'createdAt'>) => void }) => {
     const [open, setOpen] = useState(false);
+    const [cliente, setCliente] = useState('');
+    const [email, setEmail] = useState('');
+    const [telefono, setTelefono] = useState('');
+    const [origen, setOrigen] = useState<OrigenLead>('Facebook');
     const { toast } = useToast();
 
     const handleAdd = () => {
-        if (!leadsText.trim()) {
+        if (!cliente || !origen) {
             toast({
                 title: "Error",
-                description: "El campo de texto está vacío.",
+                description: "El nombre del cliente y el origen son obligatorios.",
                 variant: "destructive",
             });
             return;
         }
 
-        const lines = leadsText.trim().split('\n');
-        const newLeads: Omit<Lead, 'id' | 'status' | 'responsable' | 'createdAt'>[] = [];
-        const validOrigins = origenes.map(o => o.toLowerCase());
-
-        for (const line of lines) {
-            const parts = line.split(',').map(p => p.trim());
-            if (parts.length === 4) {
-                const [cliente, email, telefono, origen] = parts;
-                const origenLower = origen.toLowerCase();
-
-                if (!validOrigins.includes(origenLower as any)) {
-                     toast({
-                        title: "Error de Formato",
-                        description: `El origen "${origen}" en la línea "${line}" no es válido. Orígenes válidos: ${origenes.join(', ')}`,
-                        variant: "destructive",
-                    });
-                    return; // Stop processing if one is wrong
-                }
-
-                newLeads.push({ 
-                    cliente, 
-                    email, 
-                    telefono, 
-                    origen: origenes.find(o => o.toLowerCase() === origenLower) as OrigenLead
-                });
-            } else {
-                 toast({
-                    title: "Error de Formato",
-                    description: `La línea "${line}" no tiene el formato correcto (Nombre, Email, Teléfono, Origen).`,
-                    variant: "destructive",
-                });
-                return; // Stop processing if one line is wrong
-            }
-        }
+        onAddLead({ cliente, email, telefono, origen });
         
-        onAddLeads(newLeads);
-        setLeadsText('');
+        // Reset form and close
+        setCliente('');
+        setEmail('');
+        setTelefono('');
+        setOrigen('Facebook');
         setOpen(false);
-    }
+    };
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button>
                     <PlusCircle className="w-4 h-4 mr-2" />
-                    Añadir Prospectos
+                    Añadir Prospecto
                 </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Añadir Nuevos Prospectos</DialogTitle>
-                    <DialogDescription>
-                       Pega la lista de prospectos. Cada línea debe tener el formato:
-                       <br />
-                       <code className="text-xs font-mono p-1 bg-muted rounded-sm">Nombre, Email, Teléfono, Origen</code>
-                    </DialogDescription>
+                    <DialogTitle>Añadir Nuevo Prospecto</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
-                     <Textarea
-                        placeholder="Ejemplo:&#10;Cafetería El Buen Sabor, cafe@ejemplo.com, 5511223344, Referencia&#10;Constructora Fuerte, contacto@constructora.com, 5599887766, Facebook"
-                        value={leadsText}
-                        onChange={(e) => setLeadsText(e.target.value)}
-                        className="h-48"
-                    />
+                    <div className="space-y-2">
+                        <Label htmlFor="cliente">Nombre del Cliente</Label>
+                        <Input id="cliente" value={cliente} onChange={(e) => setCliente(e.target.value)} placeholder="Ej. Tacos El Veloz" />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="email">Email (Opcional)</Label>
+                        <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="contacto@ejemplo.com" />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="telefono">Teléfono (Opcional)</Label>
+                        <Input id="telefono" type="tel" value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="5512345678" />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="origen">Origen del Prospecto</Label>
+                        <Select value={origen} onValueChange={(value: OrigenLead) => setOrigen(value)}>
+                            <SelectTrigger id="origen">
+                                <SelectValue placeholder="Seleccionar origen" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {origenes.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                    <Button onClick={handleAdd}>Añadir Prospectos</Button>
+                    <Button onClick={handleAdd}>Añadir Prospecto</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -173,31 +157,29 @@ export default function VentasPage() {
     const [monthFilter, setMonthFilter] = useState('Todos');
     const [searchFilter, setSearchFilter] = useState('');
 
-    const handleAddLeads = (newLeadsData: Omit<Lead, 'id' | 'status' | 'responsable'| 'createdAt'>[]) => {
+    const handleAddLead = (newLeadData: Omit<Lead, 'id' | 'status' | 'responsable'| 'createdAt'>) => {
         setLeads(prevLeads => {
             let lastSellerIndex = parseInt(localStorage.getItem('lastAssignedSellerIndex') || '0');
             
-            const leadsToAdd: Lead[] = newLeadsData.map((newLeadData) => {
-                const newSeller = responsables[lastSellerIndex % responsables.length];
-                lastSellerIndex++;
-                return {
-                    id: `lead-${Date.now()}-${Math.random()}`,
-                    ...newLeadData,
-                    status: 'Lead Nuevo',
-                    responsable: newSeller,
-                    createdAt: new Date(),
-                }
-            });
+            const newSeller = responsables[lastSellerIndex % responsables.length];
+            lastSellerIndex++;
+            
+            const leadToAdd: Lead = {
+                id: `lead-${Date.now()}-${Math.random()}`,
+                ...newLeadData,
+                status: 'Lead Nuevo',
+                responsable: newSeller,
+                createdAt: new Date(),
+            };
     
             localStorage.setItem('lastAssignedSellerIndex', lastSellerIndex.toString());
             
-            if (leadsToAdd.length > 0) {
-                toast({
-                    title: "Prospectos Añadidos",
-                    description: `${leadsToAdd.length} nuevos prospectos se han añadido al pipeline.`,
-                });
-            }
-            return [...leadsToAdd, ...prevLeads];
+            toast({
+                title: "Prospecto Añadido",
+                description: `${leadToAdd.cliente} se ha añadido al pipeline y asignado a ${newSeller}.`,
+            });
+
+            return [leadToAdd, ...prevLeads];
         });
     };
 
@@ -293,7 +275,7 @@ export default function VentasPage() {
     <div>
         <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold font-headline">Pipeline de Ventas</h1>
-            <AddLeadDialog onAddLeads={handleAddLeads} />
+            <AddLeadDialog onAddLead={handleAddLead} />
         </div>
        <Card>
         <CardHeader>
