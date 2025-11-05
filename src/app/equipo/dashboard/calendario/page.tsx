@@ -6,9 +6,9 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, subWeeks, addWeeks } from 'date-fns';
+import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, subWeeks, addWeeks, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { PlusCircle, Video, Camera, Phone, User, Monitor, Mic, Lightbulb, Grip, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { PlusCircle, Video, Camera, Phone, User, Monitor, Mic, Lightbulb, Grip, X, ChevronLeft, ChevronRight, Users } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -262,9 +262,29 @@ export default function CalendarioPage() {
     const goToNextWeek = () => setCurrentDate(addWeeks(currentDate, 1));
     const goToCurrentWeek = () => setCurrentDate(new Date());
 
+    const weeklySummary = useMemo(() => {
+        const summary: { [key: string]: number } = {};
+        
+        teamMembers.forEach(member => {
+            summary[member.name] = 0;
+        });
+
+        const eventsInWeek = events.filter(event => 
+            isWithinInterval(event.fullStart, { start: currentWeekStart, end: currentWeekEnd })
+        );
+
+        eventsInWeek.forEach(event => {
+            if (summary[event.assignedToName] !== undefined) {
+                summary[event.assignedToName]++;
+            }
+        });
+
+        return summary;
+    }, [currentWeekStart, currentWeekEnd, events]);
+
 
     return (
-        <div className="flex flex-col h-[calc(100vh-6rem)]">
+        <div className="flex flex-col h-full">
           <header className="flex justify-between items-center mb-6 px-1">
             <div>
                 <h1 className="text-2xl font-bold font-headline">Calendario de Grabaciones</h1>
@@ -280,7 +300,7 @@ export default function CalendarioPage() {
             </div>
           </header>
 
-          <div className="grid grid-cols-7 flex-grow border-t border-l rounded-t-lg overflow-hidden">
+          <div className="grid grid-cols-7 flex-grow border-t border-l rounded-t-lg overflow-hidden bg-card">
                 {daysInWeek.map(day => {
                     const dayEvents = events.filter(event => isSameDay(event.fullStart, day)).sort((a, b) => a.fullStart.getTime() - b.fullStart.getTime());
                     return (
@@ -293,7 +313,7 @@ export default function CalendarioPage() {
                                 <div className="p-2 space-y-2">
                                 {dayEvents.length > 0 ? (
                                     dayEvents.map(event => (
-                                    <Card key={event.id} className="p-3 bg-card/70 hover:bg-card transition-colors">
+                                    <Card key={event.id} className="p-3 bg-background/50 hover:bg-background transition-colors">
                                         <CardHeader className="p-0 mb-2">
                                             <CardTitle className="text-sm">{event.project}</CardTitle>
                                             <CardDescription className="text-xs">{event.clientName}</CardDescription>
@@ -319,6 +339,26 @@ export default function CalendarioPage() {
                     )
                 })}
           </div>
+          <Card className="mt-8">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <Users className="w-5 h-5"/>
+                    Resumen de Actividad Semanal
+                </CardTitle>
+                <CardDescription>Número de grabaciones asignadas a cada miembro del equipo para la semana seleccionada.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    {Object.entries(weeklySummary).map(([name, count]) => (
+                        <div key={name} className="flex items-center justify-between p-3 rounded-lg bg-background/50">
+                            <span className="font-medium">{name}</span>
+                            <Badge variant={count > 0 ? 'default' : 'outline'} className="text-lg">{count}</Badge>
+                        </div>
+                    ))}
+                </div>
+            </CardContent>
+           </Card>
         </div>
       );
 }
+
