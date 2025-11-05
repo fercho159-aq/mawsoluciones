@@ -23,7 +23,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { format, startOfMonth, endOfMonth, isWithinInterval, parse, addMonths, getDaysInMonth, parseISO } from 'date-fns';
+import { format, startOfMonth, endOfMonth, isWithinInterval, parse, addMonths, getDaysInMonth, parseISO, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useAuth } from '@/lib/auth-provider';
 
@@ -87,6 +87,56 @@ export const initialMovimientosDiarios: MovimientoDiario[] = [
     { id: 'mov13', fecha: new Date('2024-11-05T12:00:00'), tipo: 'Gasto', descripcion: 'Tiktok MAW', monto: 4640, cuenta: 'Cuenta MAW', categoria: 'Publicidad' },
 ];
 
+// --- Helper Functions ---
+const generatePeriodOptions = () => {
+    const options: string[] = [];
+    const today = new Date();
+    
+    // Generate periods for the last 2 months, current month, and next 3 months
+    for (let i = -2; i <= 3; i++) {
+        const date = addMonths(today, i);
+        
+        // Full month period
+        const start = startOfMonth(date);
+        const end = endOfMonth(date);
+        options.push(`${format(start, 'd MMM', { locale: es })} - ${format(end, 'd MMM', { locale: es })}`);
+
+        // 15th to 15th period
+        const start15 = new Date(date.getFullYear(), date.getMonth(), 15);
+        const end15 = addMonths(start15, 1);
+        options.push(`${format(start15, 'd MMM', { locale: es })} - ${format(end15, 'd MMM', { locale: es })}`);
+    }
+    
+    // Sort options chronologically
+    return options.sort((a, b) => {
+        const dateA = parse(a.split(' - ')[0], 'd MMM', new Date());
+        const dateB = parse(b.split(' - ')[0], 'd MMM', new Date());
+        return dateA.getTime() - dateB.getTime();
+    });
+};
+
+const getNextPeriod = (periodo: string): Periodo => {
+    try {
+        const [startStr] = periodo.split(' - ');
+        const startDate = parse(startStr, 'd MMM', new Date());
+        
+        const nextStartDate = addMonths(startDate, 1);
+        
+        if (startDate.getDate() === 1) {
+            // Full month period
+            const nextEndDate = endOfMonth(nextStartDate);
+            return `${format(nextStartDate, 'd MMM', { locale: es })} - ${format(nextEndDate, 'd MMM', { locale: es })}`;
+        } else {
+            // 15th to 15th period
+            const nextEndDate = addMonths(nextStartDate, 1);
+            return `${format(nextStartDate, 'd MMM', { locale: es })} - ${format(nextEndDate, 'd MMM', { locale: es })}`;
+        }
+    } catch(e) {
+        console.error("Error parsing period", e);
+        return "Error al generar periodo";
+    }
+}
+
 // --- Components ---
 
 const AddClientDialog = ({ onAdd, children }: { onAdd: (client: Client) => void, children: React.ReactNode }) => {
@@ -134,6 +184,7 @@ const AddCpcDialog = ({ clients, onAdd, onAddClient }: { clients: Client[], onAd
     const [tipo, setTipo] = useState<CategoriaIngreso>('Proyecto');
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
+    const periodOptions = useMemo(() => generatePeriodOptions(), []);
 
     const handleSave = () => {
         if (!clienteId || !periodo || !monto) {
@@ -169,7 +220,12 @@ const AddCpcDialog = ({ clients, onAdd, onAddClient }: { clients: Client[], onAd
                             </AddClientDialog>
                         </div>
                     </div>
-                    <Input value={periodo} onChange={e => setPeriodo(e.target.value)} placeholder="Periodo (Ej. 15 Dic - 15 Ene)" />
+                    <Select value={periodo} onValueChange={setPeriodo}>
+                        <SelectTrigger><SelectValue placeholder="Seleccionar Periodo"/></SelectTrigger>
+                        <SelectContent>
+                            {periodOptions.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
                     <Input type="number" value={monto} onChange={e => setMonto(e.target.value)} placeholder="Monto (MXN)" />
                     <Select value={tipo} onValueChange={(v) => setTipo(v as CategoriaIngreso)}>
                         <SelectTrigger><SelectValue placeholder="Tipo de Servicio"/></SelectTrigger>
@@ -237,7 +293,7 @@ const CuentasPorCobrarTab = ({ data, clients, onAddCpc, onAddClient }: { data: C
     );
 };
 
-const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave, onManualSave }: { isAdmin: boolean, cuentasPorCobrar: CuentasPorCobrar[], onSave: (pago: any) => void, onManualSave: (pago: any) => void, children: React.ReactNode }) => {
+const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave, onManualSave, children }: { isAdmin: boolean, cuentasPorCobrar: CuentasPorCobrar[], onSave: (pago: any) => void, onManualSave: (pago: any) => void, children: React.ReactNode }) => {
     const [selectedCpcId, setSelectedCpcId] = useState<string>('');
     const [cuentaDestino, setCuentaDestino] = useState<Cuenta | ''>('');
     const [detalleEfectivo, setDetalleEfectivo] = useState('');
@@ -273,17 +329,21 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave, onManualSav
 
     return (
         <Dialog open={open} onOpenChange={(o) => {setOpen(o); if(!o) resetForm();}}>
-            <DialogTrigger asChild><Button><PlusCircle className="w-4 h-4 mr-2" />Registrar Ingreso</Button></DialogTrigger>
+            <DialogTrigger asChild>{children}</DialogTrigger>
             <DialogContent>
                 <DialogHeader><DialogTitle>Registrar Ingreso</DialogTitle></DialogHeader>
                 {isAdmin && (
-                  <div className="flex items-center space-x-2">
-                    <Label htmlFor="manual-mode">Modo Manual</Label>
+                  <div className="flex items-center space-x-4 pt-2">
+                    <Label htmlFor="manual-mode">Modo:</Label>
                     <RadioGroup onValueChange={(v) => setIsManual(v === 'manual')} defaultValue="cpc" className='flex'>
-                        <RadioGroupItem value="cpc" id="cpc-mode" />
-                        <Label htmlFor="cpc-mode" className='font-normal mr-2'>Desde CxC</Label>
-                        <RadioGroupItem value="manual" id="manual-mode" />
-                        <Label htmlFor="manual-mode" className='font-normal'>Manual</Label>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="cpc" id="cpc-mode" />
+                            <Label htmlFor="cpc-mode" className='font-normal'>Desde CxC</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="manual" id="manual-mode" />
+                            <Label htmlFor="manual-mode" className='font-normal'>Manual (Admin)</Label>
+                        </div>
                     </RadioGroup>
                   </div>
                 )}
@@ -387,15 +447,8 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onAddMovimiento, cuentasPorCobra
 
         let updatedCpcList = cuentasPorCobrar.filter(item => item.id !== cpc.id);
         if (cpc.tipo === 'Iguala Mensual' || cpc.tipo === 'Ads') {
-            try {
-                const dateParts = cpc.periodo.split(' - ').map(d => d.trim());
-                const formatString = "d MMM";
-                const startDate = parse(`${dateParts[0]} ${new Date().getFullYear()}`, 'd MMM yyyy', new Date(), { locale: es });
-                const nextStartDate = addMonths(startDate, 1);
-                const nextEndDate = addMonths(nextStartDate, 1);
-                const newPeriodo = `${format(nextStartDate, "d MMM", {locale: es})} - ${format(nextEndDate, "d MMM", {locale: es})}` as Periodo;
-                updatedCpcList.push({ ...cpc, id: `cpc-${Date.now()}`, periodo: newPeriodo });
-            } catch (e) { console.error("Error creating new iguala:", e); }
+            const nextPeriod = getNextPeriod(cpc.periodo);
+            updatedCpcList.push({ ...cpc, id: `cpc-${Date.now()}`, periodo: nextPeriod });
         }
         onUpdateCpc(updatedCpcList);
     };
