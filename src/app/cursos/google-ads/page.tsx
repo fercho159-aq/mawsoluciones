@@ -370,7 +370,6 @@ export default function CoursePage() {
                                                             className={cn(
                                                                 "flex items-center gap-3 text-left p-2 rounded-md transition-colors text-sm",
                                                                 isCurrent ? "bg-primary/20 text-primary-foreground font-semibold" : "hover:bg-accent",
-                                                              ,
                                                                 isCompleted ? "text-muted-foreground line-through" : "text-foreground/80"
                                                             )}
                                                         >
@@ -453,4 +452,3 @@ export default function CoursePage() {
     </div>
   );
 }
-
