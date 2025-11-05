@@ -358,7 +358,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo Integral del Sitio Web para Additum.org",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/public/images/screenshots/additum.org/Copia de 1.png",
+      "image": "/images/screenshots/additum.org/Copia de 1.png",
       "description": "Proyecto de diseño y desarrollo web para additum.org, una empresa del sector de servicios profesionales. El objetivo fue crear una plataforma digital eficiente, moderna y accesible que reflejara la profesionalidad de la marca y facilitara la interacción con sus clientes.",
       "services": [
         "Análisis y consultoría de requerimientos",
@@ -384,7 +384,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del Sitio Web adventuresgi.com para Actividades Recreativas",
       "category": "Connective",
       "sector": "Actividades recreativas",
-      "image": "/public/images/screenshots/adventuresgi.com/5.png",
+      "image": "/images/screenshots/adventuresgi.com/5.png",
       "description": "Creación de una plataforma web interactiva para AdventuresGI.com, destinada a promover y facilitar la reserva de actividades recreativas innovadoras y seguras, con un diseño moderno y experiencia de usuario optimizada.",
       "services": [
         "Diseño y desarrollo web responsive",
@@ -406,7 +406,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo Web para BuffaloRibs.info",
       "category": "Landing",
       "sector": "Restaurante",
-      "image": "/public/images/screenshots/buffaloribs.info/9.png",
+      "image": "/images/screenshots/buffaloribs.info/9.png",
       "description": "Creación integral del sitio web para BuffaloRibs, un restaurante especializado en costillas al estilo americano, con el objetivo de mejorar su presencia digital y facilitar la interacción con sus clientes.",
       "services": [
         "Diseño UI/UX",
@@ -429,7 +429,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo de sitio web para Ixaga Leather",
       "category": "Ecomerce",
       "sector": "Ropa y Calzado",
-      "image": "/public/images/screenshots/ixagaleather.com.mx/57.png",
+      "image": "/images/screenshots/ixagaleather.com.mx/57.png",
       "description": "Diseñamos y desarrollamos el sitio web ixagaleather.com.mx para una marca mexicana líder en ropa y calzado de piel, buscando reflejar la calidad y exclusividad de sus productos.",
       "services": [
         "Diseño y desarrollo web responsivo",
@@ -451,7 +451,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "EpicRides - Plataforma Digital para Eventos de Motociclismo",
       "category": "Ecomerce",
       "sector": "Eventos",
-      "image": "/public/images/screenshots/epicrides.com.mxepicrides10@gmail.com/137.png",
+      "image": "/images/screenshots/epicrides.com.mxepicrides10@gmail.com/137.png",
       "description": "Desarrollo integral del sitio web para EpicRides, una empresa especializada en eventos de motociclismo extremo, enfocado en ofrecer una experiencia online emocionante y funcional para sus usuarios.",
       "services": [
         "Diseño y desarrollo web a medida",
@@ -473,7 +473,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del Sitio Web para CIEM SACV",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/public/images/screenshots/ciemsacv.com/13.png",
+      "image": "/images/screenshots/ciemsacv.com/13.png",
       "description": "Diseño y desarrollo integral del sitio web ciemsacv.com, enfocado en el sector de servicios profesionales para mejorar su presencia digital y comunicación con clientes potenciales.",
       "services": [
         "Análisis y planificación del proyecto",
@@ -496,7 +496,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Rediseño y Desarrollo Web para FloraEnvia",
       "category": "Ecomerce",
       "sector": "Floreria",
-      "image": "/public/images/screenshots/floraenvia.com.mx/53.png",
+      "image": "/images/screenshots/floraenvia.com.mx/53.png",
       "description": "Desarrollamos un sitio web moderno y funcional para FloraEnvia, una florería que necesitaba fortalecer su presencia digital y facilitar la experiencia de compra de sus clientes.",
       "services": [
         "Diseño web responsivo",
@@ -519,7 +519,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo Integral del Sitio Web de Simtex",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/public/images/screenshots/simtex.com.mx/33.png",
+      "image": "/images/screenshots/simtex.com.mx/33.png",
       "description": "Creación de un sitio web profesional y funcional para Simtex, una empresa del sector servicios profesionales, que refleje su experiencia y facilite la interacción con sus clientes.",
       "services": [
         "Diseño y desarrollo web responsivo",
@@ -540,7 +540,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo Web para LaTribuenMexico.com",
       "category": "Landing",
       "sector": "Actividades recreativas",
-      "image": "/public/images/screenshots/latribuenmexico.com/29.png",
+      "image": "/images/screenshots/latribuenmexico.com/29.png",
       "description": "Creación del sitio web para La Tribu en México, una plataforma dedicada a actividades recreativas que ofrece experiencias culturales y de entretenimiento únicas.",
       "services": [
         "Diseño Web Personalizado",
@@ -562,7 +562,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Lamina de Oro - Desarrollo Web Integral",
       "category": "Ecomerce",
       "sector": "Otros",
-      "image": "/public/images/screenshots/laminadeoro.com/17.png",
+      "image": "/images/screenshots/laminadeoro.com/17.png",
       "description": "Diseño y desarrollo de un sitio web corporativo para LaminadeOro, una empresa dedicada a productos y servicios en el sector de otros. El objetivo fue crear una plataforma atractiva que refleje la identidad de la marca y facilite la experiencia del usuario.",
       "services": [
         "Diseño web personalizado",
@@ -583,7 +583,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del Sitio Web para Cenotes San Isidro",
       "category": "Ecomerce",
       "sector": "Actividades recreativas",
-      "image": "/public/images/screenshots/cenotesanisidro.com/61.png",
+      "image": "/images/screenshots/cenotesanisidro.com/61.png",
       "description": "Diseño y desarrollo de un sitio web para Cenotes San Isidro, empresa dedicada a actividades recreativas en entornos naturales, con el objetivo de mejorar su presencia digital y facilitar la reserva de experiencias.",
       "services": [
         "Diseño web responsivo",
@@ -604,7 +604,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo Web para Auditorio Santiago",
       "category": "Connective",
       "sector": "Eventos",
-      "image": "/public/images/screenshots/auditoriosantiago.com/89.png",
+      "image": "/images/screenshots/auditoriosantiago.com/89.png",
       "description": "Creación de un sitio web moderno y funcional para Auditorio Santiago, un espacio dedicado a la organización y promoción de eventos.",
       "services": [
         "Diseño web responsive",
@@ -623,7 +623,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Busco al Hombre de Mi Vida",
       "category": "Connective",
       "sector": "Eventos",
-      "image": "/public/images/screenshots/buscoalhombredemivida.com/69.png",
+      "image": "/images/screenshots/buscoalhombredemivida.com/69.png",
       "description": "Desarrollo integral del sitio web para la plataforma Buscoalhombredemivida.com, dedicada a eventos de citas y encuentros amorosos en el sector de eventos.",
       "services": [
         "Diseño y desarrollo web personalizado",
@@ -642,7 +642,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo y Diseño del Sitio Web Flotillas Seguras CRM",
       "category": "Connective",
       "sector": "Sector industrial",
-      "image": "/public/images/screenshots/flotillassegurascrm.mx/65.png",
+      "image": "/images/screenshots/flotillassegurascrm.mx/65.png",
       "description": "Creación integral del sitio web flotillassegurascrm.mx, enfocado en el sector industrial para gestionar flotillas de vehículos de manera eficiente y segura.",
       "services": [
         "Diseño web personalizado",
@@ -661,7 +661,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del Sitio Web para Electrica San Miguel",
       "category": "Connective",
       "sector": "Sector industrial",
-      "image": "/public/images/screenshots/electrica-sanmiguel.com/85.png",
+      "image": "/images/screenshots/electrica-sanmiguel.com/85.png",
       "description": "Creación y desarrollo integral del sitio web para Electrica San Miguel, empresa dedicada al sector industrial, con el objetivo de mejorar su presencia digital y facilitar el acceso a sus servicios.",
       "services": [
         "Diseño y desarrollo web personalizado",
@@ -680,7 +680,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Diseño y Desarrollo Web para Plantforst",
       "category": "Ecomerce",
       "sector": "Otros",
-      "image": "/public/images/screenshots/plantforst.com/37.png",
+      "image": "/images/screenshots/plantforst.com/37.png",
       "description": "Proyecto integral de desarrollo web para Plantforst.com, un sitio enfocado en el sector Otros, que necesitaba modernizar su presencia digital para mejorar la experiencia de usuario y ampliar su alcance.",
       "services": [
         "Diseño Web Personalizado",
@@ -701,7 +701,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Las Delicias del Campo - Restaurante",
       "category": "Ecomerce",
       "sector": "Restaurante",
-      "image": "/public/images/screenshots/lasdeliciasdelcampo.com/49.png",
+      "image": "/images/screenshots/lasdeliciasdelcampo.com/49.png",
       "description": "Desarrollo integral del sitio web para Las Delicias del Campo, un restaurante que busca ofrecer una experiencia digital atractiva y funcional para sus clientes.",
       "services": [
         "Diseño web personalizado",
@@ -723,7 +723,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del Sitio Web para ASR Floral Design",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/public/images/screenshots/asrfloraldesing.com/101.png",
+      "image": "/images/screenshots/asrfloraldesing.com/101.png",
       "description": "Creación integral del sitio web para ASR Floral Design, empresa dedicada a servicios profesionales en diseño floral.",
       "services": [
         "Diseño web personalizado",
@@ -742,7 +742,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo Integral del Sitio Web MawSoluciones.com",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/public/images/screenshots/mawsoluciones.com/121.png",
+      "image": "/images/screenshots/mawsoluciones.com/121.png",
       "description": "Creación y desarrollo completo del sitio web para MawSoluciones.com, una empresa dedicada a servicios profesionales, enfocándonos en una experiencia de usuario óptima y un diseño funcional que refleje la identidad y valores del cliente.",
       "services": [
         "Diseño Web Personalizado",
@@ -763,7 +763,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo de Sitio Web para Audífonos De Asa",
       "category": "Connective",
       "sector": "Medico",
-      "image": "/public/images/screenshots/audifonosdeasa.com/113.png",
+      "image": "/images/screenshots/audifonosdeasa.com/113.png",
       "description": "Creación de un sitio web profesional y funcional para Audífonos De Asa, una empresa del sector médico especializada en soluciones auditivas.",
       "services": [
         "Diseño y desarrollo web",
@@ -782,7 +782,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Property Traders - Plataforma Inmobiliaria Online",
       "category": "Connective",
       "sector": "Inmobiliaria",
-      "image": "/public/images/screenshots/propertytraders.online//81.png",
+      "image": "/images/screenshots/propertytraders.online//81.png",
       "description": "Desarrollo integral de un sitio web para Property Traders, una empresa del sector inmobiliario que necesitaba una plataforma moderna, intuitiva y eficiente para conectar compradores y vendedores.",
       "services": [
         "Diseño y desarrollo web responsivo",
@@ -801,7 +801,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo Web para Cirujano Maxilofacial",
       "category": "Connective",
       "sector": "Medico",
-      "image": "/public/images/screenshots/cirujano-maxilofacial.com/93.png",
+      "image": "/images/screenshots/cirujano-maxilofacial.com/93.png",
       "description": "Creación de un sitio web profesional para un especialista en cirugía maxilofacial, orientado a ofrecer información clara y accesible a pacientes potenciales.",
       "services": [
         "Diseño y desarrollo web a medida",
@@ -821,7 +821,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del sitio web para Suministros Hebe",
       "category": "Ecomerce",
       "sector": "Sector industrial",
-      "image": "/public/images/screenshots/suministroshebe.com/149.png",
+      "image": "/images/screenshots/suministroshebe.com/149.png",
       "description": "Proyecto integral de desarrollo web para Suministros Hebe, empresa dedicada al sector industrial, con el objetivo de modernizar su presencia digital y optimizar la experiencia del usuario.",
       "services": [
         "Diseño y desarrollo web responsive",
@@ -842,7 +842,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo Web para Cursos de Inglés Brooklyn",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/public/images/screenshots/cursosdeinglesbrooklyn.com/153.png",
+      "image": "/images/screenshots/cursosdeinglesbrooklyn.com/153.png",
       "description": "Creación de un sitio web integral para una academia de inglés en Brooklyn, optimizado para atraer estudiantes interesados en aprender inglés de manera efectiva y accesible.",
       "services": [
         "Diseño y desarrollo web personalizado",
@@ -861,7 +861,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Sitio Web para Pisos Epóxicos Lexfor",
       "category": "Connective",
       "sector": "Sector industrial",
-      "image": "/public/images/screenshots/pisosepoxicoslexfor.com/129.png",
+      "image": "/images/screenshots/pisosepoxicoslexfor.com/129.png",
       "description": "Desarrollo completo del sitio web para Pisos Epóxicos Lexfor, una empresa dedicada al sector industrial especializada en revestimientos y pisos epóxicos.",
       "services": [
         "Diseño web responsivo",
@@ -882,7 +882,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del sitio web para Traktobuss",
       "category": "Ecomerce",
       "sector": "Sector industrial",
-      "image": "/public/images/screenshots/traktobuss.com/97.png",
+      "image": "/images/screenshots/traktobuss.com/97.png",
       "description": "Creación y desarrollo integral del sitio web para Traktobuss, enfocado en el sector industrial, buscando potenciar su presencia online y mejorar la interacción con sus clientes.",
       "services": [
         "Diseño web personalizado",
@@ -903,7 +903,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del Sitio Web para AtleticaMD",
       "category": "Connective",
       "sector": "Medico",
-      "image": "/public/images/screenshots/atleticamd.com/157.png",
+      "image": "/images/screenshots/atleticamd.com/157.png",
       "description": "Desarrollo integral del sitio web para AtleticaMD, una clínica dedicada al sector médico especializado en medicina deportiva y rehabilitación.",
       "services": [
         "Diseño web personalizado",
@@ -925,7 +925,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del sitio web para ElConejo.com.mx",
       "category": "Ecomerce",
       "sector": "Sector industrial",
-      "image": "/public/images/screenshots/elconejo.com.mx/133.png",
+      "image": "/images/screenshots/elconejo.com.mx/133.png",
       "description": "Diseño y desarrollo integral del sitio web para ElConejo.com.mx, una empresa del sector industrial, enfocándonos en mejorar su presencia digital y funcionalidad.",
       "services": [
         "Diseño web personalizado",
@@ -947,7 +947,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del Sitio Web kohui.com.mx",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/public/images/screenshots/kohui.com.mx/125.png",
+      "image": "/images/screenshots/kohui.com.mx/125.png",
       "description": "Desarrollo integral del sitio web para kohui.com.mx, ofreciendo una plataforma profesional y funcional para el sector de servicios profesionales.",
       "services": [
         "Diseño y desarrollo web personalizado",
@@ -968,7 +968,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo Integral del Sitio Web maestrodelmedia.com",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/public/images/screenshots/maestrodelmedia.com/117.png",
+      "image": "/images/screenshots/maestrodelmedia.com/117.png",
       "description": "Creación y desarrollo de un sitio web profesional para maestrodelmedia.com, enfocada en reforzar la presencia digital del cliente en el sector de Servicios Profesionales mediante un diseño moderno y funcionalidad optimizada.",
       "services": [
         "Diseño Web Personalizado",
@@ -989,7 +989,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del sitio web para PSE Power Batteries",
       "category": "Connective",
       "sector": "Sector industrial",
-      "image": "/public/images/screenshots/psepowerbatteries.com/177.png",
+      "image": "/images/screenshots/psepowerbatteries.com/177.png",
       "description": "Creación y desarrollo de un sitio web profesional para PSE Power Batteries, empresa del sector industrial especializada en productos para baterías.",
       "services": [
         "Diseño web personalizado",
@@ -1010,7 +1010,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del Sitio Web para caficon.info",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/public/images/screenshots/caficon.info/45.png",
+      "image": "/images/screenshots/caficon.info/45.png",
       "description": "Creación y desarrollo integral del sitio web de caficon.info, enfocado en destacar sus servicios profesionales de manera efectiva y atractiva.",
       "services": [
         "Diseño Web Personalizado",
@@ -1031,7 +1031,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del sitio web para Distribuidora de PVC",
       "category": "Connective",
       "sector": "Sector industrial",
-      "image": "/public/images/screenshots/distribuidoradepvc.com.mx/193.png",
+      "image": "/images/screenshots/distribuidoradepvc.com.mx/193.png",
       "description": "Creación de un sitio web corporativo para Distribuidora de PVC, empresa del sector industrial dedicada a la distribución de materiales de PVC.",
       "services": [
         "Diseño web personalizado",
@@ -1052,7 +1052,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "papierwaren.com.mx",
       "category": "Connective",
       "sector": "Active",
-      "image": "/public/images/screenshots/papierwaren.com.mx/221.png",
+      "image": "/images/screenshots/papierwaren.com.mx/221.png",
       "description": "Desarrollo completo del sitio web papierwaren.com.mx, orientado al sector Active, con enfoque en funcionalidad y experiencia de usuario.",
       "services": [
         "Diseño y desarrollo web",
@@ -1071,7 +1071,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo y Lanzamiento de MaestrosDelMedia.com",
       "category": "Connective",
       "sector": "Active",
-      "image": "/public/images/screenshots/maestrosdelmedia.com/41.png",
+      "image": "/images/screenshots/maestrosdelmedia.com/41.png",
       "description": "Creación integral del sitio web MaestrosDelMedia.com para fortalecer la presencia online y mejorar la interacción con usuarios en el sector Active.",
       "services": [
         "Diseño web personalizado",
@@ -1092,7 +1092,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo Web para Small Bumpers",
       "category": "Ecomerce",
       "sector": "Active",
-      "image": "/public/images/screenshots/smallbumpers.mx/141.png",
+      "image": "/images/screenshots/smallbumpers.mx/141.png",
       "description": "Creación y desarrollo integral del sitio web smallbumpers.mx, una plataforma dedicada a productos Active que ofrece una experiencia óptima y funcional para sus usuarios.",
       "services": [
         "Diseño y desarrollo web a medida",
@@ -1112,7 +1112,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo y Diseño del Sitio Web www.bhdmx.com",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/public/images/screenshots/www.bhdmx.com/145.png",
+      "image": "/images/screenshots/www.bhdmx.com/145.png",
       "description": "Desarrollo integral del sitio web para BHDMX, una empresa del sector de servicios profesionales, con enfoque en la experiencia de usuario, funcionalidad y adaptabilidad.",
       "services": [
         "Diseño web personalizado",
@@ -1133,7 +1133,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo Integral del Sitio Web para Bove.com.mx",
       "category": "Connective",
       "sector": "Sector industrial",
-      "image": "/public/images/screenshots/bove.com.mx/173.png",
+      "image": "/images/screenshots/bove.com.mx/173.png",
       "description": "Diseño y desarrollo de un sitio web para Bove, una empresa del sector industrial, enfocándonos en una solución digital eficiente y funcional que refleje la identidad y servicios de la compañía.",
       "services": [
         "Diseño web a medida",
@@ -1154,7 +1154,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del sitio web core31.com.mx para Sector Inmobiliario",
       "category": "Connective",
       "sector": "Inmobiliaria",
-      "image": "/public/images/screenshots/core31.com.mx/161.png",
+      "image": "/images/screenshots/core31.com.mx/161.png",
       "description": "Creación integral del sitio web para Core31, una empresa del sector inmobiliario, con el objetivo de fortalecer su presencia digital y facilitar la conexión con potenciales clientes.",
       "services": [
         "Diseño web responsivo",
@@ -1175,7 +1175,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del Sitio Web para CONCAMIN",
       "category": "Ecomerce",
       "sector": "Servicios Profesionales",
-      "image": "/public/images/screenshots/concamin.comenor.org.mx/73.png",
+      "image": "/images/screenshots/concamin.comenor.org.mx/73.png",
       "description": "Diseño y desarrollo integral del sitio web de CONCAMIN, una organización clave en el sector de Servicios Profesionales, para optimizar su presencia digital y mejorar la experiencia de sus usuarios en línea.",
       "services": [
         "Diseño web responsive",
@@ -1196,7 +1196,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del sitio web www.cuestiondepolemica.com",
       "category": "Connective",
       "sector": "Noticias",
-      "image": "/public/images/screenshots/www.cuestiondepolemica.com/169.png",
+      "image": "/images/screenshots/www.cuestiondepolemica.com/169.png",
       "description": "Creación integral del sitio web para Cuestión de Polémica, un portal de noticias dinámico y atractivo.",
       "services": [
         "Diseño web responsivo",
@@ -1218,7 +1218,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Valor Compartido - Portal de Noticias",
       "category": "Connective",
       "sector": "Noticias",
-      "image": "/public/images/screenshots/valor-compartido.com/165.png",
+      "image": "/images/screenshots/valor-compartido.com/165.png",
       "description": "Desarrollo integral de un sitio web dinámico y actualizado para Valor Compartido, un portal dedicado a ofrecer noticias relevantes y de interés general.",
       "services": [
         "Diseño y desarrollo web",
@@ -1239,7 +1239,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Diseño y Desarrollo Web para NIU Coliving",
       "category": "Connective",
       "sector": "Inmobiliaria",
-      "image": "/public/images/screenshots/niu-coliving.comes//201.png",
+      "image": "/images/screenshots/niu-coliving.comes//201.png",
       "description": "Desarrollo integral de un sitio web para NIU Coliving, una empresa inmobiliaria especializada en espacios compartidos y coliving.",
       "services": [
         "Diseño UX/UI personalizado",
@@ -1260,7 +1260,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del sitio web jazaguilar.com para el sector industrial",
       "category": "Ecomerce",
       "sector": "Sector industrial",
-      "image": "/public/images/screenshots/jazaguilar.com/181.png",
+      "image": "/images/screenshots/jazaguilar.com/181.png",
       "description": "Diseño y desarrollo integral del sitio web para jazaguilar.com, enfocado en el sector industrial, ofreciendo una plataforma funcional y estéticamente profesional que representa los valores y servicios de la empresa.",
       "services": [
         "Diseño web personalizado",
@@ -1282,7 +1282,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Diseño y Desarrollo del Sitio Web elisawagnericp.com",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/public/images/screenshots/elisawagnericp.com/189.png",
+      "image": "/images/screenshots/elisawagnericp.com/189.png",
       "description": "Desarrollo completo del sitio web para Elisa Wagner, un negocio en el sector de servicios profesionales, con el objetivo de fortalecer su presencia online y facilitar la conexión con sus clientes potenciales.",
       "services": [
         "Diseño web personalizado",
@@ -1303,7 +1303,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del Sitio Web para Arco Techos",
       "category": "Connective",
       "sector": "Sector industrial",
-      "image": "/public/images/screenshots/arco-techos.mx/185.png",
+      "image": "/images/screenshots/arco-techos.mx/185.png",
       "description": "Creación de una plataforma web robusta y funcional para Arco Techos, empresa del sector industrial, destacando sus servicios y productos industriales con un diseño moderno y una experiencia de usuario optimizada.",
       "services": [
         "Diseño y Desarrollo Web",
@@ -1324,7 +1324,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo Web para AbeVolks",
       "category": "Ecomerce",
       "sector": "Sector industrial",
-      "image": "/public/images/screenshots/abevolks.com/197.png",
+      "image": "/images/screenshots/abevolks.com/197.png",
       "description": "Creación de un sitio web profesional y funcional para AbeVolks, una empresa del sector industrial, con el objetivo de mejorar su presencia digital y facilitar la comunicación con sus clientes.",
       "services": [
         "Diseño web personalizado",
@@ -1345,7 +1345,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo Web para SIFSA",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/public/images/screenshots/www.sifsa.mx/209.png",
+      "image": "/images/screenshots/www.sifsa.mx/209.png",
       "description": "Creación y puesta en marcha del sitio web www.sifsa.mx, diseñado para ofrecer servicios profesionales en línea con una imagen corporativa sólida y funcionalidad óptima.",
       "services": [
         "Diseño web a medida",
@@ -1366,7 +1366,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del sitio web para Voltagroup",
       "category": "Connective",
       "sector": "Noticas",
-      "image": "/public/images/screenshots/voltagroup.com.mx/205.png",
+      "image": "/images/screenshots/voltagroup.com.mx/205.png",
       "description": "Proyecto integral de desarrollo web para Voltagroup, un portal de noticias actualizadas y relevantes en México.",
       "services": [
         "Diseño web responsivo",
@@ -1387,7 +1387,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Rediseño y Desarrollo Integral del Sitio Web para Grupo Jaia",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/public/images/screenshots/grupojaia.com.mx/77.png",
+      "image": "/images/screenshots/grupojaia.com.mx/77.png",
       "description": "Proyecto de desarrollo web para Grupo Jaia, una empresa del sector de servicios profesionales, enfocado en mejorar su presencia digital, usabilidad y comunicación con sus clientes a través de una plataforma moderna y funcional.",
       "services": [
         "Diseño web personalizado",
@@ -1409,7 +1409,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo Integral del Sitio Web para Turismar",
       "category": "Connective",
       "sector": "Sector industrial",
-      "image": "/public/images/screenshots/turismar.com.mx/109.png",
+      "image": "/images/screenshots/turismar.com.mx/109.png",
       "description": "Creación y lanzamiento del sitio web turismar.com.mx, enfocado en el sector industrial para mejorar la presencia digital y funcionalidad de la empresa.",
       "services": [
         "Diseño web personalizado",
@@ -1428,7 +1428,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del sitio web para Hiperprint.mx",
       "category": "Connective",
       "sector": "Sector industrial",
-      "image": "/public/images/screenshots/hiperprint.mx/105.png",
+      "image": "/images/screenshots/hiperprint.mx/105.png",
       "description": "Creación y desarrollo integral del sitio web para Hiperprint.mx, una empresa del sector industrial dedicada a la impresión especializada.",
       "services": [
         "Diseño web personalizado",
@@ -1449,7 +1449,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Consultores CAF",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/public/images/screenshots/consultorescaf.mx/213.png",
+      "image": "/images/screenshots/consultorescaf.mx/213.png",
       "description": "Desarrollo completo del sitio web para Consultores CAF, una firma dedicada a brindar servicios profesionales de consultoría empresarial.",
       "services": [
         "Diseño y desarrollo web",
@@ -1468,7 +1468,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Epidemic.mx - Plataforma de Moda en Línea",
       "category": "Ecommerce",
       "sector": "Ropa",
-      "image": "/public/images/screenshots/epidemic.mx/217.png",
+      "image": "/images/screenshots/epidemic.mx/217.png",
       "description": "Desarrollo integral de un sitio web para Epidemic.mx, una marca de ropa enfocada en ofrecer moda contemporánea y accesible.",
       "services": [
         "Diseño web personalizado",
@@ -1489,7 +1489,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del Sitio Web para RapidPre",
       "category": "Connective",
       "sector": "Sector industrial",
-      "image": "/public/images/screenshots/rapidpre.mx/233.png",
+      "image": "/images/screenshots/rapidpre.mx/233.png",
       "description": "Creación y desarrollo integral del sitio web rapidpre.mx para una empresa del sector industrial, mejorando su presencia digital y facilitando la comunicación con sus clientes.",
       "services": [
         "Diseño web personalizado",
@@ -1510,7 +1510,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo Web para Toshiba México",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/public/images/screenshots/www.toshiba.com.mx/225.png",
+      "image": "/images/screenshots/www.toshiba.com.mx/225.png",
       "description": "Proyecto integral de desarrollo web para Toshiba México enfocado en el sector de servicios profesionales, con el objetivo de mejorar la presencia digital y la experiencia del usuario.",
       "services": [
         "Diseño web personalizado",
@@ -1531,7 +1531,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo Integral del Sitio Web de Meigas",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/public/images/screenshots/www.meigas.es/229.png",
+      "image": "/images/screenshots/www.meigas.es/229.png",
       "description": "Proyecto de desarrollo web completo para Meigas, una empresa del sector de Servicios Profesionales, implementando una plataforma moderna y eficiente que refleja su identidad corporativa y facilita la interacción con sus clientes.",
       "services": [
         "Diseño web personalizado",
@@ -1553,7 +1553,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo Integral del Sitio Web LifeInsuranceExpert.ca",
       "category": "Connective",
       "sector": "Servicios Profesionales",
-      "image": "/public/images/screenshots/lifeinsuranceexpert.ca/237.png",
+      "image": "/images/screenshots/lifeinsuranceexpert.ca/237.png",
       "description": "Proyecto de desarrollo web para LifeInsuranceExpert.ca, una referencia en servicios profesionales de seguros de vida, orientado a mejorar la presencia digital y optimizar la experiencia del usuario.",
       "services": [
         "Diseño y desarrollo web personalizado",
@@ -1572,7 +1572,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del Sitio Web para Everyday Group",
       "category": "Connective",
       "sector": "Actividades recreativas",
-      "image": "/public/images/screenshots/everydaygroup.ca/25.png",
+      "image": "/images/screenshots/everydaygroup.ca/25.png",
       "description": "Creación integral del sitio web everydaygroup.ca, enfocado en actividades recreativas, para mejorar la presencia digital y la interacción con sus usuarios.",
       "services": [
         "Diseño Web Personalizado",
@@ -1593,7 +1593,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "title": "Desarrollo del Sitio Web cucubecerra.com",
       "category": "Ecommerce",
       "sector": "Ropa",
-      "image": "/public/images/screenshots/cucubecerra.com/21.png",
+      "image": "/images/screenshots/cucubecerra.com/21.png",
       "description": "Creación y diseño integral de la tienda en línea para una marca de ropa, enfocada en mejorar la experiencia del usuario y potenciar las ventas digitales.",
       "services": [
         "Diseño UX/UI",
