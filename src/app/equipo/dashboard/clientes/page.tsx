@@ -174,23 +174,13 @@ const AddClientDialog = ({ onAdd, children }: { onAdd: (client: Omit<Client, 'id
 
 export default function ClientesPage() {
     const { user, loading } = useAuth();
-    const router = useRouter();
     const [clients, setClients] = useState<Client[]>(initialClients);
     const [cuentasPorCobrar, setCuentasPorCobrar] = useState<CuentasPorCobrar[]>(initialCuentasPorCobrar);
-
-    // Redirect if user does not have access. Waits for user data to be loaded.
-    useEffect(() => {
-        if (!loading && user && !user.accessSections?.clientes) {
-            router.push('/equipo/dashboard');
-        }
-    }, [user, loading, router]);
-
+    
     const handleAddClient = (newClientData: Omit<Client, 'id'>, nuevosPendientes: Omit<Activity, 'id'>[]) => {
         const newClient: Client = { id: `client-${Date.now()}`, ...newClientData };
         setClients(prev => [...prev, newClient]);
         
-        // This is a simulation. In a real app, this state would be managed globally (e.g. via Context, Redux, Zustand)
-        // or fetched again. For now, we'll log it to show it's working.
         if (nuevosPendientes.length > 0) {
             console.log('Nuevas tareas para pendientes:', nuevosPendientes);
             const currentPendientes = JSON.parse(localStorage.getItem('pendientes') || JSON.stringify(pendientesData));
