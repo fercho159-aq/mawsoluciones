@@ -37,12 +37,12 @@ export default function PortfolioItemPage({
     <div className="bg-background">
        <section className="py-24 sm:py-32 relative">
         <div className="relative z-10 container mx-auto px-4 md:px-6">
-          <div className="max-w-7xl mx-auto items-start">
-            <div className="grid md:grid-cols-2 gap-12">
+          <div className="max-w-7xl mx-auto items-center">
+            <div className="grid md:grid-cols-12 gap-12 items-center">
               {/* Columna Izquierda: Imagen */}
-              <div className="w-full md:w-1/2 md:fixed top-0 left-0 h-screen p-8 -z-10 opacity-40 md:opacity-100">
+              <div className="w-full md:col-span-6">
                 {item.image && (
-                  <div className="relative w-full h-full rounded-lg shadow-2xl overflow-hidden">
+                  <div className="relative aspect-video rounded-lg shadow-2xl overflow-hidden">
                     <Image
                       src={item.image}
                       alt={item.title}
@@ -54,7 +54,7 @@ export default function PortfolioItemPage({
               </div>
 
               {/* Columna Derecha: Información */}
-              <div className="prose prose-lg max-w-none text-foreground/80 prose-headings:font-headline prose-headings:text-foreground md:ml-[50%]">
+              <div className="prose prose-lg max-w-none text-foreground/80 prose-headings:font-headline prose-headings:text-foreground md:col-span-6">
                 <Badge variant="secondary" className="mb-4">{item.category}</Badge>
                 <h1 className="font-headline text-2xl sm:text-3xl font-bold mb-4">
                   {item.title}
