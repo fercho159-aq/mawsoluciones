@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Menu, X, ChevronDown, CodeXml, PenSquare, Megaphone, Bot, Newspaper, Mic2, LayoutGrid, FileText, GraduationCap } from "lucide-react";
+import { Menu, X, ChevronDown, CodeXml, PenSquare, Megaphone, Bot, Newspaper, Mic2, LayoutGrid, FileText, GraduationCap, Target, Wallet, BarChart4, DollarSign } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -88,6 +88,36 @@ const coursesLinks = [
     label: "Facebook Ads para Principiantes",
     description: "Aprende desde cero a crear campañas efectivas y a optimizar tu presupuesto en la plataforma de Meta.",
     icon: <Megaphone className="w-5 h-5" />
+  },
+  {
+    href: "/cursos/google-ads",
+    label: "Google Ads Esencial",
+    description: "Domina la red de búsqueda y Display para capturar clientes con alta intención de compra.",
+    icon: <Target className="w-5 h-5" />
+  },
+  {
+    href: "/cursos/tiktok-ads",
+    label: "Publicidad en TikTok",
+    description: "Descubre cómo crear anuncios virales y conectar con la Generación Z en la plataforma de video corto.",
+    icon: <Wallet className="w-5 h-5" />
+  },
+  {
+    href: "/cursos/n8n",
+    label: "Automatización con n8n",
+    description: "Aprende a automatizar flujos de trabajo complejos y a conectar tus aplicaciones sin escribir código.",
+    icon: <Bot className="w-5 h-5" />
+  },
+  {
+    href: "/cursos/ventas",
+    label: "Técnicas de Venta Modernas",
+    description: "Desde el Social Selling hasta el cierre, aprende las metodologías que funcionan en la era digital.",
+    icon: <BarChart4 className="w-5 h-5" />
+  },
+  {
+    href: "/cursos/finanzas-personales",
+    label: "Finanzas Personales para Emprendedores",
+    description: "Organiza tus finanzas, aprende a invertir y asegura la salud financiera de tu negocio y tu vida.",
+    icon: <DollarSign className="w-5 h-5" />
   }
 ];
 
@@ -192,7 +222,7 @@ const Header = () => {
             <NavigationMenuItem>
               <NavigationMenuTrigger>Cursos</NavigationMenuTrigger>
               <NavigationMenuContent>
-                 <ul className="grid w-[400px] gap-3 p-4 md:w-[500px]">
+                 <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
                   {coursesLinks.map((link) => (
                     <ListItem
                       key={link.label}
@@ -372,3 +402,5 @@ const Header = () => {
 };
 
 export default Header;
+
+    
