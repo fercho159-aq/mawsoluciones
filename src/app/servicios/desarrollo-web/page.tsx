@@ -1,151 +1,132 @@
 
-import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle2, CodeXml, Send, Link as LinkIcon, ShoppingCart } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import WebCalculator from "@/components/web-calculator";
-import AnimatedDiv from "@/components/animated-div";
-import WebsiteAnalyzer from "@/components/website-analyzer";
+"use client";
 
-const siteTypes = [
-  {
-    title: "Landing Page",
-    icon: <Send className="w-10 h-10 text-primary" />,
-    description: "Páginas de aterrizaje optimizadas para una sola acción, diseñadas para maximizar la conversión de tus campañas.",
-    category: "Landing",
-  },
-  {
-    title: "Sitio Conectivo",
-    icon: <LinkIcon className="w-10 h-10 text-primary" />,
-    description: "Sitios web corporativos para presentar tu marca, mostrar tus servicios y conectar con tu audiencia de manera profesional.",
-    category: "Connective",
-  },
-  {
-    title: "E-commerce",
-    icon: <ShoppingCart className="w-10 h-10 text-primary" />,
-    description: "Plataformas robustas y seguras para vender tus productos en línea, con carritos de compra y pasarelas de pago.",
-    category: "E-commerce",
-  },
-];
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, CheckCircle, Circle, RefreshCw, Send } from "lucide-react";
+import AnimatedDiv from "@/components/animated-div";
+import WebDevelopmentContent from "@/components/web-development-content";
+
+type Step = 'start' | 'analyzer' | 'calculator' | 'info' | 'portfolio' | 'contact';
+type Journey = 'improve' | 'create' | null;
+
+const GuidedExperience = ({ onComplete }: { onComplete: () => void }) => {
+  const [journey, setJourney] = useState<Journey>(null);
+  const [currentStep, setCurrentStep] = useState<Step>('start');
+
+  const handleSetJourney = (type: Journey) => {
+    setJourney(type);
+    setCurrentStep(type === 'improve' ? 'analyzer' : 'calculator');
+  };
+
+  const handleNextStep = () => {
+    if (journey === 'improve') {
+      const sequence: Step[] = ['analyzer', 'info', 'portfolio', 'contact'];
+      const currentIndex = sequence.indexOf(currentStep);
+      if (currentIndex < sequence.length - 1) {
+        setCurrentStep(sequence[currentIndex + 1]);
+      } else {
+        onComplete();
+      }
+    } else if (journey === 'create') {
+      const sequence: Step[] = ['calculator', 'info', 'portfolio', 'contact'];
+      const currentIndex = sequence.indexOf(currentStep);
+      if (currentIndex < sequence.length - 1) {
+        setCurrentStep(sequence[currentIndex + 1]);
+      } else {
+        onComplete();
+      }
+    }
+  };
+  
+  const handleStartOver = () => {
+    setJourney(null);
+    setCurrentStep('start');
+  }
+
+  if (currentStep === 'start') {
+    return (
+      <section className="py-24 sm:py-32 md:py-40 bg-card">
+        <div className="container mx-auto px-4 md:px-6 text-center">
+          <AnimatedDiv className="max-w-2xl mx-auto">
+            <h1 className="font-headline text-3xl sm:text-4xl font-bold">
+              ¿Ya tienes un sitio web?
+            </h1>
+            <p className="mt-4 text-lg text-foreground/80">
+              Selecciona una opción para que podamos guiarte a la solución perfecta para ti.
+            </p>
+            <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
+              <Button size="lg" onClick={() => handleSetJourney('improve')}>
+                <CheckCircle className="w-5 h-5 mr-2" />
+                Sí, y quiero mejorarlo
+              </Button>
+              <Button size="lg" variant="outline" onClick={() => handleSetJourney('create')}>
+                <Send className="w-5 h-5 mr-2" />
+                No, es mi primera vez
+              </Button>
+            </div>
+          </AnimatedDiv>
+        </div>
+      </section>
+    );
+  }
+
+  const isLastStep = currentStep === 'contact';
+  const ctaText = journey === 'improve' ? 'Agendar sesión para rediseñar tu sitio' : 'Agendar consultoría para crear tu primer sitio';
+
+  return (
+    <div>
+        <WebDevelopmentContent
+            showAnalyzer={currentStep === 'analyzer'}
+            showCalculator={currentStep === 'calculator'}
+            showInfo={currentStep === 'info' || currentStep === 'portfolio' || currentStep === 'contact'}
+            showPortfolio={currentStep === 'portfolio' || currentStep === 'contact'}
+        />
+        <div className="py-12 bg-background text-center">
+             <div className="container mx-auto px-4 md:px-6 flex flex-col sm:flex-row justify-center items-center gap-4">
+                <Button size="lg" onClick={isLastStep ? onComplete : handleNextStep}>
+                   {isLastStep ? ctaText : 'Siguiente Paso'} <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+                <Button variant="ghost" onClick={handleStartOver}>
+                    <RefreshCw className="w-4 h-4 mr-2" /> Empezar de nuevo
+                </Button>
+             </div>
+        </div>
+    </div>
+  );
+};
 
 
 const ServicePage = () => {
-  return (
-    <div className="bg-background">
-      <section className="py-24 sm:py-32 md:py-40 bg-card">
-        <div className="container mx-auto px-4 md:px-6 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="font-headline text-4xl sm:text-5xl font-bold">
-              Desarrollo Web
-            </h1>
-            <p className="mt-6 text-lg sm:text-xl text-foreground/80">
-              Diseñamos y desarrollamos sitios web modernos, rápidos, responsivos y optimizados para la conversión que funcionan como el centro de tu ecosistema digital.
-            </p>
-          </div>
-        </div>
-      </section>
+    const [isGuidedExperience, setIsGuidedExperience] = useState(true);
 
-      <section className="py-20 md:py-28">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="relative aspect-square">
-               <Image
-                src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx3ZWIlMjBkZXZlbG9wbWVudHxlbnwwfHx8fDE3NjIwOTM0MTF8MA&ixlib=rb-4.1.0&q=80&w=1080"
-                alt="Desarrollo Web"
-                fill
-                className="rounded-lg object-cover shadow-xl"
-                data-ai-hint="web development"
-              />
-            </div>
-            <div className="prose prose-lg max-w-none text-foreground/80">
-              <h2 className="font-headline text-3xl sm:text-4xl font-bold text-foreground">Tu Negocio, Tu Sitio Web, Tus Reglas.</h2>
-              <p>
-                Tu sitio web es más que una tarjeta de presentación digital; es tu principal herramienta de ventas y marketing. En MAW Soluciones, construimos experiencias web a medida que no solo se ven increíbles, sino que también están diseñadas estratégicamente para atraer, enganchar y convertir a tus visitantes en clientes.
-              </p>
-              <ul className="space-y-4 mt-6">
-                <li className="flex items-start">
-                  <CheckCircle2 className="w-6 h-6 text-primary mr-3 mt-1 flex-shrink-0" />
-                  <span><strong>Diseño UI/UX Centrado en el Usuario:</strong> Creamos interfaces intuitivas y atractivas que ofrecen la mejor experiencia de usuario.</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle2 className="w-6 h-6 text-primary mr-3 mt-1 flex-shrink-0" />
-                  <span><strong>Desarrollo a Medida:</strong> Sitios web corporativos, e-commerce, landing pages y aplicaciones web construidas con las últimas tecnologías.</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle2 className="w-6 h-6 text-primary mr-3 mt-1 flex-shrink-0" />
-                  <span><strong>Optimización de Rendimiento (WPO):</strong> Garantizamos tiempos de carga ultra-rápidos para mejorar el SEO y la retención de usuarios.</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle2 className="w-6 h-6 text-primary mr-3 mt-1 flex-shrink-0" />
-                  <span><strong>SEO Técnico y On-Page:</strong> Construimos tu sitio sobre una base sólida para un excelente posicionamiento en Google.</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
+    useEffect(() => {
+        const hasCompletedFlow = localStorage.getItem('webDevFlowCompleted');
+        if (hasCompletedFlow === 'true') {
+            setIsGuidedExperience(false);
+        }
+    }, []);
 
-       <section className="py-20 md:py-28 bg-card">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-5xl mx-auto text-center mb-12">
-            <h2 className="font-headline text-3xl sm:text-4xl font-bold">Descubre tu Sitio Web Ideal</h2>
-            <p className="mt-4 text-lg text-foreground/80">
-              Responde unas breves preguntas y obtén una recomendación sobre el tipo de sitio web perfecto para tu negocio y una cotización al instante.
-            </p>
-          </div>
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-             <WebCalculator />
-             <div className="flex flex-col gap-8">
-               {siteTypes.map((type) => (
-                <AnimatedDiv key={type.title} className="group relative rounded-lg p-6 bg-background/50 hover:bg-background border border-border/50 hover:border-primary/50 transition-all duration-300 ease-in-out">
-                    <div className="flex flex-col items-center text-center">
-                       <div className="transition-all duration-300 group-hover:opacity-0 group-hover:scale-90">
-                           {type.icon}
-                           <h3 className="font-headline text-2xl mt-4 font-bold">{type.title}</h3>
-                       </div>
-                       <div className="absolute inset-0 p-6 flex flex-col items-center justify-center text-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out">
-                            <p className="text-foreground/80 mb-4">{type.description}</p>
-                            <Button variant="link" asChild>
-                                <Link href={`/portafolio?tab=websites&category=${type.category}`}>
-                                    Ver proyectos <ArrowRight className="w-4 h-4 ml-2"/>
-                                </Link>
-                            </Button>
-                       </div>
-                    </div>
-                </AnimatedDiv>
-              ))}
-             </div>
-          </div>
-        </div>
-      </section>
+    const handleCompleteFlow = () => {
+        localStorage.setItem('webDevFlowCompleted', 'true');
+        setIsGuidedExperience(false);
+    };
 
-      <section className="py-20 md:py-28">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-3xl mx-auto text-center mb-12">
-            <h2 className="font-headline text-3xl sm:text-4xl font-bold">Diagnostica la Salud de tu Sitio Web</h2>
-            <p className="mt-4 text-lg text-foreground/80">
-             La velocidad, el SEO y la accesibilidad son cruciales para el éxito. Ingresa tu URL y obtén un análisis instantáneo y recomendaciones para mejorar.
-            </p>
-          </div>
-          <WebsiteAnalyzer />
-        </div>
-      </section>
-      
-      <section className="py-20 md:py-28 bg-background">
-        <div className="container mx-auto px-4 md:px-6 text-center">
-            <h2 className="font-headline text-3xl sm:text-4xl font-bold">¿Listo para construir tu presencia online?</h2>
-            <p className="mt-4 text-lg text-foreground/80 max-w-2xl mx-auto">
-              Creemos juntos un sitio web que impulse tu negocio hacia el futuro.
-            </p>
-            <Button size="lg" className="mt-8" asChild>
-                <Link href="/contacto">
-                    Reserva tu Sesión Estratégica <ArrowRight className="w-5 h-5 ml-2" />
-                </Link>
-            </Button>
-        </div>
-      </section>
-    </div>
-  );
+    if (isGuidedExperience) {
+        return <GuidedExperience onComplete={handleCompleteFlow} />;
+    }
+
+    return (
+       <div className="bg-background">
+        <WebDevelopmentContent
+            showAnalyzer={true}
+            showCalculator={true}
+            showInfo={true}
+            showPortfolio={true}
+            isFullPage={true}
+        />
+       </div>
+    );
 };
 
 export default ServicePage;
