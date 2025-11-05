@@ -56,9 +56,9 @@ export const courseData: Course = {
           video_url: "",
           duration: "10 min",
           summary: [
-            "Introducción a la publicidad pagada en Facebook.",
-            "Diferencias clave entre publicidad orgánica y pagada.",
-            "Análisis de casos de éxito reales de empresas mexicanas.",
+            "Fundamentos de la Publicidad Pagada: Entenderás la diferencia clave entre alcance orgánico y pagado y por qué necesitas ambos.",
+            "Ecosistema de Meta: Conocerás cómo se conectan Facebook, Instagram, Messenger y WhatsApp para la publicidad.",
+            "Análisis de Casos de Éxito: Verás ejemplos reales de cómo empresas mexicanas han triunfado usando la plataforma.",
           ],
           questions: [
             {
@@ -87,9 +87,9 @@ export const courseData: Course = {
           video_url: "",
           duration: "15 min",
           summary: [
-            "Recorrido por la interfaz del Business Manager.",
-            "Diferencia entre Campaña, Conjunto de Anuncios y Anuncio.",
-            "Configuración inicial de tu cuenta publicitaria y método de pago.",
+            "Navegación Fluida: Te moverás con confianza por el Business Manager, encontrando cada herramienta que necesitas.",
+            "Estructura Jerárquica: Dominarás la lógica de Campaña > Conjunto de Anuncios > Anuncio, la base de toda campaña exitosa.",
+            "Configuración Financiera: Aprenderás a configurar tu cuenta publicitaria y método de pago de forma segura.",
           ],
           questions: [],
           completed: false,
@@ -102,9 +102,9 @@ export const courseData: Course = {
             video_url: "",
             duration: "12 min",
             summary: [
-              "Explicación de los objetivos de Reconocimiento, Consideración y Conversión.",
-              "Cómo elegir el objetivo correcto según tu meta de negocio.",
-              "Ejemplos prácticos para un e-commerce, un restaurante y un servicio profesional.",
+                "Claridad Estratégica: Sabrás diferenciar entre objetivos de Reconocimiento, Consideración y Conversión.",
+                "Selección Inteligente: Elegirás el objetivo de campaña que se alinea perfectamente con tu meta de negocio.",
+                "Aplicación Práctica: Podrás diseñar la estrategia inicial para un e-commerce, un restaurante o un servicio profesional."
             ],
             questions: [],
             completed: false,
@@ -117,9 +117,9 @@ export const courseData: Course = {
             video_url: "",
             duration: "8 min",
             summary: [
-              "Qué es el Píxel y por qué es fundamental para medir resultados.",
-              "Cómo instalar el Píxel en tu sitio web (WordPress, Shopify, etc.).",
-              "Verificación del Píxel y eventos estándar.",
+                "Medición Precisa: Comprenderás por qué el Píxel es tu mejor aliado para medir el retorno de inversión.",
+                "Instalación Técnica: Aprenderás a instalar el Píxel en las plataformas más comunes como WordPress y Shopify.",
+                "Seguimiento de Eventos: Serás capaz de verificar que tu Píxel funciona y mide las acciones importantes en tu web."
             ],
             questions: [],
             completed: false,
@@ -141,9 +141,9 @@ export const courseData: Course = {
                 video_url: "",
                 duration: "15 min",
                 summary: [
-                    "La importancia de definir a tu cliente ideal.",
-                    "Herramientas para investigar a tu audiencia.",
-                    "Creación de un perfil demográfico y psicográfico.",
+                    "Definición de Cliente Ideal: Sabrás exactamente a quién le estás hablando, más allá de datos demográficos.",
+                    "Investigación de Audiencia: Utilizarás herramientas para descubrir los verdaderos intereses y dolores de tu público.",
+                    "Perfil Completo: Construirás un Buyer Persona detallado, incluyendo sus motivaciones y comportamientos."
                 ],
                 questions: [],
                 completed: false,
@@ -152,13 +152,13 @@ export const courseData: Course = {
             {
                 topic_id: "2_2",
                 section_id: 2,
-                title: "Públicos Guardados: Segmentación por Intereses y Comportamientos",
+                title: "Públicos Guardados: Intereses y Comportamientos",
                 video_url: "",
                 duration: "20 min",
                 summary: [
-                    "Cómo usar la segmentación detallada de Meta.",
-                    "Estrategias para encontrar intereses ocultos y de nicho.",
-                    "Combinación y exclusión de públicos para mayor precisión.",
+                    "Dominio de la Segmentación Detallada: Navegarás con soltura por las opciones de intereses y comportamientos de Meta.",
+                    "Descubrimiento de Nichos: Aprenderás técnicas para encontrar audiencias específicas que tu competencia ignora.",
+                    "Precisión Quirúrgica: Utilizarás la combinación y exclusión de públicos para afinar tu segmentación al máximo."
                 ],
                 questions: [],
                 completed: false,
@@ -171,9 +171,9 @@ export const courseData: Course = {
                 video_url: "",
                 duration: "25 min",
                 summary: [
-                    "Creación de públicos a partir de tu lista de clientes.",
-                    "Públicos basados en visitantes de tu sitio web (Retargeting).",
-                    "Públicos de interacción con tu página de Facebook o perfil de Instagram.",
+                    "Aprovechamiento de Datos Propios: Crearás públicos a partir de tu lista de clientes para re-impactarlos.",
+                    "Estrategias de Retargeting: Implementarás campañas para usuarios que ya visitaron tu sitio web, aumentando la conversión.",
+                    "Engagement Profundo: Construirás públicos basados en la interacción con tus perfiles de Facebook e Instagram."
                 ],
                 questions: [],
                 completed: false,
@@ -186,9 +186,9 @@ export const courseData: Course = {
                 video_url: "",
                 duration: "15 min",
                 summary: [
-                    "Qué son los públicos similares y cómo funcionan.",
-                    "Creación de Lookalikes efectivos a partir de tus mejores públicos personalizados.",
-                    "Estrategias de expansión de 1% a 10%.",
+                    "Comprensión del Algoritmo: Entenderás cómo Meta encuentra personas parecidas a tus mejores clientes.",
+                    "Creación de Lookalikes Efectivos: Generarás públicos similares de alta calidad a partir de tus audiencias personalizadas.",
+                    "Estrategias de Expansión: Sabrás cómo y cuándo expandir tus públicos similares del 1% al 10% para escalar tus campañas."
                 ],
                 questions: [],
                 completed: false,
@@ -210,9 +210,9 @@ export const courseData: Course = {
                 video_url: "",
                 duration: "20 min",
                 summary: [
-                    "Ventajas y desventajas de cada formato.",
-                    "Cuándo usar cada tipo de anuncio para máximo impacto.",
-                    "Recomendaciones de tamaño y especificaciones técnicas.",
+                    "Decisión Estratégica de Formato: Sabrás qué formato usar según tu objetivo y tipo de producto.",
+                    "Optimización Técnica: Conocerás las especificaciones y tamaños recomendados para cada ubicación.",
+                    "Maximización de Impacto: Aprenderás cuándo un video es más efectivo que una imagen o cómo un carrusel puede contar una historia."
                 ],
                 questions: [],
                 completed: false,
@@ -225,9 +225,9 @@ export const courseData: Course = {
                 video_url: "",
                 duration: "25 min",
                 summary: [
-                    "Estructura de un copy efectivo (Gancho, Problema, Solución, CTA).",
-                    "Técnicas de escritura persuasiva y storytelling.",
-                    "Cómo adaptar tu mensaje a diferentes audiencias.",
+                    "Estructura Persuasiva: Dominarás la fórmula Gancho-Problema-Solución-CTA para escribir textos que venden.",
+                    "Técnicas de Storytelling: Aprenderás a conectar emocionalmente con tu audiencia a través de historias.",
+                    "Adaptación de Mensaje: Sabrás cómo ajustar tu copy para diferentes públicos y etapas del embudo de ventas."
                 ],
                 questions: [],
                 completed: false,
@@ -240,9 +240,9 @@ export const courseData: Course = {
                 video_url: "",
                 duration: "25 min",
                 summary: [
-                    "Principios básicos de diseño para no diseñadores.",
-                    "Creación de una imagen de anuncio atractiva desde cero en Canva.",
-                    "Tips para crear videos cortos y dinámicos para Reels y Stories.",
+                    "Principios de Diseño Publicitario: Entenderás los fundamentos de color, tipografía y composición para anuncios.",
+                    "Creación Práctica en Canva: Diseñarás un anuncio de imagen atractivo y profesional desde cero.",
+                    "Producción de Video Corto: Aprenderás a crear videos dinámicos para Reels y Stories que capturan la atención."
                 ],
                 questions: [],
                 completed: false,
@@ -255,9 +255,9 @@ export const courseData: Course = {
                 video_url: "",
                 duration: "20 min",
                 summary: [
-                    "Psicología detrás de un buen CTA.",
-                    "Ejemplos de CTAs que generan clics.",
-                    "Pruebas A/B para optimizar tus llamadas a la acción.",
+                    "Psicología del CTA: Comprenderás qué motiva a un usuario a hacer clic.",
+                    "Redacción de CTAs Poderosos: Escribirás llamadas a la acción que van más allá del 'Comprar ahora'.",
+                    "Optimización con Pruebas A/B: Implementarás pruebas para encontrar el CTA que genera más conversiones."
                 ],
                 questions: [],
                 completed: false,
@@ -279,9 +279,9 @@ export const courseData: Course = {
                 video_url: "",
                 duration: "15 min",
                 summary: [
-                    "Diferencias y cuándo usar cada opción.",
-                    "Cómo calcular tu presupuesto inicial.",
-                    "Estrategias para escalar el presupuesto de forma segura.",
+                    "Gestión de Inversión: Sabrás cuándo es mejor usar un presupuesto diario o uno total para tu campaña.",
+                    "Cálculo de Presupuesto Inicial: Aprenderás un método para definir cuánto invertir al empezar.",
+                    "Escalado Controlado: Conocerás estrategias para aumentar tu presupuesto de forma segura y rentable."
                 ],
                 questions: [],
                 completed: false,
@@ -294,9 +294,9 @@ export const courseData: Course = {
                 video_url: "",
                 duration: "20 min",
                 summary: [
-                    "Entendiendo las pujas por menor costo, costo objetivo y ROAS.",
-                    "Ventajas de las pujas automáticas con Advantage+.",
-                    "Cuándo considerar el control de puja manual.",
+                    "Dominio de Estrategias de Puja: Entenderás las pujas por menor costo, costo objetivo y retorno de la inversión (ROAS).",
+                    "Uso de IA para Pujas: Aprenderás a sacar provecho de las pujas automáticas de Advantage+.",
+                    "Control Manual: Sabrás en qué situaciones específicas puede ser útil tomar el control manual de las pujas."
                 ],
                 questions: [],
                 completed: false,
@@ -309,9 +309,9 @@ export const courseData: Course = {
                 video_url: "",
                 duration: "15 min",
                 summary: [
-                    "Cómo funciona CBO (Campaign Budget Optimization).",
-                    "Mejores prácticas para usar CBO de manera efectiva.",
-                    "Errores comunes a evitar con la optimización de presupuesto.",
+                    "Funcionamiento de CBO: Comprenderás cómo el algoritmo de Meta distribuye tu presupuesto automáticamente.",
+                    "Mejores Prácticas con CBO: Aplicarás las estrategias correctas para maximizar los resultados con CBO.",
+                    "Prevención de Errores: Evitarás los errores más comunes que limitan la eficacia de la optimización de presupuesto."
                 ],
                 questions: [],
                 completed: false,
@@ -324,9 +324,9 @@ export const courseData: Course = {
                 video_url: "",
                 duration: "10 min",
                 summary: [
-                    "Cómo programar tus anuncios para los momentos más efectivos.",
-                    "Estrategias para campañas estacionales (El Buen Fin, Navidad, etc.).",
-                    "Análisis de los mejores días y horas para tu negocio.",
+                    "Programación Efectiva: Aprenderás a programar tus anuncios para que se muestren en los momentos de mayor impacto.",
+                    "Estrategias Estacionales: Planificarás campañas para fechas clave como El Buen Fin, Navidad o Hot Sale.",
+                    "Análisis de Horarios: Utilizarás los datos para identificar los mejores días y horas para tu negocio."
                 ],
                 questions: [],
                 completed: false,
@@ -348,9 +348,9 @@ export const courseData: Course = {
                 video_url: "",
                 duration: "25 min",
                 summary: [
-                    "Entendiendo métricas como CTR, CPC, CPA, ROAS y Frecuencia.",
-                    "Cómo personalizar tus columnas en el Administrador de Anuncios.",
-                    "Diferencia entre métricas de vanidad y métricas de negocio.",
+                    "Interpretación de Métricas: Entenderás a fondo indicadores como CTR, CPC, CPA, ROAS y Frecuencia.",
+                    "Dashboard Personalizado: Configurarás tus columnas en el Administrador de Anuncios para ver solo lo que importa.",
+                    "Enfoque en Resultados: Distinguirás entre las 'métricas de vanidad' y las que realmente impactan en tu negocio."
                 ],
                 questions: [],
                 completed: false,
@@ -363,9 +363,9 @@ export const courseData: Course = {
                 video_url: "",
                 duration: "25 min",
                 summary: [
-                    "Cómo leer y analizar tus informes de rendimiento.",
-                    "Identificación de cuellos de botella en tu embudo de conversión.",
-                    "Uso de desgloses para obtener insights más profundos (edad, ubicación, dispositivo).",
+                    "Análisis de Informes: Aprenderás a leer e interpretar los reportes de rendimiento de tus campañas.",
+                    "Diagnóstico de Embudos: Identificarás los puntos débiles en tu embudo de conversión donde pierdes clientes.",
+                    "Obtención de Insights: Utilizarás los desgloses por edad, ubicación o dispositivo para entender mejor a tu audiencia."
                 ],
                 questions: [],
                 completed: false,
@@ -378,9 +378,9 @@ export const courseData: Course = {
                 video_url: "",
                 duration: "20 min",
                 summary: [
-                    "Qué elementos puedes probar (creatividades, públicos, copys).",
-                    "Cómo configurar una prueba A/B de manera correcta.",
-                    "Análisis de los resultados para tomar decisiones basadas en datos.",
+                    "Metodología de Pruebas: Sabrás qué elementos de tus anuncios (creatividades, públicos, copys) puedes y debes probar.",
+                    "Configuración de Experimentos: Implementarás pruebas A/B de manera correcta para obtener datos fiables.",
+                    "Toma de Decisiones Basada en Datos: Analizarás los resultados de tus pruebas para optimizar tus campañas de forma continua."
                 ],
                 questions: [],
                 completed: false,
@@ -393,9 +393,9 @@ export const courseData: Course = {
                 video_url: "",
                 duration: "20 min",
                 summary: [
-                    "Estrategias de escalado vertical y horizontal.",
-                    "Cómo aumentar el presupuesto sin perder rendimiento.",
-                    "Errores comunes al intentar escalar y cómo evitarlos.",
+                    "Estrategias de Crecimiento: Conocerás las técnicas de escalado vertical (más presupuesto) y horizontal (nuevos públicos).",
+                    "Escalado Inteligente: Aprenderás a aumentar la inversión sin sacrificar el rendimiento de tus campañas.",
+                    "Prevención de Errores de Escalado: Evitarás los fallos más comunes al intentar hacer crecer tus campañas."
                 ],
                 questions: [],
                 completed: false,
@@ -417,9 +417,9 @@ export const courseData: Course = {
                 video_url: "",
                 duration: "20 min",
                 summary: [
-                    "Creación de embudos de retargeting basados en el tiempo.",
-                    "Retargeting dinámico de productos para e-commerce.",
-                    "Estrategias para recuperar carritos abandonados.",
+                    "Embudos de Retargeting: Crearás secuencias de anuncios basadas en el tiempo y la interacción del usuario.",
+                    "Retargeting Dinámico: Implementarás anuncios de producto dinámicos para recuperar carritos abandonados en e-commerce.",
+                    "Recuperación de Clientes: Aplicarás estrategias específicas para volver a conectar con clientes antiguos."
                 ],
                 questions: [],
                 completed: false,
@@ -432,9 +432,9 @@ export const courseData: Course = {
                 video_url: "",
                 duration: "15 min",
                 summary: [
-                    "Cómo configurar formularios instantáneos dentro de Facebook.",
-                    "Integración de Lead Ads con tu CRM o sistema de email marketing.",
-                    "Mejores prácticas para cualificar los leads generados.",
+                    "Formularios Instantáneos: Configurarás campañas de Lead Ads que capturan datos sin que el usuario salga de Facebook.",
+                    "Integración con CRM: Conectarás tus formularios con tu CRM o sistema de email para un seguimiento inmediato.",
+                    "Cualificación de Leads: Aprenderás a usar los campos del formulario para cualificar a tus prospectos."
                 ],
                 questions: [],
                 completed: false,
@@ -447,9 +447,9 @@ export const courseData: Course = {
                 video_url: "",
                 duration: "15 min",
                 summary: [
-                    "Cómo iniciar conversaciones de venta a través de anuncios.",
-                    "Estrategias para automatizar respuestas iniciales.",
-                    "Casos de uso para agendamiento, cotizaciones y soporte.",
+                    "Marketing Conversacional: Utilizarás anuncios para iniciar conversaciones de venta directamente en WhatsApp y Messenger.",
+                    "Automatización de Respuestas: Configurarás respuestas automáticas para gestionar las consultas iniciales.",
+                    "Casos de Uso Prácticos: Implementarás campañas de mensajes para agendar citas, dar cotizaciones y ofrecer soporte."
                 ],
                 questions: [],
                 completed: false,
@@ -462,9 +462,9 @@ export const courseData: Course = {
                 video_url: "",
                 duration: "10 min",
                 summary: [
-                    "Impacto de las políticas de privacidad (iOS 14+).",
-                    "El rol creciente de la IA (Advantage+).",
-                    "Tendencias a seguir para mantenerte a la vanguardia.",
+                    "Adaptación a la Privacidad: Entenderás el impacto de las políticas de privacidad como iOS 14+ y cómo adaptarte.",
+                    "Dominio de la IA: Sacarás el máximo provecho a las herramientas de Advantage+ y la IA de Meta.",
+                    "Visión a Futuro: Conocerás las tendencias emergentes para mantener tus estrategias a la vanguardia."
                 ],
                 questions: [],
                 completed: false,
