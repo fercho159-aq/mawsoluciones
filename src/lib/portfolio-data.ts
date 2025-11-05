@@ -1,3 +1,4 @@
+
 import { PlaceHolderImages, ImagePlaceholder } from "@/lib/placeholder-images";
 
 export type PortfolioItemType = {
@@ -28,15 +29,15 @@ export type ContentPortfolioItemType = {
   url: string;
 };
 
-const placeholderImages = [
-  PlaceHolderImages.find(img => img.id === 'portfolio-web-ficc'),
-  PlaceHolderImages.find(img => img.id === 'portfolio-web-dfac'),
-  PlaceHolderImages.find(img => img.id === 'portfolio-web-polar')
-].filter(Boolean) as ImagePlaceholder[];
+const placeholderImages = PlaceHolderImages.filter(
+    (img) => img.id.startsWith("portfolio-web-")
+);
+
 
 let imageCounter = 0;
 
 const getNextImage = () => {
+  if (placeholderImages.length === 0) return undefined;
   const image = placeholderImages[imageCounter];
   imageCounter = (imageCounter + 1) % placeholderImages.length;
   return image;
@@ -757,7 +758,7 @@ export const portfolioItems: PortfolioItemType[] = [
       "sector": "Industrial",
       "description": "Proyecto integral de desarrollo web para Suministros Hebe, empresa dedicada al sector industrial, con el objetivo de modernizar su presencia digital y optimizar la experiencia del usuario.",
       "services": [
-        "Diseño y desarrollo web responsive",
+        "Diseño y desarrollo web responsivo",
         "Integración de catálogo de productos industriales",
         "Optimización SEO para sector industrial",
         "Implementación de sistema de contacto y cotizaciones",
