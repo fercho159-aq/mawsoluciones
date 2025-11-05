@@ -10,7 +10,7 @@ export const courseData: Course = {
   sections: [
     {
       section_id: 1,
-      title: "Introducción a n8n y la Automatización",
+      title: "Introducción a la Automatización y n8n",
       order: 1,
       duration: "1h",
       completed: false,
@@ -18,13 +18,13 @@ export const courseData: Course = {
         {
           topic_id: "n8n_1_1",
           section_id: 1,
-          title: "¿Qué es n8n y para qué sirve?",
+          title: "¿Qué es n8n y por qué es una revolución?",
           video_url: "",
           duration: "15 min",
           summary: [
             "**Concepto de 'No-Code':** Entenderás el poder de la automatización sin necesidad de ser un programador.",
             "**Casos de uso reales:** Descubrirás cómo n8n puede automatizar desde la gestión de redes sociales hasta la sincronización de bases de datos.",
-            "**n8n vs. Zapier/Make:** Conocerás las ventajas de n8n, como su flexibilidad y la posibilidad de auto-hospedaje (self-hosting).",
+            "**n8n vs. Zapier/Make:** Conocerás las ventajas de n8n, como su flexibilidad, coste y la posibilidad de auto-hospedaje (self-hosting).",
           ],
           questions: [],
           completed: false,
@@ -33,13 +33,13 @@ export const courseData: Course = {
         {
           topic_id: "n8n_1_2",
           section_id: 1,
-          title: "Instalación y Configuración del Entorno",
+          title: "Instalación en VPS y Configuraciones Clave",
           video_url: "",
           duration: "20 min",
           summary: [
-            "**n8n Cloud vs. Self-Hosting:** Evaluarás qué opción es la mejor para ti.",
-            "**Instalación con Docker:** Seguirás un paso a paso para levantar tu propia instancia de n8n de forma rápida y sencilla.",
-            "**Exploración de la Interfaz:** Te familiarizarás con el editor de flujos de trabajo, el panel de ejecuciones y las credenciales.",
+            "**Elección de un VPS:** Aprenderás a elegir un proveedor de Virtual Private Server (VPS) adecuado y económico.",
+            "**Instalación con Docker:** Seguirás un paso a paso para levantar tu propia instancia de n8n de forma segura.",
+            "**Configuración de Dominio y SSL:** Configurarás tu dominio personalizado y un certificado de seguridad para acceder a n8n de forma profesional.",
           ],
           questions: [],
           completed: false,
@@ -63,7 +63,7 @@ export const courseData: Course = {
         {
             topic_id: "n8n_1_4",
             section_id: 1,
-            title: "Examen: Los Fundamentos de n8n",
+            title: "Examen: Fundamentos de n8n",
             video_url: "",
             duration: "10 min",
             summary: [],
@@ -72,7 +72,7 @@ export const courseData: Course = {
                     "question": "¿Cuál es una de las principales ventajas de n8n frente a otras plataformas como Zapier?",
                     "options": [
                         "Tiene menos integraciones.",
-                        "Es de código abierto y permite el auto-hospedaje (self-hosting).",
+                        "Es de código abierto y permite el auto-hospedaje (self-hosting) para mayor control y menor coste.",
                         "Es mucho más caro.",
                         "Solo se puede usar en la nube."
                     ],
@@ -83,38 +83,38 @@ export const courseData: Course = {
                     "options": [
                         "Un nodo que finaliza el flujo de trabajo.",
                         "Un nodo que realiza una acción, como enviar un email.",
-                        "El nodo que inicia un flujo de trabajo basado en un evento.",
+                        "El nodo que inicia un flujo de trabajo basado en un evento específico (ej. una hora, un webhook).",
                         "Un nodo que solo sirve para hacer cálculos."
                     ],
                     "correct": 2
                 },
                 {
-                    "question": "En la interfaz de n8n, el 'Canvas' o Editor es donde:",
+                    "question": "¿Por qué es recomendable instalar n8n en un VPS propio?",
                     "options": [
-                        "Ves el historial de ejecuciones.",
-                        "Guardas tus contraseñas.",
-                        "Construyes y conectas los nodos de tu flujo de trabajo.",
-                        "Instalas las actualizaciones."
+                        "Porque es más complicado.",
+                        "Para tener control total sobre tus datos, personalización y evitar los límites de las versiones en la nube.",
+                        "Porque la versión Cloud no funciona.",
+                        "Para que sea más lento."
                     ],
-                    "correct": 2
+                    "correct": 1
                 },
                 {
                     "question": "Un 'workflow' en n8n es:",
                     "options": [
                         "Un solo nodo de acción.",
-                        "Una secuencia de nodos conectados que automatizan un proceso.",
+                        "Una secuencia de nodos conectados que automatizan un proceso de principio a fin.",
                         "Un tipo de base de datos.",
                         "El nombre de usuario para acceder a n8n."
                     ],
                     "correct": 1
                 },
                 {
-                    "question": "El término 'No-Code' se refiere a:",
+                    "question": "Un 'Webhook' es fundamentalmente:",
                     "options": [
-                        "Programación muy compleja.",
-                        "La capacidad de crear aplicaciones o automatizaciones sin escribir código.",
-                        "Un error en el sistema.",
-                        "Un lenguaje de programación antiguo."
+                        "Un tipo de base de datos.",
+                        "Una URL que espera recibir datos de otro servicio para iniciar un flujo.",
+                        "Un nodo para hacer cálculos matemáticos.",
+                        "Un error del sistema."
                     ],
                     "correct": 1
                 }
@@ -126,7 +126,7 @@ export const courseData: Course = {
     },
     {
         section_id: 2,
-        title: "Manejo de Datos y Nodos Esenciales",
+        title: "Automatización de Comunicaciones: Chatbots",
         order: 2,
         duration: "1h 15min",
         completed: false,
@@ -134,13 +134,13 @@ export const courseData: Course = {
             {
                 topic_id: "n8n_2_1",
                 section_id: 2,
-                title: "La Estructura de Datos JSON en n8n",
+                title: "Creación de un Chatbot Básico para WhatsApp",
                 video_url: "",
-                duration: "20 min",
+                duration: "25 min",
                 summary: [
-                    "**Entendiendo JSON:** Aprenderás a leer la estructura de datos que n8n utiliza para pasar información entre nodos.",
-                    "**El Visor de Datos:** Utilizarás la vista de 'Tabla' y 'JSON' para inspeccionar la información de cada paso.",
-                    "**Acceso a Datos con Expresiones:** Escribirás tus primeras expresiones para acceder a datos específicos (ej. {{$json.body.name}}).",
+                    "**Conexión con WhatsApp Business API:** Aprenderás a configurar la conexión para recibir y enviar mensajes.",
+                    "**Flujo de Bienvenida:** Diseñarás un workflow que responde automáticamente a los nuevos mensajes.",
+                    "**Menú de Opciones:** Implementarás una lógica simple para que el bot ofrezca opciones y responda según la elección.",
                 ],
                 questions: [],
                 completed: false,
@@ -149,13 +149,13 @@ export const courseData: Course = {
             {
                 topic_id: "n8n_2_2",
                 section_id: 2,
-                title: "Nodos de Lógica: IF y Switch",
+                title: "Integración con OpenAI (ChatGPT) para Respuestas Inteligentes",
                 video_url: "",
-                duration: "20 min",
+                duration: "25 min",
                 summary: [
-                    "**Toma de Decisiones:** Aprenderás a usar el nodo 'IF' para crear ramas condicionales en tu flujo (ej. si el email contiene 'compra').",
-                    "**Múltiples Caminos:** Utilizarás el nodo 'Switch' para dirigir el flujo por diferentes rutas según el valor de un dato.",
-                    "**Combinación de Lógica:** Construirás workflows más inteligentes que reaccionan de manera diferente según la información que reciben.",
+                    "**Conexión con OpenAI:** Configurarás tu API Key de OpenAI en n8n.",
+                    "**Diseño del 'Prompt':** Aprenderás a darle instrucciones a ChatGPT para que responda como un agente de soporte de tu empresa.",
+                    "**Flujo Conversacional:** Crearás un chatbot que entiende el lenguaje natural y mantiene conversaciones fluidas.",
                 ],
                 questions: [],
                 completed: false,
@@ -164,13 +164,13 @@ export const courseData: Course = {
             {
                 topic_id: "n8n_2_3",
                 section_id: 2,
-                title: "Manipulación de Datos: El Nodo 'Set'",
+                title: "Respondiendo Notas de Audio Automáticamente",
                 video_url: "",
-                duration: "20 min",
+                duration: "25 min",
                 summary: [
-                    "**Creación de Nuevos Campos:** Aprenderás a añadir nuevos datos al flujo de trabajo.",
-                    "**Modificación de Datos Existentes:** Utilizarás el nodo 'Set' para limpiar, formatear o cambiar valores.",
-                    "**Mantener solo los Datos Necesarios:** Descubrirás cómo simplificar tu flujo seleccionando únicamente los datos que necesitas para los siguientes pasos.",
+                    "**Transcripción de Audio a Texto:** Utilizarás servicios de IA como Whisper de OpenAI para convertir notas de voz en texto.",
+                    "**Procesamiento del Texto:** Enviarás el texto transcrito a ChatGPT para que genere una respuesta.",
+                    "**Respuesta por Texto:** Enviarás la respuesta generada por IA de vuelta al usuario a través de WhatsApp.",
                 ],
                 questions: [],
                 completed: false,
@@ -179,58 +179,58 @@ export const courseData: Course = {
             {
                 topic_id: "n8n_2_4",
                 section_id: 2,
-                title: "Examen: Controlando el Flujo de Datos",
+                title: "Examen: Chatbots Inteligentes",
                 video_url: "",
                 duration: "15 min",
                 summary: [],
                 questions: [
                     {
-                        "question": "En n8n, para acceder al nombre de un cliente dentro de un objeto JSON, usarías una expresión como:",
+                        "question": "Para que tu chatbot en n8n pueda entender y generar respuestas en lenguaje natural, ¿qué servicio integrarías?",
                         "options": [
-                            "{{$name}}",
-                            "{{$json.name}}",
-                            "{{$json.body.customer.name}} (dependiendo de la estructura)",
-                            "get(name)"
-                        ],
-                        "correct": 2
-                    },
-                    {
-                        "question": "¿Qué nodo utilizarías si necesitas que tu workflow tome un camino si un email contiene la palabra 'urgente' y otro camino si no la contiene?",
-                        "options": [
-                            "Set",
-                            "IF",
-                            "Merge",
-                            "Execute Workflow"
+                            "Google Sheets",
+                            "OpenAI (ChatGPT)",
+                            "Docker",
+                            "Un servidor VPS"
                         ],
                         "correct": 1
                     },
                     {
-                        "question": "El nodo 'Set' te permite:",
+                        "question": "La función principal de la API de Whisper de OpenAI en un flujo de chatbot es:",
                         "options": [
-                            "Iniciar el flujo de trabajo.",
-                            "Enviar un correo electrónico.",
-                            "Añadir, modificar o eliminar campos de datos en el flujo.",
-                            "Dividir el flujo en múltiples ramas."
+                            "Enviar imágenes.",
+                            "Generar respuestas de texto.",
+                            "Transcribir notas de audio a texto.",
+                            "Traducir idiomas."
                         ],
                         "correct": 2
                     },
                     {
-                        "question": "La información entre los nodos de n8n viaja principalmente en un formato llamado:",
+                        "question": "Un 'prompt' bien diseñado para ChatGPT en un chatbot de soporte debe incluir:",
                         "options": [
-                            "PDF",
-                            "DOCX",
-                            "JSON",
-                            "MP3"
+                            "Solo la pregunta del usuario.",
+                            "Instrucciones claras sobre su rol, el tono y la información de la empresa.",
+                            "Una lista de todos tus productos.",
+                            "Tu contraseña de OpenAI."
                         ],
-                        "correct": 2
+                        "correct": 1
                     },
                     {
-                        "question": "¿Cuándo usarías un nodo 'Switch' en lugar de un 'IF'?",
+                        "question": "Para iniciar un flujo cuando un usuario te escribe por WhatsApp, necesitas configurar un:",
                         "options": [
-                            "Nunca, son lo mismo.",
-                            "Cuando solo tienes una condición.",
-                            "Cuando tienes múltiples posibles valores para un dato y quieres una rama para cada uno.",
-                            "Cuando quieres detener el flujo."
+                            "Nodo 'Schedule' (programador).",
+                            "Webhook que reciba los mensajes de la API de WhatsApp.",
+                            "Nodo 'Start'.",
+                            "Nodo de Google Calendar."
+                        ],
+                        "correct": 1
+                    },
+                    {
+                        "question": "¿Cuál es el primer paso para automatizar la respuesta a una nota de audio?",
+                        "options": [
+                            "Enviar la nota a ChatGPT.",
+                            "Responder con un audio genérico.",
+                            "Transcribir el audio a texto.",
+                            "Guardar el audio en Google Drive."
                         ],
                         "correct": 2
                     }
@@ -242,7 +242,7 @@ export const courseData: Course = {
     },
     {
         section_id: 3,
-        title: "Integraciones Populares",
+        title: "Automatización de Productividad",
         order: 3,
         duration: "1h 30min",
         completed: false,
@@ -250,13 +250,13 @@ export const courseData: Course = {
             {
                 topic_id: "n8n_3_1",
                 section_id: 3,
-                title: "Automatizando Google Sheets",
+                title: "Sincronización con Google Calendar",
                 video_url: "",
                 duration: "25 min",
                 summary: [
-                    "**Lectura de Filas:** Crearás un workflow que se ejecuta y lee datos desde una hoja de cálculo.",
-                    "**Añadir y Actualizar Filas:** Aprenderás a añadir nuevos registros a un Google Sheet (ej. nuevos leads).",
-                    "**Caso Práctico:** Construirás un formulario que guarde sus respuestas automáticamente en una hoja de cálculo.",
+                    "**Crear Eventos desde un Formulario:** Construirás un flujo que agenda una reunión en tu calendario cuando alguien llena un formulario.",
+                    "**Recordatorios Automáticos:** Configurarás un workflow que envíe recordatorios por email o WhatsApp antes de un evento.",
+                    "**Lectura de Calendario:** Aprenderás a iniciar flujos basados en los eventos de tu calendario (ej. 'una hora antes de cada reunión').",
                 ],
                 questions: [],
                 completed: false,
@@ -265,13 +265,13 @@ export const courseData: Course = {
             {
                 topic_id: "n8n_3_2",
                 section_id: 3,
-                title: "Conectando con APIs vía HTTP Request",
+                title: "Automatización de Búsqueda de Noticias",
                 video_url: "",
                 duration: "25 min",
                 summary: [
-                    "**Conceptos de API y Webhooks:** Entenderás los fundamentos para conectar n8n con cualquier servicio online.",
-                    "**Uso del Nodo 'HTTP Request':** Aprenderás a hacer peticiones GET y POST para obtener y enviar datos.",
-                    "**Autenticación de API:** Configurarás credenciales para conectarte a APIs que requieren una clave (API Key).",
+                    "**Fuentes de Noticias (RSS y APIs):** Aprenderás a conectarte a fuentes de noticias para obtener los últimos titulares.",
+                    "**Filtrado por Palabras Clave:** Utilizarás nodos de lógica para filtrar solo las noticias que contengan palabras clave de tu interés.",
+                    "**Resumen con IA y Notificación:** Crearás un flujo que resume las noticias relevantes con OpenAI y te las envía por Slack o email.",
                 ],
                 questions: [],
                 completed: false,
@@ -280,13 +280,13 @@ export const courseData: Course = {
             {
                 topic_id: "n8n_3_3",
                 section_id: 3,
-                title: "Automatización de Email y Comunicaciones",
+                title: "Gestión de Tareas con Notion o Trello",
                 video_url: "",
                 duration: "25 min",
                 summary: [
-                    "**Envío de Emails:** Configurarás el nodo de Gmail o SMTP para enviar correos automáticos.",
-                    "**Notificaciones a Slack/Discord:** Crearás alertas automáticas para tu equipo.",
-                    "**Caso Práctico:** Diseñarás un flujo que te notifique por Slack cada vez que entra una nueva venta en tu e-commerce.",
+                    "**Creación Automática de Tareas:** Diseñarás un flujo que crea una nueva tarjeta en Trello o una página en Notion cuando recibes un email importante.",
+                    "**Sincronización Bidireccional:** Entenderás los conceptos para mantener dos sistemas sincronizados (ej. Trello y Google Calendar).",
+                    "**Reportes de Productividad:** Construirás un workflow que genere un resumen semanal de tareas completadas.",
                 ],
                 questions: [],
                 completed: false,
@@ -295,58 +295,58 @@ export const courseData: Course = {
             {
                 topic_id: "n8n_3_4",
                 section_id: 3,
-                title: "Examen: Conectando el Mundo",
+                title: "Examen: Tu Asistente Personal Robótico",
                 video_url: "",
                 duration: "15 min",
                 summary: [],
                 questions: [
                     {
-                        "question": "Para conectar n8n a un servicio que no tiene un nodo dedicado, ¿qué nodo usarías?",
+                        "question": "Para crear un flujo que te envíe un resumen de noticias sobre 'Inteligencia Artificial' cada mañana, ¿qué nodos necesitarías?",
                         "options": [
-                            "Google Sheets",
-                            "IF",
-                            "HTTP Request",
-                            "Start"
-                        ],
-                        "correct": 2
-                    },
-                    {
-                        "question": "Un 'Webhook' es fundamentalmente:",
-                        "options": [
-                            "Un tipo de base de datos.",
-                            "Una URL que espera recibir datos de otro servicio para iniciar un flujo.",
-                            "Un nodo para hacer cálculos matemáticos.",
-                            "Un error del sistema."
+                            "Solo un nodo de Email.",
+                            "Un Trigger de Hora, un nodo de Fuente de Noticias (RSS/API), un nodo de Lógica (IF) y un nodo de Email/Slack.",
+                            "Un nodo de Google Calendar.",
+                            "Un nodo de WhatsApp."
                         ],
                         "correct": 1
                     },
                     {
-                        "question": "¿Qué acción te permite el nodo de Google Sheets?",
+                        "question": "El principal beneficio de automatizar la creación de eventos en Google Calendar es:",
                         "options": [
-                            "Leer, añadir y actualizar filas.",
-                            "Crear gráficos dentro de n8n.",
-                            "Formatear las celdas con colores.",
-                            "Solo leer datos."
-                        ],
-                        "correct": 0
-                    },
-                    {
-                        "question": "Si quieres enviar datos a una API para crear un nuevo cliente, ¿qué método HTTP usarías comúnmente?",
-                        "options": [
-                            "GET",
-                            "POST",
-                            "DELETE",
-                            "UPDATE"
+                            "Hacer tu calendario más colorido.",
+                            "Eliminar el trabajo manual de agendar citas y reducir la posibilidad de errores humanos.",
+                            "Llenar tu calendario de eventos falsos.",
+                            "Sincronizarlo con TikTok."
                         ],
                         "correct": 1
                     },
                     {
-                        "question": "Para enviar un email con n8n, necesitas configurar:",
+                        "question": "Una fuente común para obtener noticias de forma automatizada es a través de un:",
                         "options": [
-                            "Una cuenta de Instagram.",
-                            "Credenciales de un proveedor de correo (como Gmail o un servidor SMTP).",
-                            "Una hoja de cálculo.",
-                            "Un nodo de HTTP Request."
+                            "Archivo PDF.",
+                            "Feed RSS.",
+                            "Mensaje de WhatsApp.",
+                            "Documento de Word."
+                        ],
+                        "correct": 1
+                    },
+                    {
+                        "question": "Si quieres crear una nueva tarea en Trello cada vez que un email en Gmail es marcado como 'importante', ¿cuál sería el Trigger de tu workflow?",
+                        "options": [
+                            "Un Trigger de Trello.",
+                            "Un Trigger de Gmail que se activa con correos 'importantes'.",
+                            "Un Trigger manual.",
+                            "Un Trigger de Hora."
+                        ],
+                        "correct": 1
+                    },
+                    {
+                        "question": "¿Cómo podrías usar la IA en un flujo de búsqueda de noticias?",
+                        "options": [
+                            "Para hacer la búsqueda más lenta.",
+                            "Para generar un resumen conciso de las noticias encontradas antes de enviarlas.",
+                            "Para borrar las noticias.",
+                            "La IA no se puede usar para eso."
                         ],
                         "correct": 1
                     }
@@ -360,7 +360,7 @@ export const courseData: Course = {
         section_id: 4,
         title: "Flujos de Trabajo Avanzados",
         order: 4,
-        duration: "1h 15min",
+        duration: "1h",
         completed: false,
         topics: [
             {
@@ -368,7 +368,7 @@ export const courseData: Course = {
                 section_id: 4,
                 title: "Manejo de Bucles y Lotes (Looping)",
                 video_url: "",
-                duration: "25 min",
+                duration: "20 min",
                 summary: [
                     "**Procesamiento de Múltiples Items:** Aprenderás a procesar una lista de elementos (ej. emails) uno por uno.",
                     "**El Nodo 'Split in Batches':** Descubrirás cómo dividir grandes volúmenes de datos para procesarlos eficientemente.",
@@ -474,5 +474,3 @@ export const courseData: Course = {
     }
   ],
 };
-
-    

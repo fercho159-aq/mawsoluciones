@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Menu, X, ChevronDown, CodeXml, PenSquare, Megaphone, Bot, Newspaper, Mic2, LayoutGrid, FileText, GraduationCap, Target, Wallet, BarChart4, DollarSign } from "lucide-react";
+import { Menu, X, ChevronDown, CodeXml, PenSquare, Megaphone, Bot, Newspaper, Mic2, LayoutGrid, FileText, GraduationCap, Target, Wallet, BarChart4, DollarSign, Database } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -118,6 +118,12 @@ const coursesLinks = [
     label: "Finanzas Personales para Emprendedores",
     description: "Organiza tus finanzas, aprende a invertir y asegura la salud financiera de tu negocio y tu vida.",
     icon: <DollarSign className="w-5 h-5" />
+  },
+  {
+    href: "/cursos/firebase-web",
+    label: "Sitios Web con Firebase",
+    description: "Construye aplicaciones web modernas y escalables con Firebase y Next.js.",
+    icon: <Database className="w-5 h-5" />
   }
 ];
 
