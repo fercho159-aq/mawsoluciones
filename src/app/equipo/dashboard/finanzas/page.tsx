@@ -22,7 +22,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 // --- Types ---
@@ -60,15 +60,20 @@ const mockCuentasPorCobrar: FinanzasData[] = [
 
 const generateMonthlyMockData = (): MovimientoDiario[] => {
     const today = new Date();
-    const start = startOfMonth(today);
+    const startOfCurrentMonth = startOfMonth(today);
+    const startOfLastMonth = startOfMonth(new Date(today.getFullYear(), today.getMonth() - 1, 1));
     return [
-        { id: 'm1', fecha: new Date(start.getTime() + 86400000 * 2), tipo: 'Ingreso', descripcion: 'Pago cliente Biofert', monto: 5000, cuenta: 'Cuenta MAW'},
-        { id: 'm2', fecha: new Date(start.getTime() + 86400000 * 3), tipo: 'Gasto', descripcion: 'Pago de software de diseño', monto: 1200, cuenta: 'Cuenta Paola'},
-        { id: 'm3', fecha: new Date(start.getTime() + 86400000 * 5), tipo: 'Ingreso', descripcion: 'Adelanto proyecto NIU', monto: 4250, cuenta: 'Fer'},
-        { id: 'm4', fecha: new Date(start.getTime() + 86400000 * 7), tipo: 'Ingreso', descripcion: 'Pago Polanco Santino', monto: 9200, cuenta: 'Cuenta MAW'},
-        { id: 'm5', fecha: new Date(start.getTime() + 86400000 * 10), tipo: 'Gasto', descripcion: 'Publicidad en Meta', monto: 5000, cuenta: 'Cuenta MAW'},
-        { id: 'm6', fecha: new Date(start.getTime() + 86400000 * 12), tipo: 'Ingreso', descripcion: 'Pago cliente Medical Tower', monto: 12000, cuenta: 'Cuenta Paola'},
-        { id: 'm7', fecha: new Date(start.getTime() + 86400000 * 15), tipo: 'Gasto', descripcion: 'Nómina', monto: 25000, cuenta: 'Cuenta MAW'},
+        // Current month
+        { id: 'm1', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 2), tipo: 'Ingreso', descripcion: 'Pago cliente Biofert', monto: 5000, cuenta: 'Cuenta MAW'},
+        { id: 'm2', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 3), tipo: 'Gasto', descripcion: 'Pago de software de diseño', monto: 1200, cuenta: 'Cuenta Paola'},
+        { id: 'm3', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 5), tipo: 'Ingreso', descripcion: 'Adelanto proyecto NIU', monto: 4250, cuenta: 'Fer'},
+        { id: 'm4', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 7), tipo: 'Ingreso', descripcion: 'Pago Polanco Santino', monto: 9200, cuenta: 'Cuenta MAW'},
+        { id: 'm5', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 10), tipo: 'Gasto', descripcion: 'Publicidad en Meta', monto: 5000, cuenta: 'Cuenta MAW'},
+        { id: 'm6', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 12), tipo: 'Ingreso', descripcion: 'Pago cliente Medical Tower', monto: 12000, cuenta: 'Cuenta Paola'},
+        { id: 'm7', fecha: new Date(startOfCurrentMonth.getTime() + 86400000 * 15), tipo: 'Gasto', descripcion: 'Nómina', monto: 25000, cuenta: 'Cuenta MAW'},
+        // Last month
+        { id: 'm8', fecha: new Date(startOfLastMonth.getTime() + 86400000 * 5), tipo: 'Ingreso', descripcion: 'Pago mes anterior Cliente X', monto: 7500, cuenta: 'Cuenta MAW'},
+        { id: 'm9', fecha: new Date(startOfLastMonth.getTime() + 86400000 * 18), tipo: 'Gasto', descripcion: 'Renta oficina mes anterior', monto: 15000, cuenta: 'Cuenta MAW'},
     ]
 }
 
@@ -271,12 +276,22 @@ const MovimientoDialog = ({ tipo, onSave, children }: MovimientoDialogProps) => 
 
 const TablaDiariaTab = ({ movimientos, onAddMovimiento }: { movimientos: MovimientoDiario[], onAddMovimiento: (mov: Omit<MovimientoDiario, 'id'|'fecha'>) => void }) => {
     
-    const monthlyData = useMemo(() => {
-        const today = new Date();
-        const start = startOfMonth(today);
-        const end = endOfMonth(today);
-        return movimientos.filter(mov => isWithinInterval(mov.fecha, { start, end }));
+    const [selectedMonth, setSelectedMonth] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
+
+    const monthOptions = useMemo(() => {
+        const uniqueMonths = new Set(
+            movimientos.map(mov => format(startOfMonth(mov.fecha), 'yyyy-MM-dd'))
+        );
+        uniqueMonths.add(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
+    
+        return Array.from(uniqueMonths).sort((a, b) => b.localeCompare(a));
     }, [movimientos]);
+
+    const monthlyData = useMemo(() => {
+        const start = parseISO(selectedMonth);
+        const end = endOfMonth(start);
+        return movimientos.filter(mov => isWithinInterval(mov.fecha, { start, end }));
+    }, [movimientos, selectedMonth]);
 
     const accountSummary = useMemo(() => {
         const summary = monthlyData.reduce((acc, mov) => {
@@ -350,8 +365,24 @@ const TablaDiariaTab = ({ movimientos, onAddMovimiento }: { movimientos: Movimie
             </div>
             <Card>
                 <CardHeader>
-                    <CardTitle>Movimientos de {format(new Date(), 'MMMM yyyy', { locale: es })}</CardTitle>
-                    <CardDescription>Registro de todos los ingresos y gastos del mes.</CardDescription>
+                    <div className="flex justify-between items-center">
+                        <div>
+                             <CardTitle>Movimientos de {format(parseISO(selectedMonth), 'MMMM yyyy', { locale: es })}</CardTitle>
+                             <CardDescription>Registro de todos los ingresos y gastos del mes.</CardDescription>
+                        </div>
+                        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                            <SelectTrigger className="w-[220px]">
+                                <SelectValue placeholder="Seleccionar mes" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {monthOptions.map(month => (
+                                    <SelectItem key={month} value={month}>
+                                        {format(parseISO(month), 'MMMM yyyy', { locale: es })}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <div className="border rounded-lg">
@@ -450,3 +481,4 @@ export default function FinanzasPage() {
     </div>
   );
 }
+
