@@ -9,6 +9,7 @@ import WhatsappIcon from "@/components/icons/whatsapp-icon";
 import AnimatedDiv from "@/components/animated-div";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import ParallaxImages from "@/components/sections/parallax-images";
 
 
 export default function PortfolioItemPage({
@@ -90,6 +91,13 @@ export default function PortfolioItemPage({
           </div>
         </div>
       </section>
+
+      {item.parallaxImages && item.parallaxImages.laptop && item.parallaxImages.phone && (
+          <ParallaxImages 
+              laptopImage={item.parallaxImages.laptop}
+              phoneImage={item.parallaxImages.phone}
+          />
+      )}
 
       {similarProjects.length > 0 && (
         <section className="py-20 md:py-28 border-t bg-card">
