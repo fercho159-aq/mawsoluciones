@@ -263,7 +263,6 @@ const Header = () => {
 
             {navLinks.map((link) => (
               <NavigationMenuItem key={link.href}>
-                 {/* @ts-ignore */}
                  <Link href={link.href} legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                     {link.label}
@@ -409,3 +408,5 @@ const Header = () => {
 };
 
 export default Header;
+
+    
