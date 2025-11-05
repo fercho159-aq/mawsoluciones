@@ -19,22 +19,20 @@ const navItems = [
     { href: "/equipo/dashboard/mi-progreso", label: "Mi Progreso", icon: <LineChart className="w-4 h-4" />, roles: ['admin', 'user'] },
 ];
 
-const salesAccess = ['Julio', 'Alma Fer'];
-
 export default function DashboardNav() {
     const pathname = usePathname();
     const { logout, user } = useAuth();
 
-    const canSeeSales = (user: TeamMember | null) => {
+    const userHasAccess = (itemRoles: string[]) => {
         if (!user) return false;
-        return salesAccess.includes(user.name);
-    }
+        return itemRoles.includes(user.role);
+    };
 
     return (
         <nav className="flex flex-col gap-2 flex-grow">
             <div className="flex-grow">
                 {navItems.map(item => {
-                    if (item.href === "/equipo/dashboard/ventas" && !canSeeSales(user)) {
+                    if (!userHasAccess(item.roles)) {
                         return null;
                     }
                     return (
