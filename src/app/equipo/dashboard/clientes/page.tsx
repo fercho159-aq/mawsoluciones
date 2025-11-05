@@ -29,7 +29,8 @@ import { Separator } from '@/components/ui/separator';
 
 const contenidoTeam = teamMembers.filter(m => ['Fany', 'Luis', 'Carlos', 'Julio', 'Paola', 'Cristian', 'Daniel', 'Bere'].includes(m.name));
 const adsTeam = teamMembers.filter(m => ['Luis', 'Carlos', 'Julio', 'Paola', 'Cristian', 'Daniel', 'Bere'].includes(m.name));
-const webTeam = teamMembers.filter(m => ['Carlos', 'Fernando', 'Alexis'].includes(m.name));
+const webTeam = teamMembers.filter(m => ['Fernando', 'Alexis'].includes(m.name));
+
 
 const AddClientDialog = ({ onAdd, children }: { onAdd: (client: Omit<Client, 'id'>, pendientes: Omit<Activity, 'id'>[]) => void, children: React.ReactNode }) => {
     const [name, setName] = useState('');
@@ -202,11 +203,24 @@ export default function ClientesPage() {
     }, [clients, cuentasPorCobrar]);
 
     if (loading) {
-         return <div className="text-center p-8">Cargando...</div>;
+         return (
+            <div className="flex items-center justify-center min-h-[50vh]">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
+            </div>
+        )
     }
 
     if (!user || (user.role !== 'admin' && user.role !== 'contabilidad')) {
-        return <div className="text-center p-8">No tienes permiso para ver esta sección.</div>;
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Acceso Denegado</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p>No tienes permiso para ver esta sección.</p>
+                </CardContent>
+            </Card>
+        );
     }
 
     return (
@@ -260,3 +274,4 @@ export default function ClientesPage() {
         </div>
     );
 }
+
