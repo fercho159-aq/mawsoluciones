@@ -114,12 +114,12 @@ const AddEventDialog = ({ onAddEvent }: { onAddEvent: (event: Evento) => void })
 }
 
 export default function CalendarioPage() {
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date | undefined>(new Date('2024-11-05'));
   const [events, setEvents] = useState<Evento[]>(mockEvents);
   const [pendientes, setPendientes] = useState<Pendiente[]>(mockPendientesData);
 
   const handleAddEvent = (newEvent: Evento) => {
-      setEvents(prev => [...prev, newEvent]);
+      setEvents(prev => [...prev, newEvent].sort((a, b) => a.date.getTime() - b.date.getTime()));
       
       const responsableDelEquipo = teamMembers.find(m => m.name === newEvent.responsable);
       
@@ -179,6 +179,7 @@ export default function CalendarioPage() {
                     components={{ Day: DayCell }}
                     modifiers={{ events: events.map(e => e.date) }}
                     modifiersClassNames={{ events: 'font-bold' }}
+                    defaultMonth={new Date('2024-11-01')}
                 />
             </div>
             <div className="lg:col-span-1 p-4">
