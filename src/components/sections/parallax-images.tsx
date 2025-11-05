@@ -23,9 +23,9 @@ const ParallaxImages = ({ laptopImage, phoneImage }: ParallaxImagesProps) => {
   
   // Phone Animation
   const phoneScale = useTransform(scrollYProgress, [0.4, 0.7], [0.5, 1]);
-  const phoneOpacity = useTransform(scrollYProgress, [0.5, 0.65], [0, 1]);
+  const phoneOpacity = useTransform(scrollYProgress, [0.4, 0.55], [0, 1]);
   const phoneY = useTransform(scrollYProgress, [0.4, 0.7], ['0vh', '5vh']);
-  const phoneX = useTransform(scrollYProgress, [0.4, 0.7], ['130vw', '-40vw']);
+  const phoneX = useTransform(scrollYProgress, [0.4, 0.7], ['-50vw', '-15vw']);
 
 
   return (
