@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, ArrowRight, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
+import { ArrowUpDown, ArrowRight, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Users } from 'lucide-react';
 import WhatsappIcon from '@/components/icons/whatsapp-icon';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -38,6 +38,7 @@ import {
     type CategoriaGasto,
     type Cuenta
 } from '@/lib/finanzas-data';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 
 // --- Helper Functions ---
@@ -130,7 +131,55 @@ const AddClientDialog = ({ onAdd, children }: { onAdd: (client: Client) => void,
     )
 }
 
-const AddCpcDialog = ({ clients, onAdd, onAddClient }: { clients: Client[], onAdd: (cpc: Omit<CuentasPorCobrar, 'id'>) => void, onAddClient: (client: Client) => void }) => {
+const ClientesTab = ({ clients, cuentasPorCobrar, onAddClient, isAdmin }: { clients: Client[], cuentasPorCobrar: CuentasPorCobrar[], onAddClient: (client: Client) => void, isAdmin: boolean }) => {
+    const clientBalances = useMemo(() => {
+        const balances: Record<string, number> = {};
+        clients.forEach(c => balances[c.id] = 0);
+        cuentasPorCobrar.forEach(cpc => {
+            if (balances[cpc.clienteId] !== undefined) {
+                balances[cpc.clienteId] += cpc.monto;
+            }
+        });
+        return balances;
+    }, [clients, cuentasPorCobrar]);
+
+    return (
+        <Card>
+            <CardHeader className='flex-row justify-between items-center'>
+                <div>
+                    <CardTitle>Gestión de Clientes</CardTitle>
+                    <CardDescription>Añade nuevos clientes y consulta su estado financiero.</CardDescription>
+                </div>
+                {isAdmin && (
+                    <AddClientDialog onAdd={onAddClient}>
+                        <Button><PlusCircle className="w-4 h-4 mr-2" /> Añadir Nuevo Cliente</Button>
+                    </AddClientDialog>
+                )}
+            </CardHeader>
+            <CardContent>
+                 <div className="border rounded-lg">
+                    <Table>
+                        <TableHeader><TableRow><TableHead>Nombre</TableHead><TableHead>Teléfono</TableHead><TableHead>Email</TableHead><TableHead className="text-right">Saldo Pendiente</TableHead></TableRow></TableHeader>
+                        <TableBody>
+                            {clients.map(client => (
+                                <TableRow key={client.id}>
+                                    <TableCell className="font-medium">{client.name}</TableCell>
+                                    <TableCell>{client.whatsapp || 'N/A'}</TableCell>
+                                    <TableCell>{client.email || 'N/A'}</TableCell>
+                                    <TableCell className={cn("text-right font-bold", clientBalances[client.id] > 0 ? "text-destructive" : "text-green-500")}>
+                                        {clientBalances[client.id].toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
+
+const AddCpcDialog = ({ clients, onAdd }: { clients: Client[], onAdd: (cpc: Omit<CuentasPorCobrar, 'id'>) => void }) => {
     const [clienteId, setClienteId] = useState('');
     const [periodo, setPeriodo] = useState('');
     const [monto, setMonto] = useState('');
@@ -161,17 +210,13 @@ const AddCpcDialog = ({ clients, onAdd, onAddClient }: { clients: Client[], onAd
                 <div className="grid gap-4 py-4">
                      <div className="space-y-2">
                         <Label>Cliente</Label>
-                        <div className="flex gap-2">
-                           <Select value={clienteId} onValueChange={setClienteId}>
-                                <SelectTrigger><SelectValue placeholder="Seleccionar cliente" /></SelectTrigger>
-                                <SelectContent>
-                                    {clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                            <AddClientDialog onAdd={onAddClient}>
-                                <Button variant="outline" size="icon"><PlusCircle className="w-4 h-4"/></Button>
-                            </AddClientDialog>
-                        </div>
+                        <Select value={clienteId} onValueChange={setClienteId}>
+                            <SelectTrigger><SelectValue placeholder="Seleccionar cliente" /></SelectTrigger>
+                            <SelectContent>
+                                {clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                        {clients.length === 0 && <AlertDescription>No hay clientes. Crea uno en la pestaña 'Clientes' primero.</AlertDescription>}
                     </div>
                     <Select value={periodo} onValueChange={setPeriodo}>
                         <SelectTrigger><SelectValue placeholder="Seleccionar Periodo"/></SelectTrigger>
@@ -198,7 +243,7 @@ const AddCpcDialog = ({ clients, onAdd, onAddClient }: { clients: Client[], onAd
     )
 }
 
-const CuentasPorCobrarTab = ({ data, clients, onAddCpc, onAddClient }: { data: CuentasPorCobrar[], clients: Client[], onAddCpc: (cpc: Omit<CuentasPorCobrar, 'id'>) => void, onAddClient: (client: Client) => void }) => {
+const CuentasPorCobrarTab = ({ data, clients, onAddCpc }: { data: CuentasPorCobrar[], clients: Client[], onAddCpc: (cpc: Omit<CuentasPorCobrar, 'id'>) => void }) => {
     const handleWhatsappReminder = (item: CuentasPorCobrar) => {
         const client = clients.find(c => c.id === item.clienteId);
         if (!client || !client.whatsapp) {
@@ -217,7 +262,7 @@ const CuentasPorCobrarTab = ({ data, clients, onAddCpc, onAddClient }: { data: C
                     <CardTitle>Control de Pagos Pendientes</CardTitle>
                     <CardDescription>Gestiona los pagos pendientes de tus clientes y envía recordatorios.</CardDescription>
                 </div>
-                <AddCpcDialog clients={clients} onAdd={onAddCpc} onAddClient={onAddClient} />
+                <AddCpcDialog clients={clients} onAdd={onAddCpc} />
             </CardHeader>
             <CardContent>
                 <div className="border rounded-lg">
@@ -311,6 +356,7 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave, onManualSav
                             <SelectTrigger><SelectValue placeholder="Seleccionar cliente pendiente" /></SelectTrigger>
                             <SelectContent>{cuentasPorCobrar.map(cpc => <SelectItem key={cpc.id} value={cpc.id}>{cpc.clienteName} - {cpc.periodo}</SelectItem>)}</SelectContent>
                         </Select>
+                        {cuentasPorCobrar.length === 0 && <AlertDescription>No hay cuentas por cobrar pendientes.</AlertDescription>}
                         {selectedCpc && <Card className="bg-muted p-4"><p><strong>Monto:</strong> {selectedCpc.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p></Card>}
                     </div>
                 )}
@@ -486,7 +532,9 @@ export default function FinanzasPage() {
     const [clients, setClients] = useState<Client[]>(initialClients);
     const [movimientos, setMovimientos] = useState<MovimientoDiario[]>(initialMovimientosDiarios);
     const [cuentasPorCobrar, setCuentasPorCobrar] = useState<CuentasPorCobrar[]>(initialCuentasPorCobrar);
-    const [activeTab, setActiveTab] = useState("cuentas-por-cobrar");
+    const [activeTab, setActiveTab] = useState("clientes");
+    
+    const isAdmin = user?.role === 'admin' || user?.role === 'contabilidad';
 
     const handleAddMovimiento = (nuevoMovimiento: Omit<MovimientoDiario, 'id' | 'fecha'>) => {
         const fullMovimiento: MovimientoDiario = { id: `mov-${Date.now()}`, ...nuevoMovimiento, fecha: new Date() };
@@ -505,20 +553,29 @@ export default function FinanzasPage() {
     return (
         <div>
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold font-headline">{activeTab === 'cuentas-por-cobrar' ? 'Gestión de Cobranza' : 'Control Financiero Mensual'}</h1>
+                <h1 className="text-3xl font-bold font-headline">
+                    {activeTab === 'clientes' && 'Gestión de Clientes'}
+                    {activeTab === 'cuentas-por-cobrar' && 'Gestión de Cobranza'}
+                    {activeTab === 'tabla-diaria' && 'Control Financiero Mensual'}
+                </h1>
             </div>
-            <Tabs defaultValue="cuentas-por-cobrar" className="w-full" onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="cuentas-por-cobrar">Cuentas por Cobrar</TabsTrigger>
-                    <TabsTrigger value="tabla-diaria">Tabla Diaria</TabsTrigger>
+            <Tabs defaultValue="clientes" className="w-full" onValueChange={setActiveTab}>
+                <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="clientes"><Users className="w-4 h-4 mr-2" />Clientes</TabsTrigger>
+                    <TabsTrigger value="cuentas-por-cobrar"><DollarSign className="w-4 h-4 mr-2"/>Cuentas por Cobrar</TabsTrigger>
+                    <TabsTrigger value="tabla-diaria"><TrendingUp className="w-4 h-4 mr-2"/>Tabla Diaria</TabsTrigger>
                 </TabsList>
+                 <TabsContent value="clientes" className="mt-4">
+                    <ClientesTab clients={clients} cuentasPorCobrar={cuentasPorCobrar} onAddClient={handleAddClient} isAdmin={isAdmin} />
+                </TabsContent>
                 <TabsContent value="cuentas-por-cobrar" className="mt-4">
-                   <CuentasPorCobrarTab data={cuentasPorCobrar} clients={clients} onAddCpc={handleAddCpc} onAddClient={handleAddClient} />
+                   <CuentasPorCobrarTab data={cuentasPorCobrar} clients={clients} onAddCpc={handleAddCpc} />
                 </TabsContent>
                 <TabsContent value="tabla-diaria" className="mt-4">
-                    <TablaDiariaTab isAdmin={user?.role === 'admin'} movimientos={movimientos} onAddMovimiento={handleAddMovimiento} cuentasPorCobrar={cuentasPorCobrar} onUpdateCpc={setCuentasPorCobrar} />
+                    <TablaDiariaTab isAdmin={isAdmin} movimientos={movimientos} onAddMovimiento={handleAddMovimiento} cuentasPorCobrar={cuentasPorCobrar} onUpdateCpc={setCuentasPorCobrar} />
                 </TabsContent>
             </Tabs>
         </div>
     );
 }
+
