@@ -2,14 +2,13 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Calendar } from "@/components/ui/calendar";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { format } from 'date-fns';
+import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, subWeeks, addWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { PlusCircle, Video, Camera, Phone, User, Monitor, Mic, Lightbulb, Grip, X } from 'lucide-react';
+import { PlusCircle, Video, Camera, Phone, User, Monitor, Mic, Lightbulb, Grip, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,8 +19,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-import { addDays, startOfMonth } from 'date-fns';
-
 
 // Mocks - estos serían reemplazados por datos de Firebase
 const mockEquipment = [
@@ -46,7 +43,6 @@ type RecordingEvent = {
   project: string;
 };
 
-// ** NEW MOCK DATA **
 const initialEvents: RecordingEvent[] = [
     {
         id: `rec-1730812800000`,
@@ -59,6 +55,18 @@ const initialEvents: RecordingEvent[] = [
         assignedEquipment: ["eq1", "eq2"],
         equipmentNames: ["Micrófono Hollyland", "Cámara Sony FX3"],
         project: "Videos testimoniales para Q4"
+    },
+     {
+        id: `rec-1730985600000`,
+        clientName: "Constructora Edifica",
+        assignedToName: "Luis",
+        fullStart: new Date('2024-11-07T14:00:00'),
+        fullEnd: new Date('2024-11-07T16:30:00'),
+        location: "Oficinas del Cliente",
+        locationType: "oficina_cliente",
+        assignedEquipment: ["eq5"],
+        equipmentNames: ["iPhone 15 Pro"],
+        project: "Entrevistas para video corporativo"
     }
 ];
 
@@ -225,119 +233,92 @@ const AddRecordingEventDialog = ({ onAddEvent }: { onAddEvent: (event: Recording
 }
 
 export default function CalendarioPage() {
-  const [date, setDate] = useState<Date | undefined>(new Date('2024-11-05T00:00:00'));
-  const [events, setEvents] = useState<RecordingEvent[]>(initialEvents);
-  const [pendientes, setPendientes] = useState<Pendiente[]>(mockPendientesData);
+    const [currentDate, setCurrentDate] = useState(new Date('2024-11-05'));
+    const [events, setEvents] = useState<RecordingEvent[]>(initialEvents);
+    const [pendientes, setPendientes] = useState<Pendiente[]>(mockPendientesData);
 
-  const handleAddEvent = (newEvent: RecordingEvent) => {
-      setEvents(prev => [...prev, newEvent].sort((a, b) => a.fullStart.getTime() - b.fullStart.getTime()));
-      
-      const newPendiente: Pendiente = {
-          id: `pend-${Date.now()}`,
-          cliente: newEvent.clientName,
-          encargado: newEvent.assignedToName, 
-          ejecutor: newEvent.assignedToName,
-          fechaCorte: 15,
-          status: 'Trabajando' as StatusPendiente,
-          pendientePrincipal: newEvent.project || `Grabación para ${newEvent.clientName}`,
-          categoria: 'Contenido'
-      };
-      setPendientes(prev => [...prev, newPendiente]);
-      // NOTE: In a real app, this would trigger a write to Firebase for both collections
-  }
+    const weekStartsOn = 1; // Monday
+    const currentWeekStart = startOfWeek(currentDate, { weekStartsOn });
+    const currentWeekEnd = endOfWeek(currentDate, { weekStartsOn });
+    const daysInWeek = eachDayOfInterval({ start: currentWeekStart, end: currentWeekEnd });
 
-  const filteredEvents = useMemo(() => {
-    return events.filter(event => 
-        date ? event.fullStart.toDateString() === date.toDateString() : false
-    ).sort((a,b) => a.fullStart.getTime() - b.fullStart.getTime());
-  }, [date, events]);
-  
-  const eventsByDay = useMemo(() => {
-    return events.reduce((acc, event) => {
-      const day = format(event.fullStart, 'yyyy-MM-dd');
-      if (!acc[day]) {
-        acc[day] = [];
-      }
-      acc[day].push(event);
-      return acc;
-    }, {} as Record<string, RecordingEvent[]>);
-  }, [events]);
+    const handleAddEvent = (newEvent: RecordingEvent) => {
+        setEvents(prev => [...prev, newEvent].sort((a, b) => a.fullStart.getTime() - b.fullStart.getTime()));
+        
+        const newPendiente: Pendiente = {
+            id: `pend-${Date.now()}`,
+            cliente: newEvent.clientName,
+            encargado: newEvent.assignedToName, 
+            ejecutor: newEvent.assignedToName,
+            fechaCorte: 15,
+            status: 'Trabajando' as StatusPendiente,
+            pendientePrincipal: newEvent.project || `Grabación para ${newEvent.clientName}`,
+            categoria: 'Contenido'
+        };
+        setPendientes(prev => [...prev, newPendiente]);
+    }
 
-  const DayCell = ({ date, ...props }: { date: Date } & React.HTMLAttributes<HTMLDivElement>) => {
-    const dayKey = format(date, 'yyyy-MM-dd');
-    const eventsForDay = eventsByDay[dayKey] || [];
+    const goToPreviousWeek = () => setCurrentDate(subWeeks(currentDate, 1));
+    const goToNextWeek = () => setCurrentDate(addWeeks(currentDate, 1));
+    const goToCurrentWeek = () => setCurrentDate(new Date());
+
+
     return (
-        <div {...props} className="relative h-full">
-            {props.children}
-            {eventsForDay.length > 0 && (
-                <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
-                    {eventsForDay.slice(0, 3).map((event, index) => (
-                        <div key={index} className="w-1.5 h-1.5 rounded-full bg-primary" />
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col h-full">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold font-headline">Calendario de Grabaciones</h1>
-        <AddRecordingEventDialog onAddEvent={handleAddEvent} />
-      </div>
-
-      <Card>
-        <div className="grid grid-cols-1 lg:grid-cols-3">
-            <div className="lg:col-span-2 p-4 border-r">
-                 <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    className="p-0 [&_td]:w-auto [&_td]:h-14 [&_th]:w-auto"
-                    locale={es}
-                    components={{ Day: DayCell }}
-                    defaultMonth={new Date('2024-11-01')}
-                />
+        <div className="flex flex-col h-[calc(100vh-6rem)]">
+          <header className="flex justify-between items-center mb-6 px-1">
+            <div>
+                <h1 className="text-2xl font-bold font-headline">Calendario de Grabaciones</h1>
+                <p className="text-muted-foreground">
+                    {format(currentWeekStart, "d 'de' MMMM", { locale: es })} - {format(currentWeekEnd, "d 'de' MMMM 'de' yyyy", { locale: es })}
+                </p>
             </div>
-            <div className="lg:col-span-1 p-4 bg-card/30">
-                 <h2 className="text-xl font-bold font-headline mb-4">
-                    Grabaciones para {date ? format(date, "d 'de' MMMM", { locale: es }) : 'el día seleccionado'}
-                </h2>
-                <ScrollArea className="h-[450px] pr-2">
-                  <div className="space-y-4">
-                  {filteredEvents.length > 0 ? (
-                      filteredEvents.map((event) => (
-                      <Card key={event.id} className="p-4 bg-card/50">
-                          <CardHeader className="p-0 mb-3">
-                            <CardTitle className="text-base">{event.project}</CardTitle>
-                            <CardDescription>{event.clientName}</CardDescription>
-                          </CardHeader>
-                          <CardContent className="p-0 text-sm space-y-2">
-                             <p className="flex items-center gap-2 text-muted-foreground"><User className="w-4 h-4" /> Responsable: {event.assignedToName}</p>
-                             <p className="font-semibold">{format(event.fullStart, 'HH:mm')} - {format(event.fullEnd, 'HH:mm')}</p>
-                             <p className="text-xs text-muted-foreground">{event.locationType === 'estudio' ? 'Estudio MAW' : event.location}</p>
-                             <div>
-                                <p className="text-xs font-semibold mb-1">Equipo Asignado:</p>
-                                <div className="flex flex-wrap gap-1">
-                                    {event.equipmentNames.map(name => <Badge key={name} variant="secondary">{name}</Badge>)}
+            <div className="flex items-center gap-2">
+                <Button variant="outline" onClick={goToPreviousWeek}><ChevronLeft className="w-4 h-4 mr-2" /> Semana Anterior</Button>
+                <Button variant="ghost" onClick={goToCurrentWeek}>Semana Actual</Button>
+                <Button variant="outline" onClick={goToNextWeek}>Siguiente Semana <ChevronRight className="w-4 h-4 ml-2" /></Button>
+                <AddRecordingEventDialog onAddEvent={handleAddEvent} />
+            </div>
+          </header>
+
+          <div className="grid grid-cols-7 flex-grow border-t border-l rounded-t-lg overflow-hidden">
+                {daysInWeek.map(day => {
+                    const dayEvents = events.filter(event => isSameDay(event.fullStart, day)).sort((a, b) => a.fullStart.getTime() - b.fullStart.getTime());
+                    return (
+                        <div key={day.toString()} className="border-r border-b flex flex-col">
+                            <div className="p-2 border-b text-center">
+                                <p className="text-sm font-semibold uppercase text-muted-foreground">{format(day, 'EEE', { locale: es })}</p>
+                                <p className="text-2xl font-bold">{format(day, 'd')}</p>
+                            </div>
+                            <ScrollArea className="flex-grow">
+                                <div className="p-2 space-y-2">
+                                {dayEvents.length > 0 ? (
+                                    dayEvents.map(event => (
+                                    <Card key={event.id} className="p-3 bg-card/70 hover:bg-card transition-colors">
+                                        <CardHeader className="p-0 mb-2">
+                                            <CardTitle className="text-sm">{event.project}</CardTitle>
+                                            <CardDescription className="text-xs">{event.clientName}</CardDescription>
+                                        </CardHeader>
+                                        <CardContent className="p-0 text-xs space-y-1">
+                                            <p className="flex items-center gap-1.5 text-muted-foreground"><User className="w-3 h-3" /> {event.assignedToName}</p>
+                                            <p className="font-semibold">{format(event.fullStart, 'HH:mm')} - {format(event.fullEnd, 'HH:mm')}</p>
+                                            <div className="flex flex-wrap gap-1 pt-1">
+                                                {event.equipmentNames.map(name => <Badge key={name} variant="secondary" className="text-xs">{name}</Badge>)}
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                    ))
+                                ) : (
+                                    <div className="text-center text-xs text-muted-foreground pt-10">
+                                        <Camera className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                                        <p>Sin grabaciones</p>
+                                    </div>
+                                )}
                                 </div>
-                             </div>
-                          </CardContent>
-                      </Card>
-                      ))
-                  ) : (
-                      <div className="text-center text-muted-foreground py-10 flex flex-col items-center justify-center h-full">
-                          <Camera className="w-16 h-16 mb-4 text-muted-foreground" />
-                          <p>No hay grabaciones programadas para este día.</p>
-                      </div>
-                  )}
-                  </div>
-                </ScrollArea>
-            </div>
+                            </ScrollArea>
+                        </div>
+                    )
+                })}
+          </div>
         </div>
-      </Card>
-    </div>
-  );
+      );
 }
-
