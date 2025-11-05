@@ -110,21 +110,31 @@ const PendientesTable = ({ data }: { data: Pendiente[] }) => {
 
 
 export default function PendientesPage() {
-    const [responsableFilter, setResponsableFilter] = useState('Todos');
+    const [encargadoFilter, setEncargadoFilter] = useState('Todos');
+    const [ejecutorFilter, setEjecutorFilter] = useState('Todos');
     const [statusFilter, setStatusFilter] = useState('Todos');
     const [searchFilter, setSearchFilter] = useState('');
 
+    const ejecutoresDisponibles = useMemo(() => {
+        if (encargadoFilter === 'Todos') {
+            return Array.from(new Set(mockData.map(item => item.ejecutor))).sort();
+        }
+        return Array.from(new Set(mockData.filter(item => item.encargado === encargadoFilter).map(item => item.ejecutor))).sort();
+    }, [encargadoFilter]);
+
+    React.useEffect(() => {
+        setEjecutorFilter('Todos');
+    }, [encargadoFilter]);
+
     const filteredData = useMemo(() => {
         return mockData.filter(item => {
-            const responsableMatch = responsableFilter === 'Todos' || item.encargado === responsableFilter || item.ejecutor === responsableFilter;
+            const encargadoMatch = encargadoFilter === 'Todos' || item.encargado === encargadoFilter;
+            const ejecutorMatch = ejecutorFilter === 'Todos' || item.ejecutor === ejecutorFilter;
             const statusMatch = statusFilter === 'Todos' || item.status === statusFilter;
             const searchMatch = searchFilter === '' || item.cliente.toLowerCase().includes(searchFilter.toLowerCase()) || item.pendientePrincipal.toLowerCase().includes(searchFilter.toLowerCase());
-            return responsableMatch && statusMatch && searchMatch;
+            return encargadoMatch && ejecutorMatch && statusMatch && searchMatch;
         });
-    }, [responsableFilter, statusFilter, searchFilter]);
-
-    const allPersonal = Array.from(new Set([...mockData.map(item => item.encargado), ...mockData.map(item => item.ejecutor)])).sort();
-
+    }, [encargadoFilter, ejecutorFilter, statusFilter, searchFilter]);
 
   return (
     <div>
@@ -138,13 +148,22 @@ export default function PendientesPage() {
                     onChange={(e) => setSearchFilter(e.target.value)}
                     className="max-w-xs"
                 />
-                <Select value={responsableFilter} onValueChange={setResponsableFilter}>
+                <Select value={encargadoFilter} onValueChange={setEncargadoFilter}>
                     <SelectTrigger className="w-full md:w-[180px]">
-                        <SelectValue placeholder="Filtrar por Responsable" />
+                        <SelectValue placeholder="Filtrar por Encargado" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="Todos">Todo el personal</SelectItem>
-                        {allPersonal.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                        <SelectItem value="Todos">Todos los Encargados</SelectItem>
+                        {encargados.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+                 <Select value={ejecutorFilter} onValueChange={setEjecutorFilter}>
+                    <SelectTrigger className="w-full md:w-[180px]">
+                        <SelectValue placeholder="Filtrar por Ejecutor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="Todos">Todos los Ejecutores</SelectItem>
+                        {ejecutoresDisponibles.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
                     </SelectContent>
                 </Select>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -181,5 +200,3 @@ export default function PendientesPage() {
     </div>
   );
 }
-
-    
