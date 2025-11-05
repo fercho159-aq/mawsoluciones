@@ -1,8 +1,5 @@
-
-"use client";
-
 import { portfolioItems } from "@/lib/portfolio-data";
-import { notFound, useRouter } from "next/navigation";
+import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { motion, AnimatePresence } from "framer-motion";
+import BackButton from "@/components/back-button";
 
 interface QuoteFormData {
   name: string;
@@ -130,17 +128,6 @@ const QuoteDialog = ({ itemTitle }: { itemTitle: string }) => {
     </Dialog>
   );
 }
-
-const BackButton = () => {
-    const router = useRouter();
-    return (
-        <Button variant="outline" onClick={() => router.back()} className="mb-8">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Volver a Clientes
-        </Button>
-    )
-}
-
 
 export default function PortfolioItemPage({
   params,
