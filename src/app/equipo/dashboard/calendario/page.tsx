@@ -15,7 +15,7 @@ type Evento = {
   date: Date;
   title: string;
   type: 'grabacion' | 'cita' | 'llamada';
-  responsable: 'Alma Fer' | 'Julio' | 'Fany' | 'Luis' | 'Carlos';
+  responsable: 'Alma' | 'Julio' | 'Fany' | 'Luis' | 'Carlos' | 'Fer';
 };
 
 const today = new Date();
@@ -24,9 +24,9 @@ const startOfToday = startOfMonth(today);
 const mockEvents: Evento[] = [
   { date: addDays(startOfToday, 2), title: "Grabación Biofert", type: 'grabacion', responsable: 'Fany' },
   { date: addDays(startOfToday, 2), title: "Videollamada con Prospecto 'Tacos El Veloz'", type: 'cita', responsable: 'Julio' },
-  { date: addDays(startOfToday, 4), title: "Llamada de seguimiento 'Constructora Edifica'", type: 'llamada', responsable: 'Alma Fer' },
+  { date: addDays(startOfToday, 4), title: "Llamada de seguimiento 'Constructora Edifica'", type: 'llamada', responsable: 'Alma' },
   { date: addDays(startOfToday, 9), title: "Grabación UROLOGO", type: 'grabacion', responsable: 'Luis' },
-  { date: addDays(startOfToday, 9), title: "Cita de cierre 'Clínica Dental Sonrisa'", type: 'cita', responsable: 'Alma Fer' },
+  { date: addDays(startOfToday, 9), title: "Cita de cierre 'Clínica Dental Sonrisa'", type: 'cita', responsable: 'Fer' },
   { date: addDays(startOfToday, 15), title: "Grabación Benja", type: 'grabacion', responsable: 'Fany' },
   { date: addDays(startOfToday, 17), title: "Videollamada de Demo 'Restaurante La Toscana'", type: 'cita', responsable: 'Julio' },
   { date: addDays(startOfToday, 24), title: "Grabación para Redes", type: 'grabacion', responsable: 'Carlos' },
@@ -112,7 +112,8 @@ export default function CalendarioPage() {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="Todos">Todos</SelectItem>
-                        <SelectItem value="Alma Fer">Alma Fer</SelectItem>
+                        <SelectItem value="Alma">Alma</SelectItem>
+                        <SelectItem value="Fer">Fer</SelectItem>
                         <SelectItem value="Julio">Julio</SelectItem>
                         <SelectItem value="Fany">Fany</SelectItem>
                         <SelectItem value="Luis">Luis</SelectItem>
@@ -145,4 +146,3 @@ export default function CalendarioPage() {
     </div>
   );
 }
-

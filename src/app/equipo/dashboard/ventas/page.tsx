@@ -33,6 +33,7 @@ import { Textarea } from '@/components/ui/textarea';
 
 type OrigenLead = "Facebook" | "TikTok" | "Referencia" | "Sitio Web";
 type StatusLead = "Lead Nuevo" | "Contactado" | "Videollamada" | "En Negociación" | "Convertido" | "No Interesado";
+type ResponsableVentas = "Alma" | "Fer" | "Julio";
 
 interface Lead {
   id: string;
@@ -41,16 +42,16 @@ interface Lead {
   telefono?: string;
   origen: OrigenLead;
   status: StatusLead;
-  responsable: "Alma Fer" | "Julio";
+  responsable: ResponsableVentas;
 }
 
 const mockLeads: Lead[] = [
-  { id: 'lead1', cliente: "Gimnasio FitnessPro", email: "contacto@fitnesspro.com", telefono: "5511223344", origen: "Facebook", status: "Videollamada", responsable: "Alma Fer" },
+  { id: 'lead1', cliente: "Gimnasio FitnessPro", email: "contacto@fitnesspro.com", telefono: "5511223344", origen: "Facebook", status: "Videollamada", responsable: "Alma" },
   { id: 'lead2', cliente: "Tacos El Veloz", email: "info@tacoselveloz.com", telefono: "5522334455", origen: "TikTok", status: "Lead Nuevo", responsable: "Julio" },
-  { id: 'lead3', cliente: "Clínica Dental Sonrisa", email: "hola@dentalsonrisa.mx", telefono: "5533445566", origen: "Referencia", status: "En Negociación", responsable: "Alma Fer" },
+  { id: 'lead3', cliente: "Clínica Dental Sonrisa", email: "hola@dentalsonrisa.mx", telefono: "5533445566", origen: "Referencia", status: "En Negociación", responsable: "Fer" },
   { id: 'lead4', cliente: "Ecommerce de Ropa 'Moda Hoy'", email: "ventas@modahoy.com", telefono: "5544556677", origen: "Facebook", status: "Contactado", responsable: "Julio" },
-  { id: 'lead5', cliente: "Constructora Edifica", email: "proyectos@edifica.com", telefono: "5555667788", origen: "Sitio Web", status: "No Interesado", responsable: "Alma Fer" },
-  { id: 'lead6', cliente: "Restaurante La Toscana", email: "reservas@latoscana.com", telefono: "5566778899", origen: "TikTok", status: "Videollamada", responsable: "Julio" },
+  { id: 'lead5', cliente: "Constructora Edifica", email: "proyectos@edifica.com", telefono: "5555667788", origen: "Sitio Web", status: "No Interesado", responsable: "Alma" },
+  { id: 'lead6', cliente: "Restaurante La Toscana", email: "reservas@latoscana.com", telefono: "5566778899", origen: "TikTok", status: "Videollamada", responsable: "Fer" },
 ];
 
 const statusColors: Record<StatusLead, string> = {
@@ -63,7 +64,7 @@ const statusColors: Record<StatusLead, string> = {
 };
 
 const origenes: OrigenLead[] = ["Facebook", "TikTok", "Referencia", "Sitio Web"];
-const responsables = ["Alma Fer", "Julio"];
+const responsables: ResponsableVentas[] = ["Alma", "Fer", "Julio"];
 const statuses: StatusLead[] = ["Lead Nuevo", "Contactado", "Videollamada", "En Negociación", "Convertido", "No Interesado"];
 
 const AddLeadDialog = ({ onAddLeads }: { onAddLeads: (leads: Omit<Lead, 'id' | 'status' | 'responsable'>[]) => void }) => {
@@ -169,20 +170,20 @@ export default function VentasPage() {
     const [searchFilter, setSearchFilter] = useState('');
 
     const handleAddLeads = (newLeadsData: Omit<Lead, 'id' | 'status' | 'responsable'>[]) => {
-        let lastSeller = localStorage.getItem('lastAssignedSeller') || 'Julio';
+        let lastSellerIndex = parseInt(localStorage.getItem('lastAssignedSellerIndex') || '0');
         
-        const leadsToAdd: Lead[] = newLeadsData.map((newLeadData, index) => {
-            const newSeller = lastSeller === 'Julio' ? 'Alma Fer' : 'Julio';
-            lastSeller = newSeller;
+        const leadsToAdd: Lead[] = newLeadsData.map((newLeadData) => {
+            const newSeller = responsables[lastSellerIndex];
+            lastSellerIndex = (lastSellerIndex + 1) % responsables.length;
             return {
-                id: `lead-${Date.now()}-${index}`,
+                id: `lead-${Date.now()}-${Math.random()}`,
                 ...newLeadData,
                 status: 'Lead Nuevo',
                 responsable: newSeller,
             }
         });
 
-        localStorage.setItem('lastAssignedSeller', lastSeller);
+        localStorage.setItem('lastAssignedSellerIndex', lastSellerIndex.toString());
 
         setLeads(prev => [...leadsToAdd, ...prev]);
         toast({
@@ -197,7 +198,6 @@ export default function VentasPage() {
             try {
                 const newLeadsFromStorage = JSON.parse(newLeadsJSON);
                 if (Array.isArray(newLeadsFromStorage) && newLeadsFromStorage.length > 0) {
-                    // We use the same handleAddLeads function to ensure leads are distributed
                     handleAddLeads(newLeadsFromStorage); 
                     localStorage.removeItem('newLeads');
                      toast({
