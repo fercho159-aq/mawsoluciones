@@ -43,11 +43,10 @@ export default function PortfolioItemPage({
               {item.image && (
                 <div className="relative aspect-video rounded-lg shadow-2xl overflow-hidden">
                   <Image
-                    src={item.image.imageUrl}
+                    src={item.image}
                     alt={item.title}
                     fill
                     className="object-cover"
-                    data-ai-hint={item.image.imageHint}
                   />
                 </div>
               )}
@@ -115,12 +114,11 @@ export default function PortfolioItemPage({
                               <div className="relative aspect-video">
                                   {project.image && (
                                   <Image
-                                      src={project.image.imageUrl}
+                                      src={project.image}
                                       alt={project.title}
                                       fill
                                       sizes="(max-width: 640px) 100vw, 50vw"
                                       className="object-cover transition-transform duration-300 group-hover:scale-105"
-                                      data-ai-hint={project.image.imageHint}
                                   />
                                   )}
                               </div>
