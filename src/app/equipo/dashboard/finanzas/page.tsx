@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { format, startOfMonth, endOfMonth, isWithinInterval, parse, addMonths, getDaysInMonth, parseISO } from 'date-fns';
@@ -27,7 +28,6 @@ import { es } from 'date-fns/locale';
 
 // --- Types ---
 type Periodo = string;
-type MetodoContacto = "Whatsapp" | "Email";
 type MovimientoTipo = "Ingreso" | "Gasto";
 type CategoriaIngreso = "Proyecto" | "Iguala Mensual" | "Ads";
 type CategoriaGasto = "Publicidad" | "Sueldos" | "Comisiones" | "Impuestos" | "Personales" | "Otros" | "Renta";
@@ -38,8 +38,7 @@ interface CuentasPorCobrar {
   cliente: string;
   periodo: Periodo;
   monto: number;
-  metodo: MetodoContacto;
-  contacto: string;
+  whatsapp: string;
   tipo: CategoriaIngreso;
 }
 
@@ -56,11 +55,10 @@ export interface MovimientoDiario {
 
 // --- Initial Data ---
 const initialCuentasPorCobrar: CuentasPorCobrar[] = [
-  { id: 'cpc1', cliente: "Bateiras", periodo: "15 Nov - 15 Dic", monto: 3944, metodo: "Whatsapp", contacto: "5215512345678", tipo: "Ads" },
+  { id: 'cpc1', cliente: "Bateiras", periodo: "15 Oct - 15 Nov", monto: 3944, whatsapp: "5215512345678", tipo: "Ads" },
 ];
 
-export const mockMovimientosDiarios: MovimientoDiario[] = [
-    { id: 'mov1', fecha: new Date('2024-11-04T10:00:00'), tipo: 'Ingreso', descripcion: 'Pago cliente Bateiras', monto: 3944, cuenta: 'Cuenta MAW', categoria: 'Ads' },
+export const initialMovimientosDiarios: MovimientoDiario[] = [
     { id: 'mov2', fecha: new Date('2024-11-01T09:00:00'), tipo: 'Gasto', descripcion: 'Pago Dani', monto: 9000, cuenta: 'Cuenta Aldo', categoria: 'Sueldos' },
     { id: 'mov3', fecha: new Date('2024-11-01T09:01:00'), tipo: 'Gasto', descripcion: 'Pago Didi Den', monto: 9900, cuenta: 'Cuenta Aldo', categoria: 'Sueldos' },
     { id: 'mov4', fecha: new Date('2024-11-01T09:02:00'), tipo: 'Gasto', descripcion: 'Renta Abajo', monto: 4500, cuenta: 'Cuenta Aldo', categoria: 'Renta' },
@@ -80,24 +78,23 @@ const AddCpcDialog = ({ onAdd }: { onAdd: (cpc: Omit<CuentasPorCobrar, 'id'>) =>
     const [cliente, setCliente] = useState('');
     const [periodo, setPeriodo] = useState('');
     const [monto, setMonto] = useState('');
-    const [metodo, setMetodo] = useState<MetodoContacto>('Whatsapp');
-    const [contacto, setContacto] = useState('');
+    const [whatsapp, setWhatsapp] = useState('');
     const [tipo, setTipo] = useState<CategoriaIngreso>('Proyecto');
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
 
     const handleSave = () => {
-        if (!cliente || !periodo || !monto || !contacto) {
+        if (!cliente || !periodo || !monto || !whatsapp) {
             toast({ title: "Error", description: "Todos los campos son obligatorios.", variant: "destructive" });
             return;
         }
 
-        onAdd({ cliente, periodo, monto: parseFloat(monto), metodo, contacto, tipo });
+        onAdd({ cliente, periodo, monto: parseFloat(monto), whatsapp, tipo });
         setOpen(false);
         toast({ title: "Éxito", description: `Cuenta por cobrar para ${cliente} añadida.` });
 
         // Reset form
-        setCliente(''); setPeriodo(''); setMonto(''); setMetodo('Whatsapp'); setContacto(''); setTipo('Proyecto');
+        setCliente(''); setPeriodo(''); setMonto(''); setWhatsapp(''); setTipo('Proyecto');
     };
 
     return (
@@ -132,21 +129,8 @@ const AddCpcDialog = ({ onAdd }: { onAdd: (cpc: Omit<CuentasPorCobrar, 'id'>) =>
                         </Select>
                     </div>
                      <div className="space-y-2">
-                        <Label>Método de Contacto</Label>
-                        <RadioGroup defaultValue="Whatsapp" value={metodo} onValueChange={v => setMetodo(v as MetodoContacto)} className="flex gap-4">
-                             <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="Whatsapp" id="cpc-wa" />
-                                <Label htmlFor="cpc-wa" className="font-normal">Whatsapp</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="Email" id="cpc-em" />
-                                <Label htmlFor="cpc-em" className="font-normal">Email</Label>
-                            </div>
-                        </RadioGroup>
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="cpc-contacto">Contacto ({metodo})</Label>
-                        <Input id="cpc-contacto" value={contacto} onChange={e => setContacto(e.target.value)} placeholder={metodo === 'Whatsapp' ? 'Ej. 52155...' : 'Ej. cliente@email.com'} />
+                        <Label htmlFor="cpc-whatsapp">Número de WhatsApp</Label>
+                        <Input id="cpc-whatsapp" value={whatsapp} onChange={e => setWhatsapp(e.target.value)} placeholder="Ej. 5215512345678" />
                     </div>
                 </div>
                 <DialogFooter>
@@ -193,8 +177,8 @@ const CuentasPorCobrarTab = ({ data, onAddCpc }: { data: CuentasPorCobrar[], onA
     };
 
     const handleWhatsappReminder = (item: CuentasPorCobrar) => {
-        const message = `¡Hola ${item.cliente}! Te recordamos amablemente que el pago de tu servicio para el periodo del ${item.periodo} está pendiente. El monto es de ${item.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}. ¡Gracias!`;
-        const whatsappUrl = `https://wa.me/${item.contacto}?text=${encodeURIComponent(message)}`;
+        const message = `¡Hola ${item.cliente}! Te recordamos amablemente que el pago de tu servicio de ${item.tipo} para el periodo del ${item.periodo} está pendiente. El monto es de ${item.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}. ¡Gracias!`;
+        const whatsappUrl = `https://wa.me/${item.whatsapp}?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
     }
 
@@ -237,16 +221,10 @@ const CuentasPorCobrarTab = ({ data, onAddCpc }: { data: CuentasPorCobrar[], onA
                             <TableCell>{item.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
                             <TableCell><Badge variant={item.tipo === 'Iguala Mensual' ? 'secondary' : 'default'}>{item.tipo}</Badge></TableCell>
                             <TableCell className="text-right">
-                            {item.metodo === 'Whatsapp' ? (
                                 <Button variant="whatsapp" size="sm" onClick={() => handleWhatsappReminder(item)}>
                                     <WhatsappIcon className="w-4 h-4 mr-2" />
                                     Recordar Pago
                                 </Button>
-                            ) : (
-                                <Button variant="outline" size="sm">
-                                    Enviar Email<ArrowRight className="w-4 h-4 ml-2" />
-                                </Button>
-                            )}
                             </TableCell>
                         </TableRow>
                         ))}
@@ -384,6 +362,7 @@ const RegistrarGastoDialog = ({ onSave, children }: { onSave: (gasto: Omit<Movim
              return;
         }
         if (['Personales', 'Otros'].includes(categoriaGasto)) {
+            datosGasto.descripcion = `${categoriaGasto} (${nombreOtro})`
             datosGasto.nombreOtro = nombreOtro;
         }
         
@@ -460,35 +439,40 @@ const TablaDiariaTab = ({ movimientos, onAddMovimiento, cuentasPorCobrar, onUpda
     const handleRegisterIngreso = (pago: { cpc: CuentasPorCobrar, cuenta: Cuenta | string }) => {
         const { cpc, cuenta } = pago;
         
-        onAddMovimiento({
+        const nuevoIngreso: Omit<MovimientoDiario, 'id' | 'fecha'> = {
             descripcion: `Pago cliente ${cpc.cliente}`,
             monto: cpc.monto,
             cuenta: cuenta,
             tipo: 'Ingreso',
             categoria: cpc.tipo,
-        });
+        };
 
-        let updatedCpc = cuentasPorCobrar.filter(item => item.id !== cpc.id);
+        onAddMovimiento(nuevoIngreso);
+
+        let updatedCpcList = cuentasPorCobrar.filter(item => item.id !== cpc.id);
         
         if (cpc.tipo === 'Iguala Mensual' || cpc.tipo === 'Ads') {
-             try {
-                const dateParts = cpc.periodo.split(' - ').map(d => d.trim());
-                const formatString = "dd MMM";
+            try {
+                const dateParts = cpc.periodo.split(' - ').map(d => d.trim().replace("de ", ""));
+                const formatString = "d MMM";
                 const currentYear = new Date().getFullYear();
-
+                
                 const startDate = parse(`${dateParts[0]} ${currentYear}`, 'd MMM yyyy', new Date(), { locale: es });
+                
                 const nextStartDate = addMonths(startDate, 1);
                 const nextEndDate = addMonths(nextStartDate, 1);
                 
-                const newPeriodo = `${format(nextStartDate, "dd MMM", {locale: es})} - ${format(nextEndDate, "dd MMM", {locale: es})}` as Periodo;
+                const newPeriodo = `${format(nextStartDate, "d MMM", {locale: es})} - ${format(nextEndDate, "d MMM", {locale: es})}` as Periodo;
                 
                 const newIguala: CuentasPorCobrar = { ...cpc, id: `cpc-${Date.now()}`, periodo: newPeriodo };
-                updatedCpc.push(newIguala);
-             } catch (e) {
-                 console.error("Error parsing date for new iguala:", e);
-             }
+                updatedCpcList.push(newIguala);
+            } catch (e) {
+                console.error("Error parsing date for new iguala:", e);
+                // Si falla el parseo, no se crea la nueva iguala pero el pago se registra.
+            }
         }
-        onUpdateCpc(updatedCpc);
+        
+        onUpdateCpc(updatedCpcList);
     };
 
     const handleRegisterGasto = (gasto: Omit<MovimientoDiario, 'id' | 'fecha' | 'tipo'>) => {
@@ -499,7 +483,7 @@ const TablaDiariaTab = ({ movimientos, onAddMovimiento, cuentasPorCobrar, onUpda
 
     const monthOptions = useMemo(() => {
         const uniqueMonths = new Set(
-            mockMovimientosDiarios.map(mov => format(startOfMonth(mov.fecha), 'yyyy-MM-dd'))
+            initialMovimientosDiarios.map(mov => format(startOfMonth(mov.fecha), 'yyyy-MM-dd'))
         );
         const currentMonthStart = format(startOfMonth(new Date(2024, 10, 1)), 'yyyy-MM-dd');
         if (!uniqueMonths.has(currentMonthStart)) {
@@ -509,7 +493,8 @@ const TablaDiariaTab = ({ movimientos, onAddMovimiento, cuentasPorCobrar, onUpda
     }, []);
 
     const monthlyData = useMemo(() => {
-        const start = parse(selectedMonth, 'yyyy-MM-dd', new Date());
+        if (!selectedMonth) return [];
+        const start = startOfMonth(parseISO(selectedMonth));
         const end = endOfMonth(start);
         return movimientos.filter(mov => isWithinInterval(mov.fecha, { start, end }));
     }, [movimientos, selectedMonth]);
@@ -538,7 +523,7 @@ const TablaDiariaTab = ({ movimientos, onAddMovimiento, cuentasPorCobrar, onUpda
                     <Button variant="destructive"><MinusCircle className="w-4 h-4 mr-2" />Registrar Gasto</Button>
                 </RegistrarGastoDialog>
             </div>
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                  <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Ingresos del Mes</CardTitle>
@@ -573,7 +558,7 @@ const TablaDiariaTab = ({ movimientos, onAddMovimiento, cuentasPorCobrar, onUpda
                 <CardHeader>
                     <div className="flex justify-between items-center">
                         <div>
-                             <CardTitle>Movimientos de {format(parse(selectedMonth, 'yyyy-MM-dd', new Date()), 'MMMM yyyy', { locale: es })}</CardTitle>
+                             <CardTitle>Movimientos de {format(parseISO(selectedMonth), 'MMMM yyyy', { locale: es })}</CardTitle>
                              <CardDescription>Registro de todos los ingresos y gastos del mes.</CardDescription>
                         </div>
                         <Select value={selectedMonth} onValueChange={setSelectedMonth}>
@@ -581,7 +566,7 @@ const TablaDiariaTab = ({ movimientos, onAddMovimiento, cuentasPorCobrar, onUpda
                             <SelectContent>
                                 {monthOptions.map(month => (
                                     <SelectItem key={month} value={month}>
-                                        {format(parse(month, 'yyyy-MM-dd', new Date()), 'MMMM yyyy', { locale: es })}
+                                        {format(parseISO(month), 'MMMM yyyy', { locale: es })}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -634,7 +619,7 @@ const TablaDiariaTab = ({ movimientos, onAddMovimiento, cuentasPorCobrar, onUpda
 }
 
 export default function FinanzasPage() {
-    const [movimientos, setMovimientos] = useState<MovimientoDiario[]>(mockMovimientosDiarios);
+    const [movimientos, setMovimientos] = useState<MovimientoDiario[]>(initialMovimientosDiarios);
     const [cuentasPorCobrar, setCuentasPorCobrar] = useState<CuentasPorCobrar[]>(initialCuentasPorCobrar);
     const [activeTab, setActiveTab] = useState("cuentas-por-cobrar");
 
@@ -672,10 +657,14 @@ export default function FinanzasPage() {
             </TabsContent>
 
             <TabsContent value="tabla-diaria" className="mt-4">
-                <TablaDiariaTab movimientos={movimientos} onAddMovimiento={handleAddMovimiento} cuentasPorCobrar={cuentasPorCobrar} onUpdateCpc={setCuentasPorCobrar} />
+                <TablaDiariaTab 
+                    movimientos={movimientos} 
+                    onAddMovimiento={handleAddMovimiento} 
+                    cuentasPorCobrar={cuentasPorCobrar} 
+                    onUpdateCpc={setCuentasPorCobrar} 
+                />
             </TabsContent>
         </Tabs>
     </div>
   );
 }
-
