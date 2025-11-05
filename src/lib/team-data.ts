@@ -14,6 +14,8 @@ export const teamMembers: TeamMember[] = [
     { id: '2', name: 'Luis', username: 'luis', password: 'admin2025', role: 'admin', email: 'luis@maw.com' },
     { id: '3', name: 'Carlos', username: 'carlos', password: 'admin2025', role: 'admin', email: 'carlos@maw.com' },
     { id: '4', name: 'Julio', username: 'julio', password: 'admin2025', role: 'admin', email: 'julio@maw.com' },
+    { id: '15', name: 'Alma Fer', username: 'alma', password: 'alma2025', role: 'admin', email: 'alma@maw.com' },
+
 
     // Ejecutores (Users)
     { id: '5', name: 'Aldair', username: 'aldair', password: 'aldair2025', role: 'user', email: 'aldair@maw.com' },
