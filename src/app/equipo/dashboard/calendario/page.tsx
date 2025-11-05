@@ -49,11 +49,11 @@ type RecordingEvent = {
 // ** NEW MOCK DATA **
 const initialEvents: RecordingEvent[] = [
     {
-        id: `rec-${Date.now()}`,
+        id: `rec-1730812800000`,
         clientName: "Biofert",
         assignedToName: "Fany",
-        fullStart: addDays(startOfMonth(new Date('2024-11-05')), 4), // Approx Nov 5th
-        fullEnd: addDays(startOfMonth(new Date('2024-11-05')), 4),
+        fullStart: new Date('2024-11-05T10:00:00'),
+        fullEnd: new Date('2024-11-05T12:00:00'),
         location: "Estudio Principal",
         locationType: "estudio",
         assignedEquipment: ["eq1", "eq2"],
@@ -225,7 +225,7 @@ const AddRecordingEventDialog = ({ onAddEvent }: { onAddEvent: (event: Recording
 }
 
 export default function CalendarioPage() {
-  const [date, setDate] = useState<Date | undefined>(new Date('2024-11-05'));
+  const [date, setDate] = useState<Date | undefined>(new Date('2024-11-05T00:00:00'));
   const [events, setEvents] = useState<RecordingEvent[]>(initialEvents);
   const [pendientes, setPendientes] = useState<Pendiente[]>(mockPendientesData);
 
@@ -251,9 +251,21 @@ export default function CalendarioPage() {
         date ? event.fullStart.toDateString() === date.toDateString() : false
     ).sort((a,b) => a.fullStart.getTime() - b.fullStart.getTime());
   }, [date, events]);
+  
+  const eventsByDay = useMemo(() => {
+    return events.reduce((acc, event) => {
+      const day = format(event.fullStart, 'yyyy-MM-dd');
+      if (!acc[day]) {
+        acc[day] = [];
+      }
+      acc[day].push(event);
+      return acc;
+    }, {} as Record<string, RecordingEvent[]>);
+  }, [events]);
 
   const DayCell = ({ date, ...props }: { date: Date } & React.HTMLAttributes<HTMLDivElement>) => {
-    const eventsForDay = events.filter(event => event.fullStart.toDateString() === date.toDateString());
+    const dayKey = format(date, 'yyyy-MM-dd');
+    const eventsForDay = eventsByDay[dayKey] || [];
     return (
         <div {...props} className="relative h-full">
             {props.children}
@@ -282,11 +294,9 @@ export default function CalendarioPage() {
                     mode="single"
                     selected={date}
                     onSelect={setDate}
-                    className="p-0 [&_td]:w-14 [&_td]:h-14 [&_th]:w-14"
+                    className="p-0 [&_td]:w-auto [&_td]:h-14 [&_th]:w-auto"
                     locale={es}
                     components={{ Day: DayCell }}
-                    modifiers={{ events: events.map(e => e.fullStart) }}
-                    modifiersClassNames={{ events: 'font-bold' }}
                     defaultMonth={new Date('2024-11-01')}
                 />
             </div>
