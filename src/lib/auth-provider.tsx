@@ -19,7 +19,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user info is in localStorage on initial load on the client side
     try {
       const storedUser = localStorage.getItem('team-user');
       if (storedUser) {
@@ -46,13 +45,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       localStorage.removeItem('team-user');
       setUser(null);
-      router.push('/equipo');
+      router.push('/');
     } catch (error) {
       console.error("Failed to remove user from localStorage", error);
     }
   };
 
-  // While loading, we can show a loader or just nothing
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">

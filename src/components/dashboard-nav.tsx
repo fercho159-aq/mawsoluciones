@@ -5,9 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
-import { Users, BookOpen, ListTodo, KeyRound, DollarSign, Calendar, LineChart, LogOut, Handshake } from "lucide-react";
+import { Users, BookOpen, ListTodo, KeyRound, DollarSign, Calendar, LineChart, Handshake } from "lucide-react";
 import { useAuth } from "@/lib/auth-provider";
-import type { TeamMember } from "@/lib/team-data";
 
 const navItems = [
     { href: "/equipo/dashboard/nosotros", label: "Nosotros", icon: <Users className="w-4 h-4" />, section: 'nosotros' },
@@ -22,11 +21,10 @@ const navItems = [
 
 export default function DashboardNav() {
     const pathname = usePathname();
-    const { logout, user } = useAuth();
+    const { user } = useAuth();
 
     const userHasAccess = (section: string) => {
         if (!user || !user.accessSections) {
-             // Fallback for old structure or no user
             if(user?.role === 'admin') return true;
             return false;
         }
@@ -54,16 +52,6 @@ export default function DashboardNav() {
                         </Button>
                     );
                 })}
-            </div>
-            <div className="mt-auto">
-                 <Button 
-                    variant="outline"
-                    onClick={logout}
-                    className="justify-start w-full"
-                >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Cerrar Sesión
-                </Button>
             </div>
         </nav>
     );
