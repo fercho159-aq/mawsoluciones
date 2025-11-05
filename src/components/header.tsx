@@ -24,6 +24,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 const servicesLinks = [
   { 
@@ -87,43 +88,50 @@ const coursesLinks = [
     href: "/cursos/facebook-ads",
     label: "Facebook Ads para Principiantes",
     description: "Aprende desde cero a crear campañas efectivas y a optimizar tu presupuesto en la plataforma de Meta.",
-    icon: <Megaphone className="w-5 h-5" />
+    icon: <Megaphone className="w-5 h-5" />,
+    image: PlaceHolderImages.find(p => p.id === 'user-photo-1')
   },
   {
     href: "/cursos/google-ads",
     label: "Google Ads Esencial",
     description: "Domina la red de búsqueda y Display para capturar clientes con alta intención de compra.",
-    icon: <Target className="w-5 h-5" />
+    icon: <Target className="w-5 h-5" />,
+    image: PlaceHolderImages.find(p => p.id === 'user-photo-2')
   },
   {
     href: "/cursos/tiktok-ads",
     label: "Publicidad en TikTok",
     description: "Descubre cómo crear anuncios virales y conectar con la Generación Z en la plataforma de video corto.",
-    icon: <Wallet className="w-5 h-5" />
+    icon: <Wallet className="w-5 h-5" />,
+    image: PlaceHolderImages.find(p => p.id === 'user-photo-3')
   },
   {
     href: "/cursos/n8n",
     label: "Automatización con n8n",
     description: "Aprende a automatizar flujos de trabajo complejos y a conectar tus aplicaciones sin escribir código.",
-    icon: <Bot className="w-5 h-5" />
+    icon: <Bot className="w-5 h-5" />,
+    image: PlaceHolderImages.find(p => p.id === 'user-photo-4')
   },
   {
     href: "/cursos/ventas",
     label: "Técnicas de Venta Modernas",
     description: "Desde el Social Selling hasta el cierre, aprende las metodologías que funcionan en la era digital.",
-    icon: <BarChart4 className="w-5 h-5" />
+    icon: <BarChart4 className="w-5 h-5" />,
+    image: PlaceHolderImages.find(p => p.id === 'user-photo-5')
   },
   {
     href: "/cursos/finanzas-personales",
     label: "Finanzas Personales para Emprendedores",
     description: "Organiza tus finanzas, aprende a invertir y asegura la salud financiera de tu negocio y tu vida.",
-    icon: <DollarSign className="w-5 h-5" />
+    icon: <DollarSign className="w-5 h-5" />,
+    image: PlaceHolderImages.find(p => p.id === 'user-photo-6')
   },
   {
     href: "/cursos/firebase-web",
     label: "Sitios Web con Firebase",
     description: "Construye aplicaciones web modernas y escalables con Firebase y Next.js.",
-    icon: <Database className="w-5 h-5" />
+    icon: <Database className="w-5 h-5" />,
+    image: PlaceHolderImages.find(p => p.id === 'user-photo-1')
   }
 ];
 
@@ -408,5 +416,3 @@ const Header = () => {
 };
 
 export default Header;
-
-    
