@@ -379,24 +379,6 @@
       "imageHint": "designer clothes"
     },
     {
-      "id": "interview-chumel",
-      "description": "Chumel Torres being interviewed",
-      "imageUrl": "https://images.unsplash.com/photo-1589920148299-19ce928e4699?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjb21lZGlhbiUyMG9uJTIwc3RhZ2V8ZW58MHx8fHwxNzYyMzkxOTU3fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "comedian on stage"
-    },
-    {
-      "id": "interview-roberto",
-      "description": "Roberto Martinez in a podcast studio",
-      "imageUrl": "https://images.unsplash.com/photo-1590602842423-036e520021cb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwb2RjYXN0JTIwaW50ZXJ2aWV3fGVufDB8fHx8MTc2MjM5MTk1N3ww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "podcast interview"
-    },
-    {
-      "id": "interview-ricardo",
-      "description": "Ricardo Perez from La Cotorrisa",
-      "imageUrl": "https://images.unsplash.com/photo-1558980830-a035a9134327?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYWxlJTIwY29tZWRpYW58ZW58MHx8fHwxNzYyMzkxOTU3fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "male comedian"
-    },
-    {
       "id": "blog-mapa-marketing",
       "description": "mapa-marketing-digital-influencers-masters",
       "imageUrl": "/images/blog/Gemini_Generated_Image_lkv6c4lkv6c4lkv6.png",
@@ -407,6 +389,60 @@
       "description": "estrategias-trafico-web-instagram-2026",
       "imageUrl": "/images/blog/Gemini_Generated_Image_449hap449hap449h.png",
       "imageHint": "digital marketing"
+    },
+    {
+      "id": "interview-cafe-globo",
+      "description": "Thumbnail for Cafe Globo interview about AI",
+      "imageUrl": "/images/blog/Gemini_Generated_Image_2f4v262f4v262f4v.png",
+      "imageHint": "podcast thumbnail"
+    },
+    {
+      "id": "interview-giovanny-valencia",
+      "description": "Thumbnail for Giovanny Valencia podcast about sales",
+      "imageUrl": "/images/blog/Gemini_Generated_Image_4wjl0o4wjl0o4wjl.png",
+      "imageHint": "podcast host"
+    },
+    {
+      "id": "interview-cafe-canela-bots",
+      "description": "Thumbnail for Cafe con Canela TV interview about bots",
+      "imageUrl": "/images/blog/Gemini_Generated_Image_4n1l5q4n1l5q4n1l.png",
+      "imageHint": "interview thumbnail"
+    },
+    {
+      "id": "interview-cafe-canela-money",
+      "description": "Thumbnail for Cafe con Canela interview about making money",
+      "imageUrl": "/images/blog/Gemini_Generated_Image_ax7t5kax7t5kax7t.png",
+      "imageHint": "business podcast"
+    },
+    {
+      "id": "interview-lucero-trejo",
+      "description": "Thumbnail for Lucero Trejo podcast",
+      "imageUrl": "/images/blog/Gemini_Generated_Image_h9s2fwh9s2fwh9s2.png",
+      "imageHint": "marketing podcast"
+    },
+    {
+      "id": "interview-nizme-lleras",
+      "description": "Thumbnail for Nizme Lleras podcast",
+      "imageUrl": "/images/blog/Gemini_Generated_Image_qg6zneqg6zneqg6z.png",
+      "imageHint": "woman podcast"
+    },
+    {
+      "id": "interview-giovanna-venegas",
+      "description": "Thumbnail for Giovanna Venegas podcast",
+      "imageUrl": "/images/blog/Gemini_Generated_Image_49yv0449yv0449yv.png",
+      "imageHint": "business woman"
+    },
+    {
+      "id": "interview-yordani",
+      "description": "Thumbnail for Yordani podcast on marketing",
+      "imageUrl": "/images/blog/Gemini_Generated_Image_6a62qg6a62qg6a62.png",
+      "imageHint": "marketing expert"
+    },
+    {
+      "id": "interview-evelyn-cantu",
+      "description": "Thumbnail for Evelyn Cantú podcast",
+      "imageUrl": "/images/blog/Gemini_Generated_Image_qysgdaqysgdaqysg.png",
+      "imageHint": "content creator"
     }
   ]
 }
