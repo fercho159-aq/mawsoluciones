@@ -4,8 +4,7 @@
 import type { FirebaseApp } from 'firebase/app';
 import type { Auth } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
-import { createContext, useContext, ReactNode, Suspense } from 'react';
-import { FirebaseClientProvider } from './client-provider';
+import { createContext, useContext, ReactNode } from 'react';
 
 const FirebaseAppContext = createContext<FirebaseApp | undefined>(undefined);
 export const AuthContext = createContext<Auth | undefined>(undefined);
@@ -18,25 +17,18 @@ export function FirebaseProvider({
   firestore,
 }: {
   children: ReactNode;
-  app?: FirebaseApp;
-  auth?: Auth;
-  firestore?: Firestore;
+  app: FirebaseApp;
+  auth: Auth;
+  firestore: Firestore;
 }) {
-  if (app && auth && firestore) {
-    return (
-      <FirebaseAppContext.Provider value={app}>
-        <AuthContext.Provider value={auth}>
-          <FirestoreContext.Provider value={firestore}>
-            {children}
-          </FirestoreContext.Provider>
-        </AuthContext.Provider>
-      </FirebaseAppContext.Provider>
-    );
-  }
   return (
-    <Suspense>
-      <FirebaseClientProvider>{children}</FirebaseClientProvider>
-    </Suspense>
+    <FirebaseAppContext.Provider value={app}>
+      <AuthContext.Provider value={auth}>
+        <FirestoreContext.Provider value={firestore}>
+          {children}
+        </FirestoreContext.Provider>
+      </AuthContext.Provider>
+    </FirebaseAppContext.Provider>
   );
 }
 

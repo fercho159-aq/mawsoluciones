@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { Toaster } from "@/components/ui/toaster"
 import ChatBubble from '@/components/chat-bubble';
 import { ThemeProvider } from '@/components/theme-provider';
-import { FirebaseProvider } from '@/firebase/provider';
+import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
   title: 'MAW Soluciones | Agencia de Marketing Digital',
@@ -31,11 +31,11 @@ export default function RootLayout({
             enableSystem={false}
             disableTransitionOnChange
         >
-          <FirebaseProvider>
+          <FirebaseClientProvider>
             {children}
             <ChatBubble />
             <Toaster />
-          </FirebaseProvider>
+          </FirebaseClientProvider>
         </ThemeProvider>
       </body>
     </html>
