@@ -1,6 +1,6 @@
 
 
-export type Role = 'admin' | 'contabilidad' | 'ventas' | 'team_member' | 'julio' | 'alma' | 'fernando' | 'luis';
+export type Role = 'admin' | 'contabilidad' | 'ventas' | 'team_member' | 'julio' | 'alma' | 'fernando' | 'luis' | 'fany' | 'carlos' | 'paola' | 'cristian' | 'daniel' | 'alexis' | 'bere';
 
 export type TeamMember = {
     id: string;
@@ -129,4 +129,109 @@ export const teamMembers: TeamMember[] = [
         },
         progressConfig: {}
     },
+    { 
+        id: 'fany-01', 
+        name: 'Fany', 
+        username: 'fany', 
+        password: 'fany2025', 
+        role: 'fany', 
+        email: 'fany@agencia.com',
+        color: '#9333EA', // purple-500
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
+        permissions: {
+            calendario: { cambiarFechas: true, cambiarFechasSoloAsignados: true, verCalendarioTodos: true },
+            pendientes: { moverPendientes: true, reasignarResponsables: false }
+        },
+        progressConfig: {}
+    },
+    { 
+        id: 'carlos-01', 
+        name: 'Carlos', 
+        username: 'carlos', 
+        password: 'carlos2025', 
+        role: 'carlos', 
+        email: 'carlos@agencia.com',
+        color: '#F59E0B', // amber-500
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
+        permissions: {
+            calendario: { cambiarFechas: true, cambiarFechasSoloAsignados: true, verCalendarioTodos: true },
+            pendientes: { moverPendientes: true, reasignarResponsables: false }
+        },
+        progressConfig: {}
+    },
+    { 
+        id: 'paola-01', 
+        name: 'Paola', 
+        username: 'paola', 
+        password: 'paola2025', 
+        role: 'paola', 
+        email: 'paola@agencia.com',
+        color: '#EC4899', // pink-500
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
+        permissions: {
+            calendario: { cambiarFechas: true, cambiarFechasSoloAsignados: true, verCalendarioTodos: true },
+            pendientes: { moverPendientes: true, reasignarResponsables: false }
+        },
+        progressConfig: {}
+    },
+    { 
+        id: 'cristian-01', 
+        name: 'Cristian', 
+        username: 'cristian', 
+        password: 'cristian2025', 
+        role: 'cristian', 
+        email: 'cristian@agencia.com',
+        color: '#10B981', // emerald-500
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
+        permissions: {
+            calendario: { cambiarFechas: true, cambiarFechasSoloAsignados: true, verCalendarioTodos: true },
+            pendientes: { moverPendientes: true, reasignarResponsables: false }
+        },
+        progressConfig: {}
+    },
+    { 
+        id: 'daniel-01', 
+        name: 'Daniel', 
+        username: 'daniel', 
+        password: 'daniel2025', 
+        role: 'daniel', 
+        email: 'daniel@agencia.com',
+        color: '#3B82F6', // blue-500
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
+        permissions: {
+            calendario: { cambiarFechas: true, cambiarFechasSoloAsignados: true, verCalendarioTodos: true },
+            pendientes: { moverPendientes: true, reasignarResponsables: false }
+        },
+        progressConfig: {}
+    },
+    { 
+        id: 'alexis-01', 
+        name: 'Alexis', 
+        username: 'alexis', 
+        password: 'alexis2025', 
+        role: 'alexis', 
+        email: 'alexis@agencia.com',
+        color: '#EF4444', // red-500
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
+        permissions: {
+            calendario: { cambiarFechas: true, cambiarFechasSoloAsignados: true, verCalendarioTodos: true },
+            pendientes: { moverPendientes: true, reasignarResponsables: false }
+        },
+        progressConfig: {}
+    },
+     { 
+        id: 'bere-01', 
+        name: 'Bere', 
+        username: 'bere', 
+        password: 'bere2025', 
+        role: 'bere', 
+        email: 'bere@agencia.com',
+        color: '#8B5CF6', // violet-500
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
+        permissions: {
+            calendario: { cambiarFechas: true, cambiarFechasSoloAsignados: true, verCalendarioTodos: true },
+            pendientes: { moverPendientes: true, reasignarResponsables: false }
+        },
+        progressConfig: {}
+    }
 ];

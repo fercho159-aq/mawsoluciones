@@ -27,13 +27,13 @@ import { teamMembers } from '@/lib/team-data';
 import { mockData as pendientesData, type Activity, type StatusPendiente } from '@/lib/activities-data';
 import { Separator } from '@/components/ui/separator';
 
-const contenidoTeam = teamMembers.filter(m => ['Fany', 'Luis', 'Carlos', 'Julio', 'Aldair', 'Alexis', 'Pedro', 'Dani', 'Bere'].includes(m.name));
-const adsTeam = teamMembers.filter(m => ['Luis', 'Carlos', 'Julio', 'Alexis', 'Pedro', 'Bere'].includes(m.name));
-const webTeam = teamMembers.filter(m => ['Carlos', 'Pedro', 'Dani'].includes(m.name));
-
+const contenidoTeam = teamMembers.filter(m => ['Fany', 'Luis', 'Carlos', 'Julio', 'Paola', 'Cristian', 'Daniel', 'Bere'].includes(m.name));
+const adsTeam = teamMembers.filter(m => ['Luis', 'Carlos', 'Julio', 'Paola', 'Cristian', 'Daniel', 'Bere'].includes(m.name));
+const webTeam = teamMembers.filter(m => ['Carlos', 'Fernando', 'Alexis'].includes(m.name));
 
 const AddClientDialog = ({ onAdd, children }: { onAdd: (client: Omit<Client, 'id'>, pendientes: Omit<Activity, 'id'>[]) => void, children: React.ReactNode }) => {
     const [name, setName] = useState('');
+    const [representativeName, setRepresentativeName] = useState('');
     const [whatsapp, setWhatsapp] = useState('');
     const [email, setEmail] = useState('');
     const [open, setOpen] = useState(false);
@@ -49,7 +49,7 @@ const AddClientDialog = ({ onAdd, children }: { onAdd: (client: Omit<Client, 'id
     }>({});
     
     const resetForm = () => {
-        setName(''); setWhatsapp(''); setEmail(''); setServiceType('');
+        setName(''); setRepresentativeName(''); setWhatsapp(''); setEmail(''); setServiceType('');
         setAreas([]); setResponsables({});
     }
 
@@ -60,7 +60,7 @@ const AddClientDialog = ({ onAdd, children }: { onAdd: (client: Omit<Client, 'id
         }
 
         const nuevosPendientes: Omit<Activity, 'id'>[] = [];
-        const clienteNuevoData = { name, whatsapp, email };
+        const clienteNuevoData = { name, representativeName, whatsapp, email };
 
         areas.forEach(area => {
             let pendiente: Omit<Activity, 'id' | 'status' | 'fechaCorte'>;
@@ -106,7 +106,8 @@ const AddClientDialog = ({ onAdd, children }: { onAdd: (client: Omit<Client, 'id
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader><DialogTitle>Nuevo Cliente</DialogTitle></DialogHeader>
                 <div className="grid gap-4 py-4">
-                    <Input value={name} onChange={e => setName(e.target.value)} placeholder="Nombre del Cliente" />
+                    <Input value={name} onChange={e => setName(e.target.value)} placeholder="Nombre de la Empresa Cliente" />
+                    <Input value={representativeName} onChange={e => setRepresentativeName(e.target.value)} placeholder="Nombre del Representante" />
                     <Input value={whatsapp} onChange={e => setWhatsapp(e.target.value)} placeholder="WhatsApp (Ej. 52155...)" />
                     <Input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" />
                     <Separator className="my-2"/>
@@ -184,7 +185,7 @@ export default function ClientesPage() {
         if (nuevosPendientes.length > 0) {
             console.log('Nuevas tareas para pendientes:', nuevosPendientes);
             const currentPendientes = JSON.parse(localStorage.getItem('pendientes') || JSON.stringify(pendientesData));
-            const updatedPendientes = [...currentPendientes, ...nuevosPendientes.map(p => ({...p, id: `pend-${Date.now()}-${Math.random()}`}))];
+            const updatedPendientes = [...currentPendientes, ...nuevosPendientes.map((p, i) => ({...p, id: `pend-${Date.now()}-${i}`}))];
             localStorage.setItem('pendientes', JSON.stringify(updatedPendientes));
         }
     }
@@ -204,7 +205,7 @@ export default function ClientesPage() {
          return <div className="text-center p-8">Cargando...</div>;
     }
 
-    if (!user || !user.accessSections?.clientes) {
+    if (!user || (user.role !== 'admin' && user.role !== 'contabilidad')) {
         return <div className="text-center p-8">No tienes permiso para ver esta sección.</div>;
     }
 
@@ -228,7 +229,8 @@ export default function ClientesPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Nombre</TableHead>
+                                    <TableHead>Empresa Cliente</TableHead>
+                                    <TableHead>Nombre Representante</TableHead>
                                     <TableHead>Teléfono</TableHead>
                                     <TableHead>Email</TableHead>
                                     { (user?.permissions?.clientes?.verSaldo) && (
@@ -240,6 +242,7 @@ export default function ClientesPage() {
                                 {clients.map(client => (
                                     <TableRow key={client.id}>
                                         <TableCell className="font-medium">{client.name}</TableCell>
+                                        <TableCell>{client.representativeName || 'N/A'}</TableCell>
                                         <TableCell>{client.whatsapp || 'N/A'}</TableCell>
                                         <TableCell>{client.email || 'N/A'}</TableCell>
                                         { (user?.permissions?.clientes?.verSaldo) && (

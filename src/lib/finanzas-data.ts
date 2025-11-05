@@ -9,6 +9,7 @@ export type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo" | "Efectivo";
 export interface Client {
   id: string;
   name: string;
+  representativeName?: string;
   whatsapp?: string;
   email?: string;
 }
@@ -35,7 +36,7 @@ export interface MovimientoDiario {
 }
 
 export const initialClients: Client[] = [
-    { id: 'client-1', name: "Bateiras", whatsapp: "5215512345678", email: "contacto@bateiras.com" }
+    { id: 'client-1', name: "Bateiras", representativeName: "Juan Pérez", whatsapp: "5215512345678", email: "contacto@bateiras.com" }
 ];
 
 export const initialCuentasPorCobrar: CuentasPorCobrar[] = [
