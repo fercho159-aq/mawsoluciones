@@ -91,8 +91,8 @@ export default function MiProgresoPage() {
     const { user } = useAuth();
     
     const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
-        from: startOfMonth(new Date('2024-11-01')),
-        to: endOfMonth(new Date('2024-11-01')),
+        from: startOfMonth(new Date(2024, 10, 1)), // November 2024
+        to: endOfMonth(new Date(2024, 10, 1)),
     });
 
     const teamProgressData = useMemo(() => {
@@ -387,5 +387,3 @@ export default function MiProgresoPage() {
     </div>
   );
 }
-
-    
