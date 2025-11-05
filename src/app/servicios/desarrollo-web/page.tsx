@@ -36,7 +36,7 @@ const ServicePage = () => {
       <section className="py-20 md:py-28">
         <div className="container mx-auto px-4 md:px-6">
           <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="relative h-[60vh]">
+            <div className="relative h-[80vh]">
                <ParallaxImages 
                 laptopImage="/images/desarrollo web/2.png"
                 phoneImage="/images/desarrollo web/4.png"
