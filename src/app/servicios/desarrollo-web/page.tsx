@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import WebCalculator from "@/components/web-calculator";
 import AnimatedDiv from "@/components/animated-div";
+import PageSpeedInsights from "@/components/pagespeed-insights";
 
 const siteTypes = [
   {
@@ -115,6 +116,18 @@ const ServicePage = () => {
               ))}
              </div>
           </div>
+        </div>
+      </section>
+
+      <section className="py-20 md:py-28">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="max-w-3xl mx-auto text-center mb-12">
+            <h2 className="font-headline text-3xl sm:text-4xl font-bold">Diagnostica la Velocidad de tu Sitio Actual</h2>
+            <p className="mt-4 text-lg text-foreground/80">
+              La velocidad de tu sitio web afecta directamente tu ranking en Google y la experiencia de tus usuarios. Ingresa tu URL y obtén un análisis instantáneo con Google PageSpeed Insights.
+            </p>
+          </div>
+          <PageSpeedInsights />
         </div>
       </section>
       
