@@ -30,6 +30,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { format, getMonth, getYear } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 type OrigenLead = "Facebook" | "TikTok" | "Referencia" | "Sitio Web";
 type StatusLead = "Lead Nuevo" | "Contactado" | "Videollamada" | "En Negociación" | "Convertido" | "No Interesado";
@@ -43,15 +45,16 @@ interface Lead {
   origen: OrigenLead;
   status: StatusLead;
   responsable: ResponsableVentas;
+  createdAt: Date;
 }
 
 const mockLeads: Lead[] = [
-  { id: 'lead1', cliente: "Gimnasio FitnessPro", email: "contacto@fitnesspro.com", telefono: "5511223344", origen: "Facebook", status: "Videollamada", responsable: "Alma" },
-  { id: 'lead2', cliente: "Tacos El Veloz", email: "info@tacoselveloz.com", telefono: "5522334455", origen: "TikTok", status: "Lead Nuevo", responsable: "Julio" },
-  { id: 'lead3', cliente: "Clínica Dental Sonrisa", email: "hola@dentalsonrisa.mx", telefono: "5533445566", origen: "Referencia", status: "En Negociación", responsable: "Fer" },
-  { id: 'lead4', cliente: "Ecommerce de Ropa 'Moda Hoy'", email: "ventas@modahoy.com", telefono: "5544556677", origen: "Facebook", status: "Contactado", responsable: "Julio" },
-  { id: 'lead5', cliente: "Constructora Edifica", email: "proyectos@edifica.com", telefono: "5555667788", origen: "Sitio Web", status: "No Interesado", responsable: "Alma" },
-  { id: 'lead6', cliente: "Restaurante La Toscana", email: "reservas@latoscana.com", telefono: "5566778899", origen: "TikTok", status: "Videollamada", responsable: "Fer" },
+  { id: 'lead1', cliente: "Gimnasio FitnessPro", email: "contacto@fitnesspro.com", telefono: "5511223344", origen: "Facebook", status: "Videollamada", responsable: "Alma", createdAt: new Date('2024-10-05T10:00:00Z') },
+  { id: 'lead2', cliente: "Tacos El Veloz", email: "info@tacoselveloz.com", telefono: "5522334455", origen: "TikTok", status: "Lead Nuevo", responsable: "Julio", createdAt: new Date('2024-10-15T11:00:00Z') },
+  { id: 'lead3', cliente: "Clínica Dental Sonrisa", email: "hola@dentalsonrisa.mx", telefono: "5533445566", origen: "Referencia", status: "En Negociación", responsable: "Fer", createdAt: new Date('2024-09-20T12:00:00Z') },
+  { id: 'lead4', cliente: "Ecommerce de Ropa 'Moda Hoy'", email: "ventas@modahoy.com", telefono: "5544556677", origen: "Facebook", status: "Contactado", responsable: "Julio", createdAt: new Date('2024-09-25T14:00:00Z') },
+  { id: 'lead5', cliente: "Constructora Edifica", email: "proyectos@edifica.com", telefono: "5555667788", origen: "Sitio Web", status: "No Interesado", responsable: "Alma", createdAt: new Date('2024-08-10T16:00:00Z') },
+  { id: 'lead6', cliente: "Restaurante La Toscana", email: "reservas@latoscana.com", telefono: "5566778899", origen: "TikTok", status: "Videollamada", responsable: "Fer", createdAt: new Date('2024-10-01T18:00:00Z') },
 ];
 
 const statusColors: Record<StatusLead, string> = {
@@ -67,7 +70,7 @@ const origenes: OrigenLead[] = ["Facebook", "TikTok", "Referencia", "Sitio Web"]
 const responsables: ResponsableVentas[] = ["Alma", "Fer", "Julio"];
 const statuses: StatusLead[] = ["Lead Nuevo", "Contactado", "Videollamada", "En Negociación", "Convertido", "No Interesado"];
 
-const AddLeadDialog = ({ onAddLeads }: { onAddLeads: (leads: Omit<Lead, 'id' | 'status' | 'responsable'>[]) => void }) => {
+const AddLeadDialog = ({ onAddLeads }: { onAddLeads: (leads: Omit<Lead, 'id' | 'status' | 'responsable' | 'createdAt'>[]) => void }) => {
     const [leadsText, setLeadsText] = useState('');
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
@@ -83,7 +86,7 @@ const AddLeadDialog = ({ onAddLeads }: { onAddLeads: (leads: Omit<Lead, 'id' | '
         }
 
         const lines = leadsText.trim().split('\n');
-        const newLeads: Omit<Lead, 'id' | 'status' | 'responsable'>[] = [];
+        const newLeads: Omit<Lead, 'id' | 'status' | 'responsable' | 'createdAt'>[] = [];
         const validOrigins = origenes.map(o => o.toLowerCase());
 
         for (const line of lines) {
@@ -167,9 +170,10 @@ export default function VentasPage() {
     const [responsableFilter, setResponsableFilter] = useState('Todos');
     const [statusFilter, setStatusFilter] = useState('Todos');
     const [origenFilter, setOrigenFilter] = useState('Todos');
+    const [monthFilter, setMonthFilter] = useState('Todos');
     const [searchFilter, setSearchFilter] = useState('');
 
-    const handleAddLeads = (newLeadsData: Omit<Lead, 'id' | 'status' | 'responsable'>[]) => {
+    const handleAddLeads = (newLeadsData: Omit<Lead, 'id' | 'status' | 'responsable'| 'createdAt'>[]) => {
         setLeads(prevLeads => {
             let lastSellerIndex = parseInt(localStorage.getItem('lastAssignedSellerIndex') || '0');
             
@@ -181,6 +185,7 @@ export default function VentasPage() {
                     ...newLeadData,
                     status: 'Lead Nuevo',
                     responsable: newSeller,
+                    createdAt: new Date(),
                 }
             });
     
@@ -204,7 +209,7 @@ export default function VentasPage() {
 
             if (newLeadsJSON) {
                 try {
-                    const newLeadsFromStorage: Omit<Lead, 'id' | 'status' | 'responsable'>[] = JSON.parse(newLeadsJSON);
+                    const newLeadsFromStorage: Omit<Lead, 'id' | 'status' | 'responsable' | 'createdAt'>[] = JSON.parse(newLeadsJSON);
                     if (Array.isArray(newLeadsFromStorage) && newLeadsFromStorage.length > 0) {
                         let lastSellerIndex = parseInt(localStorage.getItem('lastAssignedSellerIndex') || '0');
                         
@@ -216,6 +221,7 @@ export default function VentasPage() {
                                 ...newLeadData,
                                 status: 'Lead Nuevo',
                                 responsable: newSeller,
+                                createdAt: new Date(),
                             };
                         });
 
@@ -262,6 +268,14 @@ export default function VentasPage() {
             });
         }
     }
+    
+    const availableMonths = useMemo(() => {
+        const months = new Set<string>();
+        leads.forEach(lead => {
+            months.add(format(lead.createdAt, 'yyyy-MM'));
+        });
+        return Array.from(months).sort().reverse();
+    }, [leads]);
 
     const filteredLeads = useMemo(() => {
         return leads.filter(lead => {
@@ -269,9 +283,11 @@ export default function VentasPage() {
             const responsableMatch = responsableFilter === 'Todos' || lead.responsable === responsableFilter;
             const statusMatch = statusFilter === 'Todos' || lead.status === statusFilter;
             const origenMatch = origenFilter === 'Todos' || lead.origen === origenFilter;
-            return searchMatch && responsableMatch && statusMatch && origenMatch;
+            const monthMatch = monthFilter === 'Todos' || format(lead.createdAt, 'yyyy-MM') === monthFilter;
+
+            return searchMatch && responsableMatch && statusMatch && origenMatch && monthMatch;
         });
-    }, [leads, searchFilter, responsableFilter, statusFilter, origenFilter]);
+    }, [leads, searchFilter, responsableFilter, statusFilter, origenFilter, monthFilter]);
 
   return (
     <div>
@@ -285,11 +301,12 @@ export default function VentasPage() {
             <CardDescription>Gestiona los leads desde el primer contacto hasta la conversión.</CardDescription>
         </CardHeader>
         <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
                 <Input 
                     placeholder="Buscar por cliente..."
                     value={searchFilter}
                     onChange={(e) => setSearchFilter(e.target.value)}
+                    className="col-span-2 md:col-span-1"
                 />
                 <Select value={responsableFilter} onValueChange={setResponsableFilter}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
@@ -310,6 +327,15 @@ export default function VentasPage() {
                     <SelectContent>
                         <SelectItem value="Todos">Todos los Orígenes</SelectItem>
                         {origenes.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+                 <Select value={monthFilter} onValueChange={setMonthFilter}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="Todos">Todos los Meses</SelectItem>
+                        {availableMonths.map(month => (
+                            <SelectItem key={month} value={month}>{format(new Date(month), "MMMM yyyy", {locale: es})}</SelectItem>
+                        ))}
                     </SelectContent>
                 </Select>
             </div>
