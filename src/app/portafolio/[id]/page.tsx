@@ -36,33 +36,25 @@ export default function PortfolioItemPage({
   return (
     <div className="bg-background">
        <section className="py-24 sm:py-32 relative">
-        {item.parallaxImages && item.parallaxImages.laptop && item.parallaxImages.phone && (
-            <div className="absolute inset-0 z-0">
-                <ParallaxImages 
-                    laptopImage={item.parallaxImages.laptop}
-                    phoneImage={item.parallaxImages.phone}
-                />
-            </div>
-        )}
         <div className="relative z-10 container mx-auto px-4 md:px-6">
-          <div className="max-w-7xl mx-auto items-start bg-background/80 backdrop-blur-sm p-8 rounded-lg">
+          <div className="max-w-7xl mx-auto items-start">
             <div className="grid md:grid-cols-2 gap-12">
               {/* Columna Izquierda: Imagen */}
-              <div className="sticky top-28">
+              <div className="w-full md:w-1/2 md:fixed top-0 left-0 h-screen p-8 -z-10 opacity-40 md:opacity-100">
                 {item.image && (
-                  <div className="relative aspect-video rounded-lg shadow-2xl overflow-hidden">
+                  <div className="relative w-full h-full rounded-lg shadow-2xl overflow-hidden">
                     <Image
                       src={item.image}
                       alt={item.title}
                       fill
-                      className="object-cover"
+                      className="object-contain"
                     />
                   </div>
                 )}
               </div>
 
               {/* Columna Derecha: Información */}
-              <div className="prose prose-lg max-w-none text-foreground/80 prose-headings:font-headline prose-headings:text-foreground">
+              <div className="prose prose-lg max-w-none text-foreground/80 prose-headings:font-headline prose-headings:text-foreground md:ml-[50%]">
                 <Badge variant="secondary" className="mb-4">{item.category}</Badge>
                 <h1 className="font-headline text-2xl sm:text-3xl font-bold mb-4">
                   {item.title}
