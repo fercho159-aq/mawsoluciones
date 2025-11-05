@@ -29,6 +29,7 @@ import Footer from '@/components/footer';
 import WhatsappIcon from '@/components/icons/whatsapp-icon';
 import { Card, CardContent } from '@/components/ui/card';
 import AnimatedProgress from '@/components/animated-progress';
+import Image from 'next/image';
 
 const sectionIcons: Record<number, React.ReactNode> = {
   1: <Eye className="w-5 h-5 mr-3 text-primary" />,
@@ -324,7 +325,7 @@ export default function CoursePage() {
     <div className="flex flex-col min-h-screen bg-background">
         <Header />
         <div className="flex-grow">
-            <header className="bg-card shadow-md sticky top-20 z-40">
+            <header className="bg-card shadow-md sticky top-0 md:top-20 z-40">
                 <div className="container mx-auto px-4 md:px-6 py-4">
                     <h1 className="text-xl md:text-2xl font-bold font-headline">{courseData.title}</h1>
                     <div className="flex items-center gap-4 mt-2">
@@ -392,6 +393,14 @@ export default function CoursePage() {
                                     <div className="aspect-video bg-muted rounded-md flex items-center justify-center mb-6 relative overflow-hidden">
                                         {currentTopic.video_url ? (
                                             <video controls src={currentTopic.video_url} className="w-full h-full object-cover" />
+                                        ) : currentTopic.image ? (
+                                            <Image 
+                                                src={currentTopic.image.imageUrl} 
+                                                alt={currentTopic.title} 
+                                                fill 
+                                                className="object-cover"
+                                                data-ai-hint={currentTopic.image.imageHint}
+                                            />
                                         ) : (
                                             <div className="text-center text-muted-foreground">
                                                 <PlayCircle className="w-16 h-16 mx-auto mb-2" />

@@ -78,9 +78,9 @@ const Hero = () => {
             <CarouselItem key={index} className="h-full">
               <div className="relative flex items-center justify-center min-h-[70vh] md:min-h-screen h-full py-24 sm:py-32 md:py-40">
                 <motion.div
-                  className="absolute inset-0 z-0"
+                  className="absolute inset-0 z-0 bg-black"
                   initial={{ opacity: 0.8 }}
-                  animate={{ opacity: 0.2 }}
+                  animate={{ opacity: 0.5 }}
                   transition={{ duration: 1.5, ease: "easeInOut" }}
                 >
                   <Image
@@ -88,11 +88,11 @@ const Hero = () => {
                     alt={slide.headline}
                     fill
                     priority={index === 0}
-                    className="object-cover"
+                    className="object-cover opacity-50"
                     data-ai-hint={slide.imageHint}
                   />
                 </motion.div>
-                <div className="absolute inset-0 z-10 bg-gradient-to-t from-background via-background/80 to-transparent" />
+                <div className="absolute inset-0 z-10 bg-gradient-to-t from-background via-background/60 to-transparent" />
                 <div className="relative z-20 container mx-auto px-4 md:px-6">
                   <motion.div
                     initial="hidden"
@@ -122,7 +122,7 @@ const Hero = () => {
                           transition: { duration: 0.8, ease: "easeOut" },
                         },
                       }}
-                      className="font-headline text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight"
+                      className="font-headline text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white"
                     >
                       {slide.headline}
                     </motion.h1>
@@ -135,7 +135,7 @@ const Hero = () => {
                           transition: { duration: 0.8, ease: "easeOut" },
                         },
                       }}
-                      className="mt-6 text-lg sm:text-xl text-foreground/80 max-w-2xl mx-auto"
+                      className="mt-6 text-lg sm:text-xl text-white/80 max-w-2xl mx-auto"
                     >
                       {slide.subheadline}
                     </motion.p>

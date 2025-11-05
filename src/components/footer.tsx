@@ -12,7 +12,7 @@ const Footer = () => {
           <div className="flex flex-col">
             <Logo />
             <p className="mt-4 text-foreground/70 max-w-xs">
-              Transformando ideas en resultados digitales.
+              Transformamos ideas en <i><b>resultados digitales</b></i> tangibles. En MAW Soluciones, no solo creamos estrategias; construimos el puente entre tu marca y tus clientes potenciales. Fusionamos <i><b>creatividad y data</b></i> para desarrollar soluciones de marketing que no solo se ven bien, sino que funcionan, crecen y convierten. Somos tu socio estratégico en el complejo ecosistema digital.
             </p>
           </div>
           <div>

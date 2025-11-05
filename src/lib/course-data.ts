@@ -1,4 +1,6 @@
 
+import { ImagePlaceholder } from './placeholder-images';
+
 export interface Question {
   question: string;
   options: string[];
@@ -15,6 +17,7 @@ export interface Topic {
   questions: Question[];
   completed: boolean;
   order: number;
+  image?: ImagePlaceholder;
 }
 
 export interface Section {

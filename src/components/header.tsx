@@ -25,6 +25,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { ThemeToggle } from "./theme-toggle";
 
 const servicesLinks = [
   { 
@@ -188,7 +189,7 @@ const Header = () => {
         "sticky top-0 z-50 w-full transition-colors duration-300 ease-in-out",
         isScrolled
           ? "bg-background/80 backdrop-blur-lg border-b border-border/20 shadow-sm"
-          : "bg-background"
+          : "bg-transparent"
       )}
     >
       <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
@@ -271,8 +272,8 @@ const Header = () => {
 
             {navLinks.map((link) => (
               <NavigationMenuItem key={link.href}>
-                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                  <Link href={link.href}>
+                <NavigationMenuLink asChild>
+                  <Link href={link.href} className={navigationMenuTriggerStyle()}>
                     {link.label}
                   </Link>
                 </NavigationMenuLink>
@@ -282,7 +283,7 @@ const Header = () => {
         </NavigationMenu>
 
         <div className="hidden md:flex items-center gap-2">
-          
+          <ThemeToggle />
           <Button asChild>
             <Link href="/contacto">Reservar Sesión</Link>
           </Button>
@@ -290,7 +291,7 @@ const Header = () => {
 
         {/* Mobile Navigation */}
         <div className="md:hidden flex items-center gap-2">
-          
+          <ThemeToggle />
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
