@@ -14,6 +14,7 @@ import { ArrowLeft, ArrowRight, Briefcase, Bot, ShoppingCart, Send, Link as Link
 import { motion, AnimatePresence } from 'framer-motion';
 import WhatsappIcon from './icons/whatsapp-icon';
 import { cn } from '@/lib/utils';
+import { Checkbox } from './ui/checkbox';
 
 const webGoals = [
     { id: 'ecommerce', label: 'Vender productos directamente', icon: <ShoppingCart />, recommendation: 'Sitio E-commerce' },
@@ -51,6 +52,7 @@ const WebCalculator = () => {
     personName: '',
     mainGoal: 'connective',
     competitors: '',
+    noInspiration: false,
     designStyle: 'minimalist',
     isRedesign: 'No',
     currentWebsite: '',
@@ -94,10 +96,10 @@ const WebCalculator = () => {
 
   useEffect(() => {
     const lastRegularStepId = formData.mainGoal === 'ecommerce' ? 5 : 4;
-    if (currentStep === lastRegularStepId && formData.competitors !== '') {
+    if (currentStep === lastRegularStepId && (formData.competitors !== '' || formData.noInspiration)) {
         handleNext();
     }
-  }, [formData.competitors, currentStep]);
+  }, [formData.competitors, formData.noInspiration, currentStep]);
 
   const handleBack = () => {
     setError('');
@@ -106,10 +108,20 @@ const WebCalculator = () => {
     }
   };
 
+  const handleNoInspirationChange = (checked: boolean) => {
+    setFormData(prev => ({
+        ...prev,
+        noInspiration: checked,
+        competitors: checked ? '' : prev.competitors
+    }));
+  }
+
   const handleSendToWhatsapp = () => {
     const designStyleLabel = designStyles.find(d => d.id === formData.designStyle)?.label || 'No especificado';
     const productRangeLabel = productRanges.find(r => r.id === formData.productRange)?.label || '';
     
+    let inspirationText = formData.noInspiration ? 'No se proporcionaron sitios de inspiración.' : (formData.competitors || 'No especificados');
+
     const message = `
 *¡Hola! Quiero una cotización para mi sitio web!*
 \n*Empresa:* ${formData.companyName}
@@ -119,7 +131,7 @@ ${formData.mainGoal === 'ecommerce' ? `*Cantidad de Productos:* ${productRangeLa
 *¿Busca rediseño?:* ${formData.isRedesign}
 ${formData.isRedesign === 'Sí' ? `*Sitio Actual:* ${formData.currentWebsite}\n` : ''}*Estilo de diseño preferido:* ${designStyleLabel}
 *Sitios de referencia:* 
-${formData.competitors || 'No especificados'}
+${inspirationText}
 \n*Mi número es:* ${whatsappNumber}
     `.trim().replace(/\n\s*\n/g, '\n'); // Remove empty lines
     const whatsappUrl = `https://wa.me/5542314150?text=${encodeURIComponent(message.trim())}`;
@@ -243,14 +255,28 @@ ${formData.competitors || 'No especificados'}
         return (
             <div className="space-y-4">
                 <Label htmlFor="competitors">Inspiración y Competencia</Label>
-                <p className="text-sm text-muted-foreground">Menciona algunos sitios web que te gusten (pueden ser de tu competencia o no). Si no tienes, ¡no te preocupes! Déjalo en blanco.</p>
+                <p className="text-sm text-muted-foreground">Menciona algunos sitios web que te gusten (pueden ser de tu competencia o no).</p>
                 <Textarea 
                     id="competitors"
                     value={formData.competitors}
                     onChange={(e) => setFormData({...formData, competitors: e.target.value})}
                     placeholder="Ej: www.competidor1.com, www.marcafavorita.com"
                     className="h-32"
+                    disabled={formData.noInspiration}
                 />
+                 <div className="flex items-center space-x-2">
+                    <Checkbox
+                        id="no-inspiration"
+                        checked={formData.noInspiration}
+                        onCheckedChange={(checked) => handleNoInspirationChange(Boolean(checked))}
+                    />
+                    <label
+                        htmlFor="no-inspiration"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                        No tengo sitios web de inspiración en mente
+                    </label>
+                </div>
             </div>
         );
       case formData.mainGoal === 'ecommerce' ? 6 : 5:
@@ -267,8 +293,8 @@ ${formData.competitors || 'No especificados'}
                         <div className="inline-block bg-primary/10 p-6 rounded-full mb-4">
                             {recommendedGoal?.icon && React.cloneElement(recommendedGoal.icon, { className: "w-16 h-16 text-primary" })}
                         </div>
-                        <p className="text-xl text-muted-foreground">Basado en tus respuestas, tu sitio ideal es un</p>
-                        <p className="text-3xl font-bold text-primary my-2">{recommendation}</p>
+                        <p className="text-lg text-muted-foreground">Basado en tus respuestas, tu sitio ideal es un</p>
+                        <p className="text-2xl font-bold text-primary my-2">{recommendation}</p>
                         <Card className="mt-6 text-left">
                             <CardHeader>
                                 <CardTitle className='flex items-center gap-2'><CircleDollarSign /> Inversión Estimada</CardTitle>
@@ -311,7 +337,7 @@ ${formData.competitors || 'No especificados'}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -50 }}
                 transition={{ duration: 0.3 }}
-                className="min-h-[250px]"
+                className="min-h-[300px]"
             >
                 {renderStep()}
             </motion.div>
@@ -364,3 +390,4 @@ ${formData.competitors || 'No especificados'}
 };
 
 export default WebCalculator;
+
