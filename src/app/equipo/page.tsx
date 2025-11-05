@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -9,19 +9,25 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { LogIn } from 'lucide-react';
 import Logo from '@/components/logo';
+import { teamMembers } from '@/lib/team-data';
+import { useAuth } from '@/lib/auth-provider';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === 'admin' && password === 'admin2025') {
+    const user = teamMembers.find(member => member.username === username && member.password === password);
+
+    if (user) {
+      login(user);
       toast({
         title: 'Inicio de sesión exitoso',
-        description: 'Bienvenido al panel de equipo.',
+        description: `Bienvenido, ${user.name}.`,
       });
       router.push('/equipo/dashboard');
     } else {
@@ -50,7 +56,7 @@ export default function LoginPage() {
               <Input
                 id="username"
                 type="text"
-                placeholder="admin"
+                placeholder="tu.usuario"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required

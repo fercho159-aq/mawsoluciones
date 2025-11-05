@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { Users, BookOpen, ListTodo, KeyRound, DollarSign, Calendar, LineChart, LogOut } from "lucide-react";
+import { useAuth } from "@/lib/auth-provider";
 
 const navItems = [
     { href: "/equipo/dashboard/nosotros", label: "Nosotros", icon: <Users className="w-4 h-4" /> },
@@ -18,12 +19,7 @@ const navItems = [
 
 export default function DashboardNav() {
     const pathname = usePathname();
-    const router = useRouter();
-
-    const handleLogout = () => {
-        // In a real app, you'd clear auth state here
-        router.push('/equipo');
-    }
+    const { logout } = useAuth();
 
     return (
         <nav className="flex flex-col gap-2 flex-grow">
@@ -45,7 +41,7 @@ export default function DashboardNav() {
             <div className="mt-auto">
                  <Button 
                     variant="outline"
-                    onClick={handleLogout}
+                    onClick={logout}
                     className="justify-start w-full"
                 >
                     <LogOut className="w-4 h-4 mr-2" />
