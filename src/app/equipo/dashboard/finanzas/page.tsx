@@ -41,43 +41,35 @@ import { Calendar } from '@/components/ui/calendar';
 // --- Helper Functions ---
 const generatePeriodOptions = (billingDay: number) => {
     const today = new Date();
-    const options = new Map<string, string>();
+    const options = new Set<string>(); // Use a Set to avoid duplicates
     const labelFormat = "d 'de' MMMM, yyyy";
 
-    // Past dates
-    let pastDate = setDate(today, billingDay);
-    if(today.getDate() <= billingDay) {
-        pastDate = subMonths(pastDate, 1);
-    }
-    options.set(pastDate.toISOString(), format(pastDate, labelFormat, {locale: es}));
-
-    // Future dates
-    let futureDate = setDate(today, billingDay);
-     if(today.getDate() > billingDay) {
-        futureDate = addMonths(futureDate, 1);
-    }
-    options.set(futureDate.toISOString(), format(futureDate, labelFormat, {locale: es}));
-
-    // For day 15, also add 30th/31st, and vice-versa
-    const otherDay = billingDay === 15 ? 30 : 15;
+    // --- Generate 4 main dates ---
+    const days = [15, 30];
     
-    // Past other day
-    let pastOtherDay = setDate(today, otherDay > getDaysInMonth(today) ? getDaysInMonth(today) : otherDay);
-    if(today.getDate() <= otherDay) {
-         pastOtherDay = subMonths(pastOtherDay, 1);
-         pastOtherDay = setDate(pastOtherDay, otherDay > getDaysInMonth(pastOtherDay) ? getDaysInMonth(pastOtherDay) : otherDay);
-    }
-    options.set(pastOtherDay.toISOString(), format(pastOtherDay, labelFormat, {locale: es}));
+    // Past dates
+    days.forEach(day => {
+        let pastDate = setDate(today, day > getDaysInMonth(today) ? getDaysInMonth(today) : day);
+        if (today.getDate() <= day) {
+            pastDate = subMonths(pastDate, 1);
+            pastDate = setDate(pastDate, day > getDaysInMonth(pastDate) ? getDaysInMonth(pastDate) : day);
+        }
+        options.add(pastDate.toISOString());
+    });
+    
+    // Future dates
+    days.forEach(day => {
+        let futureDate = setDate(today, day > getDaysInMonth(today) ? getDaysInMonth(today) : day);
+        if (today.getDate() > day) {
+            futureDate = addMonths(futureDate, 1);
+            futureDate = setDate(futureDate, day > getDaysInMonth(futureDate) ? getDaysInMonth(futureDate) : day);
+        }
+        options.add(futureDate.toISOString());
+    });
 
-    // Future other day
-    let futureOtherDay = setDate(today, otherDay > getDaysInMonth(today) ? getDaysInMonth(today) : otherDay);
-    if(today.getDate() > otherDay) {
-        futureOtherDay = addMonths(futureOtherDay, 1);
-        futureOtherDay = setDate(futureOtherDay, otherDay > getDaysInMonth(futureOtherDay) ? getDaysInMonth(futureOtherDay) : otherDay);
-    }
-    options.set(futureOtherDay.toISOString(), format(futureOtherDay, labelFormat, {locale: es}));
-
-    return Array.from(options.entries()).sort((a,b) => new Date(a[0]).getTime() - new Date(b[0]).getTime());
+    return Array.from(options)
+        .sort((a,b) => new Date(a).getTime() - new Date(b).getTime())
+        .map(isoString => ({ value: isoString, label: format(parseISO(isoString), labelFormat, { locale: es }) }));
 };
 
 const getNextPeriod = (periodo: string): Periodo => {
@@ -121,7 +113,7 @@ const AddCpcDialog = ({ clients, onAdd }: { clients: (Client & { financialProfil
             }
             finalBillingDate = format(customDate, "d 'de' MMMM, yyyy", {locale: es});
         } else {
-            finalBillingDate = periodOptions.find(p => p[0] === billingDate)?.[1] || '';
+            finalBillingDate = periodOptions.find(p => p.value === billingDate)?.label || '';
         }
 
         if (!clienteId || !finalBillingDate || !monto) {
@@ -157,14 +149,20 @@ const AddCpcDialog = ({ clients, onAdd }: { clients: (Client & { financialProfil
                      <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Fecha de Corte</Label>
-                            <Input value={selectedClient?.financialProfile?.billingDay ? `Día ${selectedClient.financialProfile.billingDay}`: 'N/A'} disabled />
+                            <Select value={selectedClient?.financialProfile?.billingDay?.toString() || ''} disabled={!selectedClient}>
+                                <SelectTrigger><SelectValue placeholder="Día"/></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="15">Día 15</SelectItem>
+                                    <SelectItem value="30">Día 30</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div className="space-y-2">
                             <Label>Fecha de Cobro</Label>
                             <Select value={billingDate} onValueChange={setBillingDate} disabled={!selectedClient}>
                                 <SelectTrigger><SelectValue placeholder="Seleccionar Fecha"/></SelectTrigger>
                                 <SelectContent>
-                                    {periodOptions.map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}
+                                    {periodOptions.map(({value, label}) => <SelectItem key={value} value={value}>{label}</SelectItem>)}
                                     <SelectItem value="other">Otra fecha</SelectItem>
                                 </SelectContent>
                             </Select>
