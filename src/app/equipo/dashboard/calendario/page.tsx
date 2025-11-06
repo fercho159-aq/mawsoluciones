@@ -54,7 +54,7 @@ type RecordingEvent = {
 
 const equipmentCategoryIcons = {
     audio: <Mic className="w-4 h-4" />,
-    video: <Monitor className="w-4 h-4" />,
+    video: <Camera className="w-4 h-4" />,
     iluminacion: <Lightbulb className="w-4 h-4" />,
     soporte: <Grip className="w-4 h-4" />
 };
@@ -305,11 +305,21 @@ const CalendarSection = ({ title, description, events, team, eventType, onSave, 
         team.forEach(member => { summary[member.name] = 0; });
         const eventsInWeek = events.filter(event => 
             event.type === eventType &&
+            (memberFilter === 'Todos' || event.assignedToName === memberFilter) &&
             isWithinInterval(event.fullStart, { start: currentWeekStart, end: currentWeekEnd })
         );
         eventsInWeek.forEach(event => { if (summary[event.assignedToName] !== undefined) summary[event.assignedToName]++; });
+        
+        if (memberFilter !== 'Todos') {
+            const filteredSummary: { [key: string]: number } = {};
+            if(summary[memberFilter] !== undefined) {
+                filteredSummary[memberFilter] = summary[memberFilter];
+            }
+            return filteredSummary;
+        }
+
         return summary;
-    }, [currentWeekStart, currentWeekEnd, events, team, eventType]);
+    }, [currentWeekStart, currentWeekEnd, events, team, eventType, memberFilter]);
 
     const goToPreviousWeek = () => setCurrentDate(subWeeks(currentDate, 1));
     const goToNextWeek = () => setCurrentDate(addWeeks(currentDate, 1));
