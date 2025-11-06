@@ -21,11 +21,11 @@ export async function getLeads() {
 export async function addProspect(data: Partial<Omit<NewLead, 'id' | 'createdAt' | 'data'>>) {
     try {
         await db.insert(leads).values({
-            name: data.name || data.company,
+            name: data.name,
             company: data.company,
             phone: data.phone,
             email: data.email,
-            source: data.source || 'Referencia',
+            source: data.source,
             status: data.status,
             responsable: data.responsable,
         });

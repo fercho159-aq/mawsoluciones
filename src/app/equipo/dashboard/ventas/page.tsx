@@ -51,26 +51,28 @@ const statusColors: Record<StatusLead, string> = {
 const responsables: ResponsableVentas[] = ["Alma", "Fer", "Julio"];
 const statuses: StatusLead[] = ["Lead Nuevo", "Contactado", "Videollamada", "En Negociación", "Convertido", "No Interesado"];
 
-const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Omit<NewLead, 'id' | 'createdAt' | 'responsable' | 'status' | 'data'>) => void }) => {
+const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<NewLead>) => void }) => {
     const [open, setOpen] = useState(false);
     const [name, setName] = useState('');
+    const [company, setCompany] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const { toast } = useToast();
 
     const handleAdd = () => {
-        if (!name) {
+        if (!name && !company) {
             toast({
                 title: "Error",
-                description: "El nombre del cliente es obligatorio.",
+                description: "El nombre del cliente o de la empresa es obligatorio.",
                 variant: "destructive",
             });
             return;
         }
 
-        onAddLead({ name, email, phone, source: 'Referencia', company: name });
+        onAddLead({ name: name || company, company: company || name, email, phone });
         
         setName('');
+        setCompany('');
         setEmail('');
         setPhone('');
         setOpen(false);
@@ -90,8 +92,12 @@ const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Omit<NewLead, 'id' | '
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="space-y-2">
-                        <Label htmlFor="cliente">Nombre del Cliente</Label>
-                        <Input id="cliente" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej. Tacos El Veloz" />
+                        <Label htmlFor="cliente">Nombre del Contacto</Label>
+                        <Input id="cliente" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej. Juan Pérez" />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="empresa">Nombre de la Empresa</Label>
+                        <Input id="empresa" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Ej. Tacos El Veloz" />
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="email">Email (Opcional)</Label>
@@ -137,8 +143,14 @@ export default function VentasPage() {
         fetchLeads();
     }, []);
 
-    const handleAddLead = async (newLeadData: Omit<NewLead, 'id' | 'createdAt' | 'responsable' | 'status' | 'data'>) => {
-        let lastSellerIndex = parseInt(localStorage.getItem('lastAssignedSellerIndex') || '0');
+    const handleAddLead = async (newLeadData: Partial<Omit<NewLead, 'id' | 'createdAt' | 'data'>>) => {
+        let lastSellerIndex = 0;
+        try {
+            lastSellerIndex = parseInt(localStorage.getItem('lastAssignedSellerIndex') || '0');
+        } catch (error) {
+            console.error('Could not parse lastAssignedSellerIndex from localStorage');
+        }
+        
         const newSeller = responsables[lastSellerIndex % responsables.length];
         lastSellerIndex++;
         localStorage.setItem('lastAssignedSellerIndex', lastSellerIndex.toString());
@@ -148,6 +160,7 @@ export default function VentasPage() {
                 ...newLeadData,
                 status: 'Lead Nuevo',
                 responsable: newSeller,
+                source: 'Referencia' // Manual add is always "Referencia"
             });
             toast({
                 title: "Prospecto Añadido",
@@ -155,6 +168,7 @@ export default function VentasPage() {
             });
             fetchLeads();
         } catch(e) {
+            console.error(e);
             toast({
                 title: "Error",
                 description: "No se pudo añadir el prospecto.",
@@ -194,7 +208,7 @@ export default function VentasPage() {
     }
     
     const origenes = useMemo(() => {
-        const allOrigins = new Set(leads.map(l => l.source.includes('Calculator') ? 'Sitio Web' : l.source));
+        const allOrigins = new Set(leads.map(l => l.source && l.source.includes('Calculator') ? 'Sitio Web' : l.source || 'N/A' ));
         return ['Todos', ...Array.from(allOrigins)];
     }, [leads]);
 
@@ -210,10 +224,10 @@ export default function VentasPage() {
 
     const filteredLeads = useMemo(() => {
         return leads.filter(lead => {
-            const searchMatch = searchFilter === '' || lead.name?.toLowerCase().includes(searchFilter.toLowerCase());
+            const searchMatch = searchFilter === '' || lead.name?.toLowerCase().includes(searchFilter.toLowerCase()) || lead.company?.toLowerCase().includes(searchFilter.toLowerCase());
             const responsableMatch = responsableFilter === 'Todos' || lead.responsable === responsableFilter;
             const statusMatch = statusFilter === 'Todos' || lead.status === statusFilter;
-            const leadOrigin = lead.source.includes('Calculator') ? 'Sitio Web' : lead.source;
+            const leadOrigin = lead.source && lead.source.includes('Calculator') ? 'Sitio Web' : lead.source;
             const origenMatch = origenFilter === 'Todos' || leadOrigin === origenFilter;
             const monthMatch = monthFilter === 'Todos' || (lead.createdAt && format(new Date(lead.createdAt), 'yyyy-MM') === monthFilter);
 
@@ -261,7 +275,7 @@ export default function VentasPage() {
                 <Select value={origenFilter} onValueChange={setOrigenFilter}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                        {origenes.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                        {origenes.map(o => <SelectItem key={o} value={o!}>{o}</SelectItem>)}
                     </SelectContent>
                 </Select>
                  <Select value={monthFilter} onValueChange={setMonthFilter}>
@@ -289,7 +303,7 @@ export default function VentasPage() {
                         {filteredLeads.filter(l => l.status !== 'Convertido' && l.status !== 'No Interesado').map((lead) => (
                             <TableRow key={lead.id}>
                                 <TableCell className="font-medium">{lead.name}</TableCell>
-                                <TableCell>{lead.source.includes('Calculator') ? 'Sitio Web' : lead.source}</TableCell>
+                                <TableCell>{lead.source && lead.source.includes('Calculator') ? 'Sitio Web' : lead.source}</TableCell>
                                 <TableCell>{lead.responsable}</TableCell>
                                 <TableCell>
                                     <Badge className={cn("text-white", statusColors[lead.status as StatusLead])}>
