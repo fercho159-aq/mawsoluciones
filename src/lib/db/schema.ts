@@ -1,4 +1,4 @@
-import { pgTable, serial, text, varchar, timestamp, boolean, integer, jsonb, real, date } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, varchar, timestamp, boolean, integer, jsonb, real, date, relations } from 'drizzle-orm/pg-core';
 
 export const clients = pgTable('clients', {
   id: serial('id').primaryKey(),
@@ -35,12 +35,24 @@ export const pendientes = pgTable('pendientes', {
     createdAt: timestamp('created_at').defaultNow(),
 });
 
+export const pendientesRelations = relations(pendientes, ({ many }) => ({
+	subTasks: many(subTasks),
+}));
+
+
 export const subTasks = pgTable('sub_tasks', {
     id: serial('id').primaryKey(),
     text: text('text').notNull(),
     completed: boolean('completed').default(false).notNull(),
     pendienteId: integer('pendiente_id').references(() => pendientes.id),
 });
+
+export const subTasksRelations = relations(subTasks, ({ one }) => ({
+	pendiente: one(pendientes, {
+		fields: [subTasks.pendienteId],
+		references: [pendientes.id],
+	}),
+}));
 
 export const accesses = pgTable('accesses', {
     id: serial('id').primaryKey(),
@@ -76,3 +88,6 @@ export const movimientosDiarios = pgTable('movimientos_diarios', {
 
 export type MovimientoDiario = typeof movimientosDiarios.$inferSelect;
 export type NewMovimientoDiario = typeof movimientosDiarios.$inferInsert;
+
+export type Pendiente = typeof pendientes.$inferSelect;
+export type SubTask = typeof subTasks.$inferSelect;
