@@ -13,16 +13,22 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/lib/auth-provider';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
-import type { Pendiente, SubTask } from '@/lib/db/schema';
-import { getPendientes, addSubTask, toggleSubTask } from './_actions';
+import type { Pendiente, SubTask, Client } from '@/lib/db/schema';
+import { getPendientes, addSubTask, toggleSubTask, addPendiente } from './_actions';
+import { getClients } from '../clientes/_actions';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { teamMembers } from '@/lib/team-data';
+
 
 const statusColors: Record<string, string> = {
   "Pendiente del cliente": "bg-orange-500",
@@ -31,6 +37,81 @@ const statusColors: Record<string, string> = {
 };
 
 type PendienteWithSubTasks = Pendiente & { subTasks: SubTask[] };
+
+const AddPendienteDialog = ({ clients, onAddPendiente }: { clients: Client[], onAddPendiente: () => void }) => {
+    const [open, setOpen] = useState(false);
+    const { toast } = useToast();
+    const [cliente, setCliente] = useState('');
+    const [encargado, setEncargado] = useState('');
+    const [ejecutor, setEjecutor] = useState('');
+    const [categoria, setCategoria] = useState('');
+    const [pendientePrincipal, setPendientePrincipal] = useState('');
+
+    const encargadosTeam = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel'].includes(m.name));
+    const ejecutoresTeam = teamMembers;
+
+    const handleSave = async () => {
+        if (!cliente || !encargado || !ejecutor || !categoria || !pendientePrincipal) {
+            toast({ title: "Error", description: "Todos los campos son obligatorios.", variant: "destructive" });
+            return;
+        }
+
+        try {
+            await addPendiente({
+                cliente,
+                encargado,
+                ejecutor,
+                categoria,
+                pendientePrincipal,
+                fechaCorte: 15,
+                status: 'Trabajando'
+            });
+            toast({ title: "Éxito", description: "Pendiente creado correctamente." });
+            onAddPendiente();
+            setOpen(false);
+        } catch (error) {
+            toast({ title: "Error", description: "No se pudo crear el pendiente.", variant: "destructive" });
+        }
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <Button><PlusCircle className="w-4 h-4 mr-2" /> Añadir Pendiente Manual</Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader><DialogTitle>Nuevo Pendiente Manual</DialogTitle></DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <Select value={cliente} onValueChange={setCliente}>
+                        <SelectTrigger><SelectValue placeholder="Seleccionar Cliente" /></SelectTrigger>
+                        <SelectContent>{clients.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <Select value={categoria} onValueChange={setCategoria}>
+                        <SelectTrigger><SelectValue placeholder="Seleccionar Categoría" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Contenido">Contenido</SelectItem>
+                            <SelectItem value="Ads">Ads</SelectItem>
+                            <SelectItem value="Web">Web</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <Select value={encargado} onValueChange={setEncargado}>
+                        <SelectTrigger><SelectValue placeholder="Seleccionar Encargado" /></SelectTrigger>
+                        <SelectContent>{encargadosTeam.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <Select value={ejecutor} onValueChange={setEjecutor}>
+                        <SelectTrigger><SelectValue placeholder="Seleccionar Ejecutor" /></SelectTrigger>
+                        <SelectContent>{ejecutoresTeam.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <Textarea value={pendientePrincipal} onChange={(e) => setPendientePrincipal(e.target.value)} placeholder="Descripción del pendiente principal..." />
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                    <Button onClick={handleSave}>Guardar Pendiente</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
 
 const PendientesTable = ({ data, onUpdateTask, currentUser }: { data: PendienteWithSubTasks[]; onUpdateTask: (task: PendienteWithSubTasks) => void; currentUser: any; }) => {
     const [newSubTaskText, setNewSubTaskText] = useState<Record<string, string>>({});
@@ -52,7 +133,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser }: { data: PendienteW
             const newSubTask = await addSubTask({ text, pendienteId: taskId });
             const task = data.find(t => t.id === taskId);
             if (task && newSubTask) {
-                const updatedTask = { ...task, subTasks: [...task.subTasks, newSubTask] };
+                const updatedTask = { ...task, subTasks: [...(task.subTasks || []), newSubTask] };
                 onUpdateTask(updatedTask);
             }
             setNewSubTaskText(prev => ({...prev, [taskId.toString()]: ''}));
@@ -156,21 +237,26 @@ const PendientesTable = ({ data, onUpdateTask, currentUser }: { data: PendienteW
 export default function PendientesPage() {
     const { user } = useAuth();
     const [pendientes, setPendientes] = useState<PendienteWithSubTasks[]>([]);
+    const [clients, setClients] = useState<Client[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [encargadoFilter, setEncargadoFilter] = useState('Todos');
     const [ejecutorFilter, setEjecutorFilter] = useState('Todos');
     const [statusFilter, setStatusFilter] = useState('Todos');
     const [searchFilter, setSearchFilter] = useState('');
 
-    const fetchPendientes = async () => {
+    const fetchData = async () => {
         setIsLoading(true);
-        const data = await getPendientes();
-        setPendientes(data);
+        const [pendientesData, clientsData] = await Promise.all([
+            getPendientes(),
+            getClients()
+        ]);
+        setPendientes(pendientesData);
+        setClients(clientsData);
         setIsLoading(false);
     }
     
     useEffect(() => {
-        fetchPendientes();
+        fetchData();
     }, []);
     
     const handleUpdateTask = (updatedTask: PendienteWithSubTasks) => {
@@ -209,7 +295,10 @@ export default function PendientesPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold font-headline mb-8">Pendientes de Equipo</h1>
+        <div className='flex justify-between items-center mb-8'>
+            <h1 className="text-3xl font-bold font-headline">Pendientes de Equipo</h1>
+            <AddPendienteDialog clients={clients} onAddPendiente={fetchData} />
+        </div>
         
         <Card className="mb-4">
             <CardContent className="p-4 flex flex-col md:flex-row gap-4">
@@ -271,3 +360,5 @@ export default function PendientesPage() {
     </div>
   );
 }
+
+    

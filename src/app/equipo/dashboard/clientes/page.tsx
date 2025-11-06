@@ -297,13 +297,17 @@ export default function ClientesPage() {
                 </CardContent>
             </Card>
 
-             <ClientFormDialog client={selectedClient!} onSave={() => { fetchClients(); setSelectedClient(null); setIsEditModalOpen(false); }} isEditing={true}>
-                <div style={{ display: isEditModalOpen ? 'block' : 'none' }}>
-                    <Dialog open={isEditModalOpen} onOpenChange={(open) => { if(!open) { setSelectedClient(null); setIsEditModalOpen(false); }}} />
-                </div>
-             </ClientFormDialog>
+             <Dialog open={isEditModalOpen} onOpenChange={(open) => { if(!open) { setSelectedClient(null); setIsEditModalOpen(false); } else { setIsEditModalOpen(true); } }}>
+                <DialogContent>
+                    <ClientFormDialog client={selectedClient!} onSave={() => { fetchClients(); setSelectedClient(null); setIsEditModalOpen(false); }} isEditing={true}>
+                        <div></div>
+                    </ClientFormDialog>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
 
 export type { Client };
+
+    

@@ -19,6 +19,18 @@ export async function getPendientes() {
     }
 }
 
+export type NewPendienteData = Omit<typeof pendientes.$inferInsert, 'id' | 'createdAt'>;
+
+export async function addPendiente(data: NewPendienteData) {
+    try {
+        await db.insert(pendientes).values(data);
+        revalidatePath("/equipo/dashboard/pendientes");
+    } catch (error) {
+        console.error("Error adding pendiente:", error);
+        throw new Error("Could not add pendiente");
+    }
+}
+
 export async function addSubTask(data: typeof subTasks.$inferInsert) {
     try {
         const newSubTask = await db.insert(subTasks).values(data).returning();
@@ -39,3 +51,5 @@ export async function toggleSubTask(id: number, completed: boolean) {
         throw new Error("Could not toggle subtask");
     }
 }
+
+    
