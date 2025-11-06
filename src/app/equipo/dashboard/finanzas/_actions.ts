@@ -2,7 +2,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { cuentasPorCobrar, movimientosDiarios, type NewCuentaPorCobrar, type CuentaPorCobrar, finanzas_final, NewMovimientoDiario, clients } from "@/lib/db/schema";
+import { cuentasPorCobrar, movimientosDiarios, type NewCuentaPorCobrar, type CuentaPorCobrar, NewMovimientoDiario, clients } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -82,29 +82,5 @@ export async function updateCpcAfterPayment(cpc: CuentaPorCobrar, nextPeriod: st
     } catch (error) {
         console.error("Error updating cpc after payment:", error);
         throw new Error("Could not update cpc");
-    }
-}
-
-export async function addFinanzaFinal(data: { clientName: string, serviceType: string, amount: number }) {
-  try {
-    await db.insert(finanzas_final).values({
-      clientName: data.clientName,
-      serviceType: data.serviceType,
-      amount: data.amount,
-    });
-    revalidatePath("/equipo/dashboard/finanzas");
-  } catch (error) {
-    console.error("Error adding to finanzas_final:", error);
-    throw new Error("Could not save to finanzas_final");
-  }
-}
-
-export async function getFinanzasFinal() {
-    try {
-        const allFinanzas = await db.query.finanzas_final.findMany();
-        return allFinanzas;
-    } catch(e) {
-        console.error("error fetching finanzas final", e)
-        return [];
     }
 }

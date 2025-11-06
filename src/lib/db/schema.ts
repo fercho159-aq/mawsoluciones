@@ -60,7 +60,7 @@ export const accesses = pgTable('accesses', {
 
 export const cuentasPorCobrar = pgTable('cuentas_por_cobrar', {
     id: serial('id').primaryKey(),
-    clienteId: integer('cliente_id').notNull().references(() => clients.id, { onDelete: 'cascade' }),
+    clienteId: integer('client_id').notNull().references(() => clients.id, { onDelete: 'cascade' }),
     clienteName: varchar('cliente_name', { length: 255 }).notNull(),
     periodo: varchar('periodo', { length: 100 }).notNull(),
     monto: real('monto').notNull(),
@@ -114,6 +114,15 @@ export const prospects_maw = pgTable('prospects_maw', {
     source: varchar('source', { length: 100 }).notNull(),
     status: varchar('status', { length: 50 }),
     responsable: varchar('responsable', { length: 100 }),
+    createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const finanzas_final = pgTable('finanzas_final', {
+    id: serial('id').primaryKey(),
+    clientName: varchar('client_name', { length: 255 }).notNull(),
+    serviceType: varchar('service_type', { length: 100 }).notNull(),
+    amount: real('amount').notNull(),
+    requiresInvoice: boolean('requires_invoice').default(false).notNull(),
     createdAt: timestamp('created_at').defaultNow(),
 });
 
@@ -181,6 +190,5 @@ export type Colaborador = typeof colaboradores.$inferSelect;
 export type NewColaborador = typeof colaboradores.$inferInsert;
 export type ClientFinancialProfile = typeof clientFinancialProfiles.$inferSelect;
 export type NewClientFinancialProfile = typeof clientFinancialProfiles.$inferInsert;
-export type FinanzaFinal = any;
-export type NewFinanzaFinal = any;
-
+export type FinanzaFinal = typeof finanzas_final.$inferSelect;
+export type NewFinanzaFinal = typeof finanzas_final.$inferInsert;
