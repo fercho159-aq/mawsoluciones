@@ -230,8 +230,10 @@ export default function ClientesPage() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const router = useRouter();
     const { toast } = useToast();
+    const [isLoading, setIsLoading] = useState(true);
 
     const fetchClients = async () => {
+        setIsLoading(true);
         try {
             const clientsData = await getClients();
             setClients(clientsData);
@@ -241,6 +243,8 @@ export default function ClientesPage() {
                 description: "No se pudieron obtener los clientes. Intenta recargar la página.",
                 variant: "destructive"
             });
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -266,7 +270,7 @@ export default function ClientesPage() {
         return balances;
     }, [clients, cuentasPorCobrar]);
 
-    if (loading) {
+    if (loading || isLoading) {
         return (
             <div className="flex items-center justify-center min-h-[50vh]">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
@@ -356,3 +360,5 @@ export default function ClientesPage() {
 }
 
 export type { Client };
+
+    
