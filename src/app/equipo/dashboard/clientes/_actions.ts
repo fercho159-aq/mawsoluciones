@@ -2,7 +2,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { clients, pendientes } from "@/lib/db/schema";
+import { clients, pendientes_maw } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -45,15 +45,16 @@ export async function addClient(data: NewClientData) {
                 ejecutor = data.responsables.contenido.ejecutor;
             } else if (area === 'Ads' && data.responsables.ads) {
                 encargado = data.responsables.ads.responsable;
-                ejecutor = data.responsables.ads.responsable; // Assuming encargado is also ejecutor initially
+                ejecutor = data.responsables.ads.responsable; 
             } else if (area === 'Web' && data.responsables.web) {
                 encargado = data.responsables.web.responsable;
                 ejecutor = data.responsables.web.responsable;
             }
 
             if (encargado && ejecutor) {
-                 await db.insert(pendientes).values({
-                    cliente: data.name,
+                 await db.insert(pendientes_maw).values({
+                    clientId: newClient.id,
+                    clienteName: data.name,
                     encargado: encargado,
                     ejecutor: ejecutor,
                     categoria: area,

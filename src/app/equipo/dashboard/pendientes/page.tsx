@@ -20,7 +20,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/lib/auth-provider';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, CalendarIcon } from 'lucide-react';
-import type { Pendiente, Client, RecordingEvent } from '@/lib/db/schema';
+import type { PendienteMaw, Client, RecordingEvent } from '@/lib/db/schema';
 import { getPendientes, addPendiente, updatePendiente } from './_actions';
 import { getClients } from '../clientes/_actions';
 import { useToast } from '@/hooks/use-toast';
@@ -39,7 +39,7 @@ const statusColors: Record<string, string> = {
   "Resuelto": "bg-gray-500"
 };
 
-export type PendienteWithRelations = Pendiente & { recordingEvent?: RecordingEvent | null };
+export type PendienteWithRelations = PendienteMaw & { recordingEvent?: RecordingEvent | null };
 
 const EditablePendiente = ({ pendiente, onUpdate }: { pendiente: PendienteWithRelations, onUpdate: (id: number, text: string) => void }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -121,7 +121,6 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                         <TableHead>Pendiente</TableHead>
                         <TableHead className="w-[120px]">Encargado</TableHead>
                         <TableHead className="w-[120px]">Ejecutor</TableHead>
-                        <TableHead className="w-[100px]">Corte</TableHead>
                         <TableHead className="w-[180px]">Status</TableHead>
                         <TableHead className="w-[180px]">Próxima Grabación</TableHead>
                     </TableRow>
@@ -142,14 +141,13 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                     />
                                 </TableCell>
                                 <TableCell className="font-medium align-top">
-                                   {pendiente.cliente}
+                                   {pendiente.clienteName}
                                 </TableCell>
                                 <TableCell className={cn("align-top", pendiente.completed && "line-through text-muted-foreground")}>
                                      <EditablePendiente pendiente={pendiente} onUpdate={onUpdatePendienteText}/>
                                 </TableCell>
                                 <TableCell className="align-top">{pendiente.encargado}</TableCell>
                                 <TableCell className="align-top">{pendiente.ejecutor}</TableCell>
-                                <TableCell className="align-top">Día {pendiente.fechaCorte}</TableCell>
                                 <TableCell className="align-top">
                                      <Select value={pendiente.status} onValueChange={(newStatus) => updatePendiente(pendiente.id, {status: newStatus}).then(onRefresh)}>
                                         <SelectTrigger className="w-full">
@@ -168,7 +166,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                     <ScheduleRecordingDialog 
                                         event={pendiente.recordingEvent}
                                         pendienteId={pendiente.id}
-                                        clientName={pendiente.cliente}
+                                        clientName={pendiente.clienteName}
                                         project={pendiente.pendientePrincipal}
                                         assignedToName={pendiente.ejecutor}
                                         onSave={onRefresh}
@@ -259,7 +257,7 @@ export default function PendientesPage() {
         return pendientes.filter(item => {
             const encargadoMatch = encargadoFilter === 'Todos' || item.encargado === encargadoFilter;
             const ejecutorMatch = ejecutorFilter === 'Todos' || item.ejecutor === ejecutorFilter;
-            const searchMatch = searchFilter === '' || item.cliente.toLowerCase().includes(searchFilter.toLowerCase()) || item.pendientePrincipal.toLowerCase().includes(searchFilter.toLowerCase());
+            const searchMatch = searchFilter === '' || item.clienteName.toLowerCase().includes(searchFilter.toLowerCase()) || item.pendientePrincipal.toLowerCase().includes(searchFilter.toLowerCase());
             return encargadoMatch && ejecutorMatch && searchMatch;
         });
     }, [encargadoFilter, ejecutorFilter, searchFilter, pendientes]);
@@ -370,7 +368,7 @@ export default function PendientesPage() {
 const AddPendienteDialog = ({ clients, onAddPendiente }: { clients: Client[], onAddPendiente: () => void }) => {
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
-    const [cliente, setCliente] = useState('');
+    const [clienteId, setClienteId] = useState('');
     const [encargado, setEncargado] = useState('');
     const [ejecutor, setEjecutor] = useState('');
     const [categoria, setCategoria] = useState('');
@@ -380,14 +378,21 @@ const AddPendienteDialog = ({ clients, onAddPendiente }: { clients: Client[], on
     const ejecutoresTeam = teamMembers;
 
     const handleSave = async () => {
-        if (!cliente || !encargado || !ejecutor || !categoria || !pendientePrincipal) {
+        if (!clienteId || !encargado || !ejecutor || !categoria || !pendientePrincipal) {
             toast({ title: "Error", description: "Todos los campos son obligatorios.", variant: "destructive" });
+            return;
+        }
+
+        const selectedClient = clients.find(c => c.id === parseInt(clienteId));
+        if (!selectedClient) {
+             toast({ title: "Error", description: "Cliente no válido.", variant: "destructive" });
             return;
         }
 
         try {
             await addPendiente({
-                cliente: cliente,
+                clientId: selectedClient.id,
+                clienteName: selectedClient.name,
                 encargado,
                 ejecutor,
                 categoria,
@@ -411,9 +416,9 @@ const AddPendienteDialog = ({ clients, onAddPendiente }: { clients: Client[], on
             <DialogContent>
                 <DialogHeader><DialogTitle>Nuevo Pendiente Manual</DialogTitle></DialogHeader>
                 <div className="grid gap-4 py-4">
-                    <Select value={cliente} onValueChange={setCliente}>
+                    <Select value={clienteId} onValueChange={setClienteId}>
                         <SelectTrigger><SelectValue placeholder="Seleccionar Cliente" /></SelectTrigger>
-                        <SelectContent>{clients.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}</SelectContent>
+                        <SelectContent>{clients.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}</SelectContent>
                     </Select>
                     <Select value={categoria} onValueChange={setCategoria}>
                         <SelectTrigger><SelectValue placeholder="Seleccionar Categoría" /></SelectTrigger>
@@ -441,5 +446,3 @@ const AddPendienteDialog = ({ clients, onAddPendiente }: { clients: Client[], on
         </Dialog>
     )
 }
-
-    

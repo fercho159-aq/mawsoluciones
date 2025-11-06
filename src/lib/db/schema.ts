@@ -13,30 +13,39 @@ export const clients = pgTable('clients', {
 
 export const clientsRelations = relations(clients, ({ many }) => ({
 	cuentasPorCobrar: many(cuentasPorCobrar),
+    pendientes: many(pendientes_maw),
 }));
 
 export type Client = typeof clients.$inferSelect;
 export type NewClient = typeof clients.$inferInsert;
 
-export const pendientes = pgTable('pendientes', {
+export const pendientes_maw = pgTable('pendientes_maw', {
     id: serial('id').primaryKey(),
-    cliente: varchar('cliente', { length: 255 }).notNull(),
+    clientId: integer('client_id').notNull().references(() => clients.id, { onDelete: 'cascade' }),
+    clienteName: varchar('cliente_name', { length: 255 }).notNull(),
     encargado: varchar('encargado', { length: 100 }).notNull(),
     ejecutor: varchar('ejecutor', { length: 100 }).notNull(),
-    fechaCorte: integer('fecha_corte').default(15),
-    status: varchar('status', { length: 50 }).notNull(),
-    pendientePrincipal: text('pendiente_principal').notNull(),
     categoria: varchar('categoria', { length: 50 }).notNull(),
+    pendientePrincipal: text('pendiente_principal').notNull(),
+    status: varchar('status', { length: 50 }).notNull().default('Trabajando'),
     completed: boolean('completed').default(false).notNull(),
     createdAt: timestamp('created_at').defaultNow(),
 });
 
-export const pendientesRelations = relations(pendientes, ({ one }) => ({
+export const pendientesMawRelations = relations(pendientes_maw, ({ one }) => ({
+    client: one(clients, {
+        fields: [pendientes_maw.clientId],
+        references: [clients.id],
+    }),
     recordingEvent: one(recordingEvents, {
-        fields: [pendientes.id],
+        fields: [pendientes_maw.id],
         references: [recordingEvents.pendienteId],
     })
 }));
+
+export type PendienteMaw = typeof pendientes_maw.$inferSelect;
+export type NewPendienteMaw = typeof pendientes_maw.$inferInsert;
+
 
 export const accesses = pgTable('accesses', {
     id: serial('id').primaryKey(),
@@ -93,13 +102,13 @@ export const recordingEvents = pgTable('recording_events', {
     project: text('project'),
     assignedEquipment: jsonb('assigned_equipment').$type<string[]>(),
     equipmentNames: jsonb('equipment_names').$type<string[]>(),
-    pendienteId: integer('pendiente_id').references(() => pendientes.id, { onDelete: 'cascade' }),
+    pendienteId: integer('pendiente_id').references(() => pendientes_maw.id, { onDelete: 'cascade' }),
 });
 
 export const recordingEventsRelations = relations(recordingEvents, ({ one }) => ({
-	pendiente: one(pendientes, {
+	pendiente: one(pendientes_maw, {
 		fields: [recordingEvents.pendienteId],
-		references: [pendientes.id],
+		references: [pendientes_maw.id],
 	}),
 }));
 
@@ -131,8 +140,5 @@ export type NewProspect = typeof prospects_maw.$inferInsert;
 export type Lead = typeof leads.$inferSelect;
 export type NewLead = typeof leads.$inferInsert;
 
-export type Pendiente = typeof pendientes.$inferSelect;
 export type RecordingEvent = typeof recordingEvents.$inferSelect;
 export type NewRecordingEvent = typeof recordingEvents.$inferInsert;
-
-    

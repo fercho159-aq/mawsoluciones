@@ -2,13 +2,17 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { pendientes, recordingEvents, NewRecordingEvent, Pendiente } from "@/lib/db/schema";
+import { pendientes_maw, recordingEvents, NewRecordingEvent, PendienteMaw } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function getPendientes() {
     try {
-        const allPendientes = await db.select().from(pendientes);
+        const allPendientes = await db.query.pendientes_maw.findMany({
+            with: {
+                recordingEvent: true
+            }
+        });
         return allPendientes;
     } catch (error) {
         console.error("Error fetching pendientes:", error);
@@ -16,15 +20,11 @@ export async function getPendientes() {
     }
 }
 
-export type NewPendienteData = Omit<Pendiente, 'id' | 'createdAt'>;
+export type NewPendienteData = Omit<PendienteMaw, 'id' | 'createdAt'>;
 
-export async function addPendiente(data: Omit<NewPendienteData, 'id' | 'createdAt' | 'fechaCorte'>) {
+export async function addPendiente(data: Omit<NewPendienteData, 'id' | 'createdAt'>) {
     try {
-        await db.insert(pendientes).values({
-            ...data,
-            cliente: data.cliente,
-            fechaCorte: 15, // Default value
-        });
+        await db.insert(pendientes_maw).values(data);
         revalidatePath("/equipo/dashboard/pendientes");
     } catch (error) {
         console.error("Error adding pendiente:", error);
@@ -34,7 +34,7 @@ export async function addPendiente(data: Omit<NewPendienteData, 'id' | 'createdA
 
 export async function updatePendiente(id: number, data: Partial<NewPendienteData>) {
     try {
-        await db.update(pendientes).set(data).where(eq(pendientes.id, id));
+        await db.update(pendientes_maw).set(data).where(eq(pendientes_maw.id, id));
         revalidatePath("/equipo/dashboard/pendientes");
     } catch (error) {
         console.error("Error updating pendiente:", error);
@@ -84,5 +84,3 @@ export async function getRecordingEvents() {
         return [];
     }
 }
-
-    

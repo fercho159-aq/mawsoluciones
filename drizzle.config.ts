@@ -10,5 +10,5 @@ export default defineConfig({
   dbCredentials: {
     url: process.env.DATABASE_URL,
   },
-  tablesFilter: ["nextn_*"],
+  tablesFilter: ["nextn_*", "pendientes_maw"],
 });
