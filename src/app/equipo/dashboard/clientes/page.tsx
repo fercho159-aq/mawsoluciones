@@ -372,8 +372,10 @@ export default function ClientesPage() {
                                     <TableRow 
                                         key={client.id} 
                                         data-state={selectedClients.includes(client.id) && "selected"}
+                                        onClick={() => handleRowClick(client)}
+                                        className={cn(user?.permissions?.clientes?.editarClientes && "cursor-pointer")}
                                     >
-                                        <TableCell>
+                                        <TableCell onClick={(e) => e.stopPropagation()}>
                                             <Checkbox
                                                 checked={selectedClients.includes(client.id)}
                                                 onCheckedChange={(checked) => handleSelectionChange(client.id, Boolean(checked))}
@@ -405,11 +407,10 @@ export default function ClientesPage() {
             </Card>
 
              <Dialog open={isEditModalOpen} onOpenChange={(open) => { if(!open) { setSelectedClient(null); setIsEditModalOpen(false); } else { setIsEditModalOpen(true); } }}>
-                <DialogContent>
-                    <ClientFormDialog client={selectedClient!} onSave={() => { fetchClients(); setSelectedClient(null); setIsEditModalOpen(false); }} isEditing={true}>
-                        <div></div>
-                    </ClientFormDialog>
-                </DialogContent>
+                <ClientFormDialog client={selectedClient!} onSave={() => { fetchClients(); setSelectedClient(null); setIsEditModalOpen(false); }} isEditing={true}>
+                    <DialogContent onClick={(e) => e.stopPropagation()}>
+                    </DialogContent>
+                </ClientFormDialog>
             </Dialog>
         </div>
     );
