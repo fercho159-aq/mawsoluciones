@@ -5,18 +5,20 @@ import { cn } from '@/lib/utils';
 import { Toaster } from "@/components/ui/toaster"
 import ChatBubble from '@/components/chat-bubble';
 import { ThemeProvider } from '@/components/theme-provider';
-import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { FirebaseProvider } from '@/firebase/provider';
+import { initializeFirebase } from '@/firebase';
 
 export const metadata: Metadata = {
   title: 'MAW Soluciones | Agencia de Marketing Digital',
   description: 'Potenciamos tu marca con estrategias de marketing digital innovadoras. Creación de contenido, desarrollo web, y más.',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const firebase = await initializeFirebase();
   return (
     <html lang="es" className="scroll-smooth" suppressHydrationWarning>
       <head>
@@ -31,11 +33,15 @@ export default function RootLayout({
             enableSystem={false}
             disableTransitionOnChange
         >
-          <FirebaseClientProvider>
+          <FirebaseProvider
+            app={firebase.app}
+            auth={firebase.auth}
+            firestore={firebase.firestore}
+          >
             {children}
             <ChatBubble />
             <Toaster />
-          </FirebaseClientProvider>
+          </FirebaseProvider>
         </ThemeProvider>
       </body>
     </html>

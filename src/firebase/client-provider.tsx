@@ -1,41 +1,29 @@
 
 'use client';
 
+import { ReactNode, useContext } from 'react';
+import {
+  AuthContext,
+  FirebaseAppContext,
+  FirestoreContext,
+  FirebaseProvider,
+} from './provider';
 import { initializeFirebase } from '.';
-import { ReactNode, useEffect, useState } from 'react';
-import type { FirebaseApp } from 'firebase/app';
-import { Firestore } from 'firebase/firestore';
-import { Auth } from 'firebase/auth';
-import { FirebaseProvider } from './provider';
 
+// This component is no longer responsible for initialization,
+// but ensures that the context is available on the client.
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
-  const [firebase, setFirebase] = useState<{
-    app: FirebaseApp;
-    firestore: Firestore;
-    auth: Auth;
-  } | null>(null);
+  const app = useContext(FirebaseAppContext);
+  const auth = useContext(AuthContext);
+  const firestore = useContext(FirestoreContext);
 
-  useEffect(() => {
-    const init = async () => {
-      const firebaseInstances = await initializeFirebase();
-      setFirebase(firebaseInstances);
-    };
-    if (!firebase) {
-      init();
-    }
-  }, [firebase]);
-
-  if (!firebase) {
+  // If the context is not yet available, we can show a loading state
+  // or just return the children, assuming the parent provider will handle it.
+  if (!app || !auth || !firestore) {
+    // This can be a loading spinner or some fallback UI
     return <>{children}</>;
   }
 
-  return (
-    <FirebaseProvider
-      app={firebase.app}
-      auth={firebase.auth}
-      firestore={firebase.firestore}
-    >
-      {children}
-    </FirebaseProvider>
-  );
+  // The provider is already wrapping the layout, so we just return children.
+  return <>{children}</>;
 }

@@ -7,8 +7,8 @@ export default function EquipoLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthProvider>
-      {children}
-    </AuthProvider>
+      <AuthProvider>
+        {children}
+      </AuthProvider>
   );
 }

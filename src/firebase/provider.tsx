@@ -6,7 +6,7 @@ import type { Auth } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
 import { createContext, useContext, ReactNode } from 'react';
 
-const FirebaseAppContext = createContext<FirebaseApp | undefined>(undefined);
+export const FirebaseAppContext = createContext<FirebaseApp | undefined>(undefined);
 export const AuthContext = createContext<Auth | undefined>(undefined);
 export const FirestoreContext = createContext<Firestore | undefined>(undefined);
 
