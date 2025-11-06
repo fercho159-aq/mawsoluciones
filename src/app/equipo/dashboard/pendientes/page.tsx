@@ -133,6 +133,8 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
     const { toast } = useToast();
     const [addingToClientId, setAddingToClientId] = useState<number | null>(null);
     
+    const canReassign = currentUser?.role === 'admin' || currentUser?.permissions?.pendientes?.reasignarResponsables;
+
     const handleTogglePendiente = async (pendiente: PendienteWithRelations) => {
         try {
             const updatedPendiente = { ...pendiente, completed: !pendiente.completed };
@@ -163,6 +165,16 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
         }
     }
 
+    const handleResponsableChange = async (pendienteId: number, field: 'encargado' | 'ejecutor', value: string) => {
+        try {
+            await updatePendiente(pendienteId, { [field]: value });
+            toast({ title: 'Actualizado', description: `Se ha cambiado el ${field}.` });
+            onRefresh();
+        } catch (error) {
+            toast({ title: "Error", description: `No se pudo actualizar el ${field}.`, variant: "destructive" });
+        }
+    }
+
     const groupedData = useMemo(() => {
         return data.reduce((acc, pendiente) => {
             (acc[pendiente.clienteName] = acc[pendiente.clienteName] || []).push(pendiente);
@@ -186,6 +198,8 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                         <TableHead className="w-[200px]">Cliente</TableHead>
                         <TableHead className="w-[40px]"></TableHead>
                         <TableHead>Pendiente</TableHead>
+                        <TableHead className="w-[180px]">Encargado</TableHead>
+                        <TableHead className="w-[180px]">Ejecutor</TableHead>
                         <TableHead className="w-[180px]">Status</TableHead>
                         <TableHead className="w-[180px]">Próxima Grabación</TableHead>
                     </TableRow>
@@ -197,24 +211,52 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
 
                         return (
                         <React.Fragment key={clienteName}>
-                            <tr className="group/client-group">
-                                <TableCell rowSpan={pendientes.length + 1} className="align-middle text-center font-medium p-2 border-r">
-                                    {clienteName}
-                                </TableCell>
-                            </tr>
-                            {pendientes.map((pendiente) => (
-                                <TableRow key={pendiente.id} className="group-hover/client-group:bg-muted/30">
-                                    <TableCell className="p-2">
+                            {pendientes.map((pendiente, index) => (
+                                <TableRow key={pendiente.id}>
+                                    {index === 0 && (
+                                        <TableCell rowSpan={pendientes.length} className="align-middle text-center font-medium p-2 border-r">
+                                            {clienteName}
+                                        </TableCell>
+                                    )}
+                                    <TableCell className="p-2 align-middle">
                                          <Checkbox 
                                             id={`pendiente-${pendiente.id}`} 
                                             checked={pendiente.completed}
                                             onCheckedChange={() => handleTogglePendiente(pendiente)}
                                         />
                                     </TableCell>
-                                    <TableCell className={cn("p-2", pendiente.completed && "line-through text-muted-foreground")}>
+                                    <TableCell className={cn("p-2 align-middle", pendiente.completed && "line-through text-muted-foreground")}>
                                         <EditablePendiente pendiente={pendiente} onUpdate={onUpdatePendienteText}/>
                                     </TableCell>
-                                    <TableCell className="p-2">
+                                     <TableCell className="p-2 align-middle">
+                                        <Select
+                                            value={pendiente.encargado}
+                                            onValueChange={(newEncargado) => handleResponsableChange(pendiente.id, 'encargado', newEncargado)}
+                                            disabled={!canReassign}
+                                        >
+                                            <SelectTrigger className="w-full text-xs">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {teamMembers.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    </TableCell>
+                                    <TableCell className="p-2 align-middle">
+                                        <Select
+                                            value={pendiente.ejecutor}
+                                            onValueChange={(newEjecutor) => handleResponsableChange(pendiente.id, 'ejecutor', newEjecutor)}
+                                            disabled={!canReassign}
+                                        >
+                                            <SelectTrigger className="w-full text-xs">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {teamMembers.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    </TableCell>
+                                    <TableCell className="p-2 align-middle">
                                         <Select value={pendiente.status} onValueChange={(newStatus) => updatePendiente(pendiente.id, {status: newStatus}).then(onRefresh)}>
                                             <SelectTrigger className="w-full">
                                                 <SelectValue />
@@ -228,7 +270,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
-                                    <TableCell className="p-2 text-center">
+                                    <TableCell className="p-2 text-center align-middle">
                                         <ScheduleRecordingDialog 
                                             event={pendiente.recordingEvent}
                                             pendienteId={pendiente.id}
@@ -253,7 +295,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                 </TableRow>
                             ))}
                             <TableRow>
-                                <TableCell colSpan={4} className="p-0">
+                                <TableCell colSpan={7} className="p-0">
                                     {addingToClientId === client.id ? (
                                         <AddPendienteInline 
                                             client={client}
@@ -468,6 +510,3 @@ export default function PendientesPage() {
     </div>
   );
 }
-
-
-
