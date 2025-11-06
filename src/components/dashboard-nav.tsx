@@ -8,7 +8,7 @@ import { Button } from "./ui/button";
 import { Users, BookOpen, ListTodo, KeyRound, DollarSign, Calendar, LineChart, Handshake, Settings } from "lucide-react";
 import { useAuth } from "@/lib/auth-provider";
 
-const navItems = [
+const baseNavItems = [
     { href: "/equipo/dashboard/nosotros", label: "Nosotros", icon: <Users className="w-4 h-4" />, section: 'nosotros' },
     { href: "/equipo/dashboard/introduccion", label: "Introducción", icon: <BookOpen className="w-4 h-4" />, section: 'introduccion' },
     { href: "/equipo/dashboard/clientes", label: "Clientes", icon: <Users className="w-4 h-4" />, section: 'clientes' },
@@ -24,6 +24,13 @@ const navItems = [
 export default function DashboardNav() {
     const pathname = usePathname();
     const { user } = useAuth();
+
+    const navItems = baseNavItems.map(item => {
+        if (item.section === 'miProgreso' && user?.role === 'admin') {
+            return { ...item, label: '¿CÓMO VA LA EMPRESA?' };
+        }
+        return item;
+    });
 
     const userHasAccess = (section: string) => {
         if (!user) return false;

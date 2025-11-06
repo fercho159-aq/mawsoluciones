@@ -11,6 +11,8 @@ export type TeamMember = {
     email: string;
     color: string;
     birthday?: string;
+    phone?: string;
+    avatarUrl?: string;
     accessSections?: Record<string, boolean>;
     permissions?: Record<string, any>;
     progressConfig?: Record<string, boolean>;
