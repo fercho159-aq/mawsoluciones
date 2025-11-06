@@ -58,10 +58,10 @@ const ClientFormDialog = ({ client, onSave, children, isEditing }: { client?: Cl
             setEmail(client.email || '');
             setAreas(client.managedAreas || []);
             // Nota: La edición de servicios/responsables está deshabilitada para mantener la integridad de las tareas existentes.
-        } else if (!isEditing) {
+        } else {
             resetForm();
         }
-    }, [client, open, isEditing]);
+    }, [client, open]);
 
     const resetForm = () => {
         setName(''); setRepresentativeName(''); setWhatsapp(''); setEmail(''); setServiceType('');
@@ -116,7 +116,7 @@ const ClientFormDialog = ({ client, onSave, children, isEditing }: { client?: Cl
     };
 
     return (
-        <Dialog open={open} onOpenChange={(o) => { if (!o) resetForm(); setOpen(o); }}>
+        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if(!o) resetForm();}}>
             <DialogTrigger asChild>{children}</DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader><DialogTitle>{isEditing ? 'Editar Cliente' : 'Nuevo Cliente'}</DialogTitle></DialogHeader>
@@ -316,12 +316,10 @@ export default function ClientesPage() {
                 </CardContent>
             </Card>
 
-             {selectedClient && isEditModalOpen && (
-                 <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-                    <ClientFormDialog client={selectedClient} onSave={handleSaveClient} isEditing={true}>
-                       <></>
-                    </ClientFormDialog>
-                 </Dialog>
+             {selectedClient && (
+                 <ClientFormDialog client={selectedClient} onSave={handleSaveClient} isEditing={true}>
+                    <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen} />
+                 </ClientFormDialog>
             )}
         </div>
     );

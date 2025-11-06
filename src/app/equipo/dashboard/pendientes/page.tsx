@@ -104,7 +104,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser }: { data: Activity[]
                                     <div className="flex flex-col gap-2">
                                         <p className="font-semibold">{item.pendientePrincipal}</p>
                                         <div className="pl-4 space-y-2">
-                                            {item.subTasks.map(subTask => (
+                                            {item.subTasks?.map(subTask => (
                                                 <div key={subTask.id} className="flex items-center gap-2">
                                                     <Checkbox 
                                                         id={`subtask-${subTask.id}`} 
@@ -148,7 +148,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser }: { data: Activity[]
 
 export default function PendientesPage() {
     const { user } = useAuth();
-    const [pendientes, setPendientes] = useState<Activity[]>(mockData);
+    const [pendientes, setPendientes] = useState<Activity[]>([]);
     const [encargadoFilter, setEncargadoFilter] = useState('Todos');
     const [ejecutorFilter, setEjecutorFilter] = useState('Todos');
     const [statusFilter, setStatusFilter] = useState('Todos');
@@ -159,6 +159,8 @@ export default function PendientesPage() {
             const storedPendientes = localStorage.getItem('pendientes');
             if (storedPendientes) {
                 setPendientes(JSON.parse(storedPendientes));
+            } else {
+                setPendientes(mockData);
             }
         } catch (e) {
             console.error("Failed to load pendientes from local storage", e);
@@ -182,11 +184,6 @@ export default function PendientesPage() {
         }
         return Array.from(new Set(pendientes.filter(item => item.encargado === encargadoFilter).map(item => item.ejecutor))).sort();
     }, [encargadoFilter, pendientes]);
-
-    React.useEffect(() => {
-        // Do not reset ejecutor filter if an encargado is selected
-        // setEjecutorFilter('Todos');
-    }, [encargadoFilter]);
 
     const filteredData = useMemo(() => {
         return pendientes.filter(item => {
