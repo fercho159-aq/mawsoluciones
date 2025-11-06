@@ -1,16 +1,16 @@
-
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
-import { Users, BookOpen, ListTodo, KeyRound, DollarSign, Calendar, LineChart, Handshake, Settings } from "lucide-react";
+import { Users, BookOpen, ListTodo, KeyRound, DollarSign, Calendar, LineChart, Handshake, Settings, UserPlus } from "lucide-react";
 import { useAuth } from "@/lib/auth-provider";
 
 const baseNavItems = [
     { href: "/equipo/dashboard/nosotros", label: "Nosotros", icon: <Users className="w-4 h-4" />, section: 'nosotros' },
     { href: "/equipo/dashboard/introduccion", label: "Introducción", icon: <BookOpen className="w-4 h-4" />, section: 'introduccion' },
+    { href: "/equipo/dashboard/colaboradores", label: "Colaboradores", icon: <UserPlus className="w-4 h-4" />, section: 'colaboradores' },
     { href: "/equipo/dashboard/clientes", label: "Clientes", icon: <Users className="w-4 h-4" />, section: 'clientes' },
     { href: "/equipo/dashboard/pendientes", label: "Pendientes", icon: <ListTodo className="w-4 h-4" />, section: 'pendientes' },
     { href: "/equipo/dashboard/finanzas", label: "Finanzas", icon: <DollarSign className="w-4 h-4" />, section: 'finanzas' },
@@ -34,7 +34,13 @@ export default function DashboardNav() {
 
     const userHasAccess = (section: string) => {
         if (!user) return false;
+        
+        // Admin has access to everything
         if (user.role === 'admin') return true;
+
+        // Specific logic for 'colaboradores'
+        if (section === 'colaboradores') return false;
+
         if (!user.accessSections) return false;
 
         return user.accessSections[section] === true;
