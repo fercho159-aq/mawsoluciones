@@ -26,6 +26,7 @@ export const clients = pgTable('clients', {
   whatsapp: varchar('whatsapp', { length: 50 }).notNull(),
   email: varchar('email', { length: 255 }),
   managedAreas: jsonb('managed_areas').$type<string[]>(),
+  archived: boolean('archived').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow(),
 });
 

@@ -14,7 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Edit } from 'lucide-react';
+import { PlusCircle, Edit, Archive, Trash, X, Inbox } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -27,7 +27,9 @@ import { teamMembers, type TeamMember } from '@/lib/team-data';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import type { Client as ClientType, ClientFinancialProfile } from '@/lib/db/schema';
-import { addClient, updateClient, getClients as fetchClientsDB } from './_actions';
+import { addClient, updateClient, getClients as fetchClientsDB, updateClientStatus, deleteClients } from './_actions';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 
 const adsTeam: TeamMember[] = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel'].includes(m.name));
@@ -224,24 +226,14 @@ export const ClientFormDialog = ({ client, children, isEditing, onSave }: { clie
 
 export type Client = ClientType & { financialProfile: ClientFinancialProfile | null };
 
-export async function getClients(): Promise<Client[]> {
-    try {
-        const allClients = await fetchClientsDB();
-        return allClients as Client[];
-    } catch (error) {
-        console.error("Error fetching clients from page:", error);
-        return [];
-    }
-}
-
 export default function ClientesPage() {
     const { user, loading } = useAuth();
     
     const [clients, setClients] = useState<Client[]>([]);
-    const [cuentasPorCobrar, setCuentasPorCobrar] = useState<any[]>([]);
+    const [selectedClients, setSelectedClients] = useState<number[]>([]);
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const router = useRouter();
+    const [activeTab, setActiveTab] = useState('activos');
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(true);
 
@@ -249,7 +241,7 @@ export default function ClientesPage() {
         setIsLoading(true);
         try {
             const clientsData = await getClients();
-            setClients(clientsData);
+            setClients(clientsData as Client[]);
         } catch (error) {
             toast({
                 title: "Error al cargar clientes",
@@ -272,16 +264,38 @@ export default function ClientesPage() {
         }
     };
 
-    const clientBalances = useMemo(() => {
-        const balances: Record<number, number> = {};
-        clients.forEach(c => balances[c.id] = 0);
-        cuentasPorCobrar.forEach(cpc => {
-            if (balances[cpc.clienteId] !== undefined) {
-               balances[cpc.clienteId] += cpc.monto;
+    const handleSelectionChange = (clientId: number, checked: boolean) => {
+        setSelectedClients(prev => 
+            checked ? [...prev, clientId] : prev.filter(id => id !== clientId)
+        );
+    };
+
+    const currentClients = useMemo(() => clients.filter(c => activeTab === 'activos' ? !c.archived : c.archived), [clients, activeTab]);
+
+    const handleSelectAll = (checked: boolean) => {
+        if (checked) {
+            setSelectedClients(currentClients.map(c => c.id));
+        } else {
+            setSelectedClients([]);
+        }
+    };
+
+    const handleBulkAction = async (action: 'archive' | 'unarchive' | 'delete') => {
+        if (selectedClients.length === 0) return;
+        try {
+            if (action === 'delete') {
+                await deleteClients(selectedClients);
+                 toast({ title: 'Éxito', description: `${selectedClients.length} cliente(s) eliminados.` });
+            } else {
+                await updateClientStatus(selectedClients, action === 'archive');
+                 toast({ title: 'Éxito', description: `${selectedClients.length} cliente(s) ${action === 'archive' ? 'archivados' : 'restaurados'}.` });
             }
-        });
-        return balances;
-    }, [clients, cuentasPorCobrar]);
+            setSelectedClients([]);
+            fetchClients();
+        } catch (e) {
+            toast({ title: 'Error', description: 'No se pudo completar la acción.', variant: 'destructive' });
+        }
+    };
 
     if (loading || isLoading) {
         return (
@@ -303,6 +317,8 @@ export default function ClientesPage() {
             </Card>
         );
     }
+    
+    const isAllSelected = selectedClients.length > 0 && selectedClients.length === currentClients.length;
 
     return (
         <div>
@@ -311,7 +327,7 @@ export default function ClientesPage() {
                 <CardHeader className='flex-row justify-between items-center'>
                     <div>
                         <CardTitle>Listado de Clientes</CardTitle>
-                        <CardDescription>Añade nuevos clientes y consulta su estado financiero.</CardDescription>
+                        <CardDescription>Añade nuevos clientes y consulta su estado.</CardDescription>
                     </div>
                     { (user?.permissions?.clientes?.agregarClientes) && (
                          <ClientFormDialog onSave={fetchClients} isEditing={false}>
@@ -320,44 +336,92 @@ export default function ClientesPage() {
                     )}
                 </CardHeader>
                 <CardContent>
-                    <div className="border rounded-lg">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Nombre de la Empresa</TableHead>
-                                    <TableHead>Nombre Representante</TableHead>
-                                    <TableHead>Teléfono</TableHead>
-                                    <TableHead>Email</TableHead>
-                                    <TableHead>Áreas Gestionadas</TableHead>
-                                    { (user?.permissions?.clientes?.verSaldo) && (
-                                       <TableHead className="text-right">Saldo Pendiente</TableHead>
-                                    )}
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {clients.map(client => (
-                                    <TableRow key={client.id} onClick={() => handleRowClick(client)} className={cn(user?.permissions?.clientes?.editarClientes && "cursor-pointer")}>
-                                        <TableCell className="font-medium">{client.name}</TableCell>
-                                        <TableCell>{client.representativeName || 'N/A'}</TableCell>
-                                        <TableCell>{client.whatsapp || 'N/A'}</TableCell>
-                                        <TableCell>{client.email || 'N/A'}</TableCell>
-                                        <TableCell>
-                                            <div className="flex gap-1 flex-wrap">
-                                                {client.managedAreas?.map(area => (
-                                                    <Badge key={area} variant="secondary">{area}</Badge>
-                                                ))}
-                                            </div>
-                                        </TableCell>
-                                        { (user?.permissions?.clientes?.verSaldo) && (
-                                            <TableCell className={cn("text-right font-bold", (clientBalances[client.id] || 0) > 0 ? "text-destructive" : "text-green-500")}>
-                                                {(clientBalances[client.id] || 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
-                                            </TableCell>
-                                        )}
+                     <Tabs value={activeTab} onValueChange={(v) => {setActiveTab(v); setSelectedClients([]);}}>
+                        <TabsList>
+                            <TabsTrigger value="activos">Activos</TabsTrigger>
+                            <TabsTrigger value="archivados">Archivados</TabsTrigger>
+                        </TabsList>
+
+                        {selectedClients.length > 0 && (
+                            <div className="flex items-center gap-4 bg-muted p-2 rounded-md my-4">
+                                <span className="text-sm font-medium">{selectedClients.length} seleccionado(s)</span>
+                                {activeTab === 'activos' ? (
+                                    <Button variant="outline" size="sm" onClick={() => handleBulkAction('archive')}><Archive className="w-4 h-4 mr-2"/>Archivar</Button>
+                                ) : (
+                                    <Button variant="outline" size="sm" onClick={() => handleBulkAction('unarchive')}><Inbox className="w-4 h-4 mr-2"/>Restaurar</Button>
+                                )}
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button variant="destructive" size="sm"><Trash className="w-4 h-4 mr-2"/>Eliminar</Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                            <AlertDialogDescription>Esta acción es irreversible y eliminará permanentemente los clientes seleccionados.</AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleBulkAction('delete')}>Confirmar</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                                <Button variant="ghost" size="icon" onClick={() => setSelectedClients([])}><X className="w-4 h-4" /></Button>
+                            </div>
+                        )}
+
+                        <div className="border rounded-lg mt-4">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="w-[50px]">
+                                             <Checkbox
+                                                checked={isAllSelected}
+                                                onCheckedChange={handleSelectAll}
+                                                aria-label="Select all"
+                                            />
+                                        </TableHead>
+                                        <TableHead>Nombre de la Empresa</TableHead>
+                                        <TableHead>Nombre Representante</TableHead>
+                                        <TableHead>Teléfono</TableHead>
+                                        <TableHead>Email</TableHead>
+                                        <TableHead>Áreas Gestionadas</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
+                                </TableHeader>
+                                <TableBody>
+                                    {currentClients.map(client => (
+                                        <TableRow 
+                                            key={client.id} 
+                                            data-state={selectedClients.includes(client.id) && "selected"}
+                                        >
+                                            <TableCell>
+                                                <Checkbox
+                                                    checked={selectedClients.includes(client.id)}
+                                                    onCheckedChange={(checked) => handleSelectionChange(client.id, Boolean(checked))}
+                                                    aria-label={`Select client ${client.name}`}
+                                                />
+                                            </TableCell>
+                                            <TableCell className="font-medium">{client.name}</TableCell>
+                                            <TableCell>{client.representativeName || 'N/A'}</TableCell>
+                                            <TableCell>{client.whatsapp || 'N/A'}</TableCell>
+                                            <TableCell>{client.email || 'N/A'}</TableCell>
+                                            <TableCell>
+                                                <div className="flex gap-1 flex-wrap">
+                                                    {client.managedAreas?.map(area => (
+                                                        <Badge key={area} variant="secondary">{area}</Badge>
+                                                    ))}
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                             {currentClients.length === 0 && (
+                                <div className="text-center p-8 text-muted-foreground">
+                                    No hay clientes en esta vista.
+                                </div>
+                            )}
+                        </div>
+                    </Tabs>
                 </CardContent>
             </Card>
 

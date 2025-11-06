@@ -3,7 +3,7 @@
 
 import { db } from "@/lib/db";
 import { clients, pendientes_maw, clientFinancialProfiles } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function getClients() {
@@ -92,4 +92,24 @@ export async function updateClient(id: number, data: Partial<Omit<typeof clients
     console.error("Error updating client:", error);
     throw new Error("Could not update client");
   }
+}
+
+export async function updateClientStatus(ids: number[], archived: boolean) {
+    try {
+        await db.update(clients).set({ archived }).where(inArray(clients.id, ids));
+        revalidatePath('/equipo/dashboard/clientes');
+    } catch(error) {
+        console.error("Error updating client status:", error);
+        throw new Error("Could not update client status");
+    }
+}
+
+export async function deleteClients(ids: number[]) {
+    try {
+        await db.delete(clients).where(inArray(clients.id, ids));
+        revalidatePath('/equipo/dashboard/clientes');
+    } catch (error) {
+        console.error("Error deleting clients:", error);
+        throw new Error("Could not delete clients");
+    }
 }
