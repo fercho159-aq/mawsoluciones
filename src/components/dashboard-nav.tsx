@@ -34,11 +34,14 @@ export default function DashboardNav() {
 
     const userHasAccess = (section: string) => {
         if (!user) return false;
+
+        // "Nosotros", "Introduccion", and "Configuracion" are always visible for everyone.
+        if (['nosotros', 'introduccion', 'configuracion'].includes(section)) {
+            return true;
+        }
         
-        // Admin has access to everything except their own "Mi Progreso" page, which is relabeled.
+        // Admin has access to everything.
         if (user.role === 'admin') {
-            // Special case for collaborators, only admin sees it
-             if (section === 'colaboradores') return true;
              return true;
         }
 

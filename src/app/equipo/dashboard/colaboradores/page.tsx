@@ -28,7 +28,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 
 const roles = ['admin', 'contabilidad', 'ventas', 'team_member', 'julio', 'alma', 'fernando', 'luis', 'fany', 'carlos', 'paola', 'cristian', 'daniel', 'alexis', 'bere', 'kari', 'aldair', 'pedro'];
-const sections = ['nosotros', 'introduccion', 'clientes', 'pendientes', 'finanzas', 'ventas', 'accesos', 'calendario', 'miProgreso', 'configuracion'];
+const sections = ['clientes', 'pendientes', 'finanzas', 'ventas', 'accesos', 'calendario', 'miProgreso'];
 
 const ColaboradorFormDialog = ({ colaborador, onSave }: { colaborador?: Colaborador | null, onSave: () => void }) => {
     const [open, setOpen] = useState(false);
@@ -37,7 +37,14 @@ const ColaboradorFormDialog = ({ colaborador, onSave }: { colaborador?: Colabora
 
     useEffect(() => {
         if (open) {
-            setFormData(colaborador || {});
+            const initialData = colaborador || {};
+            // Ensure nosotros and introduccion are always true
+            initialData.accessSections = {
+                ...(initialData.accessSections || {}),
+                nosotros: true,
+                introduccion: true,
+            };
+            setFormData(initialData);
         }
     }, [open, colaborador]);
 
@@ -47,18 +54,28 @@ const ColaboradorFormDialog = ({ colaborador, onSave }: { colaborador?: Colabora
             return;
         }
 
+        const dataToSave = {
+            ...formData,
+            accessSections: {
+                ...(formData.accessSections || {}),
+                nosotros: true,
+                introduccion: true,
+                configuracion: true,
+            }
+        };
+
         try {
             if (colaborador?.id) {
                 // In a real DB scenario, this would call an update action
                 // For now, we simulate success and refresh.
-                console.log("Simulating update for:", formData);
+                console.log("Simulating update for:", dataToSave);
             } else {
                 // In a real DB scenario, this would call an add action
                 if (!formData.password) {
                      toast({ title: 'Error', description: 'La contraseña es obligatoria para nuevos colaboradores.', variant: 'destructive' });
                     return;
                 }
-                console.log("Simulating add for:", formData);
+                console.log("Simulating add for:", dataToSave);
             }
             toast({ title: 'Éxito', description: `Colaborador ${colaborador ? 'actualizado' : 'añadido'}. (Simulación)` });
             onSave();
