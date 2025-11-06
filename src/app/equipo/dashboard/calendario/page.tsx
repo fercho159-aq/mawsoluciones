@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { getRecordingEvents } from '../pendientes/_actions';
 import type { RecordingEvent } from '@/lib/db/schema';
 import { ScheduleRecordingDialog } from '@/components/schedule-recording-dialog';
+import { useAuth } from '@/lib/auth-provider';
 
 
 const mockEquipment = [
@@ -180,6 +181,7 @@ const CalendarSection = ({ title, events, team, eventType, onRefresh }: {
 }
 
 export default function CalendarioPage() {
+    const { user } = useAuth();
     const [events, setEvents] = useState<RecordingEvent[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -197,6 +199,8 @@ export default function CalendarioPage() {
     const grabaciones = events.filter(e => e.project !== 'cita_venta');
     const citasVenta = events.filter(e => e.project === 'cita_venta');
 
+    const canSeeSalesCalendar = user?.accessSections?.ventas;
+
     if (isLoading) {
         return <div className="flex items-center justify-center min-h-[50vh]"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div></div>
     }
@@ -212,13 +216,15 @@ export default function CalendarioPage() {
                     eventType="grabacion"
                     onRefresh={fetchEvents}
                 />
-                 <CalendarSection
-                    title="Calendario de Citas de Venta"
-                    events={citasVenta}
-                    team={salesTeam}
-                    eventType="cita_venta"
-                    onRefresh={fetchEvents}
-                />
+                 {canSeeSalesCalendar && (
+                    <CalendarSection
+                        title="Calendario de Citas de Venta"
+                        events={citasVenta}
+                        team={salesTeam}
+                        eventType="cita_venta"
+                        onRefresh={fetchEvents}
+                    />
+                 )}
             </div>
         </div>
     )
