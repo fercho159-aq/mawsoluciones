@@ -23,7 +23,7 @@ export const pendientes = pgTable('pendientes', {
     cliente: varchar('cliente', { length: 255 }).notNull(),
     encargado: varchar('encargado', { length: 100 }).notNull(),
     ejecutor: varchar('ejecutor', { length: 100 }).notNull(),
-    fechaCorte: integer('fecha_corte').notNull(),
+    fechaCorte: integer('fecha_corte').default(15).notNull(),
     status: varchar('status', { length: 50 }).notNull(),
     pendientePrincipal: text('pendiente_principal').notNull(),
     categoria: varchar('categoria', { length: 50 }).notNull(),
@@ -48,7 +48,7 @@ export const accesses = pgTable('accesses', {
 
 export const cuentasPorCobrar = pgTable('cuentas_por_cobrar', {
     id: serial('id').primaryKey(),
-    clienteId: integer('cliente_id').notNull().references(() => clients.id, { onDelete: 'cascade' }),
+    clienteId: integer('cliente_id').notNull(),
     clienteName: varchar('cliente_name', { length: 255 }).notNull(),
     periodo: varchar('periodo', { length: 100 }).notNull(),
     monto: real('monto').notNull(),
@@ -93,7 +93,7 @@ export const recordingEvents = pgTable('recording_events', {
     project: text('project'),
     assignedEquipment: jsonb('assigned_equipment').$type<string[]>(),
     equipmentNames: jsonb('equipment_names').$type<string[]>(),
-    pendienteId: integer('pendiente_id').notNull().references(() => pendientes.id, { onDelete: 'cascade' }),
+    pendienteId: integer('pendiente_id').references(() => pendientes.id, { onDelete: 'cascade' }),
 });
 
 export const recordingEventsRelations = relations(recordingEvents, ({ one }) => ({

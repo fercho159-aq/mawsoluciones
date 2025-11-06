@@ -19,7 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/lib/auth-provider';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, CalendarIcon, ArrowRight } from 'lucide-react';
+import { PlusCircle, CalendarIcon } from 'lucide-react';
 import type { Pendiente, Client, RecordingEvent } from '@/lib/db/schema';
 import { getPendientes, addPendiente, updatePendiente } from './_actions';
 import { getClients } from '../clientes/_actions';
@@ -206,7 +206,6 @@ export default function PendientesPage() {
     const [searchFilter, setSearchFilter] = useState('');
 
     const [activeTab, setActiveTab] = useState('contenido');
-    const [highlightedTab, setHighlightedTab] = useState<string | null>(null);
     const { toast } = useToast();
 
     const fetchData = async () => {
@@ -256,20 +255,6 @@ export default function PendientesPage() {
     
     const canAddPendiente = user?.role === 'admin' || user?.permissions?.pendientes?.reasignarResponsables;
 
-    const handleSearchChange = (value: string) => {
-        setSearchFilter(value);
-        setHighlightedTab(null);
-        if (value) {
-            const foundPendiente = pendientes.find(p => p.cliente.toLowerCase().includes(value.toLowerCase()));
-            if (foundPendiente) {
-                 startTransition(() => {
-                    setActiveTab(foundPendiente.categoria.toLowerCase());
-                    setHighlightedTab(foundPendiente.categoria.toLowerCase());
-                });
-            }
-        }
-    };
-
   if (isLoading) {
     return (
         <div className="flex items-center justify-center min-h-[50vh]">
@@ -300,10 +285,10 @@ export default function PendientesPage() {
                 <Input 
                     placeholder="Buscar por cliente o pendiente..."
                     value={searchFilter}
-                    onChange={(e) => handleSearchChange(e.target.value)}
+                    onChange={(e) => setSearchFilter(e.target.value)}
                     className="max-w-xs"
                 />
-                <Select value={encargadoFilter} onValueChange={(v) => { setEncargadoFilter(v); setHighlightedTab(null); }}>
+                <Select value={encargadoFilter} onValueChange={setEncargadoFilter}>
                     <SelectTrigger className="w-full md:w-[180px]">
                         <SelectValue placeholder="Filtrar por Encargado" />
                     </SelectTrigger>
@@ -312,7 +297,7 @@ export default function PendientesPage() {
                         {encargados.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
                     </SelectContent>
                 </Select>
-                 <Select value={ejecutorFilter} onValueChange={(v) => { setEjecutorFilter(v); setHighlightedTab(null); }}>
+                 <Select value={ejecutorFilter} onValueChange={setEjecutorFilter}>
                     <SelectTrigger className="w-full md:w-[180px]">
                         <SelectValue placeholder="Filtrar por Ejecutor" />
                     </SelectTrigger>
@@ -326,17 +311,14 @@ export default function PendientesPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="contenido" className="relative">
+                <TabsTrigger value="contenido">
                     Pendientes Contenido
-                    {highlightedTab === 'contenido' && <ArrowRight className="absolute -right-5 h-6 w-6 text-primary animate-bounce" />}
                 </TabsTrigger>
-                <TabsTrigger value="ads" className="relative">
+                <TabsTrigger value="ads">
                     Pendientes Ads
-                    {highlightedTab === 'ads' && <ArrowRight className="absolute -right-5 h-6 w-6 text-primary animate-bounce" />}
                 </TabsTrigger>
-                <TabsTrigger value="web" className="relative">
+                <TabsTrigger value="web">
                     Pendientes Web
-                    {highlightedTab === 'web' && <ArrowRight className="absolute -right-5 h-6 w-6 text-primary animate-bounce" />}
                 </TabsTrigger>
             </TabsList>
             
@@ -448,5 +430,3 @@ const AddPendienteDialog = ({ clients, onAddPendiente }: { clients: Client[], on
         </Dialog>
     )
 }
-
-    

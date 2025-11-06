@@ -2,7 +2,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { clients } from "@/lib/db/schema";
+import { clients, pendientes } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -26,13 +26,46 @@ export type NewClientData = Omit<typeof clients.$inferInsert, 'id' | 'createdAt'
 
 export async function addClient(data: NewClientData) {
   try {
-    await db.insert(clients).values({
+    const [newClient] = await db.insert(clients).values({
         name: data.name,
         representativeName: data.representativeName,
         whatsapp: data.whatsapp,
         email: data.email,
         managedAreas: data.managedAreas
-    }).returning();
+    }).returning({ id: clients.id });
+    
+    // Create pendientes if areas are selected
+    if (data.managedAreas && data.responsables) {
+        for (const area of data.managedAreas) {
+            let encargado = '';
+            let ejecutor = '';
+            
+            if (area === 'Contenido' && data.responsables.contenido) {
+                encargado = data.responsables.contenido.encargado;
+                ejecutor = data.responsables.contenido.ejecutor;
+            } else if (area === 'Ads' && data.responsables.ads) {
+                encargado = data.responsables.ads.responsable;
+                ejecutor = data.responsables.ads.responsable; // Assuming encargado is also ejecutor initially
+            } else if (area === 'Web' && data.responsables.web) {
+                encargado = data.responsables.web.responsable;
+                ejecutor = data.responsables.web.responsable;
+            }
+
+            if (encargado && ejecutor) {
+                 await db.insert(pendientes).values({
+                    cliente: data.name,
+                    encargado: encargado,
+                    ejecutor: ejecutor,
+                    categoria: area,
+                    pendientePrincipal: `Kick-off y configuración inicial del área de ${area}.`,
+                    status: 'Trabajando',
+                    fechaCorte: 15,
+                    completed: false,
+                });
+            }
+        }
+    }
+
     revalidatePath("/equipo/dashboard/clientes");
     revalidatePath("/equipo/dashboard/pendientes");
   } catch (error) {
