@@ -1,80 +1,153 @@
+
 "use client";
 
+import { useState } from 'react';
+import { nosotrosCourseData, type Topic } from '@/lib/nosotros-data';
+import { CodeXml, PenSquare, Megaphone, Bot, Users, Briefcase, Crown } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import { cn } from '@/lib/utils';
+import { Card, CardContent } from '@/components/ui/card';
 import { teamMembers } from '@/lib/team-data';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import AnimatedDiv from '@/components/animated-div';
-import { Crown, Users, Briefcase } from 'lucide-react';
 import type { TeamMember } from '@/lib/db/schema';
+import AnimatedDiv from '@/components/animated-div';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
-const roleIcons: { [key: string]: React.ReactNode } = {
-  admin: <Crown className="w-4 h-4 text-amber-500" />,
-  julio: <Crown className="w-4 h-4 text-amber-500" />,
-  fernando: <Crown className="w-4 h-4 text-amber-500" />,
-  ventas: <Briefcase className="w-4 h-4 text-blue-500" />,
-  alma: <Briefcase className="w-4 h-4 text-blue-500" />,
-  produccion: <Users className="w-4 h-4 text-green-500" />,
-  team_member: <Users className="w-4 h-4 text-green-500" />,
+
+const sectionIcons: Record<number, React.ReactNode> = {
+  1: <CodeXml className="w-5 h-5 mr-3 text-primary" />,
+  2: <PenSquare className="w-5 h-5 mr-3 text-primary" />,
+  3: <Megaphone className="w-5 h-5 mr-3 text-primary" />,
 };
 
-const TeamCard = ({ member }: { member: TeamMember }) => (
-    <AnimatedDiv className="text-center">
-        <Card className="bg-card/50 hover:bg-card transition-colors hover:shadow-lg">
-            <CardContent className="p-4 flex flex-col items-center">
-                <Avatar className="w-20 h-20 mb-4 border-2" style={{ borderColor: member.color || 'hsl(var(--primary))' }}>
+const CompactTeamCard = ({ member }: { member: TeamMember }) => (
+    <TooltipProvider>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <Avatar className="w-16 h-16 border-2 hover:border-primary transition-colors" style={{ borderColor: member.color || 'hsl(var(--border))' }}>
                     <AvatarImage src={member.avatarUrl} alt={member.name} />
                     <AvatarFallback style={{ backgroundColor: member.color || 'hsl(var(--primary))', color: 'white' }}>
                         {member.name.charAt(0)}
                     </AvatarFallback>
                 </Avatar>
-                <h3 className="font-bold text-lg">{member.name}</h3>
-                <Badge variant="secondary" className="mt-1 capitalize">{member.role}</Badge>
-            </CardContent>
-        </Card>
-    </AnimatedDiv>
+            </TooltipTrigger>
+            <TooltipContent>
+                <p className="font-bold">{member.name}</p>
+                <p className="text-sm text-muted-foreground capitalize">{member.role}</p>
+            </TooltipContent>
+        </Tooltip>
+    </TooltipProvider>
 );
 
+
 export default function NosotrosPage() {
+  const [currentTopic, setCurrentTopic] = useState<Topic>(nosotrosCourseData.sections[0].topics[0]);
+  
+  const handleTopicClick = (topic: Topic) => {
+    setCurrentTopic(topic);
+  };
+  
   const leadership = teamMembers.filter(m => ['admin', 'julio', 'fernando'].includes(m.role));
   const salesTeam = teamMembers.filter(m => ['alma'].includes(m.role));
   const productionTeam = teamMembers.filter(m => !['admin', 'julio', 'fernando', 'alma', 'contabilidad'].includes(m.role));
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold font-headline mb-8">Organigrama del Equipo</h1>
-
-      <div className="space-y-12">
-        <section>
-           <h2 className="text-2xl font-bold font-headline mb-6 flex items-center gap-2">
-            <Crown className="w-6 h-6 text-amber-500" />
-            Liderazgo
-           </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                {leadership.map(member => <TeamCard key={member.id} member={member} />)}
+    <div className="flex flex-col">
+        <header className="bg-card shadow-md sticky top-0 z-10 mb-8">
+            <div className="container mx-auto px-4 md:px-0 py-4">
+                <h1 className="text-xl md:text-2xl font-bold font-headline">{nosotrosCourseData.title}</h1>
             </div>
-        </section>
+        </header>
 
-         <section>
-           <h2 className="text-2xl font-bold font-headline mb-6 flex items-center gap-2">
-            <Briefcase className="w-6 h-6 text-blue-500" />
-            Equipo de Ventas
-           </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                {salesTeam.map(member => <TeamCard key={member.id} member={member} />)}
-            </div>
-        </section>
+        <div className="container mx-auto px-4 md:px-0">
+            <div className="flex flex-col md:flex-row gap-8">
+                <aside className="w-full md:w-1/3 lg:w-1/4">
+                    <div className="sticky top-28">
+                         <Accordion type="single" collapsible defaultValue={`section-${currentTopic.section_id}`} className="w-full">
+                            {nosotrosCourseData.sections.map((section) => (
+                                <AccordionItem value={`section-${section.section_id}`} key={section.section_id}>
+                                    <AccordionTrigger className="font-headline text-lg hover:no-underline">
+                                       <div className="flex items-center">
+                                            {sectionIcons[section.section_id as keyof typeof sectionIcons] || <CodeXml className="w-5 h-5 mr-3 text-primary" />}
+                                            <span>{section.title}</span>
+                                       </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="pl-4">
+                                        <div className="flex flex-col gap-1">
+                                            {section.topics.map((topic) => {
+                                                const isCurrent = currentTopic.topic_id === topic.topic_id;
+                                                return (
+                                                    <button
+                                                        key={topic.topic_id}
+                                                        onClick={() => handleTopicClick(topic)}
+                                                        className={cn(
+                                                            "flex items-center gap-3 text-left p-2 rounded-md transition-colors text-sm",
+                                                            isCurrent ? "bg-primary/20 text-primary-foreground font-semibold" : "hover:bg-accent",
+                                                            "text-foreground/80"
+                                                        )}
+                                                    >
+                                                        <div className={cn("w-2 h-2 rounded-full", isCurrent ? 'bg-primary' : 'bg-muted-foreground')}></div>
+                                                        <span className="flex-1">{topic.title}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            ))}
+                        </Accordion>
+                    </div>
+                </aside>
 
-         <section>
-           <h2 className="text-2xl font-bold font-headline mb-6 flex items-center gap-2">
-            <Users className="w-6 h-6 text-green-500" />
-            Equipo de Producción
-           </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                {productionTeam.map(member => <TeamCard key={member.id} member={member} />)}
+                <main className="w-full md:w-2/3 lg:w-3/4">
+                    <Card>
+                      <CardContent className="p-6">
+                        <h2 className="font-headline text-2xl sm:text-3xl font-bold mb-4">{currentTopic.title}</h2>
+                        <div 
+                            className="prose prose-lg max-w-none text-foreground/80 prose-headings:font-headline prose-headings:text-foreground prose-strong:text-foreground mb-8"
+                            dangerouslySetInnerHTML={{ __html: currentTopic.content }}
+                        />
+                      </CardContent>
+                    </Card>
+                </main>
             </div>
-        </section>
-      </div>
+
+            <section className="mt-16 pt-8 border-t">
+                <h2 className="text-2xl font-bold font-headline mb-8 text-center">Organigrama del Equipo</h2>
+                <div className="space-y-10">
+                    <AnimatedDiv>
+                        <h3 className="text-xl font-bold font-headline mb-6 flex items-center justify-center gap-2 text-amber-500">
+                            <Crown className="w-6 h-6" /> Liderazgo
+                        </h3>
+                        <div className="flex justify-center flex-wrap gap-4">
+                            {leadership.map(member => <CompactTeamCard key={member.id} member={member} />)}
+                        </div>
+                    </AnimatedDiv>
+                    <AnimatedDiv>
+                        <h3 className="text-xl font-bold font-headline mb-6 flex items-center justify-center gap-2 text-blue-500">
+                            <Briefcase className="w-6 h-6" /> Equipo de Ventas
+                        </h3>
+                        <div className="flex justify-center flex-wrap gap-4">
+                            {salesTeam.map(member => <CompactTeamCard key={member.id} member={member} />)}
+                        </div>
+                    </AnimatedDiv>
+                    <AnimatedDiv>
+                        <h3 className="text-xl font-bold font-headline mb-6 flex items-center justify-center gap-2 text-green-500">
+                            <Users className="w-6 h-6" /> Equipo de Producción
+                        </h3>
+                        <div className="flex justify-center flex-wrap gap-4">
+                            {productionTeam.map(member => <CompactTeamCard key={member.id} member={member} />)}
+                        </div>
+                    </AnimatedDiv>
+                </div>
+            </section>
+
+        </div>
     </div>
   );
 }
