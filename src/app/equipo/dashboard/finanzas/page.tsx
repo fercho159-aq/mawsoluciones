@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, ArrowRight, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Users, CalendarIcon, FileText, Edit, Camera, Zap, RefreshCw } from 'lucide-react';
+import { ArrowUpDown, ArrowRight, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Users, CalendarIcon, FileText, Edit, Camera, Zap, RefreshCw, AlertTriangle } from 'lucide-react';
 import WhatsappIcon from '@/components/icons/whatsapp-icon';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -64,10 +64,7 @@ const AddCpcDialog = ({ clients, onSave, children }: { clients: Client[], onSave
     const [clienteId, setClienteId] = useState('');
     const [monto, setMonto] = useState('');
     const [tipo, setTipo] = useState<CategoriaIngreso>('Iguala Mensual');
-    
-    const [billingDay, setBillingDay] = useState<'15' | '30'>('15');
-    const [customDate, setCustomDate] = useState<Date | undefined>(undefined);
-    const [selectedBillingDateOption, setSelectedBillingDateOption] = useState('');
+    const [periodo, setPeriodo] = useState('');
 
     useEffect(() => {
         if (open) {
@@ -75,15 +72,13 @@ const AddCpcDialog = ({ clients, onSave, children }: { clients: Client[], onSave
         }
     }, [open]);
 
-
     const resetForm = () => {
-        setClienteId(''); setMonto(''); setTipo('Iguala Mensual');
-        setBillingDay('15'); setCustomDate(undefined); setSelectedBillingDateOption('');
+        setClienteId(''); setMonto(''); setTipo('Iguala Mensual'); setPeriodo('');
     }
 
     const handleSave = async () => {
-        if (!clienteId || !monto || !selectedBillingDateOption) {
-            toast({ title: "Error", description: "Cliente, monto y fecha de cobro son obligatorios.", variant: "destructive" });
+        if (!clienteId || !monto || !periodo) {
+            toast({ title: "Error", description: "Cliente, monto y periodo son obligatorios.", variant: "destructive" });
             return;
         }
 
@@ -93,40 +88,10 @@ const AddCpcDialog = ({ clients, onSave, children }: { clients: Client[], onSave
             return;
         }
         
-        const now = new Date();
-        let finalBillingDate: Date;
-        
-        switch (selectedBillingDateOption) {
-            case 'next_15':
-                finalBillingDate = setDate(now.getDate() > 15 ? addMonths(now, 1) : now, 15);
-                break;
-            case 'past_15':
-                finalBillingDate = setDate(now.getDate() <= 15 ? subMonths(now, 1) : now, 15);
-                break;
-            case 'next_30':
-                finalBillingDate = endOfMonth(now.getDate() === getDaysInMonth(now) ? addMonths(now, 1) : now);
-                break;
-            case 'past_30':
-                finalBillingDate = endOfMonth(now.getDate() < getDaysInMonth(now) ? subMonths(now, 1) : now);
-                break;
-            case 'custom':
-                if (!customDate) {
-                    toast({ title: "Error", description: "Por favor, selecciona una fecha personalizada.", variant: "destructive" });
-                    return;
-                }
-                finalBillingDate = customDate;
-                break;
-            default:
-                toast({ title: "Error", description: "Opción de fecha de cobro no válida.", variant: "destructive" });
-                return;
-        }
-        const finalBillingDateLabel = format(finalBillingDate, "d MMM yyyy", { locale: es });
-
-
-        const data: NewCuentaPorCobrar = { 
+        const data: Omit<NewCuentaPorCobrar, 'id'> = { 
             clienteId: parseInt(clienteId), 
             clienteName: cliente.name, 
-            periodo: finalBillingDateLabel,
+            periodo,
             monto: parseFloat(monto), 
             tipo,
         };
@@ -158,15 +123,6 @@ const AddCpcDialog = ({ clients, onSave, children }: { clients: Client[], onSave
                                 {clients.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
                             </SelectContent>
                         </Select>
-                        {clients.length === 0 && (
-                             <Alert>
-                                <AlertTriangle className="h-4 w-4" />
-                                <AlertTitle>No hay clientes</AlertTitle>
-                                <AlertDescription>
-                                    Aún no hay clientes registrados. Ve a la sección de clientes para añadir uno.
-                                </AlertDescription>
-                            </Alert>
-                        )}
                     </div>
                     
                     <div className="space-y-2">
@@ -187,34 +143,8 @@ const AddCpcDialog = ({ clients, onSave, children }: { clients: Client[], onSave
                     </div>
 
                     <div className="space-y-2">
-                         <Label>Fecha de Corte</Label>
-                         <RadioGroup value={billingDay} onValueChange={v => setBillingDay(v as '15' | '30')} className="flex gap-4">
-                            <div className="flex items-center space-x-2"><RadioGroupItem value="15" id="d15" /><Label htmlFor="d15" className="font-normal">Día 15</Label></div>
-                            <div className="flex items-center space-x-2"><RadioGroupItem value="30" id="d30" /><Label htmlFor="d30" className="font-normal">Día 30</Label></div>
-                         </RadioGroup>
-                    </div>
-
-                     <div className="space-y-2">
-                        <Label>Fecha de Cobro</Label>
-                        <Select value={selectedBillingDateOption} onValueChange={v => setSelectedBillingDateOption(v)}>
-                            <SelectTrigger><SelectValue placeholder="Seleccionar fecha..."/></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value={`next_${billingDay}`}>Próximo día {billingDay}</SelectItem>
-                                <SelectItem value={`past_${billingDay}`}>Pasado día {billingDay}</SelectItem>
-                                <SelectItem value="custom">Otra fecha</SelectItem>
-                            </SelectContent>
-                        </Select>
-                         {selectedBillingDateOption === 'custom' && (
-                             <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !customDate && "text-muted-foreground")}>
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {customDate ? format(customDate, "d 'de' MMMM, yyyy", { locale: es }) : <span>Seleccionar fecha</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={customDate} onSelect={setCustomDate} initialFocus /></PopoverContent>
-                            </Popover>
-                        )}
+                        <Label>Periodo</Label>
+                        <Input value={periodo} onChange={e => setPeriodo(e.target.value)} placeholder="Ej. Noviembre 2024" />
                     </div>
                 </div>
                 <DialogFooter>
@@ -367,7 +297,7 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave, onManualSav
         resetForm();
     };
     
-    const handleManualSave = () => {
+    const handleManualIngreso = () => {
         if(!manualAmount || !manualDesc || !cuentaDestino) return;
         onManualSave({ monto: parseFloat(manualAmount), descripcion: manualDesc, cuenta: cuentaDestino, detalleCuenta: detalleEfectivo, categoria: 'Proyecto' });
         setOpen(false);
@@ -428,7 +358,7 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave, onManualSav
                 </div>
                 <DialogFooter className='mt-4'>
                     <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                    <Button onClick={isManual ? handleManualSave : handleSave} disabled={isManual ? (!manualAmount || !manualDesc || !cuentaDestino) : (!selectedCpc || !cuentaDestino)}>Registrar</Button>
+                    <Button onClick={isManual ? handleManualIngreso : handleSave} disabled={isManual ? (!manualAmount || !manualDesc || !cuentaDestino) : (!selectedCpc || !cuentaDestino)}>Registrar</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -644,3 +574,6 @@ export default function FinanzasPage() {
     );
 }
 
+
+
+    
