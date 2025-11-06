@@ -1,5 +1,5 @@
 
-import { FirebaseApp, getApp, getApps, initializeApp } from 'firebase/app';
+import { FirebaseApp, getApps, initializeApp, getApp } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
 import { Firestore, getFirestore } from 'firebase/firestore';
 import { firebaseConfig } from './config';
@@ -14,15 +14,13 @@ let app: FirebaseApp;
 let auth: Auth;
 let firestore: Firestore;
 
-export const initializeFirebase = async () => {
-  if (getApps().length) {
-    app = getApp();
-    auth = getAuth(app);
-    firestore = getFirestore(app);
-  } else {
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    firestore = getFirestore(app);
-  }
-  return { app, auth, firestore };
-};
+if (getApps().length) {
+  app = getApp();
+} else {
+  app = initializeApp(firebaseConfig);
+}
+
+auth = getAuth(app);
+firestore = getFirestore(app);
+
+export { app, auth, firestore };

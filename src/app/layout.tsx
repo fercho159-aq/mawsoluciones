@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster"
 import ChatBubble from '@/components/chat-bubble';
 import { ThemeProvider } from '@/components/theme-provider';
 import { FirebaseProvider } from '@/firebase/provider';
-import { initializeFirebase } from '@/firebase';
+import { app, auth, firestore } from '@/firebase';
 
 export const metadata: Metadata = {
   title: 'MAW Soluciones | Agencia de Marketing Digital',
@@ -18,7 +18,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const firebase = await initializeFirebase();
   return (
     <html lang="es" className="scroll-smooth" suppressHydrationWarning>
       <head>
@@ -34,9 +33,9 @@ export default async function RootLayout({
             disableTransitionOnChange
         >
           <FirebaseProvider
-            app={firebase.app}
-            auth={firebase.auth}
-            firestore={firebase.firestore}
+            app={app}
+            auth={auth}
+            firestore={firestore}
           >
             {children}
             <ChatBubble />
