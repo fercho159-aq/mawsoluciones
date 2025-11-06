@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect, startTransition } from 'react';
@@ -25,8 +26,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { teamMembers, type TeamMember } from '@/lib/team-data';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import type { Client } from '@/lib/db/schema';
-import { addClient, updateClient, getClients } from './_actions';
+import type { Client as ClientType, ClientFinancialProfile } from '@/lib/db/schema';
+import { addClient, updateClient, getClients as fetchClientsDB } from './_actions';
 
 
 const adsTeam: TeamMember[] = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel'].includes(m.name));
@@ -40,7 +41,7 @@ const ejecutoresPorEncargado: Record<string, string[]> = {
     'Fany': ['Fany', 'Daniel', 'Cristian', 'Aldair']
 };
 
-const ClientFormDialog = ({ client, children, isEditing, onSave }: { client?: Client, children: React.ReactNode, isEditing: boolean, onSave: () => void }) => {
+export const ClientFormDialog = ({ client, children, isEditing, onSave }: { client?: Client, children: React.ReactNode, isEditing: boolean, onSave: () => void }) => {
     const [name, setName] = useState('');
     const [representativeName, setRepresentativeName] = useState('');
     const [whatsapp, setWhatsapp] = useState('');
@@ -221,6 +222,18 @@ const ClientFormDialog = ({ client, children, isEditing, onSave }: { client?: Cl
     )
 }
 
+export type Client = ClientType & { financialProfile: ClientFinancialProfile | null };
+
+export async function getClients(): Promise<Client[]> {
+    try {
+        const allClients = await fetchClientsDB();
+        return allClients as Client[];
+    } catch (error) {
+        console.error("Error fetching clients from page:", error);
+        return [];
+    }
+}
+
 export default function ClientesPage() {
     const { user, loading } = useAuth();
     
@@ -358,7 +371,5 @@ export default function ClientesPage() {
         </div>
     );
 }
-
-export type { Client };
 
     

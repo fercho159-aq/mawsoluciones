@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, ArrowRight, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Users, CalendarIcon, FileText, Edit } from 'lucide-react';
+import { ArrowUpDown, ArrowRight, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Users, CalendarIcon, FileText, Edit, Camera, Zap } from 'lucide-react';
 import WhatsappIcon from '@/components/icons/whatsapp-icon';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,7 +30,8 @@ import { es } from 'date-fns/locale';
 import { useAuth } from '@/lib/auth-provider';
 import type { CategoriaIngreso, CategoriaGasto, Cuenta, Periodo } from '@/lib/finanzas-data';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { getClients, type Client } from '../clientes/_actions';
+import { getClients, type Client } from '../clientes/page';
+import { ClientFormDialog } from '../clientes/page';
 import { addCpc, addMovimiento, getCuentasPorCobrar, getMovimientos, updateCpcAfterPayment, updateCpc } from './_actions';
 import type { MovimientoDiario, CuentaPorCobrar, NewCuentaPorCobrar, NewMovimientoDiario, ClientFinancialProfile } from '@/lib/db/schema';
 import { Switch } from '@/components/ui/switch';
@@ -43,34 +44,29 @@ const generatePeriodOptions = () => {
     const today = new Date();
     const options: { value: string, label: string }[] = [];
 
-    // Past 15th
-    let past15 = new Date(today);
+    // Previous 15th
+    let past15 = setDate(today, 15);
     if (today.getDate() <= 15) {
-        past15.setMonth(today.getMonth() - 1);
+      past15 = subMonths(past15, 1);
     }
-    past15.setDate(15);
     options.push({ value: past15.toISOString(), label: `Pasado día 15 (${format(past15, 'd MMM', { locale: es })})` });
-
-    // Past 30th (end of month)
-    let past30 = new Date(today);
-    past30.setMonth(today.getMonth() - 1);
-    past30 = endOfMonth(past30);
+    
+    // Previous 30th (end of month)
+    let past30 = endOfMonth(subMonths(today, 1));
     options.push({ value: past30.toISOString(), label: `Pasado día 30 (${format(past30, 'd MMM', { locale: es })})` });
 
     // Next 15th
-    let next15 = new Date(today);
+    let next15 = setDate(today, 15);
     if (today.getDate() > 15) {
-        next15.setMonth(today.getMonth() + 1);
+      next15 = addMonths(next15, 1);
     }
-    next15.setDate(15);
      options.push({ value: next15.toISOString(), label: `Próximo día 15 (${format(next15, 'd MMM', { locale: es })})` });
 
     // Next 30th (end of month)
-    let next30 = new Date(today);
-     if (today.getDate() > endOfMonth(today).getDate() - 5) { // Logic to push to next month if close to end
-        next30.setMonth(today.getMonth() + 1);
+    let next30 = endOfMonth(today);
+    if (today.getDate() > endOfMonth(today).getDate() - 5) {
+        next30 = endOfMonth(addMonths(today, 1));
     }
-    next30 = endOfMonth(next30);
     options.push({ value: next30.toISOString(), label: `Próximo día 30 (${format(next30, 'd MMM', { locale: es })})` });
 
     return options.sort((a,b) => new Date(a.value).getTime() - new Date(b.value).getTime());
@@ -92,7 +88,7 @@ const getNextPeriod = (periodo: string): Periodo => {
 }
 
 // --- Components ---
-const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt }: { cpc?: CuentaPorCobrar | null, clients: (Client & { financialProfile: ClientFinancialProfile | null })[], onSave: () => void, children: React.ReactNode, onGenerateReceipt: (item: CuentaPorCobrar, withInvoice: boolean) => void }) => {
+const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt, onClientAdded }: { cpc?: CuentaPorCobrar | null, clients: Client[], onSave: () => void, children: React.ReactNode, onGenerateReceipt: (item: CuentaPorCobrar, withInvoice: boolean) => void, onClientAdded: () => void }) => {
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
     
@@ -145,16 +141,16 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt }: { c
              const selectedOption = periodOptions.find(p => p.value === billingDate);
              if (selectedOption) {
                  finalBillingDateLabel = selectedOption.label;
-             } else if (isEditing) {
-                 finalBillingDateLabel = billingDate; // Keep existing label on edit if not found in options
+             } else if (isEditing && billingDate) {
+                 finalBillingDateLabel = billingDate; // Keep existing label on edit
              } else {
                  toast({ title: "Error", description: "Por favor, selecciona una fecha de cobro válida.", variant: "destructive" });
                  return;
              }
         }
-
-        if (!clienteId || !monto) {
-            toast({ title: "Error", description: "Cliente y monto son obligatorios.", variant: "destructive" });
+        
+        if (!clienteId || !monto || !billingDay) {
+            toast({ title: "Error", description: "Cliente, fecha de corte y monto son obligatorios.", variant: "destructive" });
             return;
         }
 
@@ -197,6 +193,14 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt }: { c
                                 {clients.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
                             </SelectContent>
                         </Select>
+                        <Alert variant="default" className='mt-2 text-sm text-muted-foreground p-3'>
+                            <AlertDescription className='flex items-center justify-between gap-2'>
+                               ¿No encuentras al cliente?
+                                <ClientFormDialog onSave={onClientAdded} isEditing={false}>
+                                    <Button variant="secondary" size="sm">Añadir Cliente <PlusCircle className='w-4 h-4 ml-2'/></Button>
+                                </ClientFormDialog>
+                            </AlertDescription>
+                        </Alert>
                     </div>
                      <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -276,8 +280,11 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt }: { c
     )
 }
 
-const CuentasPorCobrarTab = ({ data, clients, onAddCpc, onUpdateCpc }: { data: CuentaPorCobrar[], clients: (Client & { financialProfile: ClientFinancialProfile | null })[], onAddCpc: (cpc: Omit<NewCuentaPorCobrar, 'id'>) => void, onUpdateCpc: () => void }) => {
+const CuentasPorCobrarTab = ({ data, clients, onAddCpc, onUpdateCpc, onClientAdded }: { data: CuentaPorCobrar[], clients: Client[], onAddCpc: (cpc: Omit<NewCuentaPorCobrar, 'id'>) => void, onUpdateCpc: () => void, onClientAdded: () => void }) => {
     
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
+    const [clientFilter, setClientFilter] = useState('Todos');
+
     const handleWhatsappReminder = (item: CuentaPorCobrar) => {
         const client = clients.find(c => c.id === item.clienteId);
         if (!client || !client.whatsapp) {
@@ -367,33 +374,77 @@ const CuentasPorCobrarTab = ({ data, clients, onAddCpc, onUpdateCpc }: { data: C
         const url = URL.createObjectURL(blob);
         window.open(url, '_blank');
     };
+
+    const sortedAndFilteredData = useMemo(() => {
+        let filtered = [...data];
+        if(clientFilter !== 'Todos') {
+            filtered = filtered.filter(item => item.clienteId.toString() === clientFilter);
+        }
+        if (sortOrder) {
+            filtered.sort((a, b) => sortOrder === 'desc' ? b.monto - a.monto : a.monto - b.monto);
+        }
+        return filtered;
+    }, [data, sortOrder, clientFilter]);
+
+    const toggleSort = () => {
+        setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc');
+    };
     
     return (
         <Card>
-            <CardHeader className='flex-row justify-between items-center'>
+            <CardHeader className='flex-col md:flex-row justify-between items-start md:items-center'>
                 <div>
                     <CardTitle>Control de Pagos Pendientes</CardTitle>
                     <CardDescription>Gestiona los pagos pendientes de tus clientes y envía recordatorios.</CardDescription>
                 </div>
-                <AddCpcDialog clients={clients} onSave={onUpdateCpc} onGenerateReceipt={handleGenerateReceipt}>
-                    <Button><PlusCircle className="w-4 h-4 mr-2" />Añadir Cuenta por Cobrar</Button>
-                </AddCpcDialog>
+                 <div className="flex gap-2">
+                    <Select value={clientFilter} onValueChange={setClientFilter}>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Filtrar por cliente" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Todos">Todos los Clientes</SelectItem>
+                            {clients.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                    <AddCpcDialog clients={clients} onSave={onUpdateCpc} onGenerateReceipt={handleGenerateReceipt} onClientAdded={onClientAdded}>
+                        <Button><PlusCircle className="w-4 h-4 mr-2" />Añadir CxC</Button>
+                    </AddCpcDialog>
+                 </div>
             </CardHeader>
             <CardContent>
                 <div className="border rounded-lg">
                     <Table>
-                        <TableHeader><TableRow><TableHead>Cliente</TableHead><TableHead>Periodo</TableHead><TableHead>Monto Adeudado</TableHead><TableHead>Tipo</TableHead><TableHead colSpan={2} className="text-right">Acciones</TableHead></TableRow></TableHeader>
+                        <TableHeader><TableRow>
+                            <TableHead>Cliente</TableHead>
+                            <TableHead>Periodo</TableHead>
+                            <TableHead className='cursor-pointer' onClick={toggleSort}>
+                                <div className="flex items-center gap-1">
+                                    Monto Adeudado
+                                    <ArrowUpDown className="w-4 h-4" />
+                                </div>
+                            </TableHead>
+                            <TableHead>Tipo</TableHead>
+                            <TableHead colSpan={2} className="text-right">Acciones</TableHead>
+                            </TableRow>
+                        </TableHeader>
                         <TableBody>
-                            {data.map((item) => (
-                                <AddCpcDialog key={item.id} cpc={item} clients={clients} onSave={onUpdateCpc} onGenerateReceipt={handleGenerateReceipt}>
+                            {sortedAndFilteredData.map((item) => (
+                                <AddCpcDialog key={item.id} cpc={item} clients={clients} onSave={onUpdateCpc} onGenerateReceipt={handleGenerateReceipt} onClientAdded={onClientAdded}>
                                     <TableRow className="cursor-pointer">
                                         <TableCell className="font-medium">{item.clienteName}</TableCell>
                                         <TableCell><Badge variant="outline">{item.periodo}</Badge></TableCell>
                                         <TableCell>{item.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
-                                        <TableCell><Badge variant={item.tipo === 'Iguala Mensual' ? 'secondary' : 'default'}>{item.tipo}</Badge></TableCell>
+                                        <TableCell>
+                                            <Badge variant={item.tipo === 'Iguala Mensual' ? 'secondary' : 'default'} className="flex items-center gap-1.5 w-fit">
+                                                {item.tipo === 'Iguala Mensual' && <Camera className='w-4 h-4' />}
+                                                {item.tipo === 'Proyecto' && <Zap className='w-4 h-4' />}
+                                                {item.tipo}
+                                            </Badge>
+                                        </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex gap-2 justify-end" onClick={e => e.stopPropagation()}>
-                                                <Button variant="ghost" size="sm" onClick={() => handleGenerateReceipt(item)}><FileText className="w-4 h-4 mr-2" />Recibo</Button>
+                                                <Button variant="ghost" size="sm" onClick={() => handleGenerateReceipt(item, false)}><FileText className="w-4 h-4 mr-2" />Recibo</Button>
                                                 <Button variant="whatsapp" size="sm" onClick={() => handleWhatsappReminder(item)}>
                                                     <WhatsappIcon className="w-4 h-4 mr-2" />
                                                     Recordar
@@ -646,7 +697,7 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onAddMovimiento, cuentasPorCobra
 
 export default function FinanzasPage() {
     const { user } = useAuth();
-    const [clients, setClients] = useState<(Client & { financialProfile: ClientFinancialProfile | null })[]>([]);
+    const [clients, setClients] = useState<Client[]>([]);
     const [movimientos, setMovimientos] = useState<MovimientoDiario[]>([]);
     const [cuentasPorCobrar, setCuentasPorCobrar] = useState<CuentaPorCobrar[]>([]);
     const [activeTab, setActiveTab] = useState("cuentas-por-cobrar");
@@ -661,7 +712,7 @@ export default function FinanzasPage() {
             getCuentasPorCobrar(),
             getMovimientos(),
         ]);
-        setClients(clientsData as (Client & { financialProfile: ClientFinancialProfile | null })[]);
+        setClients(clientsData as Client[]);
         setCuentasPorCobrar(cpcData);
         setMovimientos(movimientosData.map(m => ({...m, fecha: new Date(m.fecha)})));
         setIsLoading(false);
@@ -703,7 +754,7 @@ export default function FinanzasPage() {
                     <TabsTrigger value="tabla-diaria"><TrendingUp className="w-4 h-4 mr-2"/>Tabla Diaria</TabsTrigger>
                 </TabsList>
                 <TabsContent value="cuentas-por-cobrar" className="mt-4">
-                   <CuentasPorCobrarTab data={cuentasPorCobrar} clients={clients} onAddCpc={handleSaveCpc} onUpdateCpc={handleSaveCpc} />
+                   <CuentasPorCobrarTab data={cuentasPorCobrar} clients={clients} onAddCpc={handleSaveCpc} onUpdateCpc={handleSaveCpc} onClientAdded={fetchData}/>
                 </TabsContent>
                 <TabsContent value="tabla-diaria" className="mt-4">
                     <TablaDiariaTab isAdmin={isAdmin} movimientos={movimientos} onAddMovimiento={handleAddMovimiento} cuentasPorCobrar={cuentasPorCobrar} onUpdateCpc={handleUpdateCpc} />
@@ -712,5 +763,6 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
 
 
