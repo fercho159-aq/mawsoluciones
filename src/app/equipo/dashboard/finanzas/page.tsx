@@ -132,9 +132,12 @@ const AddCpcDialog = ({ clients, onSave, onClientAdd, children }: { clients: Cli
 
         try {
             await addCpc(data);
-            onSave();
-            setOpen(false);
-            toast({ title: "Éxito", description: `Cuenta por cobrar para ${cliente.name} guardada.` });
+             startTransition(() => {
+                onSave();
+                setOpen(false);
+                toast({ title: "Éxito", description: `Cuenta por cobrar para ${cliente.name} guardada.` });
+                resetForm();
+            });
         } catch (error) {
              toast({ title: "Error", description: `No se pudo guardar la cuenta por cobrar.`, variant: 'destructive' });
         }
@@ -635,11 +638,3 @@ export default function FinanzasPage() {
         </div>
     );
 }
-
-    
-
-    
-
-
-
-
