@@ -94,16 +94,6 @@ export async function updateClient(id: number, data: Partial<Omit<typeof clients
   }
 }
 
-export async function updateClientStatus(ids: number[], archived: boolean) {
-    try {
-        await db.update(clients).set({ archived }).where(inArray(clients.id, ids));
-        revalidatePath('/equipo/dashboard/clientes');
-    } catch(error) {
-        console.error("Error updating client status:", error);
-        throw new Error("Could not update client status");
-    }
-}
-
 export async function deleteClients(ids: number[]) {
     try {
         await db.delete(clients).where(inArray(clients.id, ids));
