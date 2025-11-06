@@ -2,7 +2,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { cuentasPorCobrar, movimientosDiarios, type NewCuentaPorCobrar, type NewMovimientoDiario, type CuentaPorCobrar } from "@/lib/db/schema";
+import { cuentasPorCobrar, movimientosDiarios, type NewCuentaPorCobrar, type CuentaPorCobrar } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -38,6 +38,17 @@ export async function addCpc(data: NewCuentaPorCobrar) {
   }
 }
 
+export async function updateCpc(id: number, data: Partial<Omit<NewCuentaPorCobrar, 'id'>>) {
+    try {
+        await db.update(cuentasPorCobrar).set(data).where(eq(cuentasPorCobrar.id, id));
+        revalidatePath("/equipo/dashboard/finanzas");
+    } catch (error) {
+        console.error("Error updating cpc:", error);
+        throw new Error("Could not update cpc");
+    }
+}
+
+
 export async function addMovimiento(data: Omit<NewMovimientoDiario, 'id'>) {
   try {
     await db.insert(movimientosDiarios).values(data);
@@ -54,7 +65,7 @@ export async function updateCpcAfterPayment(cpc: CuentaPorCobrar, nextPeriod: st
         await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, cpc.id));
 
         // If it's a recurring payment, create the next one
-        if (cpc.tipo === 'Iguala Mensual' || cpc.tipo === 'Ads') {
+        if (cpc.tipo === 'Iguala Mensual') {
             await db.insert(cuentasPorCobrar).values({
                 clienteId: cpc.clienteId,
                 clienteName: cpc.clienteName,
