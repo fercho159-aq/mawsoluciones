@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, startTransition } from 'react';
 import Link from 'next/link';
 import {
   Table,
@@ -27,19 +27,11 @@ import { useToast } from '@/hooks/use-toast';
 import { format, startOfMonth, endOfMonth, isWithinInterval, parse, addMonths, getDaysInMonth, parseISO, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useAuth } from '@/lib/auth-provider';
-import { 
-    initialClients, 
-    initialCuentasPorCobrar, 
-    initialMovimientosDiarios,
-    type Client,
-    type CuentasPorCobrar,
-    type MovimientoDiario,
-    type Periodo,
-    type CategoriaIngreso,
-    type CategoriaGasto,
-    type Cuenta
-} from '@/lib/finanzas-data';
+import type { CategoriaIngreso, CategoriaGasto, Cuenta, Periodo } from '@/lib/finanzas-data';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { getClients, type Client } from '../clientes/_actions';
+import { addCpc, addMovimiento, getCuentasPorCobrar, getMovimientos, updateCpcAfterPayment } from './_actions';
+import type { MovimientoDiario, CuentaPorCobrar, NewCuentaPorCobrar, NewMovimientoDiario } from '@/lib/db/schema';
 
 
 // --- Helper Functions ---
@@ -47,22 +39,14 @@ const generatePeriodOptions = () => {
     const options: string[] = [];
     const today = new Date();
     
-    // Generate periods for the last 2 months, current month, and next 3 months
     for (let i = -2; i <= 3; i++) {
         const date = addMonths(today, i);
         
-        // Full month period
         const start = startOfMonth(date);
         const end = endOfMonth(date);
         options.push(`${format(start, 'd MMM', { locale: es })} - ${format(end, 'd MMM', { locale: es })}`);
-
-        // 15th to 15th period
-        const start15 = new Date(date.getFullYear(), date.getMonth(), 15);
-        const end15 = addMonths(start15, 1);
-        options.push(`${format(start15, 'd MMM', { locale: es })} - ${format(end15, 'd MMM', { locale: es })}`);
     }
     
-    // Sort options chronologically
     return options.sort((a, b) => {
         const dateA = parse(a.split(' - ')[0], 'd MMM', new Date());
         const dateB = parse(b.split(' - ')[0], 'd MMM', new Date());
@@ -76,16 +60,8 @@ const getNextPeriod = (periodo: string): Periodo => {
         const startDate = parse(startStr, 'd MMM', new Date(), { locale: es });
         
         const nextStartDate = addMonths(startDate, 1);
-        
-        if (startDate.getDate() === 1) {
-            // Full month period
-            const nextEndDate = endOfMonth(nextStartDate);
-            return `${format(nextStartDate, 'd MMM', { locale: es })} - ${format(nextEndDate, 'd MMM', { locale: es })}`;
-        } else {
-            // 15th to 15th period
-            const nextEndDate = addMonths(nextStartDate, 1);
-            return `${format(nextStartDate, 'd MMM', { locale: es })} - ${format(nextEndDate, 'd MMM', { locale: es })}`;
-        }
+        const nextEndDate = endOfMonth(nextStartDate);
+        return `${format(nextStartDate, 'd MMM', { locale: es })} - ${format(nextEndDate, 'd MMM', { locale: es })}`;
     } catch(e) {
         console.error("Error parsing period", e);
         return "Error al generar periodo";
@@ -93,7 +69,7 @@ const getNextPeriod = (periodo: string): Periodo => {
 }
 
 // --- Components ---
-const AddCpcDialog = ({ clients, onAdd }: { clients: Client[], onAdd: (cpc: Omit<CuentasPorCobrar, 'id'>) => void }) => {
+const AddCpcDialog = ({ clients, onAdd }: { clients: Client[], onAdd: (cpc: Omit<NewCuentaPorCobrar, 'id'>) => void }) => {
     const [clienteId, setClienteId] = useState('');
     const [periodo, setPeriodo] = useState('');
     const [monto, setMonto] = useState('');
@@ -107,9 +83,9 @@ const AddCpcDialog = ({ clients, onAdd }: { clients: Client[], onAdd: (cpc: Omit
             toast({ title: "Error", description: "Todos los campos son obligatorios.", variant: "destructive" });
             return;
         }
-        const cliente = clients.find(c => c.id === clienteId);
+        const cliente = clients.find(c => c.id === parseInt(clienteId));
         if (!cliente) return;
-        onAdd({ clienteId, clienteName: cliente.name, periodo, monto: parseFloat(monto), tipo });
+        onAdd({ clienteId: cliente.id, clienteName: cliente.name, periodo, monto: parseFloat(monto), tipo });
         setOpen(false);
         setClienteId(''); setPeriodo(''); setMonto(''); setTipo('Proyecto');
     };
@@ -127,7 +103,7 @@ const AddCpcDialog = ({ clients, onAdd }: { clients: Client[], onAdd: (cpc: Omit
                         <Select value={clienteId} onValueChange={setClienteId}>
                             <SelectTrigger><SelectValue placeholder="Seleccionar cliente" /></SelectTrigger>
                             <SelectContent>
-                                {clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                                {clients.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
                             </SelectContent>
                         </Select>
                         {clients.length === 0 ? (
@@ -163,8 +139,8 @@ const AddCpcDialog = ({ clients, onAdd }: { clients: Client[], onAdd: (cpc: Omit
     )
 }
 
-const CuentasPorCobrarTab = ({ data, clients, onAddCpc }: { data: CuentasPorCobrar[], clients: Client[], onAddCpc: (cpc: Omit<CuentasPorCobrar, 'id'>) => void }) => {
-    const handleWhatsappReminder = (item: CuentasPorCobrar) => {
+const CuentasPorCobrarTab = ({ data, clients, onAddCpc }: { data: CuentaPorCobrar[], clients: Client[], onAddCpc: (cpc: Omit<NewCuentaPorCobrar, 'id'>) => void }) => {
+    const handleWhatsappReminder = (item: CuentaPorCobrar) => {
         const client = clients.find(c => c.id === item.clienteId);
         if (!client || !client.whatsapp) {
             alert("Este cliente no tiene un número de WhatsApp registrado.");
@@ -211,13 +187,13 @@ const CuentasPorCobrarTab = ({ data, clients, onAddCpc }: { data: CuentasPorCobr
     );
 };
 
-const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave, onManualSave, children }: { isAdmin: boolean, cuentasPorCobrar: CuentasPorCobrar[], onSave: (pago: any) => void, onManualSave: (pago: any) => void, children: React.ReactNode }) => {
+const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave, onManualSave, children }: { isAdmin: boolean, cuentasPorCobrar: CuentaPorCobrar[], onSave: (pago: any) => void, onManualSave: (pago: any) => void, children: React.ReactNode }) => {
     const [selectedCpcId, setSelectedCpcId] = useState<string>('');
     const [cuentaDestino, setCuentaDestino] = useState<Cuenta | ''>('');
     const [detalleEfectivo, setDetalleEfectivo] = useState('');
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
-    const selectedCpc = useMemo(() => cuentasPorCobrar.find(c => c.id === selectedCpcId), [selectedCpcId, cuentasPorCobrar]);
+    const selectedCpc = useMemo(() => cuentasPorCobrar.find(c => c.id.toString() === selectedCpcId), [selectedCpcId, cuentasPorCobrar]);
     
     // Manual state for admin
     const [isManual, setIsManual] = useState(false);
@@ -274,7 +250,7 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave, onManualSav
                     <div className="grid gap-4 py-4">
                         <Select value={selectedCpcId} onValueChange={setSelectedCpcId}>
                             <SelectTrigger><SelectValue placeholder="Seleccionar cliente pendiente" /></SelectTrigger>
-                            <SelectContent>{cuentasPorCobrar.map(cpc => <SelectItem key={cpc.id} value={cpc.id}>{cpc.clienteName} - {cpc.periodo}</SelectItem>)}</SelectContent>
+                            <SelectContent>{cuentasPorCobrar.map(cpc => <SelectItem key={cpc.id} value={cpc.id.toString()}>{cpc.clienteName} - {cpc.periodo}</SelectItem>)}</SelectContent>
                         </Select>
                         {cuentasPorCobrar.length === 0 && <AlertDescription>No hay cuentas por cobrar pendientes.</AlertDescription>}
                         {selectedCpc && <Card className="bg-muted p-4"><p><strong>Monto:</strong> {selectedCpc.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p></Card>}
@@ -301,7 +277,7 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave, onManualSav
     )
 }
 
-const RegistrarGastoDialog = ({ onSave }: { onSave: (gasto: Omit<MovimientoDiario, 'id' | 'fecha' | 'tipo'>) => void }) => {
+const RegistrarGastoDialog = ({ onSave }: { onSave: (gasto: Omit<NewMovimientoDiario, 'id'|'fecha' | 'tipo'>) => void }) => {
     const [descripcion, setDescripcion] = useState('');
     const [monto, setMonto] = useState('');
     const [cuenta, setCuenta] = useState<Cuenta | ''>('');
@@ -313,7 +289,7 @@ const RegistrarGastoDialog = ({ onSave }: { onSave: (gasto: Omit<MovimientoDiari
 
     const handleSave = () => {
          if (!descripcion || !monto || !cuenta || !categoriaGasto) return;
-         const gastoData: Omit<MovimientoDiario, 'id' | 'fecha' | 'tipo'> = {
+         const gastoData = {
             descripcion, monto: parseFloat(monto), cuenta, categoria: categoriaGasto,
             detalleCuenta: cuenta === 'Efectivo' ? detalleEfectivo : undefined,
             nombreOtro: ['Personales', 'Otros'].includes(categoriaGasto) ? nombreOtro : undefined,
@@ -357,19 +333,13 @@ const RegistrarGastoDialog = ({ onSave }: { onSave: (gasto: Omit<MovimientoDiari
     )
 }
 
-const TablaDiariaTab = ({ isAdmin, movimientos, onAddMovimiento, cuentasPorCobrar, onUpdateCpc }: { isAdmin: boolean, movimientos: MovimientoDiario[], onAddMovimiento: (pago: any) => void, cuentasPorCobrar: CuentasPorCobrar[], onUpdateCpc: (cpcs: CuentasPorCobrar[]) => void }) => {
+const TablaDiariaTab = ({ isAdmin, movimientos, onAddMovimiento, cuentasPorCobrar, onUpdateCpc }: { isAdmin: boolean, movimientos: MovimientoDiario[], onAddMovimiento: (pago: any) => void, cuentasPorCobrar: CuentaPorCobrar[], onUpdateCpc: (cpcs: CuentaPorCobrar[]) => void }) => {
     
-    const handleRegisterIngreso = (pago: { cpc: CuentasPorCobrar, cuenta: Cuenta | string, detalleCuenta?: string }) => {
+    const handleRegisterIngreso = (pago: { cpc: CuentaPorCobrar, cuenta: Cuenta | string, detalleCuenta?: string }) => {
         const { cpc, cuenta, detalleCuenta } = pago;
         const nuevoIngreso = { descripcion: `Pago cliente ${cpc.clienteName}`, monto: cpc.monto, cuenta, detalleCuenta, tipo: 'Ingreso', categoria: cpc.tipo };
         onAddMovimiento(nuevoIngreso);
-
-        let updatedCpcList = cuentasPorCobrar.filter(item => item.id !== cpc.id);
-        if (cpc.tipo === 'Iguala Mensual' || cpc.tipo === 'Ads') {
-            const nextPeriod = getNextPeriod(cpc.periodo);
-            updatedCpcList.push({ ...cpc, id: `cpc-${Date.now()}`, periodo: nextPeriod });
-        }
-        onUpdateCpc(updatedCpcList);
+        updateCpcAfterPayment(cpc, getNextPeriod(cpc.periodo));
     };
 
     const handleManualIngreso = (pago: any) => {
@@ -385,7 +355,7 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onAddMovimiento, cuentasPorCobra
     const summary = useMemo(() => {
         const start = startOfMonth(parseISO(selectedMonth));
         const end = endOfMonth(start);
-        const monthlyData = movimientos.filter(mov => isWithinInterval(mov.fecha, { start, end }));
+        const monthlyData = movimientos.filter(mov => isWithinInterval(new Date(mov.fecha), { start, end }));
         
         return monthlyData.reduce((acc, mov) => {
             if (mov.tipo === 'Ingreso') acc.totalIngresos += mov.monto;
@@ -428,9 +398,9 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onAddMovimiento, cuentasPorCobra
                         <Table>
                             <TableHeader><TableRow><TableHead>Fecha</TableHead><TableHead>Tipo</TableHead><TableHead>Descripción</TableHead><TableHead>Categoría / Detalle</TableHead><TableHead>Cuenta</TableHead><TableHead className="text-right">Monto</TableHead></TableRow></TableHeader>
                             <TableBody>
-                                {movimientos.filter(mov => isWithinInterval(mov.fecha, {start: startOfMonth(parseISO(selectedMonth)), end: endOfMonth(parseISO(selectedMonth))})).map(mov => (
+                                {movimientos.filter(mov => isWithinInterval(new Date(mov.fecha), {start: startOfMonth(parseISO(selectedMonth)), end: endOfMonth(parseISO(selectedMonth))})).map(mov => (
                                     <TableRow key={mov.id}>
-                                        <TableCell>{format(mov.fecha, 'dd MMM yyyy, HH:mm', { locale: es })}</TableCell>
+                                        <TableCell>{format(new Date(mov.fecha), 'dd MMM yyyy, HH:mm', { locale: es })}</TableCell>
                                         <TableCell><Badge variant={mov.tipo === 'Ingreso' ? 'default' : 'destructive'} className={cn(mov.tipo === 'Ingreso' && 'bg-green-500 hover:bg-green-500/80')}>{mov.tipo}</Badge></TableCell>
                                         <TableCell>{mov.descripcion}</TableCell>
                                         <TableCell>{mov.categoria}{mov.nombreOtro ? ` (${mov.nombreOtro})` : ''}</TableCell>
@@ -449,23 +419,50 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onAddMovimiento, cuentasPorCobra
 
 export default function FinanzasPage() {
     const { user } = useAuth();
-    const [clients, setClients] = useState<Client[]>(initialClients);
-    const [movimientos, setMovimientos] = useState<MovimientoDiario[]>(initialMovimientosDiarios);
-    const [cuentasPorCobrar, setCuentasPorCobrar] = useState<CuentasPorCobrar[]>(initialCuentasPorCobrar);
+    const [clients, setClients] = useState<Client[]>([]);
+    const [movimientos, setMovimientos] = useState<MovimientoDiario[]>([]);
+    const [cuentasPorCobrar, setCuentasPorCobrar] = useState<CuentaPorCobrar[]>([]);
     const [activeTab, setActiveTab] = useState("cuentas-por-cobrar");
-    
+    const [isLoading, setIsLoading] = useState(true);
+
     const isAdmin = user?.role === 'admin' || user?.role === 'contabilidad';
 
-    const handleAddMovimiento = (nuevoMovimiento: Omit<MovimientoDiario, 'id' | 'fecha'>) => {
-        const fullMovimiento: MovimientoDiario = { id: `mov-${Date.now()}`, ...nuevoMovimiento, fecha: new Date() };
-        setMovimientos(prev => [fullMovimiento, ...prev].sort((a, b) => b.fecha.getTime() - a.fecha.getTime()));
+    const fetchData = async () => {
+        setIsLoading(true);
+        const [clientsData, cpcData, movimientosData] = await Promise.all([
+            getClients(),
+            getCuentasPorCobrar(),
+            getMovimientos(),
+        ]);
+        setClients(clientsData);
+        setCuentasPorCobrar(cpcData);
+        setMovimientos(movimientosData.map(m => ({...m, fecha: new Date(m.fecha)})));
+        setIsLoading(false);
+    }
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+    
+    const handleAddMovimiento = async (nuevoMovimiento: Omit<NewMovimientoDiario, 'id' | 'fecha'>) => {
+        await addMovimiento(nuevoMovimiento);
+        fetchData();
     };
 
-    const handleAddCpc = (nuevaCpc: Omit<CuentasPorCobrar, 'id'>) => {
-        const fullCpc: CuentasPorCobrar = { id: `cpc-${Date.now()}`, ...nuevaCpc };
-        setCuentasPorCobrar(prev => [fullCpc, ...prev]);
+    const handleAddCpc = async (nuevaCpc: Omit<NewCuentaPorCobrar, 'id'>) => {
+        await addCpc(nuevaCpc);
+        fetchData();
     }
     
+    const handleUpdateCpc = async (cpcList: CuentaPorCobrar[]) => {
+        // This logic is now handled on the server side in `updateCpcAfterPayment`
+        fetchData();
+    };
+    
+    if (isLoading) {
+        return <div className="flex items-center justify-center min-h-[50vh]"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div></div>
+    }
+
     return (
         <div>
             <div className="flex justify-between items-center mb-8">
@@ -483,9 +480,10 @@ export default function FinanzasPage() {
                    <CuentasPorCobrarTab data={cuentasPorCobrar} clients={clients} onAddCpc={handleAddCpc} />
                 </TabsContent>
                 <TabsContent value="tabla-diaria" className="mt-4">
-                    <TablaDiariaTab isAdmin={isAdmin} movimientos={movimientos} onAddMovimiento={handleAddMovimiento} cuentasPorCobrar={cuentasPorCobrar} onUpdateCpc={setCuentasPorCobrar} />
+                    <TablaDiariaTab isAdmin={isAdmin} movimientos={movimientos} onAddMovimiento={handleAddMovimiento} cuentasPorCobrar={cuentasPorCobrar} onUpdateCpc={handleUpdateCpc} />
                 </TabsContent>
             </Tabs>
         </div>
     );
 }
+

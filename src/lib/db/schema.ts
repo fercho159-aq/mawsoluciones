@@ -1,4 +1,4 @@
-import { pgTable, serial, text, varchar, timestamp, boolean, integer, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, varchar, timestamp, boolean, integer, jsonb, real, date } from 'drizzle-orm/pg-core';
 
 export const clients = pgTable('clients', {
   id: serial('id').primaryKey(),
@@ -9,6 +9,8 @@ export const clients = pgTable('clients', {
   managedAreas: jsonb('managed_areas').$type<string[]>(),
   createdAt: timestamp('created_at').defaultNow(),
 });
+
+export type Client = typeof clients.$inferSelect;
 
 export const prospects = pgTable('prospects', {
   id: serial('id').primaryKey(),
@@ -47,3 +49,30 @@ export const accesses = pgTable('accesses', {
     email: varchar('email', { length: 255 }).notNull(),
     password: varchar('password', { length: 255 }).notNull(),
 });
+
+export const cuentasPorCobrar = pgTable('cuentas_por_cobrar', {
+    id: serial('id').primaryKey(),
+    clienteId: integer('cliente_id').references(() => clients.id).notNull(),
+    clienteName: varchar('cliente_name', { length: 255 }).notNull(),
+    periodo: varchar('periodo', { length: 100 }).notNull(),
+    monto: real('monto').notNull(),
+    tipo: varchar('tipo', { length: 50 }).notNull(),
+});
+
+export type CuentaPorCobrar = typeof cuentasPorCobrar.$inferSelect;
+export type NewCuentaPorCobrar = typeof cuentasPorCobrar.$inferInsert;
+
+export const movimientosDiarios = pgTable('movimientos_diarios', {
+    id: serial('id').primaryKey(),
+    fecha: timestamp('fecha').defaultNow().notNull(),
+    tipo: varchar('tipo', { length: 50 }).notNull(), // 'Ingreso' o 'Gasto'
+    descripcion: text('descripcion').notNull(),
+    monto: real('monto').notNull(),
+    cuenta: varchar('cuenta', { length: 100 }).notNull(),
+    detalleCuenta: varchar('detalle_cuenta', { length: 255 }),
+    categoria: varchar('categoria', { length: 100 }),
+    nombreOtro: varchar('nombre_otro', { length: 255 }),
+});
+
+export type MovimientoDiario = typeof movimientosDiarios.$inferSelect;
+export type NewMovimientoDiario = typeof movimientosDiarios.$inferInsert;
