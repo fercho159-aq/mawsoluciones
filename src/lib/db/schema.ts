@@ -1,6 +1,24 @@
 import { pgTable, serial, text, varchar, timestamp, boolean, integer, jsonb, real, date } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
+// New Team Members table
+export const teamMembers = pgTable('team_members', {
+  id: varchar('id', { length: 50 }).primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  username: varchar('username', { length: 100 }).notNull().unique(),
+  password: varchar('password', { length: 255 }),
+  role: varchar('role', { length: 50 }).notNull(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
+  color: varchar('color', { length: 50 }),
+  birthday: text('birthday'), // Storing as text to be safe with date formats
+  phone: varchar('phone', { length: 50 }),
+  avatarUrl: text('avatar_url'),
+  accessSections: jsonb('access_sections'),
+  permissions: jsonb('permissions'),
+  progressConfig: jsonb('progress_config'),
+});
+
+
 export const clients = pgTable('clients', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),

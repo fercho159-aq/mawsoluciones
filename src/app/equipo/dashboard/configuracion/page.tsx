@@ -14,9 +14,12 @@ import { es } from 'date-fns/locale';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { updateUserProfile } from './_actions';
+import type { TeamMember } from '@/lib/team-data';
+
 
 export default function ConfiguracionPage() {
-    const { user, updateUser } = useAuth();
+    const { user, login } = useAuth(); // Changed to use login to update client state
     const { toast } = useToast();
     
     const [name, setName] = useState('');
@@ -48,33 +51,37 @@ export default function ConfiguracionPage() {
                 return;
             }
             setSelectedFile(file);
-            // Simulate URL creation for preview
             setAvatarUrl(URL.createObjectURL(file));
         }
     }
 
-
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!user) return;
         
-        // In a real app, you would upload `selectedFile` to a storage service (like Firebase Storage)
-        // and get a public URL to save in the database.
-        // For this simulation, we'll just use the object URL if a new file was selected,
-        // or keep the old one. This change will be temporary on the client-side.
-
-        const updatedUserData = {
-            ...user,
+        // In a real app, you would handle file upload to a storage service here.
+        // For now, we will save the user data to the database.
+        
+        const updatedData: Partial<TeamMember> = {
             name: name,
             phone: phone,
-            avatarUrl: avatarUrl, // This will be a blob URL if a new file is selected.
+            // avatarUrl: avatarUrl, // Avatar URL would be updated after upload
             birthday: birthday ? birthday.toISOString() : undefined,
         };
 
-        updateUser(updatedUserData);
-        toast({
-            title: "¡Éxito!",
-            description: "Tu información ha sido actualizada.",
-        });
+        try {
+            const updatedUser = await updateUserProfile(user.id, updatedData);
+            login(updatedUser); // Update the user state in AuthContext
+            toast({
+                title: "¡Éxito!",
+                description: "Tu información ha sido actualizada.",
+            });
+        } catch (error) {
+             toast({
+                title: "Error",
+                description: "No se pudo actualizar tu perfil. Inténtalo de nuevo.",
+                variant: "destructive"
+            });
+        }
     };
 
     if (!user) {
