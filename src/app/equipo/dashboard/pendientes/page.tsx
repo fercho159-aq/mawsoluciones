@@ -21,7 +21,7 @@ import { useAuth } from '@/lib/auth-provider';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import type { Pendiente, SubTask, Client } from '@/lib/db/schema';
-import { getPendientes, addSubTask, toggleSubTask, addPendiente } from './_actions';
+import { getPendientes, addSubTask, toggleSubTask, addPendiente, updatePendiente } from './_actions';
 import { getClients } from '../clientes/_actions';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -113,7 +113,90 @@ const AddPendienteDialog = ({ clients, onAddPendiente }: { clients: Client[], on
     )
 }
 
-const PendientesTable = ({ data, onUpdateTask, currentUser }: { data: PendienteWithSubTasks[]; onUpdateTask: (task: PendienteWithSubTasks) => void; currentUser: any; }) => {
+const EditPendienteDialog = ({ pendiente, clients, onUpdate, children }: { pendiente: PendienteWithSubTasks, clients: Client[], onUpdate: () => void, children: React.ReactNode }) => {
+    const [open, setOpen] = useState(false);
+    const { toast } = useToast();
+    const [cliente, setCliente] = useState(pendiente.cliente);
+    const [encargado, setEncargado] = useState(pendiente.encargado);
+    const [ejecutor, setEjecutor] = useState(pendiente.ejecutor);
+    const [categoria, setCategoria] = useState(pendiente.categoria);
+    const [status, setStatus] = useState(pendiente.status);
+    const [pendientePrincipal, setPendientePrincipal] = useState(pendiente.pendientePrincipal);
+
+    const encargadosTeam = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel'].includes(m.name));
+    const ejecutoresTeam = teamMembers;
+
+    const handleSave = async () => {
+        try {
+            await updatePendiente(pendiente.id, {
+                cliente,
+                encargado,
+                ejecutor,
+                categoria,
+                status,
+                pendientePrincipal,
+            });
+            toast({ title: "Éxito", description: "Pendiente actualizado." });
+            onUpdate();
+            setOpen(false);
+        } catch (error) {
+            toast({ title: "Error", description: "No se pudo actualizar el pendiente.", variant: "destructive" });
+        }
+    };
+    
+    useEffect(() => {
+        if(open) {
+            setCliente(pendiente.cliente);
+            setEncargado(pendiente.encargado);
+            setEjecutor(pendiente.ejecutor);
+            setCategoria(pendiente.categoria);
+            setStatus(pendiente.status);
+            setPendientePrincipal(pendiente.pendientePrincipal);
+        }
+    }, [open, pendiente]);
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>{children}</DialogTrigger>
+            <DialogContent>
+                <DialogHeader><DialogTitle>Editar Pendiente</DialogTitle></DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <Select value={cliente} onValueChange={setCliente}>
+                        <SelectTrigger><SelectValue placeholder="Seleccionar Cliente" /></SelectTrigger>
+                        <SelectContent>{clients.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <Select value={categoria} onValueChange={setCategoria}>
+                        <SelectTrigger><SelectValue placeholder="Seleccionar Categoría" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Contenido">Contenido</SelectItem>
+                            <SelectItem value="Ads">Ads</SelectItem>
+                            <SelectItem value="Web">Web</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <Select value={encargado} onValueChange={setEncargado}>
+                        <SelectTrigger><SelectValue placeholder="Seleccionar Encargado" /></SelectTrigger>
+                        <SelectContent>{encargadosTeam.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <Select value={ejecutor} onValueChange={setEjecutor}>
+                        <SelectTrigger><SelectValue placeholder="Seleccionar Ejecutor" /></SelectTrigger>
+                        <SelectContent>{ejecutoresTeam.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <Select value={status} onValueChange={setStatus}>
+                        <SelectTrigger><SelectValue placeholder="Seleccionar Status" /></SelectTrigger>
+                        <SelectContent>{Object.keys(statusColors).map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <Textarea value={pendientePrincipal} onChange={(e) => setPendientePrincipal(e.target.value)} placeholder="Descripción del pendiente principal..." />
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                    <Button onClick={handleSave}>Guardar Cambios</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+const PendientesTable = ({ data, onUpdateTask, currentUser, clients, onRefresh }: { data: PendienteWithSubTasks[]; onUpdateTask: (task: PendienteWithSubTasks) => void; currentUser: any; clients: Client[]; onRefresh: () => void; }) => {
     const [newSubTaskText, setNewSubTaskText] = useState<Record<string, string>>({});
     const { toast } = useToast();
 
@@ -176,55 +259,62 @@ const PendientesTable = ({ data, onUpdateTask, currentUser }: { data: PendienteW
                 <TableBody>
                     {data.map((item) => {
                         const isEncargado = currentUser.name === item.encargado;
+                        const isAdmin = currentUser.role === 'admin';
+                        const canEdit = isAdmin || isEncargado;
 
                         return (
-                            <TableRow key={item.id}>
-                                <TableCell className="font-medium align-top">{item.cliente}</TableCell>
-                                <TableCell className="align-top">{item.encargado}</TableCell>
-                                <TableCell className="align-top">{item.ejecutor}</TableCell>
-                                <TableCell className="align-top">Día {item.fechaCorte}</TableCell>
-                                <TableCell className="align-top">
-                                    <Badge className={cn("text-white", statusColors[item.status])}>
-                                        {item.status}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell>
-                                    <div className="flex flex-col gap-2">
-                                        <p className="font-semibold">{item.pendientePrincipal}</p>
-                                        <div className="pl-4 space-y-2">
-                                            {item.subTasks?.map(subTask => (
-                                                <div key={subTask.id} className="flex items-center gap-2">
-                                                    <Checkbox 
-                                                        id={`subtask-${subTask.id}`} 
-                                                        checked={subTask.completed}
-                                                        onCheckedChange={() => handleToggleSubTask(item.id, subTask.id, subTask.completed)}
-                                                    />
-                                                    <label htmlFor={`subtask-${subTask.id}`} className={cn("text-sm", subTask.completed && "line-through text-muted-foreground")}>{subTask.text}</label>
-                                                </div>
-                                            ))}
-                                        </div>
-                                         {isEncargado && (
-                                            <div className="flex items-center gap-2 pl-4 mt-2">
-                                                <Input 
-                                                    placeholder="Añadir sub-pendiente..."
-                                                    className="h-8 text-sm"
-                                                    value={newSubTaskText[item.id.toString()] || ''}
-                                                    onChange={(e) => setNewSubTaskText(prev => ({...prev, [item.id.toString()]: e.target.value}))}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter') {
-                                                            handleAddSubTask(item.id);
-                                                            e.preventDefault();
-                                                        }
-                                                    }}
-                                                />
-                                                <Button size="sm" variant="ghost" onClick={() => handleAddSubTask(item.id)}>
-                                                    <PlusCircle className="w-4 h-4" />
-                                                </Button>
+                             <EditPendienteDialog key={item.id} pendiente={item} clients={clients} onUpdate={onRefresh}>
+                                <TableRow className={cn(canEdit && "cursor-pointer")}>
+                                    <TableCell className="font-medium align-top">{item.cliente}</TableCell>
+                                    <TableCell className="align-top">{item.encargado}</TableCell>
+                                    <TableCell className="align-top">{item.ejecutor}</TableCell>
+                                    <TableCell className="align-top">Día {item.fechaCorte}</TableCell>
+                                    <TableCell className="align-top">
+                                        <Badge className={cn("text-white", statusColors[item.status])}>
+                                            {item.status}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-col gap-2">
+                                            <p className="font-semibold">{item.pendientePrincipal}</p>
+                                            <div className="pl-4 space-y-2">
+                                                {item.subTasks?.map(subTask => (
+                                                    <div key={subTask.id} className="flex items-center gap-2">
+                                                        <Checkbox 
+                                                            id={`subtask-${subTask.id}`} 
+                                                            checked={subTask.completed}
+                                                            onCheckedChange={(e) => {
+                                                                e.stopPropagation();
+                                                                handleToggleSubTask(item.id, subTask.id, subTask.completed)
+                                                            }}
+                                                        />
+                                                        <label htmlFor={`subtask-${subTask.id}`} className={cn("text-sm", subTask.completed && "line-through text-muted-foreground")}>{subTask.text}</label>
+                                                    </div>
+                                                ))}
                                             </div>
-                                        )}
-                                    </div>
-                                </TableCell>
-                            </TableRow>
+                                            {(isAdmin || isEncargado) && (
+                                                <div className="flex items-center gap-2 pl-4 mt-2" onClick={e => e.stopPropagation()}>
+                                                    <Input 
+                                                        placeholder="Añadir sub-pendiente..."
+                                                        className="h-8 text-sm"
+                                                        value={newSubTaskText[item.id.toString()] || ''}
+                                                        onChange={(e) => setNewSubTaskText(prev => ({...prev, [item.id.toString()]: e.target.value}))}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter') {
+                                                                handleAddSubTask(item.id);
+                                                                e.preventDefault();
+                                                            }
+                                                        }}
+                                                    />
+                                                    <Button size="sm" variant="ghost" onClick={() => handleAddSubTask(item.id)}>
+                                                        <PlusCircle className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            </EditPendienteDialog>
                         )
                     })}
                 </TableBody>
@@ -280,6 +370,9 @@ export default function PendientesPage() {
             return encargadoMatch && ejecutorMatch && statusMatch && searchMatch;
         });
     }, [encargadoFilter, ejecutorFilter, statusFilter, searchFilter, pendientes]);
+    
+    const canAddPendiente = user?.role === 'admin' || user?.permissions?.pendientes?.reasignarResponsables;
+
 
   if (isLoading) {
     return (
@@ -297,7 +390,9 @@ export default function PendientesPage() {
     <div>
         <div className='flex justify-between items-center mb-8'>
             <h1 className="text-3xl font-bold font-headline">Pendientes de Equipo</h1>
-            <AddPendienteDialog clients={clients} onAddPendiente={fetchData} />
+            {canAddPendiente && (
+                <AddPendienteDialog clients={clients} onAddPendiente={fetchData} />
+            )}
         </div>
         
         <Card className="mb-4">
@@ -346,15 +441,15 @@ export default function PendientesPage() {
             </TabsList>
             
             <TabsContent value="contenido">
-               <PendientesTable data={filteredData.filter(d => d.categoria === 'Contenido')} onUpdateTask={handleUpdateTask} currentUser={user} />
+               <PendientesTable data={filteredData.filter(d => d.categoria === 'Contenido')} onUpdateTask={handleUpdateTask} currentUser={user} clients={clients} onRefresh={fetchData} />
             </TabsContent>
 
             <TabsContent value="ads">
-                <PendientesTable data={filteredData.filter(d => d.categoria === 'Ads')} onUpdateTask={handleUpdateTask} currentUser={user} />
+                <PendientesTable data={filteredData.filter(d => d.categoria === 'Ads')} onUpdateTask={handleUpdateTask} currentUser={user} clients={clients} onRefresh={fetchData} />
             </TabsContent>
             
             <TabsContent value="web">
-                 <PendientesTable data={filteredData.filter(d => d.categoria === 'Web')} onUpdateTask={handleUpdateTask} currentUser={user} />
+                 <PendientesTable data={filteredData.filter(d => d.categoria === 'Web')} onUpdateTask={handleUpdateTask} currentUser={user} clients={clients} onRefresh={fetchData} />
             </TabsContent>
         </Tabs>
     </div>

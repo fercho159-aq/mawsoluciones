@@ -32,6 +32,16 @@ export async function addPendiente(data: NewPendienteData) {
     }
 }
 
+export async function updatePendiente(id: number, data: Partial<NewPendienteData>) {
+    try {
+        await db.update(pendientes).set(data).where(eq(pendientes.id, id));
+        revalidatePath("/equipo/dashboard/pendientes");
+    } catch (error) {
+        console.error("Error updating pendiente:", error);
+        throw new Error("Could not update pendiente");
+    }
+}
+
 export async function addSubTask(data: typeof subTasks.$inferInsert) {
     try {
         const newSubTask = await db.insert(subTasks).values(data).returning();
