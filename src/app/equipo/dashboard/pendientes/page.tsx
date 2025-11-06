@@ -241,8 +241,9 @@ export default function PendientesPage() {
         }
     };
 
-    const encargados = useMemo(() => Array.from(new Set(pendientes.map(item => item.encargado))).sort(), [pendientes]);
-    const ejecutoresDisponibles = useMemo(() => Array.from(new Set(pendientes.map(item => item.ejecutor))).sort(), [pendientes]);
+    const encargados = useMemo(() => teamMembers.map(m => m.name).sort(), []);
+    const ejecutoresDisponibles = useMemo(() => teamMembers.map(m => m.name).sort(), []);
+
 
     const filteredData = useMemo(() => {
         return pendientes.filter(item => {
@@ -376,7 +377,7 @@ const AddPendienteDialog = ({ clients, onAddPendiente }: { clients: Client[], on
 
         try {
             await addPendiente({
-                cliente,
+                cliente: cliente,
                 encargado,
                 ejecutor,
                 categoria,
