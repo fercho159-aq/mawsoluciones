@@ -18,17 +18,6 @@ export const clientsRelations = relations(clients, ({ many }) => ({
 export type Client = typeof clients.$inferSelect;
 export type NewClient = typeof clients.$inferInsert;
 
-export const prospects = pgTable('prospects', {
-  id: serial('id').primaryKey(),
-  cliente: varchar('cliente', { length: 255 }).notNull(),
-  email: varchar('email', { length: 255 }),
-  telefono: varchar('telefono', { length: 50 }),
-  origen: varchar('origen', { length: 50 }).notNull(),
-  status: varchar('status', { length: 50 }).notNull(),
-  responsable: varchar('responsable', { length: 100 }).notNull(),
-  createdAt: timestamp('created_at').defaultNow(),
-});
-
 export const pendientes = pgTable('pendientes', {
     id: serial('id').primaryKey(),
     cliente: varchar('cliente', { length: 255 }).notNull(),

@@ -32,7 +32,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { format, getMonth, getYear } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { getLeads, addProspect } from './_actions';
-import type { Lead } from '@/lib/db/schema';
+import type { Lead, NewLead } from '@/lib/db/schema';
 
 
 type OrigenLead = "Facebook" | "TikTok" | "Referencia" | "Sitio Web" | string;
@@ -51,33 +51,28 @@ const statusColors: Record<StatusLead, string> = {
 const responsables: ResponsableVentas[] = ["Alma", "Fer", "Julio"];
 const statuses: StatusLead[] = ["Lead Nuevo", "Contactado", "Videollamada", "En Negociación", "Convertido", "No Interesado"];
 
-const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Omit<Lead, 'id' | 'createdAt' | 'responsable' | 'status' | 'data'>) => void }) => {
+const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Omit<NewLead, 'id' | 'createdAt' | 'responsable' | 'status' | 'data'>) => void }) => {
     const [open, setOpen] = useState(false);
-    const [cliente, setCliente] = useState('');
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
-    const [telefono, setTelefono] = useState('');
-    const [origen, setOrigen] = useState<OrigenLead>('Referencia');
+    const [phone, setPhone] = useState('');
     const { toast } = useToast();
 
-    const origenes: OrigenLead[] = ["Facebook", "TikTok", "Referencia"];
-
-
     const handleAdd = () => {
-        if (!cliente || !origen) {
+        if (!name) {
             toast({
                 title: "Error",
-                description: "El nombre del cliente y el origen son obligatorios.",
+                description: "El nombre del cliente es obligatorio.",
                 variant: "destructive",
             });
             return;
         }
 
-        onAddLead({ name: cliente, email, phone: telefono, source: origen, company: cliente });
+        onAddLead({ name, email, phone, source: 'Referencia', company: name });
         
-        setCliente('');
+        setName('');
         setEmail('');
-        setTelefono('');
-        setOrigen('Referencia');
+        setPhone('');
         setOpen(false);
     };
 
@@ -96,7 +91,7 @@ const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Omit<Lead, 'id' | 'cre
                 <div className="grid gap-4 py-4">
                     <div className="space-y-2">
                         <Label htmlFor="cliente">Nombre del Cliente</Label>
-                        <Input id="cliente" value={cliente} onChange={(e) => setCliente(e.target.value)} placeholder="Ej. Tacos El Veloz" />
+                        <Input id="cliente" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej. Tacos El Veloz" />
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="email">Email (Opcional)</Label>
@@ -104,18 +99,7 @@ const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Omit<Lead, 'id' | 'cre
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="telefono">Teléfono (Opcional)</Label>
-                        <Input id="telefono" type="tel" value={telefono} onChange={(e) => setTelefono(e.target.value)} placeholder="5512345678" />
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="origen">Origen del Prospecto</Label>
-                        <Select value={origen} onValueChange={(value: OrigenLead) => setOrigen(value)}>
-                            <SelectTrigger id="origen">
-                                <SelectValue placeholder="Seleccionar origen" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {origenes.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
+                        <Input id="telefono" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="5512345678" />
                     </div>
                 </div>
                 <DialogFooter>
@@ -153,7 +137,7 @@ export default function VentasPage() {
         fetchLeads();
     }, []);
 
-    const handleAddLead = async (newLeadData: Omit<Lead, 'id' | 'createdAt' | 'responsable' | 'status' | 'data'>) => {
+    const handleAddLead = async (newLeadData: Omit<NewLead, 'id' | 'createdAt' | 'responsable' | 'status' | 'data'>) => {
         let lastSellerIndex = parseInt(localStorage.getItem('lastAssignedSellerIndex') || '0');
         const newSeller = responsables[lastSellerIndex % responsables.length];
         lastSellerIndex++;
