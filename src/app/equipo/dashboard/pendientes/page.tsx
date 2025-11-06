@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/lib/auth-provider';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, CalendarIcon, Plus, ChevronRight, ChevronsUpDown } from 'lucide-react';
+import { PlusCircle, CalendarIcon, Plus, ChevronRight, Lightbulb } from 'lucide-react';
 import type { PendienteMaw, Client, RecordingEvent, Colaborador } from '@/lib/db/schema';
 import { getPendientes, addPendiente, updatePendiente } from './_actions';
 import { getClients } from '../clientes/_actions';
@@ -616,10 +616,10 @@ export default function PendientesPage() {
                 <TabsTrigger value="contenido" className="flex items-center gap-2">
                     {tasksPerCategory.contenido && (
                         <motion.div
-                            animate={{ y: [0, -2, 0] }}
-                            transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                            animate={{ opacity: [0.5, 1, 0.5] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                         >
-                            <ChevronsUpDown className="w-4 h-4 text-primary" />
+                            <Lightbulb className="w-4 h-4 text-primary" />
                         </motion.div>
                     )}
                     Pendientes Contenido
@@ -627,10 +627,10 @@ export default function PendientesPage() {
                 <TabsTrigger value="ads" className="flex items-center gap-2">
                     {tasksPerCategory.ads && (
                        <motion.div
-                            animate={{ y: [0, -2, 0] }}
-                            transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                            animate={{ opacity: [0.5, 1, 0.5] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                         >
-                            <ChevronsUpDown className="w-4 h-4 text-primary" />
+                            <Lightbulb className="w-4 h-4 text-primary" />
                         </motion.div>
                     )}
                     Pendientes Ads
@@ -638,10 +638,10 @@ export default function PendientesPage() {
                 <TabsTrigger value="web" className="flex items-center gap-2">
                     {tasksPerCategory.web && (
                         <motion.div
-                            animate={{ y: [0, -2, 0] }}
-                            transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                            animate={{ opacity: [0.5, 1, 0.5] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                         >
-                            <ChevronsUpDown className="w-4 h-4 text-primary" />
+                            <Lightbulb className="w-4 h-4 text-primary" />
                         </motion.div>
                     )}
                     Pendientes Web
