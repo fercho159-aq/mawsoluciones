@@ -32,6 +32,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ScheduleRecordingDialog } from '@/components/schedule-recording-dialog';
 import { motion } from 'framer-motion';
+import { Progress } from '@/components/ui/progress';
 
 const statusColors: Record<string, string> = {
   "Pendiente del cliente": "bg-orange-500",
@@ -230,6 +231,26 @@ const AddPendienteInline = ({ client, categoria, onAdd, onCancel }: { client: Cl
     )
 }
 
+const ClientProgress = ({ pendientes }: { pendientes: PendienteWithRelations[] }) => {
+    const total = pendientes.length;
+    if (total === 0) return null;
+
+    const completed = pendientes.filter(p => p.completed).length;
+    const percentage = (completed / total) * 100;
+    
+    const getIndicatorColor = (value: number) => {
+        if (value < 50) return "bg-red-500";
+        if (value < 100) return "bg-yellow-500";
+        return "bg-green-500";
+    };
+
+    return (
+        <div className="mt-1 px-2">
+            <Progress value={percentage} indicatorClassName={getIndicatorColor(percentage)} className="h-2" />
+        </div>
+    );
+}
+
 
 const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdatePendienteText, clients, categoria }: { 
     data: PendienteWithRelations[]; 
@@ -250,6 +271,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
             const updatedPendiente = { ...pendiente, completed: !pendiente.completed };
             await updatePendiente(pendiente.id, { completed: updatedPendiente.completed });
             onUpdateTask(updatedPendiente); 
+            onRefresh(); // Refresh data to update progress
         } catch (error) {
             toast({ title: "Error", description: "No se pudo actualizar el pendiente.", variant: "destructive" });
         }
@@ -326,9 +348,12 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                     {index === 0 && (
                                         <TableCell 
                                             rowSpan={pendientes.length} 
-                                            className="align-middle text-center font-medium p-2 border-r"
+                                            className="align-top text-center font-medium p-2 border-r"
                                         >
-                                            {clienteName}
+                                            <div className='flex flex-col h-full justify-between'>
+                                              <span>{clienteName}</span>
+                                              <ClientProgress pendientes={pendientes} />
+                                            </div>
                                         </TableCell>
                                     )}
                                     <TableCell className="p-2 align-middle">
