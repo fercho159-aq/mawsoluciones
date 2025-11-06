@@ -3,19 +3,19 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import type { TeamMember } from './team-data';
+import type { Colaborador } from './db/schema';
 
 interface AuthContextType {
-  user: TeamMember | null;
+  user: Colaborador | null;
   loading: boolean;
-  login: (user: TeamMember) => void;
+  login: (user: Colaborador) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<TeamMember | null>(null);
+  const [user, setUser] = useState<Colaborador | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const login = (userData: TeamMember) => {
+  const login = (userData: Colaborador) => {
     try {
       localStorage.setItem('team-user', JSON.stringify(userData));
       setUser(userData);

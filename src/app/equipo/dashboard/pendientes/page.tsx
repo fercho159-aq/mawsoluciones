@@ -20,7 +20,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/lib/auth-provider';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, CalendarIcon, Plus, ChevronRight, ChevronsUpDown } from 'lucide-react';
-import type { PendienteMaw, Client, RecordingEvent } from '@/lib/db/schema';
+import type { PendienteMaw, Client, RecordingEvent, Colaborador } from '@/lib/db/schema';
 import { getPendientes, addPendiente, updatePendiente } from './_actions';
 import { getClients } from '../clientes/_actions';
 import { useToast } from '@/hooks/use-toast';
@@ -659,5 +659,3 @@ export default function PendientesPage() {
     </div>
   );
 }
-
-

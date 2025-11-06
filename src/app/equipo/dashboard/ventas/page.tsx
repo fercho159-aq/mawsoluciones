@@ -32,8 +32,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { getProspects, addMawProspect, convertProspectToClient } from './_actions';
-import type { Prospect, NewProspect } from '@/lib/db/schema';
-import { teamMembers, type TeamMember } from '@/lib/team-data';
+import type { Prospect, NewProspect, Colaborador } from '@/lib/db/schema';
+import { teamMembers } from '@/lib/team-data';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -143,9 +143,9 @@ const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<Omit<NewProspe
     )
 }
 
-const adsTeam: TeamMember[] = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel'].includes(m.name));
-const webTeam: TeamMember[] = teamMembers.filter(m => ['Julio', 'Fernando', 'Alexis'].includes(m.name));
-const contenidoEncargados: TeamMember[] = teamMembers.filter(m => ['Luis', 'Carlos', 'Fany'].includes(m.name));
+const adsTeam: Colaborador[] = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel'].includes(m.name));
+const webTeam: Colaborador[] = teamMembers.filter(m => ['Julio', 'Fernando', 'Alexis'].includes(m.name));
+const contenidoEncargados: Colaborador[] = teamMembers.filter(m => ['Luis', 'Carlos', 'Fany'].includes(m.name));
 const ejecutoresPorEncargado: Record<string, string[]> = {
     'Luis': ['Luis', 'Paola', 'Kari', 'Alexis'],
     'Carlos': ['Carlos', 'Pedro'],
@@ -168,7 +168,7 @@ const ConvertLeadDialog = ({ prospect, onSave, children }: { prospect: Prospect 
         ads?: { responsable: string };
         web?: { responsable: string };
     }>({});
-    const [availableEjecutores, setAvailableEjecutores] = useState<TeamMember[]>([]);
+    const [availableEjecutores, setAvailableEjecutores] = useState<Colaborador[]>([]);
 
     useEffect(() => {
         if (prospect && open) {

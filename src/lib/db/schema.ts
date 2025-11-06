@@ -1,8 +1,8 @@
 import { pgTable, serial, text, varchar, timestamp, boolean, integer, jsonb, real, date } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
-// New Team Members table
-export const teamMembers = pgTable('team_members', {
+// New Colaboradores table
+export const colaboradores = pgTable('colaboradores', {
   id: varchar('id', { length: 50 }).primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
   username: varchar('username', { length: 100 }).notNull().unique(),
@@ -160,3 +160,6 @@ export type NewLead = typeof leads.$inferInsert;
 
 export type RecordingEvent = typeof recordingEvents.$inferSelect;
 export type NewRecordingEvent = typeof recordingEvents.$inferInsert;
+
+export type Colaborador = typeof colaboradores.$inferSelect;
+export type NewColaborador = typeof colaboradores.$inferInsert;

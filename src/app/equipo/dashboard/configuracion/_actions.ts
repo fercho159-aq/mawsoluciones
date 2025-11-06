@@ -1,16 +1,16 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { teamMembers } from "@/lib/db/schema";
+import { colaboradores } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import type { TeamMember } from "@/lib/team-data";
+import type { Colaborador } from "@/lib/db/schema";
 
-export async function updateUserProfile(id: string, data: Partial<TeamMember>) {
+export async function updateUserProfile(id: string, data: Partial<Colaborador>) {
   try {
-    const [updatedUser] = await db.update(teamMembers)
+    const [updatedUser] = await db.update(colaboradores)
       .set(data)
-      .where(eq(teamMembers.id, id))
+      .where(eq(colaboradores.id, id))
       .returning();
     
     if (!updatedUser) {

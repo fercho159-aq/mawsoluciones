@@ -12,13 +12,14 @@ import { useAuth } from '@/lib/auth-provider';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { Colaborador } from '@/lib/db/schema';
 
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { login } = useAuth();
 
-  const handleLogin = (user: typeof teamMembers[0]) => {
+  const handleLogin = (user: Colaborador) => {
     login(user);
     toast({
       title: 'Inicio de Sesión Exitoso',

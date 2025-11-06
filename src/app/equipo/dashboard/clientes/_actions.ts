@@ -83,5 +83,3 @@ export async function updateClient(id: number, data: Partial<Omit<typeof clients
     throw new Error("Could not update client");
   }
 }
-
-    

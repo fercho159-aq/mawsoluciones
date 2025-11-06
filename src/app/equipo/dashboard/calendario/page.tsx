@@ -12,7 +12,7 @@ import { Camera, Mic, Lightbulb, Grip, ChevronLeft, ChevronRight, Users, Briefca
 import { teamMembers } from '@/lib/team-data';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getRecordingEvents } from '../pendientes/_actions';
-import type { RecordingEvent } from '@/lib/db/schema';
+import type { RecordingEvent, Colaborador } from '@/lib/db/schema';
 import { ScheduleRecordingDialog } from '@/components/schedule-recording-dialog';
 import { useAuth } from '@/lib/auth-provider';
 
