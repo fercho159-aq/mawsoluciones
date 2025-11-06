@@ -21,7 +21,7 @@ import WhatsappIcon from '@/components/icons/whatsapp-icon';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
+import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
@@ -42,37 +42,37 @@ import { Calendar } from '@/components/ui/calendar';
 const generatePeriodOptions = () => {
     const today = new Date();
     const options: { value: string, label: string }[] = [];
-    const labelFormat = "d 'de' MMMM, yyyy";
 
-    const days = [15, 30];
-    const monthsOffsets = [-1, 0, 1]; // Past, current, future
+    // Past 15th
+    let past15 = new Date(today);
+    if (today.getDate() <= 15) {
+        past15.setMonth(today.getMonth() - 1);
+    }
+    past15.setDate(15);
+    options.push({ value: past15.toISOString(), label: `Pasado día 15 (${format(past15, 'd MMM', { locale: es })})` });
 
-    const generatedDates = new Set<string>();
+    // Past 30th (end of month)
+    let past30 = new Date(today);
+    past30.setMonth(today.getMonth() - 1);
+    past30 = endOfMonth(past30);
+    options.push({ value: past30.toISOString(), label: `Pasado día 30 (${format(past30, 'd MMM', { locale: es })})` });
 
-    // Generate dates for day 15 and 30 for past, current, and next month
-    monthsOffsets.forEach(offset => {
-        days.forEach(day => {
-            let date = addMonths(today, offset);
-            let targetDay = day > getDaysInMonth(date) ? getDaysInMonth(date) : day;
-            date = setDate(date, targetDay);
-            generatedDates.add(date.toISOString().split('T')[0]);
-        });
-    });
+    // Next 15th
+    let next15 = new Date(today);
+    if (today.getDate() > 15) {
+        next15.setMonth(today.getMonth() + 1);
+    }
+    next15.setDate(15);
+     options.push({ value: next15.toISOString(), label: `Próximo día 15 (${format(next15, 'd MMM', { locale: es })})` });
 
-    const sortedDates = Array.from(generatedDates)
-        .map(dateStr => new Date(dateStr))
-        .sort((a,b) => a.getTime() - b.getTime());
-    
-    const past15 = sortedDates.reverse().find(d => d.getDate() === 15 && d < today);
-    const past30 = sortedDates.reverse().find(d => d.getDate() >= 28 && d < today); // Handles 28, 29, 30, 31
-    const next15 = sortedDates.find(d => d.getDate() === 15 && d >= today);
-    const next30 = sortedDates.find(d => d.getDate() >= 28 && d >= today);
+    // Next 30th (end of month)
+    let next30 = new Date(today);
+     if (today.getDate() > endOfMonth(today).getDate() - 5) { // Logic to push to next month if close to end
+        next30.setMonth(today.getMonth() + 1);
+    }
+    next30 = endOfMonth(next30);
+    options.push({ value: next30.toISOString(), label: `Próximo día 30 (${format(next30, 'd MMM', { locale: es })})` });
 
-    if (past15) options.push({ value: past15.toISOString(), label: `Pasado día 15 (${format(past15, 'd MMM')})` });
-    if (past30) options.push({ value: past30.toISOString(), label: `Pasado día 30 (${format(past30, 'd MMM')})` });
-    if (next15) options.push({ value: next15.toISOString(), label: `Próximo día 15 (${format(next15, 'd MMM')})` });
-    if (next30) options.push({ value: next30.toISOString(), label: `Próximo día 30 (${format(next30, 'd MMM')})` });
-    
     return options.sort((a,b) => new Date(a.value).getTime() - new Date(b.value).getTime());
 };
 
@@ -142,11 +142,19 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt }: { c
             }
             finalBillingDateLabel = format(customDate, "d 'de' MMMM, yyyy", {locale: es});
         } else {
-             finalBillingDateLabel = periodOptions.find(p => p.value === billingDate)?.label || billingDate; // Keep existing label on edit
+             const selectedOption = periodOptions.find(p => p.value === billingDate);
+             if (selectedOption) {
+                 finalBillingDateLabel = selectedOption.label;
+             } else if (isEditing) {
+                 finalBillingDateLabel = billingDate; // Keep existing label on edit if not found in options
+             } else {
+                 toast({ title: "Error", description: "Por favor, selecciona una fecha de cobro válida.", variant: "destructive" });
+                 return;
+             }
         }
 
-        if (!clienteId || !finalBillingDateLabel || !monto) {
-            toast({ title: "Error", description: "Todos los campos son obligatorios.", variant: "destructive" });
+        if (!clienteId || !monto) {
+            toast({ title: "Error", description: "Cliente y monto son obligatorios.", variant: "destructive" });
             return;
         }
 
@@ -704,4 +712,5 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
 
