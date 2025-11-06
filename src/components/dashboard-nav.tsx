@@ -18,7 +18,6 @@ const baseNavItems = [
     { href: "/equipo/dashboard/accesos", label: "Accesos", icon: <KeyRound className="w-4 h-4" />, section: 'accesos' },
     { href: "/equipo/dashboard/calendario", label: "Calendario", icon: <Calendar className="w-4 h-4" />, section: 'calendario' },
     { href: "/equipo/dashboard/mi-progreso", label: "Mi Progreso", icon: <LineChart className="w-4 h-4" />, section: 'miProgreso' },
-    { href: "/equipo/dashboard/configuracion", label: "Configuración", icon: <Settings className="w-4 h-4" />, section: 'configuracion' },
 ];
 
 export default function DashboardNav() {
