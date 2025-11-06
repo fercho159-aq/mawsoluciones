@@ -19,7 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/lib/auth-provider';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, CalendarIcon, Plus, ChevronRight } from 'lucide-react';
+import { PlusCircle, CalendarIcon, Plus, ChevronRight, ChevronsUpDown } from 'lucide-react';
 import type { PendienteMaw, Client, RecordingEvent } from '@/lib/db/schema';
 import { getPendientes, addPendiente, updatePendiente } from './_actions';
 import { getClients } from '../clientes/_actions';
@@ -31,6 +31,7 @@ import { teamMembers } from '@/lib/team-data';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ScheduleRecordingDialog } from '@/components/schedule-recording-dialog';
+import { motion } from 'framer-motion';
 
 const statusColors: Record<string, string> = {
   "Pendiente del cliente": "bg-orange-500",
@@ -530,7 +531,7 @@ export default function PendientesPage() {
   }
   
   const getFilteredDataForTab = (categoria: string) => {
-      return filteredData.filter(d => d.categoria.toLowerCase() === categoria);
+      return filteredData.filter(d => d.categoria.toLowerCase() === categoria.toLowerCase());
   }
 
   return (
@@ -585,15 +586,36 @@ export default function PendientesPage() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="contenido" className="flex items-center gap-2">
-                    {tasksPerCategory.contenido && <ChevronRight className="w-4 h-4 text-primary" />}
+                    {tasksPerCategory.contenido && (
+                        <motion.div
+                            animate={{ y: [0, -2, 0] }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                            <ChevronsUpDown className="w-4 h-4 text-primary" />
+                        </motion.div>
+                    )}
                     Pendientes Contenido
                 </TabsTrigger>
                 <TabsTrigger value="ads" className="flex items-center gap-2">
-                    {tasksPerCategory.ads && <ChevronRight className="w-4 h-4 text-primary" />}
+                    {tasksPerCategory.ads && (
+                       <motion.div
+                            animate={{ y: [0, -2, 0] }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                            <ChevronsUpDown className="w-4 h-4 text-primary" />
+                        </motion.div>
+                    )}
                     Pendientes Ads
                 </TabsTrigger>
                 <TabsTrigger value="web" className="flex items-center gap-2">
-                    {tasksPerCategory.web && <ChevronRight className="w-4 h-4 text-primary" />}
+                    {tasksPerCategory.web && (
+                        <motion.div
+                            animate={{ y: [0, -2, 0] }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                            <ChevronsUpDown className="w-4 h-4 text-primary" />
+                        </motion.div>
+                    )}
                     Pendientes Web
                 </TabsTrigger>
             </TabsList>
@@ -637,4 +659,5 @@ export default function PendientesPage() {
     </div>
   );
 }
+
 
