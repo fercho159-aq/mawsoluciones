@@ -21,6 +21,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 
 // Mocks - estos serían reemplazados por datos de Firebase
@@ -348,6 +349,7 @@ const CalendarSection = ({ title, description, events, team, eventType, onSave, 
                             </div>
                             <ScrollArea className="flex-grow">
                                 <div className="p-2 space-y-2">
+                                <TooltipProvider>
                                 {dayEvents.map(event => (
                                     <EventDialog key={event.id} event={event} onSave={(data) => onSave(data, event.id)} onDelete={onDelete} eventType={eventType} allEvents={allEvents} availableEquipment={availableEquipment}>
                                         <Card className="p-3 hover:bg-card/80 transition-colors cursor-pointer" style={{ borderLeft: `4px solid ${event.assignedToColor}`}}>
@@ -359,8 +361,23 @@ const CalendarSection = ({ title, description, events, team, eventType, onSave, 
                                                 <p className="flex items-center gap-1.5 text-muted-foreground"><User className="w-3 h-3" /> {event.assignedToName}</p>
                                                 <p className="font-semibold">{format(event.fullStart, 'HH:mm')} - {format(event.fullEnd, 'HH:mm')}</p>
                                                 {event.type === 'grabacion' && event.equipmentNames && event.equipmentNames.length > 0 && (
-                                                    <div className="flex flex-wrap gap-1 pt-1">
-                                                        {event.equipmentNames.map(name => <Badge key={name} variant="secondary" className="text-xs">{name}</Badge>)}
+                                                    <div className="flex flex-wrap gap-2 pt-1">
+                                                        {event.assignedEquipment?.map(id => {
+                                                            const equipment = mockEquipment.find(e => e.id === id);
+                                                            if (!equipment) return null;
+                                                            return (
+                                                                <Tooltip key={id}>
+                                                                    <TooltipTrigger asChild>
+                                                                        <div className="p-1.5 bg-secondary rounded-md">
+                                                                            {equipmentCategoryIcons[equipment.category]}
+                                                                        </div>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent>
+                                                                        <p>{equipment.name}</p>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            )
+                                                        })}
                                                     </div>
                                                 )}
                                                 {event.type === 'cita_venta' && (
@@ -370,6 +387,7 @@ const CalendarSection = ({ title, description, events, team, eventType, onSave, 
                                         </Card>
                                     </EventDialog>
                                 ))}
+                                </TooltipProvider>
                                 </div>
                             </ScrollArea>
                         </div>
@@ -427,7 +445,8 @@ export default function CalendarioPage() {
                 fechaCorte: 15,
                 status: 'Trabajando' as StatusPendiente,
                 pendientePrincipal: eventData.project || `${eventData.type === 'grabacion' ? 'Grabación' : 'Cita'} para ${eventData.clientName}`,
-                categoria: eventData.type === 'grabacion' ? 'Contenido' : 'Ventas'
+                categoria: eventData.type === 'grabacion' ? 'Contenido' : 'Ventas',
+                subTasks: [],
             };
             setPendientes(prev => [...prev, newPendiente]);
         }
