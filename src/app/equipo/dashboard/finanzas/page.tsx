@@ -30,7 +30,7 @@ import { es } from 'date-fns/locale';
 import { useAuth } from '@/lib/auth-provider';
 import type { CategoriaIngreso, Cuenta, Periodo } from '@/lib/finanzas-data';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { getClients, type Client } from '../clientes/page';
+import { getClients as fetchClientsDB, type Client } from '../clientes/_actions';
 import { ClientFormDialog } from '../clientes/page';
 import { addCpc, addMovimiento, getCuentasPorCobrar, getMovimientos, updateCpcAfterPayment, updateCpc } from './_actions';
 import type { MovimientoDiario, CuentaPorCobrar, NewCuentaPorCobrar, NewMovimientoDiario, ClientFinancialProfile } from '@/lib/db/schema';
@@ -43,7 +43,7 @@ import { Calendar } from '@/components/ui/calendar';
 const generatePeriodOptions = () => {
     const today = new Date();
     const options: { value: string, label: string }[] = [];
-
+    
     // Previous 15th
     let past15 = setDate(today, 15);
     if (today.getDate() <= 15) {
@@ -64,8 +64,8 @@ const generatePeriodOptions = () => {
 
     // Next 30th (end of month)
     let next30 = endOfMonth(today);
-    if (today.getDate() > endOfMonth(today).getDate() - 5) { // If in the last 5 days of month, show next month's end
-        next30 = endOfMonth(addMonths(today, 1));
+    if (new Date().getDate() > endOfMonth(new Date()).getDate() - 5 ) {
+        next30 = endOfMonth(addMonths(today,1));
     }
     options.push({ value: next30.toISOString(), label: `Próximo día 30 (${format(next30, 'd MMM', { locale: es })})` });
 
@@ -106,7 +106,8 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt, onCli
      useEffect(() => {
         if (open) {
             if (isEditing && cpc) {
-                const clientProfile = clients.find(c => c.id === cpc.clienteId)?.financialProfile;
+                const client = clients.find(c => c.id === cpc.clienteId);
+                const clientProfile = client?.financialProfile;
                 setClienteId(cpc.clienteId.toString());
                 setMonto((clientProfile?.defaultInvoice ? cpc.monto / 1.16 : cpc.monto).toFixed(2));
                 setTipo(cpc.tipo as CategoriaIngreso);
@@ -719,7 +720,7 @@ export default function FinanzasPage() {
     const fetchData = async () => {
         setIsLoading(true);
         const [clientsData, cpcData, movimientosData] = await Promise.all([
-            getClients(),
+            fetchClientsDB(),
             getCuentasPorCobrar(),
             getMovimientos(),
         ]);
@@ -774,6 +775,7 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
 
 
 
