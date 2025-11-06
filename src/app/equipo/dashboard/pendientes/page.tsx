@@ -84,7 +84,7 @@ const EditablePendiente = ({ pendiente, onUpdate }: { pendiente: PendienteWithRe
     );
 };
 
-const AddPendienteDialog = ({ clients, onAddPendiente, children, initialClient, initialCategory }: { clients: Client[], onAddPendiente: () => void, children: React.ReactNode, initialClient?: Client, initialCategory?: string }) => {
+const AddPendienteDialog = ({ clients, onAddPendiente, children, initialClient, initialCategory, initialEncargado, initialEjecutor }: { clients: Client[], onAddPendiente: () => void, children: React.ReactNode, initialClient?: Client, initialCategory?: string, initialEncargado?: string, initialEjecutor?: string }) => {
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
     const [clienteId, setClienteId] = useState('');
@@ -97,10 +97,12 @@ const AddPendienteDialog = ({ clients, onAddPendiente, children, initialClient, 
         if(open) {
             setClienteId(initialClient?.id.toString() || '');
             setCategoria(initialCategory || '');
+            setEncargado(initialEncargado || '');
+            setEjecutor(initialEjecutor || '');
         } else {
             setClienteId(''); setEncargado(''); setEjecutor(''); setCategoria(''); setPendientePrincipal('');
         }
-    }, [open, initialClient, initialCategory]);
+    }, [open, initialClient, initialCategory, initialEncargado, initialEjecutor]);
 
     const encargadosTeam = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel'].includes(m.name));
     const ejecutoresTeam = teamMembers;
@@ -154,11 +156,11 @@ const AddPendienteDialog = ({ clients, onAddPendiente, children, initialClient, 
                             <SelectItem value="Web">Web</SelectItem>
                         </SelectContent>
                     </Select>
-                    <Select value={encargado} onValueChange={setEncargado}>
+                    <Select value={encargado} onValueChange={setEncargado} disabled={!!initialEncargado}>
                         <SelectTrigger><SelectValue placeholder="Seleccionar Encargado" /></SelectTrigger>
                         <SelectContent>{encargadosTeam.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
                     </Select>
-                    <Select value={ejecutor} onValueChange={setEjecutor}>
+                    <Select value={ejecutor} onValueChange={setEjecutor} disabled={!!initialEjecutor}>
                         <SelectTrigger><SelectValue placeholder="Seleccionar Ejecutor" /></SelectTrigger>
                         <SelectContent>{ejecutoresTeam.map(e => <SelectItem key={e.id} value={e.name}>{e.name}</SelectItem>)}</SelectContent>
                     </Select>
@@ -291,6 +293,8 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                         onAddPendiente={onRefresh} 
                                         initialClient={clients.find(c => c.name === clienteName)}
                                         initialCategory={categoria}
+                                        initialEncargado={pendientes[0]?.encargado}
+                                        initialEjecutor={pendientes[0]?.ejecutor}
                                     >
                                         <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground">
                                             <Plus className="w-4 h-4 mr-2" />
@@ -363,8 +367,12 @@ export default function PendientesPage() {
         }
     };
     
-    const encargados = useMemo(() => Array.from(new Set(teamMembers.map(m => m.name))).sort(), []);
-    const ejecutores = useMemo(() => Array.from(new Set(teamMembers.map(m => m.name))).sort(), []);
+    const encargados = useMemo(() => {
+        return Array.from(new Set(teamMembers.map(m => m.name))).sort();
+    }, []);
+    const ejecutores = useMemo(() => {
+        return Array.from(new Set(teamMembers.map(m => m.name))).sort();
+    }, []);
 
 
     const filteredData = useMemo(() => {
@@ -508,3 +516,5 @@ export default function PendientesPage() {
     </div>
   );
 }
+
+    
