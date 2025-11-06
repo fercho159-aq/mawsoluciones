@@ -183,3 +183,4 @@ export type ClientFinancialProfile = typeof clientFinancialProfiles.$inferSelect
 export type NewClientFinancialProfile = typeof clientFinancialProfiles.$inferInsert;
 export type FinanzaFinal = any;
 export type NewFinanzaFinal = any;
+

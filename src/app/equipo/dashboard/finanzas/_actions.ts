@@ -84,3 +84,4 @@ export async function updateCpcAfterPayment(cpc: CuentaPorCobrar, nextPeriod: st
         throw new Error("Could not update cpc");
     }
 }
+

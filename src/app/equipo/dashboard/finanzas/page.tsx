@@ -63,7 +63,6 @@ const AddCpcDialog = ({ clients, onSave, onClientAdd, children }: { clients: Cli
     const [clienteId, setClienteId] = useState('');
     const [monto, setMonto] = useState('');
     const [tipo, setTipo] = useState<CategoriaIngreso>('Iguala Mensual');
-    const [requiresInvoice, setRequiresInvoice] = useState(false);
     
     const [billingDay, setBillingDay] = useState<'15' | '30'>('15');
     const [customDate, setCustomDate] = useState<Date | undefined>(undefined);
@@ -77,14 +76,9 @@ const AddCpcDialog = ({ clients, onSave, onClientAdd, children }: { clients: Cli
 
 
     const resetForm = () => {
-        setClienteId(''); setMonto(''); setTipo('Iguala Mensual'); setRequiresInvoice(false);
+        setClienteId(''); setMonto(''); setTipo('Iguala Mensual');
         setBillingDay('15'); setCustomDate(undefined); setSelectedBillingDateOption('');
     }
-
-    const totalAmount = useMemo(() => {
-        const baseAmount = parseFloat(monto) || 0;
-        return requiresInvoice ? baseAmount * 1.16 : baseAmount;
-    }, [monto, requiresInvoice]);
 
     const handleSave = async () => {
         if (!clienteId || !monto || !selectedBillingDateOption) {
@@ -161,14 +155,9 @@ const AddCpcDialog = ({ clients, onSave, onClientAdd, children }: { clients: Cli
                             </SelectContent>
                         </Select>
                         {clients.length === 0 && (
-                            <Alert variant="destructive" className="mt-2">
-                                <AlertDescription className="flex items-center justify-between">
-                                    <span>No hay clientes. Añade uno primero.</span>
-                                    <ClientFormDialog onSave={onClientAdd} isEditing={false}>
-                                        <Button size="sm">Añadir Cliente</Button>
-                                    </ClientFormDialog>
-                                </AlertDescription>
-                            </Alert>
+                             <ClientFormDialog onSave={onClientAdd} isEditing={false}>
+                                <Button size="sm" variant="outline" className="w-full mt-2">Añadir Nuevo Cliente</Button>
+                            </ClientFormDialog>
                         )}
                     </div>
                     
@@ -650,6 +639,7 @@ export default function FinanzasPage() {
     
 
     
+
 
 
 
