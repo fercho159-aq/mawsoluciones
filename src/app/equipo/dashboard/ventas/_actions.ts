@@ -2,9 +2,11 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { prospects_maw, type NewProspect } from "@/lib/db/schema";
-import { desc } from "drizzle-orm";
+import { prospects_maw, type NewProspect, clients } from "@/lib/db/schema";
+import { eq, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { addClient, type NewClientData } from '../clientes/_actions';
+
 
 export async function getProspects() {
   try {
@@ -39,5 +41,24 @@ export async function addMawProspect(data: Partial<Omit<NewProspect, 'id' | 'cre
     } catch (error) {
         console.error("Error adding prospect:", error);
         throw new Error("No se pudo añadir el prospecto.");
+    }
+}
+
+export async function convertProspectToClient(prospectId: number, clientData: NewClientData) {
+    try {
+        // 1. Update prospect status to 'Convertido'
+        await db.update(prospects_maw).set({ status: 'Convertido' }).where(eq(prospects_maw.id, prospectId));
+
+        // 2. Add the new client using the existing action
+        await addClient(clientData);
+
+        // 3. Revalidate paths for both pages
+        revalidatePath('/equipo/dashboard/ventas');
+        revalidatePath('/equipo/dashboard/clientes');
+        revalidatePath('/equipo/dashboard/pendientes');
+
+    } catch (error) {
+        console.error("Error converting prospect to client:", error);
+        throw new Error("No se pudo convertir el prospecto a cliente.");
     }
 }

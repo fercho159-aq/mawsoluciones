@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, startTransition } from 'react';
 import {
   Table,
   TableHeader,
@@ -31,11 +31,14 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { getProspects, addMawProspect } from './_actions';
+import { getProspects, addMawProspect, convertProspectToClient } from './_actions';
 import type { Prospect, NewProspect } from '@/lib/db/schema';
+import { teamMembers, type TeamMember } from '@/lib/team-data';
+import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 
 
-type OrigenLead = "Facebook" | "TikTok" | "Referencia" | "Sitio Web" | string;
+type OrigenLead = "Facebook" | "TikTok" | "Referencia" | "Sitio Web" | "Instagram" | string;
 type StatusLead = "Lead Nuevo" | "Contactado" | "Videollamada" | "En Negociación" | "Convertido" | "No Interesado";
 type ResponsableVentas = "Alma" | "Fer" | "Julio";
 
@@ -140,13 +143,191 @@ const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<Omit<NewProspe
     )
 }
 
+const adsTeam: TeamMember[] = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel'].includes(m.name));
+const webTeam: TeamMember[] = teamMembers.filter(m => ['Julio', 'Fernando', 'Alexis'].includes(m.name));
+const contenidoEncargados: TeamMember[] = teamMembers.filter(m => ['Luis', 'Carlos', 'Fany'].includes(m.name));
+const ejecutoresPorEncargado: Record<string, string[]> = {
+    'Luis': ['Luis', 'Paola', 'Kari', 'Alexis'],
+    'Carlos': ['Carlos', 'Pedro'],
+    'Fany': ['Fany', 'Daniel', 'Cristian', 'Aldair']
+};
+
+const ConvertLeadDialog = ({ prospect, onSave, children }: { prospect: Prospect | null, onSave: () => void, children: React.ReactNode }) => {
+    const [open, setOpen] = useState(false);
+    const { toast } = useToast();
+    
+    // Client Form State
+    const [name, setName] = useState('');
+    const [representativeName, setRepresentativeName] = useState('');
+    const [whatsapp, setWhatsapp] = useState('');
+    const [email, setEmail] = useState('');
+    const [serviceType, setServiceType] = useState<'Iguala' | 'Proyecto' | 'Ambos' | ''>('');
+    const [areas, setAreas] = useState<string[]>([]);
+    const [responsables, setResponsables] = useState<{
+        contenido?: { encargado: string; ejecutor: string };
+        ads?: { responsable: string };
+        web?: { responsable: string };
+    }>({});
+    const [availableEjecutores, setAvailableEjecutores] = useState<TeamMember[]>([]);
+
+    useEffect(() => {
+        if (prospect && open) {
+            setName(prospect.company || '');
+            setRepresentativeName(prospect.name || '');
+            setWhatsapp(prospect.phone || '');
+            setEmail(prospect.email || '');
+            // Reset other fields
+            setServiceType('');
+            setAreas([]);
+            setResponsables({});
+            setAvailableEjecutores([]);
+        }
+    }, [prospect, open]);
+
+    const resetForm = () => {
+        setName(''); setRepresentativeName(''); setWhatsapp(''); setEmail(''); setServiceType('');
+        setAreas([]); setResponsables({}); setAvailableEjecutores([]);
+    }
+
+    const handleEncargadoContenidoChange = (encargadoName: string) => {
+        const ejecutoresNombres = ejecutoresPorEncargado[encargadoName] || [];
+        const ejecutoresFiltrados = teamMembers.filter(m => ejecutoresNombres.includes(m.name));
+        setAvailableEjecutores(ejecutoresFiltrados);
+        setResponsables(prev => ({
+            ...prev,
+            contenido: { encargado: encargadoName, ejecutor: '' }
+        }));
+    };
+
+    const handleSave = async () => {
+        if (!prospect) return;
+
+        if (!name || !representativeName || !whatsapp || !serviceType || areas.length === 0) {
+            toast({ title: "Error", description: "Completa todos los campos obligatorios para crear el cliente.", variant: "destructive" });
+            return;
+        }
+
+        if (
+            (areas.includes('Contenido') && (!responsables.contenido?.encargado || !responsables.contenido?.ejecutor)) ||
+            (areas.includes('Ads') && !responsables.ads?.responsable) ||
+            (areas.includes('Web') && !responsables.web?.responsable)
+        ) {
+            toast({ title: "Error", description: "Debes asignar responsables para todas las áreas seleccionadas.", variant: "destructive" });
+            return;
+        }
+
+        const clientData: NewClientData = {
+            name,
+            representativeName,
+            whatsapp,
+            email: email || null,
+            managedAreas: areas,
+            responsables
+        };
+
+        try {
+            await convertProspectToClient(prospect.id, clientData);
+            toast({
+                title: "¡Cliente Convertido!",
+                description: `${prospect.name || prospect.company} ahora es un cliente y se crearon sus pendientes iniciales.`,
+                className: "bg-green-500 text-white"
+            });
+            startTransition(() => {
+                onSave();
+                setOpen(false);
+                resetForm();
+            });
+        } catch (error) {
+            console.error("Conversion Error:", error);
+            toast({ title: "Error", description: "No se pudo convertir el prospecto.", variant: "destructive" });
+        }
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={(o) => {setOpen(o); if(!o) resetForm();}}>
+            <DialogTrigger asChild>{children}</DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                    <DialogTitle>Convertir a "{prospect?.name || prospect?.company}" en Cliente</DialogTitle>
+                    <DialogDescription>Completa la información para registrar al nuevo cliente y crear sus pendientes iniciales.</DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto px-2">
+                    <Input value={name} onChange={e => setName(e.target.value)} placeholder="Nombre de la Empresa*" />
+                    <Input value={representativeName} onChange={e => setRepresentativeName(e.target.value)} placeholder="Nombre del Representante*" />
+                    <Input value={whatsapp} onChange={e => setWhatsapp(e.target.value)} placeholder="WhatsApp* (Ej. 52155...)" />
+                    <Input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email (Opcional)" />
+                    
+                    <Separator className="my-2"/>
+                    <h4 className="font-medium">Configuración de Servicios*</h4>
+                    <Select value={serviceType} onValueChange={(v) => setServiceType(v as any)}>
+                        <SelectTrigger><SelectValue placeholder="Tipo de Servicio*"/></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Iguala">Iguala</SelectItem>
+                            <SelectItem value="Proyecto">Proyecto</SelectItem>
+                            <SelectItem value="Ambos">Ambos</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    
+                    <div>
+                        <Label>Áreas a Gestionar en Pendientes*</Label>
+                        <div className="grid grid-cols-3 gap-4 mt-2">
+                        {['Contenido', 'Ads', 'Web'].map(area => (
+                            <div key={area} className="flex items-center space-x-2">
+                                    <Checkbox id={`area-${area}`} checked={areas.includes(area)} onCheckedChange={(checked) => setAreas(prev => checked ? [...prev, area] : prev.filter(a => a !== area))} />
+                                    <Label htmlFor={`area-${area}`}>{area}</Label>
+                            </div>
+                        ))}
+                        </div>
+                    </div>
+                    {areas.includes('Contenido') && (
+                        <div className="grid grid-cols-2 gap-4 border p-3 rounded-md">
+                        <Label className="col-span-2 font-semibold">Responsables Contenido*</Label>
+                        <Select onValueChange={handleEncargadoContenidoChange} value={responsables.contenido?.encargado || ''}>
+                            <SelectTrigger><SelectValue placeholder="Encargado*" /></SelectTrigger>
+                            <SelectContent>{contenidoEncargados.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
+                        </Select>
+                        <Select 
+                            onValueChange={(v) => setResponsables(p => ({...p, contenido: {...p.contenido!, ejecutor: v}}))}
+                            value={responsables.contenido?.ejecutor || ''}
+                            disabled={!responsables.contenido?.encargado}
+                        >
+                            <SelectTrigger><SelectValue placeholder="Ejecutor*" /></SelectTrigger>
+                            <SelectContent>{availableEjecutores.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
+                        </Select>
+                        </div>
+                    )}
+                    {areas.includes('Ads') && (
+                        <div className="border p-3 rounded-md space-y-2">
+                        <Label className="font-semibold">Responsable Ads*</Label>
+                        <Select onValueChange={(v) => setResponsables(p => ({...p, ads: {responsable: v}}))} value={responsables.ads?.responsable || ''}>
+                                <SelectTrigger><SelectValue placeholder="Seleccionar responsable*" /></SelectTrigger>
+                                <SelectContent>{adsTeam.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
+                        </Select>
+                        </div>
+                    )}
+                    {areas.includes('Web') && (
+                        <div className="border p-3 rounded-md space-y-2">
+                        <Label className="font-semibold">Responsable Web*</Label>
+                        <Select onValueChange={(v) => setResponsables(p => ({...p, web: {responsable: v}}))} value={responsables.web?.responsable || ''}>
+                                <SelectTrigger><SelectValue placeholder="Seleccionar responsable*" /></SelectTrigger>
+                                <SelectContent>{webTeam.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
+                        </Select>
+                        </div>
+                    )}
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                    <Button onClick={handleSave}><Check className="w-4 h-4 mr-2"/>Confirmar Conversión</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
 export default function VentasPage() {
     const [prospects, setProspects] = useState<Prospect[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedLead, setSelectedLead] = useState<Prospect | null>(null);
-    const [isConvertModalOpen, setIsConvertModalOpen] = useState(false);
-    const [pautaOption, setPautaOption] = useState<'si' | 'no' | 'ambos'>('si');
-    const { toast } = useToast();
 
     // Filtros
     const [responsableFilter, setResponsableFilter] = useState('Todos');
@@ -171,34 +352,6 @@ export default function VentasPage() {
         fetchProspects();
     };
 
-
-    const handleConvertClick = (lead: Prospect) => {
-        setSelectedLead(lead);
-        setIsConvertModalOpen(true);
-    };
-
-    const handleConfirmConversion = () => {
-        if (selectedLead) {
-            setProspects(prev => prev.map(lead => lead.id === selectedLead.id ? {...lead, status: 'Convertido'} : lead));
-            setIsConvertModalOpen(false);
-            
-            let toastDescription = `El cliente ${selectedLead.name} ha sido movido a Pendientes.`;
-            if (pautaOption === 'si') {
-                toastDescription += " Se creó una tarea en Pendientes Ads.";
-            } else if (pautaOption === 'no') {
-                toastDescription += " Se creó una tarea en Pendientes Contenido/Web.";
-            } else {
-                 toastDescription += " Se crearon tareas en Contenido y Ads.";
-            }
-
-            toast({
-                title: "¡Cliente Convertido!",
-                description: toastDescription,
-                className: "bg-green-500 text-white"
-            });
-        }
-    }
-    
     const origenes = useMemo(() => {
         const allOrigins = new Set(prospects.map(l => l.source || 'N/A' ));
         return ['Todos', ...Array.from(allOrigins)];
@@ -302,10 +455,12 @@ export default function VentasPage() {
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-right">
-                                     <Button variant="default" size="sm" onClick={() => handleConvertClick(lead)}>
-                                        <Sparkles className="w-4 h-4 mr-2" />
-                                        Convertir en Cliente
-                                    </Button>
+                                     <ConvertLeadDialog prospect={lead} onSave={fetchProspects}>
+                                         <Button variant="default" size="sm">
+                                            <Sparkles className="w-4 h-4 mr-2" />
+                                            Convertir en Cliente
+                                        </Button>
+                                     </ConvertLeadDialog>
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -319,42 +474,6 @@ export default function VentasPage() {
             </div>
         </CardContent>
        </Card>
-
-        <Dialog open={isConvertModalOpen} onOpenChange={setIsConvertModalOpen}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Convertir a {selectedLead?.name} en Cliente</DialogTitle>
-                    <DialogDescription>
-                        Esto moverá el lead a la base de datos de clientes activos y creará las tareas iniciales.
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="py-4">
-                    <Label className="font-semibold">¿El nuevo cliente requerirá pauta (Ads)?</Label>
-                    <RadioGroup value={pautaOption} onValueChange={(val) => setPautaOption(val as 'si' | 'no' | 'ambos')} className="mt-2 space-y-2">
-                        <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="si" id="pauta-si" />
-                            <Label htmlFor="pauta-si" className="font-normal">Sí, solo Pauta</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="no" id="pauta-no" />
-                            <Label htmlFor="pauta-no" className="font-normal">No, solo Contenido/Web</Label>
-                        </div>
-                         <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="ambos" id="pauta-ambos" />
-                            <Label htmlFor="pauta-ambos" className="font-normal">Ambos servicios</Label>
-                        </div>
-                    </RadioGroup>
-                </div>
-                <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsConvertModalOpen(false)}>Cancelar</Button>
-                    <Button onClick={handleConfirmConversion}>
-                        <Check className="w-4 h-4 mr-2"/>
-                        Confirmar Conversión
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-
     </div>
   );
 }
