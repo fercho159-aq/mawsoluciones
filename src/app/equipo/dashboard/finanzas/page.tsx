@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, ArrowRight, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Users } from 'lucide-react';
+import { ArrowUpDown, ArrowRight, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Users, CalendarIcon } from 'lucide-react';
 import WhatsappIcon from '@/components/icons/whatsapp-icon';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,34 +24,59 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { format, startOfMonth, endOfMonth, isWithinInterval, parse, addMonths, getDaysInMonth, parseISO, subMonths } from 'date-fns';
+import { format, startOfMonth, endOfMonth, isWithinInterval, parse, addMonths, getDaysInMonth, parseISO, subMonths, setDate } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useAuth } from '@/lib/auth-provider';
 import type { CategoriaIngreso, CategoriaGasto, Cuenta, Periodo } from '@/lib/finanzas-data';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { getClients, type Client } from '../clientes/_actions';
 import { addCpc, addMovimiento, getCuentasPorCobrar, getMovimientos, updateCpcAfterPayment } from './_actions';
-import type { MovimientoDiario, CuentaPorCobrar, NewCuentaPorCobrar, NewMovimientoDiario } from '@/lib/db/schema';
+import type { MovimientoDiario, CuentaPorCobrar, NewCuentaPorCobrar, NewMovimientoDiario, ClientFinancialProfile } from '@/lib/db/schema';
+import { Switch } from '@/components/ui/switch';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 
 
 // --- Helper Functions ---
-const generatePeriodOptions = () => {
-    const options: string[] = [];
+const generatePeriodOptions = (billingDay: number) => {
     const today = new Date();
-    
-    for (let i = -2; i <= 3; i++) {
-        const date = addMonths(today, i);
-        
-        const start = startOfMonth(date);
-        const end = endOfMonth(date);
-        options.push(`${format(start, 'd MMM', { locale: es })} - ${format(end, 'd MMM', { locale: es })}`);
+    const options = new Map<string, string>();
+    const labelFormat = "d 'de' MMMM, yyyy";
+
+    // Past dates
+    let pastDate = setDate(today, billingDay);
+    if(today.getDate() <= billingDay) {
+        pastDate = subMonths(pastDate, 1);
     }
+    options.set(pastDate.toISOString(), format(pastDate, labelFormat, {locale: es}));
+
+    // Future dates
+    let futureDate = setDate(today, billingDay);
+     if(today.getDate() > billingDay) {
+        futureDate = addMonths(futureDate, 1);
+    }
+    options.set(futureDate.toISOString(), format(futureDate, labelFormat, {locale: es}));
+
+    // For day 15, also add 30th/31st, and vice-versa
+    const otherDay = billingDay === 15 ? 30 : 15;
     
-    return options.sort((a, b) => {
-        const dateA = parse(a.split(' - ')[0], 'd MMM', new Date());
-        const dateB = parse(b.split(' - ')[0], 'd MMM', new Date());
-        return dateA.getTime() - dateB.getTime();
-    });
+    // Past other day
+    let pastOtherDay = setDate(today, otherDay > getDaysInMonth(today) ? getDaysInMonth(today) : otherDay);
+    if(today.getDate() <= otherDay) {
+         pastOtherDay = subMonths(pastOtherDay, 1);
+         pastOtherDay = setDate(pastOtherDay, otherDay > getDaysInMonth(pastOtherDay) ? getDaysInMonth(pastOtherDay) : otherDay);
+    }
+    options.set(pastOtherDay.toISOString(), format(pastOtherDay, labelFormat, {locale: es}));
+
+    // Future other day
+    let futureOtherDay = setDate(today, otherDay > getDaysInMonth(today) ? getDaysInMonth(today) : otherDay);
+    if(today.getDate() > otherDay) {
+        futureOtherDay = addMonths(futureOtherDay, 1);
+        futureOtherDay = setDate(futureOtherDay, otherDay > getDaysInMonth(futureOtherDay) ? getDaysInMonth(futureOtherDay) : otherDay);
+    }
+    options.set(futureOtherDay.toISOString(), format(futureOtherDay, labelFormat, {locale: es}));
+
+    return Array.from(options.entries()).sort((a,b) => new Date(a[0]).getTime() - new Date(b[0]).getTime());
 };
 
 const getNextPeriod = (periodo: string): Periodo => {
@@ -69,25 +94,46 @@ const getNextPeriod = (periodo: string): Periodo => {
 }
 
 // --- Components ---
-const AddCpcDialog = ({ clients, onAdd }: { clients: Client[], onAdd: (cpc: Omit<NewCuentaPorCobrar, 'id'>) => void }) => {
+const AddCpcDialog = ({ clients, onAdd }: { clients: (Client & { financialProfile: ClientFinancialProfile | null })[], onAdd: (cpc: Omit<NewCuentaPorCobrar, 'id'>) => void }) => {
     const [clienteId, setClienteId] = useState('');
-    const [periodo, setPeriodo] = useState('');
+    const [billingDate, setBillingDate] = useState<string>('');
     const [monto, setMonto] = useState('');
-    const [tipo, setTipo] = useState<CategoriaIngreso>('Proyecto');
+    const [tipo, setTipo] = useState<CategoriaIngreso>('Iguala Mensual');
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
-    const periodOptions = useMemo(() => generatePeriodOptions(), []);
+    const [requiresInvoice, setRequiresInvoice] = useState(false);
+    const [customDate, setCustomDate] = useState<Date | undefined>();
+
+    const selectedClient = useMemo(() => clients.find(c => c.id.toString() === clienteId), [clients, clienteId]);
+    const periodOptions = useMemo(() => selectedClient?.financialProfile ? generatePeriodOptions(selectedClient.financialProfile.billingDay || 15) : [], [selectedClient]);
+    const totalAmount = useMemo(() => {
+        const baseAmount = parseFloat(monto) || 0;
+        return requiresInvoice ? baseAmount * 1.16 : baseAmount;
+    }, [monto, requiresInvoice]);
 
     const handleSave = () => {
-        if (!clienteId || !periodo || !monto) {
+        let finalBillingDate = '';
+        if(billingDate === 'other') {
+            if (!customDate) {
+                 toast({ title: "Error", description: "Por favor, selecciona una fecha personalizada.", variant: "destructive" });
+                return;
+            }
+            finalBillingDate = format(customDate, "d 'de' MMMM, yyyy", {locale: es});
+        } else {
+            finalBillingDate = periodOptions.find(p => p[0] === billingDate)?.[1] || '';
+        }
+
+        if (!clienteId || !finalBillingDate || !monto) {
             toast({ title: "Error", description: "Todos los campos son obligatorios.", variant: "destructive" });
             return;
         }
+
         const cliente = clients.find(c => c.id === parseInt(clienteId));
         if (!cliente) return;
-        onAdd({ clienteId: cliente.id, clienteName: cliente.name, periodo, monto: parseFloat(monto), tipo });
+
+        onAdd({ clienteId: cliente.id, clienteName: cliente.name, periodo: finalBillingDate, monto: totalAmount, tipo });
         setOpen(false);
-        setClienteId(''); setPeriodo(''); setMonto(''); setTipo('Proyecto');
+        setClienteId(''); setBillingDate(''); setMonto(''); setTipo('Iguala Mensual'); setRequiresInvoice(false); setCustomDate(undefined);
     };
 
     return (
@@ -106,29 +152,60 @@ const AddCpcDialog = ({ clients, onAdd }: { clients: Client[], onAdd: (cpc: Omit
                                 {clients.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
                             </SelectContent>
                         </Select>
-                        {clients.length === 0 ? (
-                           <AlertDescription>No hay clientes. Crea uno en la pestaña 'Clientes' primero.</AlertDescription>
-                        ) : (
-                           <AlertDescription className='text-xs'>
-                                ¿No encuentras al cliente? <Link href="/equipo/dashboard/clientes" className="text-primary underline">Añádelo aquí</Link>.
-                           </AlertDescription>
-                        )}
                     </div>
-                    <Select value={periodo} onValueChange={setPeriodo}>
-                        <SelectTrigger><SelectValue placeholder="Seleccionar Periodo"/></SelectTrigger>
-                        <SelectContent>
-                            {periodOptions.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
-                    <Input type="number" value={monto} onChange={e => setMonto(e.target.value)} placeholder="Monto (MXN)" />
-                    <Select value={tipo} onValueChange={(v) => setTipo(v as CategoriaIngreso)}>
-                        <SelectTrigger><SelectValue placeholder="Tipo de Servicio"/></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="Proyecto">Proyecto</SelectItem>
-                            <SelectItem value="Iguala Mensual">Iguala Mensual</SelectItem>
-                            <SelectItem value="Ads">Ads</SelectItem>
-                        </SelectContent>
-                    </Select>
+                     <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label>Fecha de Corte</Label>
+                            <Input value={selectedClient?.financialProfile?.billingDay ? `Día ${selectedClient.financialProfile.billingDay}`: 'N/A'} disabled />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Fecha de Cobro</Label>
+                            <Select value={billingDate} onValueChange={setBillingDate} disabled={!selectedClient}>
+                                <SelectTrigger><SelectValue placeholder="Seleccionar Fecha"/></SelectTrigger>
+                                <SelectContent>
+                                    {periodOptions.map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}
+                                    <SelectItem value="other">Otra fecha</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    {billingDate === 'other' && (
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !customDate && "text-muted-foreground")}>
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {customDate ? format(customDate, "PPP", { locale: es }) : <span>Elige una fecha</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={customDate} onSelect={setCustomDate} initialFocus /></PopoverContent>
+                        </Popover>
+                    )}
+                    <div className="space-y-2">
+                        <Label>Tipo de Servicio</Label>
+                        <Select value={tipo} onValueChange={(v) => setTipo(v as CategoriaIngreso)}>
+                            <SelectTrigger><SelectValue/></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Iguala Mensual">Iguala Mensual</SelectItem>
+                                <SelectItem value="Ads">Ads</SelectItem>
+                                <SelectItem value="Proyecto">Proyecto</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Monto (MXN)</Label>
+                        <Input type="number" value={monto} onChange={e => setMonto(e.target.value)} placeholder="0.00" />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Switch id="invoice-switch" checked={requiresInvoice} onCheckedChange={setRequiresInvoice}/>
+                        <Label htmlFor="invoice-switch">Requiere Factura (Añadir 16% IVA)</Label>
+                    </div>
+                    {requiresInvoice && (
+                        <Card className="bg-muted p-4">
+                            <p>Monto Base: {parseFloat(monto || '0').toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
+                            <p>IVA (16%): {(parseFloat(monto || '0') * 0.16).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
+                            <p className="font-bold">Total: {totalAmount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
+                        </Card>
+                    )}
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
@@ -139,7 +216,7 @@ const AddCpcDialog = ({ clients, onAdd }: { clients: Client[], onAdd: (cpc: Omit
     )
 }
 
-const CuentasPorCobrarTab = ({ data, clients, onAddCpc }: { data: CuentaPorCobrar[], clients: Client[], onAddCpc: (cpc: Omit<NewCuentaPorCobrar, 'id'>) => void }) => {
+const CuentasPorCobrarTab = ({ data, clients, onAddCpc }: { data: CuentaPorCobrar[], clients: (Client & { financialProfile: ClientFinancialProfile | null })[], onAddCpc: (cpc: Omit<NewCuentaPorCobrar, 'id'>) => void }) => {
     const handleWhatsappReminder = (item: CuentaPorCobrar) => {
         const client = clients.find(c => c.id === item.clienteId);
         if (!client || !client.whatsapp) {
@@ -419,7 +496,7 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onAddMovimiento, cuentasPorCobra
 
 export default function FinanzasPage() {
     const { user } = useAuth();
-    const [clients, setClients] = useState<Client[]>([]);
+    const [clients, setClients] = useState<(Client & { financialProfile: ClientFinancialProfile | null })[]>([]);
     const [movimientos, setMovimientos] = useState<MovimientoDiario[]>([]);
     const [cuentasPorCobrar, setCuentasPorCobrar] = useState<CuentaPorCobrar[]>([]);
     const [activeTab, setActiveTab] = useState("cuentas-por-cobrar");
@@ -434,7 +511,7 @@ export default function FinanzasPage() {
             getCuentasPorCobrar(),
             getMovimientos(),
         ]);
-        setClients(clientsData);
+        setClients(clientsData as (Client & { financialProfile: ClientFinancialProfile | null })[]);
         setCuentasPorCobrar(cpcData);
         setMovimientos(movimientosData.map(m => ({...m, fecha: new Date(m.fecha)})));
         setIsLoading(false);
@@ -486,4 +563,3 @@ export default function FinanzasPage() {
         </div>
     );
 }
-

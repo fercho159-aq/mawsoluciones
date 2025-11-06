@@ -29,10 +29,21 @@ export const clients = pgTable('clients', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
-export const clientsRelations = relations(clients, ({ many }) => ({
+export const clientsRelations = relations(clients, ({ one, many }) => ({
 	cuentasPorCobrar: many(cuentasPorCobrar),
     pendientes: many(pendientes_maw),
+    financialProfile: one(clientFinancialProfiles, {
+        fields: [clients.id],
+        references: [clientFinancialProfiles.clientId],
+    })
 }));
+
+export const clientFinancialProfiles = pgTable('client_financial_profiles', {
+    id: serial('id').primaryKey(),
+    clientId: integer('client_id').notNull().unique().references(() => clients.id, { onDelete: 'cascade' }),
+    billingDay: integer('billing_day').default(15), // e.g., 15th or 30th
+    defaultInvoice: boolean('default_invoice').default(false),
+});
 
 export type Client = typeof clients.$inferSelect;
 export type NewClient = typeof clients.$inferInsert;
@@ -163,3 +174,4 @@ export type NewRecordingEvent = typeof recordingEvents.$inferInsert;
 
 export type Colaborador = typeof colaboradores.$inferSelect;
 export type NewColaborador = typeof colaboradores.$inferInsert;
+export type ClientFinancialProfile = typeof clientFinancialProfiles.$inferSelect;

@@ -2,13 +2,17 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { clients, pendientes_maw } from "@/lib/db/schema";
+import { clients, pendientes_maw, clientFinancialProfiles } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function getClients() {
   try {
-    const allClients = await db.query.clients.findMany();
+    const allClients = await db.query.clients.findMany({
+        with: {
+            financialProfile: true,
+        }
+    });
     return allClients;
   } catch (error) {
     console.error("Error fetching clients:", error);
@@ -34,6 +38,11 @@ export async function addClient(data: NewClientData) {
         managedAreas: data.managedAreas
     }).returning({ id: clients.id });
     
+    // Create financial profile for the new client
+    await db.insert(clientFinancialProfiles).values({
+        clientId: newClient.id,
+    });
+
     // Create pendientes if areas are selected
     if (data.managedAreas && data.responsables) {
         for (const area of data.managedAreas) {
@@ -68,6 +77,7 @@ export async function addClient(data: NewClientData) {
 
     revalidatePath("/equipo/dashboard/clientes");
     revalidatePath("/equipo/dashboard/pendientes");
+    revalidatePath("/equipo/dashboard/finanzas");
   } catch (error) {
     console.error("Error adding client:", error);
     throw new Error("Could not add client");
