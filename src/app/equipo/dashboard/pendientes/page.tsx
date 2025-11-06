@@ -19,21 +19,18 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/lib/auth-provider';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Trash2, CalendarIcon } from 'lucide-react';
+import { PlusCircle, CalendarIcon } from 'lucide-react';
 import type { Pendiente, SubTask, Client, RecordingEvent } from '@/lib/db/schema';
-import { getPendientes, addSubTask, toggleSubTask, addPendiente, updatePendiente, scheduleRecording, deleteRecording } from './_actions';
+import { getPendientes, addSubTask, toggleSubTask, addPendiente, updatePendiente } from './_actions';
 import { getClients } from '../clientes/_actions';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { teamMembers, type TeamMember } from '@/lib/team-data';
+import { teamMembers } from '@/lib/team-data';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Mic, Camera, Lightbulb, Grip } from 'lucide-react';
+import { ScheduleRecordingDialog } from '@/components/schedule-recording-dialog';
 
 
 const statusColors: Record<string, string> = {
@@ -42,202 +39,7 @@ const statusColors: Record<string, string> = {
   "No tenemos pendiente": "bg-green-500",
 };
 
-type PendienteWithRelations = Pendiente & { subTasks: SubTask[], recordingEvent?: RecordingEvent | null };
-
-const mockEquipment = [
-  { id: 'eq1', name: 'Micrófono Hollyland', category: 'audio' as const, available: true },
-  { id: 'eq2', name: 'Cámara Sony FX3', category: 'video' as const, available: true },
-  { id: 'eq3', name: 'Luz Aputure 600d', category: 'iluminacion' as const, available: true },
-  { id: 'eq4', name: 'Estabilizador DJI Ronin', category: 'soporte' as const, available: true },
-  { id: 'eq5', name: 'iPhone 15 Pro', category: 'video'as const, available: true },
-  { id: 'eq6',name: 'Teleprompter', category: 'soporte' as const, available: true}
-];
-const productionTeam = teamMembers.filter(member => ['luis', 'fany', 'carlos', 'paola', 'cristian', 'daniel', 'alexis'].includes(member.role));
-
-const equipmentCategoryIcons = {
-    audio: <Mic className="w-4 h-4" />,
-    video: <Camera className="w-4 h-4" />,
-    iluminacion: <Lightbulb className="w-4 h-4" />,
-    soporte: <Grip className="w-4 h-4" />
-};
-
-const ScheduleRecordingDialog = ({ pendiente, children, onSave, onDelete }: { pendiente: PendienteWithRelations, children: React.ReactNode, onSave: () => void, onDelete: (id: number) => void }) => {
-    const [open, setOpen] = useState(false);
-    const { toast } = useToast();
-    
-    const [assignedTo, setAssignedTo] = useState('');
-    const [startDate, setStartDate] = useState('');
-    const [startTime, setStartTime] = useState('');
-    const [endDate, setEndDate] = useState('');
-    const [endTime, setEndTime] = useState('');
-    const [location, setLocation] = useState('');
-    const [locationType, setLocationType] = useState<RecordingEvent['locationType']>('estudio');
-    const [assignedEquipment, setAssignedEquipment] = useState<string[]>([]);
-
-    useEffect(() => {
-        if(open) {
-            const event = pendiente.recordingEvent;
-            if (event) {
-                setAssignedTo(event.assignedTo);
-                setStartDate(format(new Date(event.fullStart), 'yyyy-MM-dd'));
-                setStartTime(format(new Date(event.fullStart), 'HH:mm'));
-                setEndDate(format(new Date(event.fullEnd), 'yyyy-MM-dd'));
-                setEndTime(format(new Date(event.fullEnd), 'HH:mm'));
-                setLocation(event.location || '');
-                setLocationType(event.locationType || 'estudio');
-                setAssignedEquipment(event.assignedEquipment || []);
-            } else {
-                 setAssignedTo(productionTeam.find(m => m.name === pendiente.ejecutor)?.id || '');
-                 setStartDate(''); setStartTime(''); setEndDate(''); setEndTime('');
-                 setLocation(''); setLocationType('estudio'); setAssignedEquipment([]);
-            }
-        }
-    }, [open, pendiente]);
-    
-    const handleSave = async () => {
-        if (!assignedTo || !startDate || !startTime || !endDate || !endTime) {
-            toast({ title: "Error", description: "Completa todos los campos de fecha y responsable.", variant: "destructive" });
-            return;
-        }
-
-        const teamMember = teamMembers.find(m => m.id === assignedTo);
-        if (!teamMember) return;
-        
-        const newEventData = {
-            pendienteId: pendiente.id,
-            clientName: pendiente.cliente,
-            assignedTo: teamMember.id,
-            assignedToName: teamMember.name,
-            fullStart: new Date(`${startDate}T${startTime}`),
-            fullEnd: new Date(`${endDate}T${endTime}`),
-            location: location || '',
-            locationType: locationType || 'estudio',
-            project: pendiente.pendientePrincipal,
-            assignedEquipment,
-            equipmentNames: assignedEquipment.map(id => mockEquipment.find(eq => eq.id === id)?.name || '')
-        };
-
-        try {
-            await scheduleRecording(newEventData);
-            toast({ title: "Éxito", description: `Grabación ${pendiente.recordingEvent ? 'actualizada' : 'agendada'}.` });
-            onSave();
-            setOpen(false);
-        } catch (error) {
-            toast({ title: "Error", description: "No se pudo agendar la grabación.", variant: "destructive" });
-        }
-    };
-    
-    const handleDelete = async () => {
-        if (!pendiente.recordingEvent) return;
-        try {
-            await deleteRecording(pendiente.id);
-            toast({ title: "Eliminado", description: "La grabación ha sido eliminada." });
-            onDelete(pendiente.id);
-            setOpen(false);
-        } catch (error) {
-             toast({ title: "Error", description: "No se pudo eliminar la grabación.", variant: "destructive" });
-        }
-    }
-    
-    return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild onClick={(e) => e.stopPropagation()}>{children}</DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
-                <DialogHeader>
-                    <DialogTitle>{pendiente.recordingEvent ? 'Editar' : 'Agendar'} Grabación</DialogTitle>
-                    <DialogDescription>Para el pendiente: "{pendiente.pendientePrincipal}"</DialogDescription>
-                </DialogHeader>
-                 <ScrollArea className="max-h-[70vh] p-4">
-                  <div className="grid gap-6">
-                      <div className="space-y-2">
-                          <Label>Responsable</Label>
-                          <Select value={assignedTo} onValueChange={setAssignedTo}>
-                              <SelectTrigger><SelectValue placeholder="Seleccionar miembro del equipo..." /></SelectTrigger>
-                              <SelectContent>
-                                  {productionTeam.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
-                              </SelectContent>
-                          </Select>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                         <div className="space-y-2">
-                            <Label htmlFor="startDate">Fecha de Inicio</Label>
-                            <Input id="startDate" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
-                         </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="startTime">Hora de Inicio</Label>
-                            <Input id="startTime" type="time" value={startTime} onChange={e => setStartTime(e.target.value)} />
-                         </div>
-                      </div>
-                       <div className="grid grid-cols-2 gap-4">
-                         <div className="space-y-2">
-                            <Label htmlFor="endDate">Fecha de Fin</Label>
-                            <Input id="endDate" type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
-                         </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="endTime">Hora de Fin</Label>
-                            <Input id="endTime" type="time" value={endTime} onChange={e => setEndTime(e.target.value)} />
-                         </div>
-                      </div>
-                      <div className="space-y-2">
-                          <Label>Ubicación / Tipo</Label>
-                           <RadioGroup value={locationType} onValueChange={(v) => setLocationType(v as any)} className="flex gap-4">
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="estudio" id="loc-estudio" /><Label htmlFor="loc-estudio">Estudio MAW</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="oficina_cliente" id="loc-oficina" /><Label htmlFor="loc-oficina">Oficina Cliente</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="exterior" id="loc-exterior" /><Label htmlFor="loc-exterior">Exterior</Label></div>
-                            </RadioGroup>
-                          <Input value={location} onChange={e => setLocation(e.target.value)} placeholder="Dirección, detalles..." />
-                      </div>
-                       <div className="space-y-2">
-                          <Label>Equipo Requerido</Label>
-                           <Card>
-                            <CardContent className="p-4 max-h-48 overflow-y-auto">
-                                <div className="space-y-3">
-                                {mockEquipment.map((item) => (
-                                    <div key={item.id} className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id={`eq-${item.id}-${pendiente.id}`}
-                                            checked={assignedEquipment.includes(item.id)}
-                                            onCheckedChange={(checked) => {
-                                                setAssignedEquipment(prev => 
-                                                    checked ? [...prev, item.id] : prev.filter(id => id !== item.id)
-                                                )
-                                            }}
-                                        />
-                                        <Label htmlFor={`eq-${item.id}-${pendiente.id}`} className="flex-1">
-                                            <div className="flex items-center gap-2">
-                                                {equipmentCategoryIcons[item.category]}
-                                                {item.name}
-                                            </div>
-                                        </Label>
-                                    </div>
-                                ))}
-                                </div>
-                            </CardContent>
-                           </Card>
-                       </div>
-                  </div>
-                </ScrollArea>
-                <DialogFooter className="justify-between pt-4">
-                    <div>
-                        {pendiente.recordingEvent && (
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild><Button variant="destructive"><Trash2 className="w-4 h-4 mr-2" />Eliminar</Button></AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader><AlertDialogTitle>¿Eliminar esta grabación?</AlertDialogTitle><AlertDialogDescription>Esta acción es irreversible.</AlertDialogDescription></AlertDialogHeader>
-                                    <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={handleDelete}>Confirmar</AlertDialogAction></AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                        )}
-                    </div>
-                    <div className="flex gap-2">
-                        <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                        <Button onClick={handleSave}>{pendiente.recordingEvent ? 'Guardar Cambios' : 'Agendar'}</Button>
-                    </div>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    )
-}
+export type PendienteWithRelations = Pendiente & { subTasks: SubTask[], recordingEvent?: RecordingEvent | null };
 
 
 const AddPendienteDialog = ({ clients, onAddPendiente }: { clients: Client[], onAddPendiente: () => void }) => {
@@ -520,9 +322,12 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, clients, onRefresh }
                                 </TableCell>
                                 <TableCell className="align-top text-center">
                                     <ScheduleRecordingDialog 
-                                        pendiente={item} 
+                                        event={item.recordingEvent}
+                                        pendienteId={item.id}
+                                        clientName={item.cliente}
+                                        project={item.pendientePrincipal}
+                                        assignedToName={item.ejecutor}
                                         onSave={onRefresh}
-                                        onDelete={() => onRefresh()}
                                     >
                                         {item.recordingEvent ? (
                                              <Button variant="outline" size="sm" className="flex flex-col h-auto">
@@ -678,5 +483,3 @@ export default function PendientesPage() {
     </div>
   );
 }
-
-    

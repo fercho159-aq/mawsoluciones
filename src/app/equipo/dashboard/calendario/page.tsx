@@ -10,10 +10,10 @@ import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, 
 import { es } from 'date-fns/locale';
 import { Camera, Mic, Lightbulb, Grip, ChevronLeft, ChevronRight, Users, Briefcase } from 'lucide-react';
 import { teamMembers } from '@/lib/team-data';
-import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getRecordingEvents } from '../pendientes/_actions';
 import type { RecordingEvent } from '@/lib/db/schema';
+import { ScheduleRecordingDialog } from '@/components/schedule-recording-dialog';
 
 
 const mockEquipment = [
@@ -35,9 +35,9 @@ const equipmentCategoryIcons = {
 const salesTeam = teamMembers.filter(member => ['julio', 'alma', 'fernando'].includes(member.role));
 const productionTeam = teamMembers.filter(member => ['luis', 'fany', 'carlos', 'paola', 'cristian', 'daniel', 'alexis'].includes(member.role));
 
-const CalendarSection = ({ title, events, team, eventType }: { 
+const CalendarSection = ({ title, events, team, eventType, onRefresh }: { 
     title: string, events: RecordingEvent[], team: typeof teamMembers, 
-    eventType: 'grabacion' | 'cita_venta',
+    eventType: 'grabacion' | 'cita_venta', onRefresh: () => void
 }) => {
     const [currentDate, setCurrentDate] = useState(new Date('2024-11-05'));
     const [memberFilter, setMemberFilter] = useState('Todos');
@@ -77,11 +77,6 @@ const CalendarSection = ({ title, events, team, eventType }: {
     const goToNextWeek = () => setCurrentDate(addWeeks(currentDate, 1));
     const goToCurrentWeek = () => setCurrentDate(new Date());
 
-    const eventTypeIcons = {
-        grabacion: <Camera className="w-4 h-4 mr-2" />,
-        cita_venta: <Briefcase className="w-4 h-4 mr-2" />
-    };
-
     const teamMemberColors: {[key: string]: string} = team.reduce((acc, member) => {
         acc[member.name] = member.color;
         return acc;
@@ -117,39 +112,49 @@ const CalendarSection = ({ title, events, team, eventType }: {
                             <div className="flex-grow p-2 space-y-2 overflow-y-auto">
                                 <TooltipProvider>
                                 {dayEvents.map(event => (
-                                    <Card key={event.id} className="p-3 hover:bg-card/80 transition-colors" style={{ borderLeft: `4px solid ${teamMemberColors[event.assignedToName] || '#FFFFFF'}`}}>
-                                        <CardHeader className="p-0 mb-2">
-                                            <CardTitle className="text-sm">{event.project || event.clientName}</CardTitle>
-                                            <CardDescription className="text-xs">{event.clientName}</CardDescription>
-                                        </CardHeader>
-                                        <CardContent className="p-0 text-xs space-y-1">
-                                            <p className="flex items-center gap-1.5 text-muted-foreground"><Users className="w-3 h-3" /> {event.assignedToName}</p>
-                                            <p className="font-semibold">{format(new Date(event.fullStart), 'HH:mm')} - {format(new Date(event.fullEnd), 'HH:mm')}</p>
-                                            {eventType === 'grabacion' && event.equipmentNames && event.equipmentNames.length > 0 && (
-                                                <div className="flex flex-wrap gap-1 pt-1">
-                                                    {event.assignedEquipment?.map(id => {
-                                                        const equipment = mockEquipment.find(e => e.id === id);
-                                                        if (!equipment) return null;
-                                                        return (
-                                                            <Tooltip key={id}>
-                                                                <TooltipTrigger asChild>
-                                                                    <div className="p-1.5 bg-secondary rounded-md">
-                                                                        {equipmentCategoryIcons[equipment.category]}
-                                                                    </div>
-                                                                </TooltipTrigger>
-                                                                <TooltipContent>
-                                                                    <p>{equipment.name}</p>
-                                                                </TooltipContent>
-                                                            </Tooltip>
-                                                        )
-                                                    })}
-                                                </div>
-                                            )}
-                                            {eventType === 'cita_venta' && (
-                                                <Badge variant="outline">{event.locationType === 'videollamada' ? 'Videollamada' : 'Presencial'}</Badge>
-                                            )}
-                                        </CardContent>
-                                    </Card>
+                                    <ScheduleRecordingDialog
+                                        key={event.id}
+                                        event={event}
+                                        pendienteId={event.pendienteId!}
+                                        clientName={event.clientName}
+                                        project={event.project}
+                                        assignedToName={event.assignedToName}
+                                        onSave={onRefresh}
+                                    >
+                                        <Card className="p-3 hover:bg-card/80 transition-colors cursor-pointer" style={{ borderLeft: `4px solid ${teamMemberColors[event.assignedToName] || '#FFFFFF'}`}}>
+                                            <CardHeader className="p-0 mb-2">
+                                                <CardTitle className="text-sm">{event.project || event.clientName}</CardTitle>
+                                                <CardDescription className="text-xs">{event.clientName}</CardDescription>
+                                            </CardHeader>
+                                            <CardContent className="p-0 text-xs space-y-1">
+                                                <p className="flex items-center gap-1.5 text-muted-foreground"><Users className="w-3 h-3" /> {event.assignedToName}</p>
+                                                <p className="font-semibold">{format(new Date(event.fullStart), 'HH:mm')} - {format(new Date(event.fullEnd), 'HH:mm')}</p>
+                                                {eventType === 'grabacion' && event.equipmentNames && event.equipmentNames.length > 0 && (
+                                                    <div className="flex flex-wrap gap-1 pt-1">
+                                                        {event.assignedEquipment?.map(id => {
+                                                            const equipment = mockEquipment.find(e => e.id === id);
+                                                            if (!equipment) return null;
+                                                            return (
+                                                                <Tooltip key={id}>
+                                                                    <TooltipTrigger asChild>
+                                                                        <div className="p-1.5 bg-secondary rounded-md">
+                                                                            {equipmentCategoryIcons[equipment.category]}
+                                                                        </div>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent>
+                                                                        <p>{equipment.name}</p>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            )
+                                                        })}
+                                                    </div>
+                                                )}
+                                                {eventType === 'cita_venta' && (
+                                                    <Badge variant="outline">{event.locationType === 'videollamada' ? 'Videollamada' : 'Presencial'}</Badge>
+                                                )}
+                                            </CardContent>
+                                        </Card>
+                                    </ScheduleRecordingDialog>
                                 ))}
                                 </TooltipProvider>
                             </div>
@@ -178,13 +183,14 @@ export default function CalendarioPage() {
     const [events, setEvents] = useState<RecordingEvent[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    const fetchEvents = async () => {
+        setIsLoading(true);
+        const eventsData = await getRecordingEvents();
+        setEvents(eventsData);
+        setIsLoading(false);
+    }
+    
     useEffect(() => {
-        const fetchEvents = async () => {
-            setIsLoading(true);
-            const eventsData = await getRecordingEvents();
-            setEvents(eventsData);
-            setIsLoading(false);
-        }
         fetchEvents();
     }, []);
 
@@ -204,12 +210,14 @@ export default function CalendarioPage() {
                     events={grabaciones}
                     team={productionTeam}
                     eventType="grabacion"
+                    onRefresh={fetchEvents}
                 />
                  <CalendarSection
                     title="Calendario de Citas de Venta"
                     events={citasVenta}
                     team={salesTeam}
                     eventType="cita_venta"
+                    onRefresh={fetchEvents}
                 />
             </div>
         </div>

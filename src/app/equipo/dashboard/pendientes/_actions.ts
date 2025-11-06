@@ -68,7 +68,7 @@ export async function scheduleRecording(data: Omit<NewRecordingEvent, 'id'>) {
     try {
         // Check if an event for this pendiente already exists
         const existingEvent = await db.query.recordingEvents.findFirst({
-            where: eq(recordingEvents.pendienteId, data.pendienteId)
+            where: data.pendienteId ? eq(recordingEvents.pendienteId, data.pendienteId) : undefined,
         });
 
         if (existingEvent) {
