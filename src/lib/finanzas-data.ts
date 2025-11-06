@@ -2,7 +2,7 @@ import { parseISO } from 'date-fns';
 
 export type Periodo = string;
 export type MovimientoTipo = "Ingreso" | "Gasto";
-export type CategoriaIngreso = "Proyecto" | "Iguala Mensual" | "Ads";
+export type CategoriaIngreso = "Proyecto" | "Iguala Mensual" | "Renovaciones" | "Otros";
 export type CategoriaGasto = "Publicidad" | "Sueldos" | "Comisiones" | "Impuestos" | "Personales" | "Otros" | "Renta";
 export type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo" | "Efectivo";
 
@@ -48,11 +48,11 @@ export const initialClients: Client[] = [
 ];
 
 export const initialCuentasPorCobrar: CuentasPorCobrar[] = [
-  { id: 'cpc1', clienteId: 'client-1', clienteName: 'Bateiras', periodo: "15 Nov - 15 Dic", monto: 3944, tipo: "Ads" },
+  { id: 'cpc1', clienteId: 'client-1', clienteName: 'Bateiras', periodo: "15 Nov - 15 Dic", monto: 3944, tipo: "Iguala Mensual" },
 ];
 
 export const initialMovimientosDiarios: MovimientoDiario[] = [
-    { id: 'mov-bateiras', fecha: parseISO('2024-11-04T10:00:00'), tipo: 'Ingreso', descripcion: 'Pago cliente Bateiras', monto: 3944, cuenta: 'Cuenta Paola', categoria: 'Ads' },
+    { id: 'mov-bateiras', fecha: parseISO('2024-11-04T10:00:00'), tipo: 'Ingreso', descripcion: 'Pago cliente Bateiras', monto: 3944, cuenta: 'Cuenta Paola', categoria: 'Iguala Mensual' },
     { id: 'mov2', fecha: new Date('2024-11-01T09:00:00'), tipo: 'Gasto', descripcion: 'Pago Dani', monto: 9000, cuenta: 'Cuenta Aldo', categoria: 'Sueldos' },
     { id: 'mov3', fecha: new Date('2024-11-01T09:01:00'), tipo: 'Gasto', descripcion: 'Pago Didi Den', monto: 9900, cuenta: 'Cuenta Aldo', categoria: 'Sueldos' },
     { id: 'mov4', fecha: new Date('2024-11-01T09:02:00'), tipo: 'Gasto', descripcion: 'Renta Abajo', monto: 4500, cuenta: 'Cuenta Aldo', categoria: 'Renta' },

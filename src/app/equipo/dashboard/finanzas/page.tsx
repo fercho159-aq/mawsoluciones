@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, ArrowRight, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Users, CalendarIcon, FileText, Edit, Camera, Zap } from 'lucide-react';
+import { ArrowUpDown, ArrowRight, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Users, CalendarIcon, FileText, Edit, Camera, Zap, RefreshCw } from 'lucide-react';
 import WhatsappIcon from '@/components/icons/whatsapp-icon';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -64,7 +64,7 @@ const generatePeriodOptions = () => {
 
     // Next 30th (end of month)
     let next30 = endOfMonth(today);
-    if (today.getDate() > endOfMonth(today).getDate() - 5) {
+    if (today.getDate() > endOfMonth(today).getDate() - 5) { // If in the last 5 days of month, show next month's end
         next30 = endOfMonth(addMonths(today, 1));
     }
     options.push({ value: next30.toISOString(), label: `Próximo día 30 (${format(next30, 'd MMM', { locale: es })})` });
@@ -149,8 +149,8 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt, onCli
              }
         }
         
-        if (!clienteId || !monto || !billingDay) {
-            toast({ title: "Error", description: "Cliente, fecha de corte y monto son obligatorios.", variant: "destructive" });
+        if (!clienteId || !monto) {
+            toast({ title: "Error", description: "Cliente y monto son obligatorios.", variant: "destructive" });
             return;
         }
 
@@ -205,7 +205,7 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt, onCli
                      <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Fecha de Corte</Label>
-                            <Select value={billingDay} onValueChange={v => setBillingDay(v as any)} disabled={isEditing}>
+                            <Select value={billingDay} onValueChange={v => setBillingDay(v as any)}>
                                 <SelectTrigger><SelectValue placeholder="Día"/></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="15">Día 15</SelectItem>
@@ -242,6 +242,8 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt, onCli
                             <SelectContent>
                                 <SelectItem value="Iguala Mensual">Iguala Mensual</SelectItem>
                                 <SelectItem value="Proyecto">Proyecto</SelectItem>
+                                <SelectItem value="Renovaciones">Renovaciones</SelectItem>
+                                <SelectItem value="Otros">Otros</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -310,7 +312,7 @@ const CuentasPorCobrarTab = ({ data, clients, onAddCpc, onUpdateCpc, onClientAdd
         const receiptHtml = `
             <html>
                 <head>
-                    <title>${withInvoice ? 'Pre-Factura' : 'Recibo de Cobro'} - ${item.clienteName}</title>
+                    <title>${withInvoice ? 'Pre-Factura / Recibo de Cobro' : 'Recibo de Cobro'} - ${item.clienteName}</title>
                     <script src="https://cdn.tailwindcss.com"></script>
                     <style> body { font-family: sans-serif; } </style>
                 </head>
@@ -324,7 +326,7 @@ const CuentasPorCobrarTab = ({ data, clients, onAddCpc, onUpdateCpc, onClientAdd
                             <p class="text-sm text-gray-600">Fecha: ${format(new Date(), 'd MMMM, yyyy', { locale: es })}</p>
                         </div>
                         <div class="mb-8">
-                            <h2 class="text-lg font-semibold mb-2">${withInvoice ? 'Pre-Factura para:' : 'Recibo para:'}</h2>
+                            <h2 class="text-lg font-semibold mb-2">${withInvoice ? 'Pre-Factura / Recibo para:' : 'Recibo para:'}</h2>
                             <p class="font-bold text-gray-800">${item.clienteName}</p>
                         </div>
                         <h3 class="text-xl font-semibold border-b pb-2 mb-4">Detalle de Adeudos</h3>
@@ -390,6 +392,16 @@ const CuentasPorCobrarTab = ({ data, clients, onAddCpc, onUpdateCpc, onClientAdd
         setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc');
     };
     
+    const getTypeIcon = (type: CategoriaIngreso) => {
+        switch (type) {
+            case 'Iguala Mensual': return <Camera className='w-4 h-4' />;
+            case 'Proyecto': return <Zap className='w-4 h-4' />;
+            case 'Renovaciones': return <RefreshCw className='w-4 h-4' />;
+            case 'Otros': return <DollarSign className='w-4 h-4' />;
+            default: return null;
+        }
+    }
+
     return (
         <Card>
             <CardHeader className='flex-col md:flex-row justify-between items-start md:items-center'>
@@ -437,8 +449,7 @@ const CuentasPorCobrarTab = ({ data, clients, onAddCpc, onUpdateCpc, onClientAdd
                                         <TableCell>{item.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
                                         <TableCell>
                                             <Badge variant={item.tipo === 'Iguala Mensual' ? 'secondary' : 'default'} className="flex items-center gap-1.5 w-fit">
-                                                {item.tipo === 'Iguala Mensual' && <Camera className='w-4 h-4' />}
-                                                {item.tipo === 'Proyecto' && <Zap className='w-4 h-4' />}
+                                                {getTypeIcon(item.tipo as CategoriaIngreso)}
                                                 {item.tipo}
                                             </Badge>
                                         </TableCell>
@@ -763,6 +774,7 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
 
 
 
