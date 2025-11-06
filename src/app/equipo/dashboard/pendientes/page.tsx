@@ -19,7 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/lib/auth-provider';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, CalendarIcon, Plus } from 'lucide-react';
+import { PlusCircle, CalendarIcon, Plus, ChevronRight } from 'lucide-react';
 import type { PendienteMaw, Client, RecordingEvent } from '@/lib/db/schema';
 import { getPendientes, addPendiente, updatePendiente } from './_actions';
 import { getClients } from '../clientes/_actions';
@@ -84,7 +84,7 @@ const EditablePendiente = ({ pendiente, onUpdate }: { pendiente: PendienteWithRe
     );
 };
 
-const AddPendienteDialog = ({ clients, onAddPendiente, children }: { clients: Client[], onAddPendiente: () => void, children: React.ReactNode }) => {
+const AddPendienteDialog = ({ clients, onAddPendiente, children, initialClient, initialCategory }: { clients: Client[], onAddPendiente: () => void, children: React.ReactNode, initialClient?: Client, initialCategory?: string }) => {
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
     const [clienteId, setClienteId] = useState('');
@@ -92,6 +92,15 @@ const AddPendienteDialog = ({ clients, onAddPendiente, children }: { clients: Cl
     const [ejecutor, setEjecutor] = useState('');
     const [categoria, setCategoria] = useState('');
     const [pendientePrincipal, setPendientePrincipal] = useState('');
+
+    useEffect(() => {
+        if(open) {
+            setClienteId(initialClient?.id.toString() || '');
+            setCategoria(initialCategory || '');
+        } else {
+            setClienteId(''); setEncargado(''); setEjecutor(''); setCategoria(''); setPendientePrincipal('');
+        }
+    }, [open, initialClient, initialCategory]);
 
     const encargadosTeam = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel'].includes(m.name));
     const ejecutoresTeam = teamMembers;
@@ -129,15 +138,15 @@ const AddPendienteDialog = ({ clients, onAddPendiente, children }: { clients: Cl
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>{children}</DialogTrigger>
+            <DialogTrigger asChild onClick={(e) => { e.stopPropagation(); setOpen(true); }}>{children}</DialogTrigger>
             <DialogContent>
-                <DialogHeader><DialogTitle>Nuevo Pendiente Manual</DialogTitle></DialogHeader>
+                <DialogHeader><DialogTitle>Nuevo Pendiente para {initialClient?.name}</DialogTitle></DialogHeader>
                 <div className="grid gap-4 py-4">
-                    <Select value={clienteId} onValueChange={setClienteId}>
+                    <Select value={clienteId} onValueChange={setClienteId} disabled={!!initialClient}>
                         <SelectTrigger><SelectValue placeholder="Seleccionar Cliente" /></SelectTrigger>
                         <SelectContent>{clients.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}</SelectContent>
                     </Select>
-                    <Select value={categoria} onValueChange={setCategoria}>
+                    <Select value={categoria} onValueChange={setCategoria} disabled={!!initialCategory}>
                         <SelectTrigger><SelectValue placeholder="Seleccionar Categoría" /></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="Contenido">Contenido</SelectItem>
@@ -151,7 +160,7 @@ const AddPendienteDialog = ({ clients, onAddPendiente, children }: { clients: Cl
                     </Select>
                     <Select value={ejecutor} onValueChange={setEjecutor}>
                         <SelectTrigger><SelectValue placeholder="Seleccionar Ejecutor" /></SelectTrigger>
-                        <SelectContent>{ejecutoresTeam.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
+                        <SelectContent>{ejecutoresTeam.map(e => <SelectItem key={e.id} value={e.name}>{e.name}</SelectItem>)}</SelectContent>
                     </Select>
                     <Textarea value={pendientePrincipal} onChange={(e) => setPendientePrincipal(e.target.value)} placeholder="Descripción del pendiente principal..." />
                 </div>
@@ -164,12 +173,17 @@ const AddPendienteDialog = ({ clients, onAddPendiente, children }: { clients: Cl
     )
 }
 
-const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdatePendienteText }: { 
+const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdatePendienteText, showEncargado, showEjecutor, onAddPendiente, clients, categoria }: { 
     data: PendienteWithRelations[]; 
     onUpdateTask: (task: PendienteWithRelations) => void; 
     currentUser: any; 
     onRefresh: () => void;
     onUpdatePendienteText: (id: number, text: string) => void;
+    showEncargado: boolean;
+    showEjecutor: boolean;
+    onAddPendiente: () => void;
+    clients: Client[];
+    categoria: string;
 }) => {
     const { toast } = useToast();
     
@@ -182,6 +196,13 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
             toast({ title: "Error", description: "No se pudo actualizar el pendiente.", variant: "destructive" });
         }
     };
+
+    const groupedData = useMemo(() => {
+        return data.reduce((acc, pendiente) => {
+            (acc[pendiente.clienteName] = acc[pendiente.clienteName] || []).push(pendiente);
+            return acc;
+        }, {} as Record<string, PendienteWithRelations[]>);
+    }, [data]);
     
     if (data.length === 0) {
         return (
@@ -196,75 +217,90 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className='w-4'></TableHead>
-                        <TableHead>Pendiente</TableHead>
                         <TableHead>Cliente</TableHead>
-                        <TableHead className="w-[120px]">Encargado</TableHead>
-                        <TableHead className="w-[120px]">Ejecutor</TableHead>
+                        <TableHead>Pendiente</TableHead>
+                        {showEncargado && <TableHead className="w-[120px]">Encargado</TableHead>}
+                        {showEjecutor && <TableHead className="w-[120px]">Ejecutor</TableHead>}
                         <TableHead className="w-[180px]">Status</TableHead>
                         <TableHead className="w-[180px]">Próxima Grabación</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {data.map((pendiente) => {
-                        const isEncargado = currentUser.name === pendiente.encargado;
-                        const isAdmin = currentUser.role === 'admin';
-                        const canEdit = isAdmin || isEncargado;
-
-                        return (
-                            <TableRow key={pendiente.id}>
-                                <TableCell>
-                                    <Checkbox 
-                                        id={`pendiente-${pendiente.id}`} 
-                                        checked={pendiente.completed}
-                                        onCheckedChange={() => handleTogglePendiente(pendiente)}
-                                    />
-                                </TableCell>
-                                <TableCell className={cn(pendiente.completed && "line-through text-muted-foreground")}>
-                                    <EditablePendiente pendiente={pendiente} onUpdate={onUpdatePendienteText}/>
-                                </TableCell>
-                                <TableCell className="align-top">{pendiente.clienteName}</TableCell>
-                                <TableCell className="align-top">{pendiente.encargado}</TableCell>
-                                <TableCell className="align-top">{pendiente.ejecutor}</TableCell>
-                                <TableCell className="align-top">
-                                    <Select value={pendiente.status} onValueChange={(newStatus) => updatePendiente(pendiente.id, {status: newStatus}).then(onRefresh)}>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {Object.entries(statusColors).map(([status, color]) => (
-                                                <SelectItem key={status} value={status}>
-                                                    <Badge className={cn("text-white", color)}>{status}</Badge>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </TableCell>
-                                <TableCell className="align-top text-center">
-                                    <ScheduleRecordingDialog 
-                                        event={pendiente.recordingEvent}
-                                        pendienteId={pendiente.id}
-                                        clientName={pendiente.clienteName}
-                                        project={pendiente.pendientePrincipal}
-                                        assignedToName={pendiente.ejecutor}
-                                        onSave={onRefresh}
+                    {Object.entries(groupedData).map(([clienteName, pendientes]) => (
+                       <React.Fragment key={clienteName}>
+                            {pendientes.map((pendiente, index) => (
+                                <TableRow key={pendiente.id}>
+                                    <TableCell className="align-top font-medium">
+                                        {index === 0 ? clienteName : ''}
+                                    </TableCell>
+                                    <TableCell className={cn(pendiente.completed && "line-through text-muted-foreground")}>
+                                        <div className="flex items-start gap-2">
+                                            <Checkbox 
+                                                id={`pendiente-${pendiente.id}`} 
+                                                checked={pendiente.completed}
+                                                onCheckedChange={() => handleTogglePendiente(pendiente)}
+                                                className="mt-1"
+                                            />
+                                            <EditablePendiente pendiente={pendiente} onUpdate={onUpdatePendienteText}/>
+                                        </div>
+                                    </TableCell>
+                                    {showEncargado && <TableCell className="align-top">{pendiente.encargado}</TableCell>}
+                                    {showEjecutor && <TableCell className="align-top">{pendiente.ejecutor}</TableCell>}
+                                    <TableCell className="align-top">
+                                        <Select value={pendiente.status} onValueChange={(newStatus) => updatePendiente(pendiente.id, {status: newStatus}).then(onRefresh)}>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {Object.entries(statusColors).map(([status, color]) => (
+                                                    <SelectItem key={status} value={status}>
+                                                        <Badge className={cn("text-white", color)}>{status}</Badge>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </TableCell>
+                                    <TableCell className="align-top text-center">
+                                         <ScheduleRecordingDialog 
+                                            event={pendiente.recordingEvent}
+                                            pendienteId={pendiente.id}
+                                            clientName={pendiente.clienteName}
+                                            project={pendiente.pendientePrincipal}
+                                            assignedToName={pendiente.ejecutor}
+                                            onSave={onRefresh}
+                                        >
+                                            {pendiente.recordingEvent ? (
+                                                <Button variant="outline" size="sm" className="flex flex-col h-auto">
+                                                    <span className='font-bold'>{format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}</span>
+                                                    <span className='text-xs text-muted-foreground'>{format(new Date(pendiente.recordingEvent.fullStart), 'HH:mm')}</span>
+                                                </Button>
+                                            ) : (
+                                                <Button variant="secondary" size="sm">
+                                                    <CalendarIcon className='w-4 h-4 mr-2' />
+                                                    Agendar
+                                                </Button>
+                                            )}
+                                        </ScheduleRecordingDialog>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                             <TableRow>
+                                <TableCell colSpan={6} className="p-1 pl-4">
+                                     <AddPendienteDialog 
+                                        clients={clients} 
+                                        onAddPendiente={onRefresh} 
+                                        initialClient={clients.find(c => c.name === clienteName)}
+                                        initialCategory={categoria}
                                     >
-                                        {pendiente.recordingEvent ? (
-                                            <Button variant="outline" size="sm" className="flex flex-col h-auto">
-                                                <span className='font-bold'>{format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}</span>
-                                                <span className='text-xs text-muted-foreground'>{format(new Date(pendiente.recordingEvent.fullStart), 'HH:mm')}</span>
-                                            </Button>
-                                        ) : (
-                                            <Button variant="secondary" size="sm">
-                                                <CalendarIcon className='w-4 h-4 mr-2' />
-                                                Agendar
-                                            </Button>
-                                        )}
-                                    </ScheduleRecordingDialog>
+                                        <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground">
+                                            <Plus className="w-4 h-4 mr-2" />
+                                            Añadir pendiente
+                                        </Button>
+                                    </AddPendienteDialog>
                                 </TableCell>
                             </TableRow>
-                        )
-                    })}
+                       </React.Fragment>
+                    ))}
                 </TableBody>
             </Table>
         </div>
@@ -326,9 +362,9 @@ export default function PendientesPage() {
             toast({ title: "Error", description: "No se pudo actualizar el pendiente.", variant: "destructive" });
         }
     };
-
+    
     const encargados = useMemo(() => Array.from(new Set(teamMembers.map(m => m.name))).sort(), []);
-    const ejecutoresDisponibles = useMemo(() => Array.from(new Set(teamMembers.map(m => m.name))).sort(), []);
+    const ejecutores = useMemo(() => Array.from(new Set(teamMembers.map(m => m.name))).sort(), []);
 
 
     const filteredData = useMemo(() => {
@@ -363,7 +399,11 @@ export default function PendientesPage() {
         <div className='flex justify-between items-center mb-8'>
             <h1 className="text-3xl font-bold font-headline">Pendientes de Equipo</h1>
              {canAddPendiente && (
-                <AddPendienteDialog clients={clients} onAddPendiente={fetchData}>
+                 <AddPendienteDialog 
+                    clients={clients} 
+                    onAddPendiente={fetchData} 
+                    initialCategory={activeTab === 'contenido' ? 'Contenido' : activeTab === 'ads' ? 'Ads' : 'Web'}
+                >
                     <Button><PlusCircle className="w-4 h-4 mr-2" /> Añadir Pendiente Manual</Button>
                 </AddPendienteDialog>
             )}
@@ -392,11 +432,20 @@ export default function PendientesPage() {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="Todos">Todos los Ejecutores</SelectItem>
-                        {ejecutoresDisponibles.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
+                        {ejecutores.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
                     </SelectContent>
                 </Select>
             </CardContent>
         </Card>
+
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+            <span>Filtros:</span>
+            <span className="font-semibold text-foreground">{searchFilter || 'Todos'}</span>
+            <ChevronRight className="w-4 h-4" />
+            <span className="font-semibold text-foreground">{encargadoFilter}</span>
+            <ChevronRight className="w-4 h-4" />
+            <span className="font-semibold text-foreground">{ejecutorFilter}</span>
+        </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
@@ -418,6 +467,11 @@ export default function PendientesPage() {
                     currentUser={user} 
                     onRefresh={fetchData}
                     onUpdatePendienteText={handleUpdatePendienteText}
+                    showEncargado={encargadoFilter === 'Todos'}
+                    showEjecutor={ejecutorFilter === 'Todos'}
+                    onAddPendiente={fetchData}
+                    clients={clients}
+                    categoria="Contenido"
                 />
             </TabsContent>
 
@@ -428,6 +482,11 @@ export default function PendientesPage() {
                     currentUser={user} 
                     onRefresh={fetchData}
                     onUpdatePendienteText={handleUpdatePendienteText}
+                    showEncargado={encargadoFilter === 'Todos'}
+                    showEjecutor={ejecutorFilter === 'Todos'}
+                    onAddPendiente={fetchData}
+                    clients={clients}
+                    categoria="Ads"
                 />
             </TabsContent>
             
@@ -438,11 +497,14 @@ export default function PendientesPage() {
                     currentUser={user} 
                     onRefresh={fetchData}
                     onUpdatePendienteText={handleUpdatePendienteText}
+                    showEncargado={encargadoFilter === 'Todos'}
+                    showEjecutor={ejecutorFilter === 'Todos'}
+                    onAddPendiente={fetchData}
+                    clients={clients}
+                    categoria="Web"
                 />
             </TabsContent>
         </Tabs>
     </div>
   );
 }
-
-    
