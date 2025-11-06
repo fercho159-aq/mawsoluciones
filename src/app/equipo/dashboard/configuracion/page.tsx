@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { useAuth } from '@/lib/auth-provider';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -24,6 +23,7 @@ export default function ConfiguracionPage() {
     const [phone, setPhone] = useState('');
     const [birthday, setBirthday] = useState<Date | undefined>(undefined);
     const [avatarUrl, setAvatarUrl] = useState('');
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     useEffect(() => {
         if (user) {
@@ -35,15 +35,38 @@ export default function ConfiguracionPage() {
             }
         }
     }, [user]);
+    
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            if (file.size > 1024 * 1024) { // 1MB limit
+                 toast({
+                    title: "Error",
+                    description: "La imagen es demasiado grande. Asegúrate de que pese menos de 1MB.",
+                    variant: "destructive"
+                });
+                return;
+            }
+            setSelectedFile(file);
+            // Simulate URL creation for preview
+            setAvatarUrl(URL.createObjectURL(file));
+        }
+    }
+
 
     const handleSave = () => {
         if (!user) return;
         
+        // In a real app, you would upload `selectedFile` to a storage service (like Firebase Storage)
+        // and get a public URL to save in the database.
+        // For this simulation, we'll just use the object URL if a new file was selected,
+        // or keep the old one. This change will be temporary on the client-side.
+
         const updatedUserData = {
             ...user,
             name: name,
             phone: phone,
-            avatarUrl: avatarUrl,
+            avatarUrl: avatarUrl, // This will be a blob URL if a new file is selected.
             birthday: birthday ? birthday.toISOString() : undefined,
         };
 
@@ -73,14 +96,15 @@ export default function ConfiguracionPage() {
                             <AvatarFallback>{user.name?.charAt(0).toUpperCase()}</AvatarFallback>
                         </Avatar>
                         <div className='flex-grow space-y-2'>
-                           <Label htmlFor="avatarUrl">URL de la Foto de Perfil</Label>
-                           <Input 
-                            id="avatarUrl"
-                            placeholder="https://ejemplo.com/foto.jpg"
-                            value={avatarUrl}
-                            onChange={(e) => setAvatarUrl(e.target.value)}
-                           />
-                           <p className="text-xs text-muted-foreground">Pega la URL de una imagen. Asegúrate de que pese menos de 1MB.</p>
+                           <Label htmlFor="avatarFile">Foto de Perfil</Label>
+                            <Input
+                                id="avatarFile"
+                                type="file"
+                                accept="image/png, image/jpeg, image/gif"
+                                onChange={handleFileChange}
+                                className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                            />
+                           <p className="text-xs text-muted-foreground">Sube una imagen desde tu PC. Límite de 1MB.</p>
                         </div>
                     </div>
 
