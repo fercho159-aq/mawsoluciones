@@ -39,6 +39,115 @@ const statusColors: Record<string, string> = {
   "Resuelto": "bg-gray-500"
 };
 
+const AddPendienteDialog = ({ clients, onAdd, children }: { clients: Client[], onAdd: (data: Omit<PendienteMaw, 'id' | 'createdAt'>) => void, children: React.ReactNode }) => {
+    const [open, setOpen] = useState(false);
+    const { toast } = useToast();
+
+    const [clientId, setClientId] = useState<string>('');
+    const [encargado, setEncargado] = useState<string>('');
+    const [ejecutor, setEjecutor] = useState<string>('');
+    const [categoria, setCategoria] = useState<string>('');
+    const [pendientePrincipal, setPendientePrincipal] = useState<string>('');
+    const [status, setStatus] = useState<string>('Trabajando');
+
+    const resetForm = () => {
+        setClientId('');
+        setEncargado('');
+        setEjecutor('');
+        setCategoria('');
+        setPendientePrincipal('');
+        setStatus('Trabajando');
+    }
+
+    const handleSave = () => {
+        const client = clients.find(c => c.id === parseInt(clientId));
+        if (!client || !encargado || !ejecutor || !categoria || !pendientePrincipal) {
+            toast({ title: "Error", description: "Todos los campos son obligatorios.", variant: "destructive" });
+            return;
+        }
+
+        onAdd({
+            clientId: client.id,
+            clienteName: client.name,
+            encargado,
+            ejecutor,
+            categoria,
+            pendientePrincipal,
+            status,
+            completed: false,
+        });
+
+        toast({ title: "Éxito", description: "Pendiente añadido correctamente." });
+        resetForm();
+        setOpen(false);
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>{children}</DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader><DialogTitle>Añadir Pendiente Manual</DialogTitle></DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="space-y-2">
+                        <Label>Cliente</Label>
+                        <Select value={clientId} onValueChange={setClientId}>
+                            <SelectTrigger><SelectValue placeholder="Seleccionar cliente" /></SelectTrigger>
+                            <SelectContent>
+                                {clients.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                     <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label>Encargado</Label>
+                            <Select value={encargado} onValueChange={setEncargado}>
+                                <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+                                <SelectContent>{teamMembers.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
+                            </Select>
+                        </div>
+                         <div className="space-y-2">
+                            <Label>Ejecutor</Label>
+                            <Select value={ejecutor} onValueChange={setEjecutor}>
+                                <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+                                <SelectContent>{teamMembers.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                     <div className="space-y-2">
+                        <Label>Categoría</Label>
+                        <Select value={categoria} onValueChange={setCategoria}>
+                            <SelectTrigger><SelectValue placeholder="Seleccionar categoría" /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Contenido">Contenido</SelectItem>
+                                <SelectItem value="Ads">Ads</SelectItem>
+                                <SelectItem value="Web">Web</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Pendiente</Label>
+                        <Textarea value={pendientePrincipal} onChange={e => setPendientePrincipal(e.target.value)} placeholder="Descripción del pendiente..." />
+                    </div>
+                     <div className="space-y-2">
+                        <Label>Status</Label>
+                        <Select value={status} onValueChange={setStatus}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                               {Object.keys(statusColors).map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => { setOpen(false); resetForm(); }}>Cancelar</Button>
+                    <Button onClick={handleSave}>Guardar Pendiente</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+
 export type PendienteWithRelations = PendienteMaw & { recordingEvent?: RecordingEvent | null };
 
 const EditablePendiente = ({ pendiente, onUpdate }: { pendiente: PendienteWithRelations, onUpdate: (id: number, text: string) => void }) => {
@@ -429,7 +538,9 @@ export default function PendientesPage() {
         <div className='flex justify-between items-center mb-8'>
             <h1 className="text-3xl font-bold font-headline">Pendientes de Equipo</h1>
              {canAddPendiente && (
-                 <Button disabled><PlusCircle className="w-4 h-4 mr-2" /> Añadir Pendiente Manual</Button>
+                <AddPendienteDialog clients={clients} onAdd={addPendiente}>
+                    <Button><PlusCircle className="w-4 h-4 mr-2" /> Añadir Pendiente Manual</Button>
+                </AddPendienteDialog>
             )}
         </div>
         
@@ -526,3 +637,4 @@ export default function PendientesPage() {
     </div>
   );
 }
+
