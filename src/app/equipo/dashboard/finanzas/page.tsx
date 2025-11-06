@@ -28,7 +28,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format, startOfMonth, endOfMonth, isWithinInterval, parse, addMonths, getDaysInMonth, parseISO, subMonths, setDate } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useAuth } from '@/lib/auth-provider';
-import type { CategoriaIngreso, Cuenta, Periodo } from '@/lib/finanzas-data';
+import type { CategoriaIngreso, Cuenta } from '@/lib/finanzas-data';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { getClients as fetchClientsDB, type Client } from '../clientes/_actions';
 import { ClientFormDialog } from '../clientes/page';
@@ -44,25 +44,21 @@ const generatePeriodOptions = () => {
     const today = new Date();
     const options: { value: string, label: string }[] = [];
     
-    // Previous 15th
     let past15 = setDate(today, 15);
     if (today.getDate() <= 15) {
       past15 = subMonths(past15, 1);
     }
     options.push({ value: past15.toISOString(), label: `Pasado día 15 (${format(past15, 'd MMM', { locale: es })})` });
     
-    // Previous 30th (end of month)
     let past30 = endOfMonth(subMonths(today, 1));
     options.push({ value: past30.toISOString(), label: `Pasado día 30 (${format(past30, 'd MMM', { locale: es })})` });
 
-    // Next 15th
     let next15 = setDate(today, 15);
     if (today.getDate() > 15) {
       next15 = addMonths(next15, 1);
     }
      options.push({ value: next15.toISOString(), label: `Próximo día 15 (${format(next15, 'd MMM', { locale: es })})` });
 
-    // Next 30th (end of month)
     let next30 = endOfMonth(today);
     if (new Date().getDate() > endOfMonth(new Date()).getDate() - 5 ) {
         next30 = endOfMonth(addMonths(today,1));
@@ -73,7 +69,7 @@ const generatePeriodOptions = () => {
 };
 
 
-const getNextPeriod = (periodo: string): Periodo => {
+const getNextPeriod = (periodo: string) => {
     try {
         const [startStr] = periodo.split(' - ');
         const startDate = parse(startStr, 'd MMM', new Date(), { locale: es });
@@ -138,20 +134,17 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt, onCli
                 return;
             }
             finalBillingDateLabel = format(customDate, "d 'de' MMMM, yyyy", {locale: es});
-        } else {
+        } else if (billingDate) {
              const selectedOption = periodOptions.find(p => p.value === billingDate);
              if (selectedOption) {
                  finalBillingDateLabel = selectedOption.label;
-             } else if (isEditing && billingDate) {
+             } else if (isEditing) {
                  finalBillingDateLabel = billingDate; // Keep existing label on edit
-             } else {
-                 toast({ title: "Error", description: "Por favor, selecciona una fecha de cobro válida.", variant: "destructive" });
-                 return;
              }
         }
         
-        if (!clienteId || !monto) {
-            toast({ title: "Error", description: "Cliente y monto son obligatorios.", variant: "destructive" });
+        if (!clienteId || !monto || !finalBillingDateLabel) {
+            toast({ title: "Error", description: "Cliente, monto y fecha de cobro son obligatorios.", variant: "destructive" });
             return;
         }
 
@@ -775,6 +768,7 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
 
 
 
