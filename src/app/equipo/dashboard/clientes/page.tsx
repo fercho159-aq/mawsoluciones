@@ -18,7 +18,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/auth-provider';
-import { initialCuentasPorCobrar, type CuentasPorCobrar } from '@/lib/finanzas-data';
 import { useRouter } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -30,7 +29,7 @@ import { addClient, updateClient, getClients } from './_actions';
 
 
 const contenidoTeam: TeamMember[] = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel'].includes(m.name));
-const adsTeam: TeamMember[] = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel', 'Bere'].includes(m.name));
+const adsTeam: TeamMember[] = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel'].includes(m.name));
 const webTeam: TeamMember[] = teamMembers.filter(m => ['Julio', 'Fernando', 'Alexis'].includes(m.name));
 
 
@@ -93,7 +92,7 @@ const ClientFormDialog = ({ client, children, isEditing, onSave }: { client?: Cl
             if (isEditing && client?.id) {
                 await updateClient(client.id, clientData);
             } else {
-                await addClient(clientData);
+                await addClient({...clientData, responsables});
             }
             startTransition(() => {
                 onSave();
@@ -188,8 +187,9 @@ export default function ClientesPage() {
     const { user, loading } = useAuth();
     
     const [clients, setClients] = useState<Client[]>([]);
-    const [cuentasPorCobrar, setCuentasPorCobrar] = useState<CuentasPorCobrar[]>(initialCuentasPorCobrar);
+    const [cuentasPorCobrar, setCuentasPorCobrar] = useState<any[]>([]);
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const router = useRouter();
 
     const fetchClients = async () => {
@@ -204,6 +204,7 @@ export default function ClientesPage() {
     const handleRowClick = (client: Client) => {
         if(user?.permissions?.clientes?.editarClientes) {
             setSelectedClient(client);
+            setIsEditModalOpen(true);
         }
     };
 
@@ -211,8 +212,9 @@ export default function ClientesPage() {
         const balances: Record<number, number> = {};
         clients.forEach(c => balances[c.id] = 0);
         cuentasPorCobrar.forEach(cpc => {
-            // Note: This logic might need adjustment if client IDs from DB are not compatible with mock data
-            // For now, we assume it won't match and balances will be 0.
+            if (balances[cpc.clienteId] !== undefined) {
+               balances[cpc.clienteId] += cpc.monto;
+            }
         });
         return balances;
     }, [clients, cuentasPorCobrar]);
@@ -283,8 +285,8 @@ export default function ClientesPage() {
                                             </div>
                                         </TableCell>
                                         { (user?.permissions?.clientes?.verSaldo) && (
-                                            <TableCell className={cn("text-right font-bold", clientBalances[client.id] > 0 ? "text-destructive" : "text-green-500")}>
-                                                {clientBalances[client.id]?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) || '$0.00'}
+                                            <TableCell className={cn("text-right font-bold", (clientBalances[client.id] || 0) > 0 ? "text-destructive" : "text-green-500")}>
+                                                {(clientBalances[client.id] || 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
                                             </TableCell>
                                         )}
                                     </TableRow>
@@ -295,21 +297,13 @@ export default function ClientesPage() {
                 </CardContent>
             </Card>
 
-             <ClientFormDialog client={selectedClient!} onSave={() => { fetchClients(); setSelectedClient(null); }} isEditing={true}>
-                <div style={{ display: selectedClient ? 'block' : 'none' }}>
-                    <Dialog open={!!selectedClient} onOpenChange={(open) => !open && setSelectedClient(null)} />
+             <ClientFormDialog client={selectedClient!} onSave={() => { fetchClients(); setSelectedClient(null); setIsEditModalOpen(false); }} isEditing={true}>
+                <div style={{ display: isEditModalOpen ? 'block' : 'none' }}>
+                    <Dialog open={isEditModalOpen} onOpenChange={(open) => { if(!open) { setSelectedClient(null); setIsEditModalOpen(false); }}} />
                 </div>
              </ClientFormDialog>
         </div>
     );
 }
 
-export interface Client {
-  id: number;
-  name: string;
-  representativeName: string;
-  whatsapp: string;
-  email: string | null;
-  managedAreas: string[] | null;
-  createdAt: Date | null;
-}
+export type { Client };
