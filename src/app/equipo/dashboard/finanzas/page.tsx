@@ -40,35 +40,6 @@ import { Calendar } from '@/components/ui/calendar';
 
 
 // --- Helper Functions ---
-const generatePeriodOptions = () => {
-    const today = new Date();
-    const options: { value: string, label: string }[] = [];
-    
-    let past15 = setDate(today, 15);
-    if (today.getDate() <= 15) {
-      past15 = subMonths(past15, 1);
-    }
-    options.push({ value: past15.toISOString(), label: `Pasado día 15 (${format(past15, 'd MMM', { locale: es })})` });
-    
-    let past30 = endOfMonth(subMonths(today, 1));
-    options.push({ value: past30.toISOString(), label: `Pasado día 30 (${format(past30, 'd MMM', { locale: es })})` });
-
-    let next15 = setDate(today, 15);
-    if (today.getDate() > 15) {
-      next15 = addMonths(next15, 1);
-    }
-     options.push({ value: next15.toISOString(), label: `Próximo día 15 (${format(next15, 'd MMM', { locale: es })})` });
-
-    let next30 = endOfMonth(today);
-    if (new Date().getDate() > endOfMonth(new Date()).getDate() - 5 ) {
-        next30 = endOfMonth(addMonths(today,1));
-    }
-    options.push({ value: next30.toISOString(), label: `Próximo día 30 (${format(next30, 'd MMM', { locale: es })})` });
-
-    return options.sort((a,b) => new Date(a.value).getTime() - new Date(b.value).getTime());
-};
-
-
 const getNextPeriod = (periodo: string) => {
     try {
         const [startStr] = periodo.split(' - ');
@@ -89,15 +60,11 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt, onCli
     const { toast } = useToast();
     
     const [clienteId, setClienteId] = useState('');
-    const [billingDate, setBillingDate] = useState<string>('');
     const [monto, setMonto] = useState('');
     const [tipo, setTipo] = useState<CategoriaIngreso>('Iguala Mensual');
     const [requiresInvoice, setRequiresInvoice] = useState(false);
-    const [customDate, setCustomDate] = useState<Date | undefined>();
-    const [billingDay, setBillingDay] = useState<'15' | '30' | ''>('');
 
     const isEditing = !!cpc;
-    const periodOptions = useMemo(generatePeriodOptions, []);
 
      useEffect(() => {
         if (open) {
@@ -107,8 +74,6 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt, onCli
                 setClienteId(cpc.clienteId.toString());
                 setMonto((clientProfile?.defaultInvoice ? cpc.monto / 1.16 : cpc.monto).toFixed(2));
                 setTipo(cpc.tipo as CategoriaIngreso);
-                setBillingDate(cpc.periodo); 
-                setBillingDay(clientProfile?.billingDay?.toString() as any || '');
                 setRequiresInvoice(clientProfile?.defaultInvoice || false);
             } else {
                 resetForm();
@@ -118,7 +83,7 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt, onCli
 
 
     const resetForm = () => {
-        setClienteId(''); setBillingDate(''); setMonto(''); setTipo('Iguala Mensual'); setRequiresInvoice(false); setCustomDate(undefined); setBillingDay('');
+        setClienteId(''); setMonto(''); setTipo('Iguala Mensual'); setRequiresInvoice(false);
     }
 
     const totalAmount = useMemo(() => {
@@ -127,24 +92,8 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt, onCli
     }, [monto, requiresInvoice]);
 
     const handleSave = async () => {
-        let finalBillingDateLabel = '';
-        if (billingDate === 'other') {
-             if (!customDate) {
-                 toast({ title: "Error", description: "Por favor, selecciona una fecha personalizada.", variant: "destructive" });
-                return;
-            }
-            finalBillingDateLabel = format(customDate, "d 'de' MMMM, yyyy", {locale: es});
-        } else if (billingDate) {
-             const selectedOption = periodOptions.find(p => p.value === billingDate);
-             if (selectedOption) {
-                 finalBillingDateLabel = selectedOption.label;
-             } else if (isEditing) {
-                 finalBillingDateLabel = billingDate; // Keep existing label on edit
-             }
-        }
-        
-        if (!clienteId || !monto || !finalBillingDateLabel) {
-            toast({ title: "Error", description: "Cliente, monto y fecha de cobro son obligatorios.", variant: "destructive" });
+        if (!clienteId || !monto) {
+            toast({ title: "Error", description: "Cliente y monto son obligatorios.", variant: "destructive" });
             return;
         }
 
@@ -154,7 +103,7 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt, onCli
         const data: Omit<NewCuentaPorCobrar, 'id'> = { 
             clienteId: cliente.id, 
             clienteName: cliente.name, 
-            periodo: finalBillingDateLabel, 
+            periodo: "Periodo pendiente", 
             monto: totalAmount, 
             tipo 
         };
@@ -196,39 +145,7 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt, onCli
                             </AlertDescription>
                         </Alert>
                     </div>
-                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label>Fecha de Corte</Label>
-                            <Select value={billingDay} onValueChange={v => setBillingDay(v as any)}>
-                                <SelectTrigger><SelectValue placeholder="Día"/></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="15">Día 15</SelectItem>
-                                    <SelectItem value="30">Día 30</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Fecha de Cobro</Label>
-                            <Select value={billingDate} onValueChange={setBillingDate}>
-                                <SelectTrigger><SelectValue placeholder="Seleccionar Fecha"/></SelectTrigger>
-                                <SelectContent>
-                                    {periodOptions.map(({value, label}) => <SelectItem key={value} value={value}>{label}</SelectItem>)}
-                                    <SelectItem value="other">Otra fecha</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-                    {billingDate === 'other' && (
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !customDate && "text-muted-foreground")}>
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {customDate ? format(customDate, "PPP", { locale: es }) : <span>Elige una fecha</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={customDate} onSelect={setCustomDate} initialFocus /></PopoverContent>
-                        </Popover>
-                    )}
+                    
                     <div className="space-y-2">
                         <Label>Tipo de Servicio</Label>
                         <Select value={tipo} onValueChange={(v) => setTipo(v as CategoriaIngreso)}>
@@ -768,10 +685,4 @@ export default function FinanzasPage() {
         </div>
     );
 }
-
-
-
-
-
-
 
