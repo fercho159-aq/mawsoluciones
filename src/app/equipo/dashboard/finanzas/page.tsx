@@ -28,7 +28,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format, startOfMonth, endOfMonth, isWithinInterval, parse, addMonths, getDaysInMonth, parseISO, subMonths, setDate } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useAuth } from '@/lib/auth-provider';
-import type { CategoriaIngreso, CategoriaGasto, Cuenta, Periodo } from '@/lib/finanzas-data';
+import type { CategoriaIngreso, Cuenta, Periodo } from '@/lib/finanzas-data';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { getClients, type Client } from '../clientes/page';
 import { ClientFormDialog } from '../clientes/page';
@@ -774,6 +774,7 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
 
 
 
