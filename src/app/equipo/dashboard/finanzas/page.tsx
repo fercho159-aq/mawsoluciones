@@ -296,7 +296,7 @@ const CuentasPorCobrarTab = ({ data, clients, onSave, onClientAdd }: { data: Cue
                         </SelectContent>
                     </Select>
                     <AddCpcDialog clients={clients} onSave={onSave} onClientAdd={onClientAdd}>
-                        <Button><PlusCircle className="w-4 h-4 mr-2" />Añadir Pago</Button>
+                        <Button><PlusCircle className="w-4 h-4 mr-2" />Añadir Cuenta por Cobrar</Button>
                     </AddCpcDialog>
                  </div>
             </CardHeader>
@@ -650,5 +650,6 @@ export default function FinanzasPage() {
     
 
     
+
 
 
