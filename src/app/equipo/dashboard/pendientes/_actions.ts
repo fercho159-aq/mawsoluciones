@@ -2,8 +2,8 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { pendientes, subTasks } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { pendientes, subTasks, recordingEvents, NewRecordingEvent } from "@/lib/db/schema";
+import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function getPendientes() {
@@ -11,6 +11,7 @@ export async function getPendientes() {
         const allPendientes = await db.query.pendientes.findMany({
             with: {
                 subTasks: true,
+                recordingEvent: true
             },
         });
         return allPendientes;
@@ -62,4 +63,46 @@ export async function toggleSubTask(id: number, completed: boolean) {
         throw new Error("Could not toggle subtask");
     }
 }
-    
+
+export async function scheduleRecording(data: Omit<NewRecordingEvent, 'id'>) {
+    try {
+        // Check if an event for this pendiente already exists
+        const existingEvent = await db.query.recordingEvents.findFirst({
+            where: eq(recordingEvents.pendienteId, data.pendienteId)
+        });
+
+        if (existingEvent) {
+            // Update
+            await db.update(recordingEvents).set(data).where(eq(recordingEvents.id, existingEvent.id));
+        } else {
+            // Insert
+            await db.insert(recordingEvents).values(data);
+        }
+        revalidatePath("/equipo/dashboard/pendientes");
+        revalidatePath("/equipo/dashboard/calendario");
+    } catch (error) {
+        console.error("Error scheduling recording:", error);
+        throw new Error("Could not schedule recording");
+    }
+}
+
+export async function deleteRecording(pendienteId: number) {
+    try {
+        await db.delete(recordingEvents).where(eq(recordingEvents.pendienteId, pendienteId));
+        revalidatePath("/equipo/dashboard/pendientes");
+        revalidatePath("/equipo/dashboard/calendario");
+    } catch (error) {
+        console.error("Error deleting recording:", error);
+        throw new Error("Could not delete recording");
+    }
+}
+
+export async function getRecordingEvents() {
+    try {
+        const events = await db.query.recordingEvents.findMany();
+        return events;
+    } catch (error) {
+        console.error("Error fetching recording events:", error);
+        return [];
+    }
+}

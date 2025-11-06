@@ -12,6 +12,7 @@ export const clients = pgTable('clients', {
 });
 
 export type Client = typeof clients.$inferSelect;
+export type NewClient = typeof clients.$inferInsert;
 
 export const prospects = pgTable('prospects', {
   id: serial('id').primaryKey(),
@@ -36,8 +37,12 @@ export const pendientes = pgTable('pendientes', {
     createdAt: timestamp('created_at').defaultNow(),
 });
 
-export const pendientesRelations = relations(pendientes, ({ many }) => ({
+export const pendientesRelations = relations(pendientes, ({ many, one }) => ({
 	subTasks: many(subTasks),
+    recordingEvent: one(recordingEvents, {
+        fields: [pendientes.id],
+        references: [recordingEvents.pendienteId],
+    })
 }));
 
 
@@ -90,5 +95,29 @@ export const movimientosDiarios = pgTable('movimientos_diarios', {
 export type MovimientoDiario = typeof movimientosDiarios.$inferSelect;
 export type NewMovimientoDiario = typeof movimientosDiarios.$inferInsert;
 
+export const recordingEvents = pgTable('recording_events', {
+    id: serial('id').primaryKey(),
+    clientName: varchar('client_name', { length: 255 }).notNull(),
+    assignedTo: varchar('assigned_to', { length: 100 }).notNull(),
+    assignedToName: varchar('assigned_to_name', { length: 100 }).notNull(),
+    fullStart: timestamp('full_start').notNull(),
+    fullEnd: timestamp('full_end').notNull(),
+    location: varchar('location', { length: 255 }),
+    locationType: varchar('location_type', { length: 50 }),
+    project: text('project'),
+    assignedEquipment: jsonb('assigned_equipment').$type<string[]>(),
+    equipmentNames: jsonb('equipment_names').$type<string[]>(),
+    pendienteId: integer('pendiente_id').notNull().references(() => pendientes.id, { onDelete: 'cascade' }),
+});
+
+export const recordingEventsRelations = relations(recordingEvents, ({ one }) => ({
+	pendiente: one(pendientes, {
+		fields: [recordingEvents.pendienteId],
+		references: [pendientes.id],
+	}),
+}));
+
 export type Pendiente = typeof pendientes.$inferSelect;
 export type SubTask = typeof subTasks.$inferSelect;
+export type RecordingEvent = typeof recordingEvents.$inferSelect;
+export type NewRecordingEvent = typeof recordingEvents.$inferInsert;
