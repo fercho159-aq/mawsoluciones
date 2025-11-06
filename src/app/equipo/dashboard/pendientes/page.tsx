@@ -203,7 +203,6 @@ export default function PendientesPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [encargadoFilter, setEncargadoFilter] = useState('Todos');
     const [ejecutorFilter, setEjecutorFilter] = useState('Todos');
-    const [statusFilter, setStatusFilter] = useState('Todos');
     const [searchFilter, setSearchFilter] = useState('');
 
     const [activeTab, setActiveTab] = useState('contenido');
@@ -245,17 +244,15 @@ export default function PendientesPage() {
 
     const encargados = useMemo(() => Array.from(new Set(pendientes.map(item => item.encargado))).sort(), [pendientes]);
     const ejecutoresDisponibles = useMemo(() => Array.from(new Set(pendientes.map(item => item.ejecutor))).sort(), [pendientes]);
-    const statuses = useMemo(() => Array.from(new Set(pendientes.map(item => item.status))), [pendientes]);
 
     const filteredData = useMemo(() => {
         return pendientes.filter(item => {
             const encargadoMatch = encargadoFilter === 'Todos' || item.encargado === encargadoFilter;
             const ejecutorMatch = ejecutorFilter === 'Todos' || item.ejecutor === ejecutorFilter;
-            const statusMatch = statusFilter === 'Todos' || item.status === statusFilter;
             const searchMatch = searchFilter === '' || item.cliente.toLowerCase().includes(searchFilter.toLowerCase()) || item.pendientePrincipal.toLowerCase().includes(searchFilter.toLowerCase());
-            return encargadoMatch && ejecutorMatch && statusMatch && searchMatch;
+            return encargadoMatch && ejecutorMatch && searchMatch;
         });
-    }, [encargadoFilter, ejecutorFilter, statusFilter, searchFilter, pendientes]);
+    }, [encargadoFilter, ejecutorFilter, searchFilter, pendientes]);
     
     const canAddPendiente = user?.role === 'admin' || user?.permissions?.pendientes?.reasignarResponsables;
 
@@ -322,15 +319,6 @@ export default function PendientesPage() {
                     <SelectContent>
                         <SelectItem value="Todos">Todos los Ejecutores</SelectItem>
                         {ejecutoresDisponibles.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
-                    </SelectContent>
-                </Select>
-                <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setHighlightedTab(null); }}>
-                    <SelectTrigger className="w-full md:w-[180px]">
-                        <SelectValue placeholder="Filtrar por Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="Todos">Todos los Status</SelectItem>
-                        {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                     </SelectContent>
                 </Select>
             </CardContent>
@@ -460,3 +448,5 @@ const AddPendienteDialog = ({ clients, onAddPendiente }: { clients: Client[], on
         </Dialog>
     )
 }
+
+    
