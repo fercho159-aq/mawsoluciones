@@ -129,6 +129,20 @@ export const recordingEventsRelations = relations(recordingEvents, ({ one }) => 
 	}),
 }));
 
+export const leads = pgTable('leads', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 255 }),
+  company: varchar('company', { length: 255 }),
+  phone: varchar('phone', { length: 50 }),
+  email: varchar('email', { length: 255 }),
+  source: varchar('source', { length: 100 }).notNull(),
+  data: jsonb('data'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export type Lead = typeof leads.$inferSelect;
+export type NewLead = typeof leads.$inferInsert;
+
 export type Pendiente = typeof pendientes.$inferSelect;
 export type SubTask = typeof subTasks.$inferSelect;
 export type RecordingEvent = typeof recordingEvents.$inferSelect;

@@ -15,6 +15,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, ArrowRight, Bot, Target, Users, Camera, Clock, Calendar, BarChart, FileText, BadgeInfo } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import WhatsappIcon from './icons/whatsapp-icon';
+import { addLead } from '@/app/leads/_actions';
 
 // DATA FROM USER PLAN
 const girosNegocioContenido = [ "Restaurante/Gastronomía", "Servicios Profesionales", "Retail/Ropa/Moda", "Salud/Medicina/Bienestar", "Bienes Raíces/Inmobiliario", "Educación/Cursos", "Entretenimiento/Eventos", "Turismo/Hospitalidad", "Automotriz", "Tecnología/Software", "Construcción/Industrial", "Beauty/Cosméticos", "Otro" ];
@@ -142,16 +143,13 @@ ${recomendacionTexto}
     const whatsappUrl = `https://wa.me/5542314150?text=${encodeURIComponent(message.trim())}`;
     window.open(whatsappUrl, '_blank');
     
-    // Add to sales pipeline
-    const newLeads = JSON.parse(localStorage.getItem('newLeads') || '[]');
-    const newLead = {
-      cliente: formData.companyName || 'Lead de Recomendador Contenido',
-      origen: 'Sitio Web',
-      telefono: whatsappNumber,
-      email: '' // Not collected
-    };
-    newLeads.push(newLead);
-    localStorage.setItem('newLeads', JSON.stringify(newLeads));
+    addLead({
+        name: formData.personName,
+        company: formData.companyName,
+        phone: whatsappNumber,
+        source: 'Content Recommender',
+        data: formData
+    });
 
     setIsResultModalOpen(false);
     setShowResults(true);
@@ -246,7 +244,7 @@ ${recomendacionTexto}
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}
             >
                 <div className="text-center">
-                    <h3 className="text-xl font-semibold">¡Hola, ${formData.personName} de ${formData.companyName}!</h3>
+                    <h3 className="text-xl font-semibold">¡Hola, {formData.personName} de {formData.companyName}!</h3>
                     <p className="text-muted-foreground">Gracias a tu información, aquí tienes tu estrategia de contenido inicial.</p>
                 </div>
                 <Card>
@@ -254,9 +252,9 @@ ${recomendacionTexto}
                         <CardTitle className='flex items-center gap-2'><BadgeInfo className="w-5 h-5 text-primary"/> Resumen de tu Estrategia</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2 text-sm">
-                        <p><strong className="text-primary">Objetivo Principal:</strong> ${formData.objetivo}</p>
-                        <p><strong className="text-primary">Público Objetivo:</strong> ${formData.publico}</p>
-                        <p><strong className="text-primary">Consejo Estratégico:</strong> ${recomendacion.consejoPrincipal}</p>
+                        <p><strong className="text-primary">Objetivo Principal:</strong> {formData.objetivo}</p>
+                        <p><strong className="text-primary">Público Objetivo:</strong> {formData.publico}</p>
+                        <p><strong className="text-primary">Consejo Estratégico:</strong> {recomendacion.consejoPrincipal}</p>
                     </CardContent>
                 </Card>
 
@@ -270,9 +268,9 @@ ${recomendacionTexto}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-2 text-sm text-foreground/80">
-                                <p><strong className='text-foreground'>Frecuencia:</strong> ${recomendacion.frecuencia[p as keyof typeof recomendacion.frecuencia]}</p>
-                                <p><strong className='text-foreground'>Contenido:</strong> ${(recomendacion.tipoContenido[p as keyof typeof recomendacion.tipoContenido] as string[]).slice(0, 2).join(', ')}...</p>
-                                <p><strong className='text-foreground'>Horarios:</strong> ${recomendacion.mejoresHorarios[p as keyof typeof recomendacion.mejoresHorarios]}</p>
+                                <p><strong className='text-foreground'>Frecuencia:</strong> {recomendacion.frecuencia[p as keyof typeof recomendacion.frecuencia]}</p>
+                                <p><strong className='text-foreground'>Contenido:</strong> {(recomendacion.tipoContenido[p as keyof typeof recomendacion.tipoContenido] as string[]).slice(0, 2).join(', ')}...</p>
+                                <p><strong className='text-foreground'>Horarios:</strong> {recomendacion.mejoresHorarios[p as keyof typeof recomendacion.mejoresHorarios]}</p>
                             </CardContent>
                         </Card>
                     ))}

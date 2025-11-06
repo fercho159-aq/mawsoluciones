@@ -15,6 +15,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import WhatsappIcon from './icons/whatsapp-icon';
 import { cn } from '@/lib/utils';
 import { Checkbox } from './ui/checkbox';
+import { addLead } from '@/app/leads/_actions';
 
 const webGoals = [
     { id: 'ecommerce', label: 'Vender productos directamente', icon: <ShoppingCart />, recommendation: 'Sitio E-commerce' },
@@ -136,6 +137,15 @@ ${inspirationText}
     `.trim().replace(/\n\s*\n/g, '\n'); // Remove empty lines
     const whatsappUrl = `https://wa.me/5542314150?text=${encodeURIComponent(message.trim())}`;
     window.open(whatsappUrl, '_blank');
+
+    addLead({
+      name: formData.personName,
+      company: formData.companyName,
+      phone: whatsappNumber,
+      source: 'Web Calculator',
+      data: formData
+    });
+
     setIsResultModalOpen(false);
     setShowResults(true);
     setCurrentStep(steps.length);

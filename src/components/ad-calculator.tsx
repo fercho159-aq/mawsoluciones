@@ -16,6 +16,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, ArrowRight, BarChart, Users, AlertTriangle, MessageSquare, Building2, TrendingUp, Megaphone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import WhatsappIcon from './icons/whatsapp-icon';
+import { addLead } from '@/app/leads/_actions';
 
 // Data from the user's plan
 const girosNegocio = ["Restaurante", "Servicios Profesionales", "Retail/Ropa", "Salud/Medicina", "Bienes Raíces", "Educación", "Entretenimiento", "Turismo", "Automotriz", "Tecnología", "Otro"];
@@ -205,16 +206,13 @@ const AdCalculator = () => {
     const whatsappUrl = `https://wa.me/5542314150?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
     
-    // Add to sales pipeline
-    const newLeads = JSON.parse(localStorage.getItem('newLeads') || '[]');
-    const newLead = {
-      cliente: formData.companyName || 'Lead de Calculadora Ads',
-      origen: 'Sitio Web',
-      telefono: whatsappNumber,
-      email: '' // Not collected in this form
-    };
-    newLeads.push(newLead);
-    localStorage.setItem('newLeads', JSON.stringify(newLeads));
+    addLead({
+        name: formData.personName,
+        company: formData.companyName,
+        phone: whatsappNumber,
+        source: 'Ad Calculator',
+        data: formData
+    });
 
     setIsResultModalOpen(false);
     setShowResults(true); // Show results after sending
@@ -388,7 +386,7 @@ const AdCalculator = () => {
                 transition={{ duration: 0.5 }}
             >
                 <div className="text-center">
-                    <h3 className="text-xl font-semibold">¡Hola, ${formData.personName} de ${formData.companyName}!</h3>
+                    <h3 className="text-xl font-semibold">¡Hola, {formData.personName} de {formData.companyName}!</h3>
                     <p className="text-muted-foreground">Gracias a tu información, aquí tienes tu estimación personalizada.</p>
                 </div>
                 <Card>
@@ -417,7 +415,7 @@ const AdCalculator = () => {
                     <CardTitle>Recomendaciones Personalizadas</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4 text-sm">
-                    <p>Para un negocio de <strong>${formData.giro}</strong> como el tuyo, las plataformas que elegiste son una excelente opción. Aquí te explicamos por qué:</p>
+                    <p>Para un negocio de <strong>{formData.giro}</strong> como el tuyo, las plataformas que elegiste son una excelente opción. Aquí te explicamos por qué:</p>
                         <ul className="list-disc list-inside space-y-2 text-foreground/80">
                         {formData.plataformas.map(p => (
                             <li key={p}><strong>{p}:</strong> {advantages[p] || platformAdvantages['Default'][p]}</li>

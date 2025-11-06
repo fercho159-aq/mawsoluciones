@@ -14,6 +14,7 @@ import { Slider } from "@/components/ui/slider";
 import { ArrowLeft, ArrowRight, Bot, Calendar, ChevronRight, Clock, Mail, MessageCircle, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import WhatsappIcon from './icons/whatsapp-icon';
+import { addLead } from '@/app/leads/_actions';
 
 const girosNegocio = [
   "Restaurante", "Servicios Profesionales", "Retail/Ropa", "Salud/Medicina", 
@@ -110,25 +111,22 @@ ${selectedGoalsText}
 *Ahorro de tiempo estimado:* ${estimatedHoursSaved} horas/mes
 \n*Mi número es:* ${whatsappNumber}
     `.trim();
-    const whatsappUrl = `https://wa.me/5542314150?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/5542314150?text=${encodeURIComponent(message.trim())}`;
     window.open(whatsappUrl, '_blank');
     
-    // Add to sales pipeline
-    const newLeads = JSON.parse(localStorage.getItem('newLeads') || '[]');
-    const newLead = {
-      cliente: formData.companyName || 'Lead de Calculadora Automatización',
-      origen: 'Sitio Web',
-      telefono: whatsappNumber,
-      email: '' // Not collected in this form
-    };
-    newLeads.push(newLead);
-    localStorage.setItem('newLeads', JSON.stringify(newLeads));
+    addLead({
+        name: formData.personName,
+        company: formData.companyName,
+        phone: whatsappNumber,
+        source: 'Automation Calculator',
+        data: formData
+    });
 
     setIsResultModalOpen(false);
     setShowResults(true);
     setCurrentStep(steps.length);
   };
-
+  
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -219,7 +217,7 @@ ${selectedGoalsText}
                     {showResults ? (
                         <>
                             <div className="text-center mb-6">
-                                <h3 className="text-xl font-semibold">¡Hola, ${formData.personName} de ${formData.companyName}!</h3>
+                                <h3 className="text-xl font-semibold">¡Hola, {formData.personName} de {formData.companyName}!</h3>
                                 <p className="text-muted-foreground">Gracias a tu información, aquí tienes tu diagnóstico personalizado.</p>
                             </div>
                             <div className="inline-block bg-primary/10 p-6 rounded-full mb-4">
