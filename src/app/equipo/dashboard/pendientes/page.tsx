@@ -52,7 +52,6 @@ const EditablePendiente = ({ pendiente, onUpdate }: { pendiente: PendienteWithRe
         }
     };
     
-    // Update local state if the prop changes from outside (e.g., after a refresh)
     useEffect(() => {
         setText(pendiente.pendientePrincipal);
     }, [pendiente.pendientePrincipal]);
@@ -106,7 +105,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
         try {
             const updatedPendiente = { ...pendiente, completed: !pendiente.completed };
             await updatePendiente(pendiente.id, { completed: updatedPendiente.completed });
-            onUpdateTask(updatedPendiente); // Update local state immediately
+            onUpdateTask(updatedPendiente); 
         } catch (error) {
             toast({ title: "Error", description: "No se pudo actualizar el pendiente.", variant: "destructive" });
         }
@@ -118,8 +117,8 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                 <TableHeader>
                     <TableRow>
                         <TableHead className='w-4'></TableHead>
+                        <TableHead>Cliente</TableHead>
                         <TableHead>Pendiente</TableHead>
-                        <TableHead className="w-[150px]">Cliente</TableHead>
                         <TableHead className="w-[120px]">Encargado</TableHead>
                         <TableHead className="w-[120px]">Ejecutor</TableHead>
                         <TableHead className="w-[100px]">Corte</TableHead>
@@ -142,11 +141,11 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                         onCheckedChange={() => handleTogglePendiente(pendiente)}
                                     />
                                 </TableCell>
-                                <TableCell className={cn(pendiente.completed && "line-through text-muted-foreground")}>
-                                     <EditablePendiente pendiente={pendiente} onUpdate={onUpdatePendienteText}/>
-                                </TableCell>
                                 <TableCell className="font-medium align-top">
                                    {pendiente.cliente}
+                                </TableCell>
+                                <TableCell className={cn("align-top", pendiente.completed && "line-through text-muted-foreground")}>
+                                     <EditablePendiente pendiente={pendiente} onUpdate={onUpdatePendienteText}/>
                                 </TableCell>
                                 <TableCell className="align-top">{pendiente.encargado}</TableCell>
                                 <TableCell className="align-top">{pendiente.ejecutor}</TableCell>
@@ -412,8 +411,7 @@ const AddPendienteDialog = ({ clients, onAddPendiente }: { clients: Client[], on
                 ejecutor,
                 categoria,
                 pendientePrincipal,
-                fechaCorte: 15, // Default value
-                status: 'Trabajando', // Default value
+                status: 'Trabajando',
                 completed: false,
             });
             toast({ title: "Éxito", description: "Pendiente creado correctamente." });

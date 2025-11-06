@@ -22,9 +22,12 @@ export async function getPendientes() {
 
 export type NewPendienteData = Omit<Pendiente, 'id' | 'createdAt'>;
 
-export async function addPendiente(data: NewPendienteData) {
+export async function addPendiente(data: Omit<NewPendienteData, 'id' | 'createdAt' | 'fechaCorte'>) {
     try {
-        await db.insert(pendientes).values(data);
+        await db.insert(pendientes).values({
+            ...data,
+            fechaCorte: 15, // Default value
+        });
         revalidatePath("/equipo/dashboard/pendientes");
     } catch (error) {
         console.error("Error adding pendiente:", error);

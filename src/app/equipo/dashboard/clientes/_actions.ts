@@ -26,8 +26,13 @@ export type NewClientData = Omit<typeof clients.$inferInsert, 'id' | 'createdAt'
 
 export async function addClient(data: NewClientData) {
   try {
-    // We remove the automatic creation of pendientes.
-    await db.insert(clients).values(data).returning();
+    await db.insert(clients).values({
+        name: data.name,
+        representativeName: data.representativeName,
+        whatsapp: data.whatsapp,
+        email: data.email,
+        managedAreas: data.managedAreas
+    }).returning();
     revalidatePath("/equipo/dashboard/clientes");
     revalidatePath("/equipo/dashboard/pendientes");
   } catch (error) {
