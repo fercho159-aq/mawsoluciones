@@ -212,9 +212,12 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                         return (
                         <React.Fragment key={clienteName}>
                             {pendientes.map((pendiente, index) => (
-                                <TableRow key={pendiente.id}>
+                                <TableRow key={pendiente.id} className="h-12 p-0">
                                     {index === 0 && (
-                                        <TableCell rowSpan={pendientes.length} className="align-middle text-center font-medium p-2 border-r">
+                                        <TableCell 
+                                            rowSpan={pendientes.length} 
+                                            className="align-middle text-center font-medium p-2 border-r"
+                                        >
                                             {clienteName}
                                         </TableCell>
                                     )}
@@ -228,13 +231,13 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                     <TableCell className={cn("p-2 align-middle", pendiente.completed && "line-through text-muted-foreground")}>
                                         <EditablePendiente pendiente={pendiente} onUpdate={onUpdatePendienteText}/>
                                     </TableCell>
-                                     <TableCell className="p-2 align-middle">
+                                    <TableCell className="p-2 align-middle">
                                         <Select
                                             value={pendiente.encargado}
                                             onValueChange={(newEncargado) => handleResponsableChange(pendiente.id, 'encargado', newEncargado)}
                                             disabled={!canReassign}
                                         >
-                                            <SelectTrigger className="w-full text-xs">
+                                            <SelectTrigger className="w-full text-xs h-8">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -248,7 +251,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                             onValueChange={(newEjecutor) => handleResponsableChange(pendiente.id, 'ejecutor', newEjecutor)}
                                             disabled={!canReassign}
                                         >
-                                            <SelectTrigger className="w-full text-xs">
+                                            <SelectTrigger className="w-full text-xs h-8">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -258,7 +261,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                     </TableCell>
                                     <TableCell className="p-2 align-middle">
                                         <Select value={pendiente.status} onValueChange={(newStatus) => updatePendiente(pendiente.id, {status: newStatus}).then(onRefresh)}>
-                                            <SelectTrigger className="w-full">
+                                            <SelectTrigger className="w-full h-8 text-xs">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -280,12 +283,12 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                             onSave={onRefresh}
                                         >
                                             {pendiente.recordingEvent ? (
-                                                <Button variant="outline" size="sm" className="flex flex-col h-auto">
+                                                <Button variant="outline" size="sm" className="flex flex-col h-auto text-xs">
                                                     <span className='font-bold'>{format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}</span>
                                                     <span className='text-xs text-muted-foreground'>{format(new Date(pendiente.recordingEvent.fullStart), 'HH:mm')}</span>
                                                 </Button>
                                             ) : (
-                                                <Button variant="secondary" size="sm">
+                                                <Button variant="secondary" size="sm" className="h-8">
                                                     <CalendarIcon className='w-4 h-4 mr-2' />
                                                     Agendar
                                                 </Button>
@@ -294,23 +297,25 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                     </TableCell>
                                 </TableRow>
                             ))}
-                            <TableRow>
-                                <TableCell colSpan={7} className="p-0">
-                                    {addingToClientId === client.id ? (
-                                        <AddPendienteInline 
-                                            client={client}
-                                            categoria={categoria}
-                                            onAdd={(text) => handleAddPendiente(text, client, pendientes[0])}
-                                            onCancel={() => setAddingToClientId(null)}
-                                        />
-                                    ) : (
-                                        <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground pl-4" onClick={() => setAddingToClientId(client.id)}>
-                                            <Plus className="w-4 h-4 mr-2" />
-                                            Añadir pendiente
-                                        </Button>
-                                    )}
-                                </TableCell>
-                            </TableRow>
+                             {currentUser?.permissions?.pendientes?.reasignarResponsables && (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="p-0">
+                                        {addingToClientId === client.id ? (
+                                            <AddPendienteInline 
+                                                client={client}
+                                                categoria={categoria}
+                                                onAdd={(text) => handleAddPendiente(text, client, pendientes[0])}
+                                                onCancel={() => setAddingToClientId(null)}
+                                            />
+                                        ) : (
+                                            <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground pl-4 h-8" onClick={() => setAddingToClientId(client.id)}>
+                                                <Plus className="w-4 h-4 mr-2" />
+                                                Añadir pendiente
+                                            </Button>
+                                        )}
+                                    </TableCell>
+                                </TableRow>
+                             )}
                         </React.Fragment>
                         )
                     })}
@@ -392,6 +397,14 @@ export default function PendientesPage() {
             return encargadoMatch && ejecutorMatch && searchMatch;
         });
     }, [encargadoFilter, ejecutorFilter, searchFilter, pendientes]);
+
+    const tasksPerCategory = useMemo(() => {
+        return {
+            contenido: filteredData.some(d => d.categoria === 'Contenido'),
+            ads: filteredData.some(d => d.categoria === 'Ads'),
+            web: filteredData.some(d => d.categoria === 'Web'),
+        };
+    }, [filteredData]);
     
     const canAddPendiente = user?.role === 'admin' || user?.permissions?.pendientes?.reasignarResponsables;
 
@@ -460,13 +473,16 @@ export default function PendientesPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="contenido">
+                <TabsTrigger value="contenido" className="flex items-center gap-2">
+                    {tasksPerCategory.contenido && <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>}
                     Pendientes Contenido
                 </TabsTrigger>
-                <TabsTrigger value="ads">
+                <TabsTrigger value="ads" className="flex items-center gap-2">
+                    {tasksPerCategory.ads && <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>}
                     Pendientes Ads
                 </TabsTrigger>
-                <TabsTrigger value="web">
+                <TabsTrigger value="web" className="flex items-center gap-2">
+                    {tasksPerCategory.web && <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>}
                     Pendientes Web
                 </TabsTrigger>
             </TabsList>
