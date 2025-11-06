@@ -139,14 +139,6 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt, onCli
                                 {clients.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
                             </SelectContent>
                         </Select>
-                        <Alert variant="default" className='mt-2 text-sm text-muted-foreground p-3'>
-                            <AlertDescription className='flex items-center justify-between gap-2'>
-                               ¿No encuentras al cliente?
-                                <ClientFormDialog onSave={onClientAdded} isEditing={false}>
-                                    <Button variant="secondary" size="sm">Añadir Cliente <PlusCircle className='w-4 h-4 ml-2'/></Button>
-                                </ClientFormDialog>
-                            </AlertDescription>
-                        </Alert>
                     </div>
                     
                     <div className="space-y-2">
@@ -692,5 +684,7 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
+    
 
     
