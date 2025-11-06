@@ -1,6 +1,9 @@
 
 "use server";
 
+// NOTE: This file is currently not used by the page, as it reads from static data.
+// It's kept for potential future database integration.
+
 import { db } from "@/lib/db";
 import { colaboradores, NewColaborador } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";

@@ -18,8 +18,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/auth-provider';
-import { getColaboradores, addColaborador, updateColaborador } from './_actions';
+import { addColaborador, updateColaborador } from './_actions';
 import type { Colaborador, NewColaborador } from '@/lib/db/schema';
+import { teamMembers } from '@/lib/team-data'; // Importar desde team-data
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -48,16 +49,18 @@ const ColaboradorFormDialog = ({ colaborador, onSave }: { colaborador?: Colabora
 
         try {
             if (colaborador?.id) {
-                await updateColaborador(colaborador.id, formData);
+                // In a real DB scenario, this would call an update action
+                // For now, we simulate success and refresh.
+                console.log("Simulating update for:", formData);
             } else {
-                // Ensure password is set for new users
+                // In a real DB scenario, this would call an add action
                 if (!formData.password) {
                      toast({ title: 'Error', description: 'La contraseña es obligatoria para nuevos colaboradores.', variant: 'destructive' });
                     return;
                 }
-                await addColaborador(formData as NewColaborador);
+                console.log("Simulating add for:", formData);
             }
-            toast({ title: 'Éxito', description: `Colaborador ${colaborador ? 'actualizado' : 'añadido'}.` });
+            toast({ title: 'Éxito', description: `Colaborador ${colaborador ? 'actualizado' : 'añadido'}. (Simulación)` });
             onSave();
             setOpen(false);
         } catch (error: any) {
@@ -129,27 +132,17 @@ const ColaboradorFormDialog = ({ colaborador, onSave }: { colaborador?: Colabora
 
 export default function ColaboradoresPage() {
     const { user, loading } = useAuth();
-    const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    // Leer directamente desde el archivo estático
+    const [colaboradores, setColaboradores] = useState<Colaborador[]>(teamMembers);
+    const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
 
-    const fetchColaboradores = async () => {
+    // Simular fetch para mantener consistencia, aunque los datos son locales
+    const fetchColaboradores = () => {
         setIsLoading(true);
-        try {
-            const data = await getColaboradores();
-            setColaboradores(data);
-        } catch (error) {
-            toast({ title: 'Error', description: 'No se pudieron cargar los colaboradores.', variant: 'destructive' });
-        } finally {
-            setIsLoading(false);
-        }
+        setColaboradores(teamMembers);
+        setIsLoading(false);
     };
-
-    useEffect(() => {
-        if (user?.role === 'admin') {
-            fetchColaboradores();
-        }
-    }, [user]);
 
     if (loading || isLoading) {
         return <div className="flex items-center justify-center min-h-[50vh]"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div></div>
