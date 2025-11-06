@@ -32,11 +32,12 @@ import type { CategoriaIngreso, Cuenta } from '@/lib/finanzas-data';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { getClients as fetchClientsDB } from '../clientes/_actions';
 import type { Client } from '../clientes/page';
-import { addCpc, addMovimiento, getCuentasPorCobrar, getMovimientos, updateCpcAfterPayment, updateCpc, addFinanzaFinal } from './_actions';
-import type { MovimientoDiario, CuentaPorCobrar, NewCuentaPorCobrar, NewMovimientoDiario, ClientFinancialProfile } from '@/lib/db/schema';
+import { addCpc, addMovimiento, getCuentasPorCobrar, getMovimientos, updateCpcAfterPayment, updateCpc, addFinanzaFinal, getFinanzasFinal } from './_actions';
+import type { MovimientoDiario, CuentaPorCobrar, NewCuentaPorCobrar, NewMovimientoDiario, ClientFinancialProfile, FinanzaFinal } from '@/lib/db/schema';
 import { Switch } from '@/components/ui/switch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
+import { ClientFormDialog } from '../clientes/page';
 
 
 // --- Helper Functions ---
@@ -55,7 +56,7 @@ const getNextPeriod = (periodo: string) => {
 }
 
 // --- Components ---
-const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt }: { cpc?: CuentaPorCobrar | null, clients: Client[], onSave: () => void, children: React.ReactNode, onGenerateReceipt: (item: CuentaPorCobrar, withInvoice: boolean) => void }) => {
+const AddCpcDialog = ({ clients, onSave, onClientAdd, children }: { clients: Client[], onSave: () => void, onClientAdd: () => void, children: React.ReactNode }) => {
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
     
@@ -63,27 +64,21 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt }: { c
     const [monto, setMonto] = useState('');
     const [tipo, setTipo] = useState<CategoriaIngreso>('Iguala Mensual');
     const [requiresInvoice, setRequiresInvoice] = useState(false);
+    
+    const [billingDay, setBillingDay] = useState<'15' | '30'>('15');
+    const [customDate, setCustomDate] = useState<Date | undefined>(undefined);
+    const [selectedBillingDateOption, setSelectedBillingDateOption] = useState('');
 
-    const isEditing = !!cpc;
-
-     useEffect(() => {
+    useEffect(() => {
         if (open) {
-            if (isEditing && cpc) {
-                const client = clients.find(c => c.id === cpc.clienteId);
-                const clientProfile = client?.financialProfile;
-                setClienteId(cpc.clienteId.toString());
-                setMonto((clientProfile?.defaultInvoice ? cpc.monto / 1.16 : cpc.monto).toFixed(2));
-                setTipo(cpc.tipo as CategoriaIngreso);
-                setRequiresInvoice(clientProfile?.defaultInvoice || false);
-            } else {
-                resetForm();
-            }
+            resetForm();
         }
-    }, [open, cpc, isEditing, clients]);
+    }, [open]);
 
 
     const resetForm = () => {
         setClienteId(''); setMonto(''); setTipo('Iguala Mensual'); setRequiresInvoice(false);
+        setBillingDay('15'); setCustomDate(undefined); setSelectedBillingDateOption('');
     }
 
     const totalAmount = useMemo(() => {
@@ -114,7 +109,7 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt }: { c
             await addFinanzaFinal(data);
             onSave();
             setOpen(false);
-            toast({ title: "Éxito", description: `Cuenta por cobrar guardada en finanzas_final.` });
+            toast({ title: "Éxito", description: `Cuenta por cobrar guardada.` });
         } catch (error) {
              toast({ title: "Error", description: `No se pudo guardar la cuenta por cobrar.`, variant: 'destructive' });
         }
@@ -124,16 +119,26 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt }: { c
         <Dialog open={open} onOpenChange={(o) => {setOpen(o); if(!o) resetForm();}}>
             <DialogTrigger asChild>{children}</DialogTrigger>
             <DialogContent>
-                <DialogHeader><DialogTitle>{isEditing ? 'Editar' : 'Nueva'} Cuenta por Cobrar</DialogTitle></DialogHeader>
+                <DialogHeader><DialogTitle>Nueva Cuenta por Cobrar</DialogTitle></DialogHeader>
                 <div className="grid gap-4 py-4">
                      <div className="space-y-2">
                         <Label>Cliente</Label>
-                        <Select value={clienteId} onValueChange={setClienteId} disabled={isEditing}>
+                        <Select value={clienteId} onValueChange={setClienteId}>
                             <SelectTrigger><SelectValue placeholder="Seleccionar cliente" /></SelectTrigger>
                             <SelectContent>
                                 {clients.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
                             </SelectContent>
                         </Select>
+                         {clients.length === 0 && (
+                            <Alert variant="destructive" className="mt-2">
+                                <AlertDescription className="flex items-center justify-between">
+                                    <span>No hay clientes. Añade uno primero.</span>
+                                    <ClientFormDialog onSave={onClientAdd} isEditing={false}>
+                                        <Button size="sm">Añadir Cliente</Button>
+                                    </ClientFormDialog>
+                                </AlertDescription>
+                            </Alert>
+                        )}
                     </div>
                     
                     <div className="space-y-2">
@@ -165,17 +170,9 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt }: { c
                     )}
                 </div>
                 <DialogFooter className="flex justify-between w-full">
-                     <div>
-                        {isEditing && cpc && (
-                            <>
-                                <Button variant="secondary" onClick={() => onGenerateReceipt(cpc, false)}><FileText className="w-4 h-4 mr-2"/>Recibo</Button>
-                                <Button variant="secondary" className="ml-2" onClick={() => onGenerateReceipt(cpc, true)}><FileText className="w-4 h-4 mr-2"/>Pre-Factura</Button>
-                            </>
-                        )}
-                    </div>
                     <div className="flex gap-2">
                         <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                        <Button onClick={handleSave}>{isEditing ? 'Actualizar Cuenta' : 'Guardar Cuenta'}</Button>
+                        <Button onClick={handleSave}>Guardar Cuenta</Button>
                     </div>
                 </DialogFooter>
             </DialogContent>
@@ -183,108 +180,18 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt }: { c
     )
 }
 
-const CuentasPorCobrarTab = ({ data, clients, onSave }: { data: CuentaPorCobrar[], clients: Client[], onSave: () => void }) => {
+const CuentasPorCobrarTab = ({ data, clients, onSave, onClientAdd }: { data: FinanzaFinal[], clients: Client[], onSave: () => void, onClientAdd: () => void }) => {
     
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
     const [clientFilter, setClientFilter] = useState('Todos');
 
-    const handleWhatsappReminder = (item: CuentaPorCobrar) => {
-        const client = clients.find(c => c.id === item.clienteId);
-        if (!client || !client.whatsapp) {
-            alert("Este cliente no tiene un número de WhatsApp registrado.");
-            return;
-        }
-        const message = `¡Hola ${item.clienteName}! Te recordamos amablemente que el pago de tu servicio de ${item.tipo} para el periodo del ${item.periodo} está pendiente. El monto es de ${item.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}. ¡Gracias!`;
-        const whatsappUrl = `https://wa.me/${client.whatsapp}?text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, '_blank');
-    }
-
-    const handleGenerateReceipt = (item: CuentaPorCobrar, withInvoice: boolean = false) => {
-        const clientDebts = data.filter(d => d.clienteId === item.clienteId);
-        let totalDebt = clientDebts.reduce((sum, debt) => sum + debt.monto, 0);
-
-        const subtotal = withInvoice ? totalDebt / 1.16 : totalDebt;
-        const iva = withInvoice ? totalDebt - subtotal : 0;
-        
-        if (withInvoice) {
-            totalDebt = subtotal + iva;
-        }
-
-        const receiptHtml = `
-            <html>
-                <head>
-                    <title>${withInvoice ? 'Pre-Factura / Recibo de Cobro' : 'Recibo de Cobro'} - ${item.clienteName}</title>
-                    <script src="https://cdn.tailwindcss.com"></script>
-                    <style> body { font-family: sans-serif; } </style>
-                </head>
-                <body class="bg-gray-100 p-8">
-                    <div class="max-w-2xl mx-auto bg-white p-10 rounded-lg shadow-lg">
-                        <div class="flex justify-between items-center border-b pb-4 mb-6">
-                            <div>
-                                <h1 class="text-2xl font-bold">MAW Soluciones</h1>
-                                <p class="text-gray-500">Agencia de Marketing Digital</p>
-                            </div>
-                            <p class="text-sm text-gray-600">Fecha: ${format(new Date(), 'd MMMM, yyyy', { locale: es })}</p>
-                        </div>
-                        <div class="mb-8">
-                            <h2 class="text-lg font-semibold mb-2">${withInvoice ? 'Pre-Factura / Recibo para:' : 'Recibo para:'}</h2>
-                            <p class="font-bold text-gray-800">${item.clienteName}</p>
-                        </div>
-                        <h3 class="text-xl font-semibold border-b pb-2 mb-4">Detalle de Adeudos</h3>
-                        <table class="w-full text-left">
-                            <thead>
-                                <tr class="bg-gray-100">
-                                    <th class="p-3">Periodo / Concepto</th>
-                                    <th class="p-3 text-right">Monto</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${clientDebts.map(debt => `
-                                    <tr class="border-b">
-                                        <td class="p-3">${debt.periodo} (${debt.tipo})</td>
-                                        <td class="p-3 text-right">${(withInvoice ? debt.monto / 1.16 : debt.monto).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                        <div class="flex justify-end mt-6">
-                            <div class="w-full max-w-xs">
-                                <div class="flex justify-between py-2 border-b">
-                                    <span class="font-semibold text-gray-700">Subtotal:</span>
-                                    <span>${subtotal.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
-                                </div>
-                                ${withInvoice ? `
-                                <div class="flex justify-between py-2 border-b">
-                                    <span class="font-semibold text-gray-700">IVA (16%):</span>
-                                    <span>${iva.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
-                                </div>
-                                ` : ''}
-                                <div class="flex justify-between py-3 bg-gray-200 px-3 rounded-md mt-4">
-                                    <span class="font-bold text-lg">Total Adeudado:</span>
-                                    <span class="font-bold text-lg">${totalDebt.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mt-12 text-center text-xs text-gray-500">
-                            <p>${withInvoice ? 'Esta es una pre-factura y no un comprobante fiscal.' : 'Este es un recibo informativo y no un comprobante fiscal.'}</p>
-                            <p>MAW Soluciones | hola@mawsoluciones.com</p>
-                        </div>
-                    </div>
-                </body>
-            </html>
-        `;
-        const blob = new Blob([receiptHtml], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
-    };
-
     const sortedAndFilteredData = useMemo(() => {
         let filtered = [...data];
         if(clientFilter !== 'Todos') {
-            filtered = filtered.filter(item => item.clienteId.toString() === clientFilter);
+            filtered = filtered.filter(item => item.clientName === clientFilter);
         }
         if (sortOrder) {
-            filtered.sort((a, b) => sortOrder === 'desc' ? b.monto - a.monto : a.monto - b.monto);
+            filtered.sort((a, b) => sortOrder === 'desc' ? b.amount - a.amount : a.amount - b.amount);
         }
         return filtered;
     }, [data, sortOrder, clientFilter]);
@@ -307,8 +214,8 @@ const CuentasPorCobrarTab = ({ data, clients, onSave }: { data: CuentaPorCobrar[
         <Card>
             <CardHeader className='flex-col md:flex-row justify-between items-start md:items-center'>
                 <div>
-                    <CardTitle>Control de Pagos Pendientes</CardTitle>
-                    <CardDescription>Gestiona los pagos pendientes de tus clientes y envía recordatorios.</CardDescription>
+                    <CardTitle>Control de Pagos</CardTitle>
+                    <CardDescription>Gestiona los pagos de tus clientes.</CardDescription>
                 </div>
                  <div className="flex gap-2">
                     <Select value={clientFilter} onValueChange={setClientFilter}>
@@ -317,11 +224,11 @@ const CuentasPorCobrarTab = ({ data, clients, onSave }: { data: CuentaPorCobrar[
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="Todos">Todos los Clientes</SelectItem>
-                            {clients.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
+                            {clients.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
                         </SelectContent>
                     </Select>
-                    <AddCpcDialog clients={clients} onSave={onSave} onGenerateReceipt={handleGenerateReceipt}>
-                        <Button><PlusCircle className="w-4 h-4 mr-2" />Añadir CxC</Button>
+                    <AddCpcDialog clients={clients} onSave={onSave} onClientAdd={onClientAdd}>
+                        <Button><PlusCircle className="w-4 h-4 mr-2" />Añadir Pago</Button>
                     </AddCpcDialog>
                  </div>
             </CardHeader>
@@ -330,47 +237,32 @@ const CuentasPorCobrarTab = ({ data, clients, onSave }: { data: CuentaPorCobrar[
                     <Table>
                         <TableHeader><TableRow>
                             <TableHead>Cliente</TableHead>
-                            <TableHead>Periodo</TableHead>
+                            <TableHead>Tipo Servicio</TableHead>
                             <TableHead className='cursor-pointer' onClick={toggleSort}>
                                 <div className="flex items-center gap-1">
-                                    Monto Adeudado
+                                    Monto
                                     <ArrowUpDown className="w-4 h-4" />
                                 </div>
                             </TableHead>
-                            <TableHead>Tipo</TableHead>
-                            <TableHead colSpan={2} className="text-right">Acciones</TableHead>
+                            <TableHead>Requiere Factura</TableHead>
+                             <TableHead>Fecha</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {sortedAndFilteredData.map((item) => (
-                                <AddCpcDialog key={item.id} cpc={item} clients={clients} onSave={onSave} onGenerateReceipt={handleGenerateReceipt}>
-                                    <TableRow className="cursor-pointer">
-                                        <TableCell className="font-medium">{item.clienteName}</TableCell>
-                                        <TableCell><Badge variant="outline">{item.periodo}</Badge></TableCell>
-                                        <TableCell>{item.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={item.tipo === 'Iguala Mensual' ? 'secondary' : 'default'} className="flex items-center gap-1.5 w-fit">
-                                                {getTypeIcon(item.tipo as CategoriaIngreso)}
-                                                {item.tipo}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex gap-2 justify-end" onClick={e => e.stopPropagation()}>
-                                                <Button variant="ghost" size="sm" onClick={() => handleGenerateReceipt(item, false)}><FileText className="w-4 h-4 mr-2" />Recibo</Button>
-                                                <Button variant="whatsapp" size="sm" onClick={() => handleWhatsappReminder(item)}>
-                                                    <WhatsappIcon className="w-4 h-4 mr-2" />
-                                                    Recordar
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                         <TableCell className="text-right w-[40px]">
-                                             <Edit className="w-4 h-4 text-muted-foreground" />
-                                         </TableCell>
-                                    </TableRow>
-                                </AddCpcDialog>
+                                <TableRow key={item.id}>
+                                    <TableCell className="font-medium">{item.clientName}</TableCell>
+                                    <TableCell>{item.serviceType}</TableCell>
+                                    <TableCell>{item.amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                    <TableCell>{item.requiresInvoice ? 'Sí' : 'No'}</TableCell>
+                                    <TableCell>{format(new Date(item.createdAt), 'dd MMM yyyy', { locale: es })}</TableCell>
+                                </TableRow>
                             ))}
                         </TableBody>
                     </Table>
+                     {sortedAndFilteredData.length === 0 && (
+                        <div className="text-center py-8 text-muted-foreground">No hay registros en esta vista.</div>
+                    )}
                 </div>
             </CardContent>
         </Card>
@@ -611,7 +503,7 @@ export default function FinanzasPage() {
     const { user } = useAuth();
     const [clients, setClients] = useState<Client[]>([]);
     const [movimientos, setMovimientos] = useState<MovimientoDiario[]>([]);
-    const [cuentasPorCobrar, setCuentasPorCobrar] = useState<CuentaPorCobrar[]>([]);
+    const [cuentasPorCobrar, setCuentasPorCobrar] = useState<FinanzaFinal[]>([]);
     const [activeTab, setActiveTab] = useState("cuentas-por-cobrar");
     const [isLoading, setIsLoading] = useState(true);
 
@@ -622,11 +514,11 @@ export default function FinanzasPage() {
         try {
             const [clientsData, cpcData, movimientosData] = await Promise.all([
                 fetchClientsDB(),
-                getCuentasPorCobrar(),
+                getFinanzasFinal(),
                 getMovimientos(),
             ]);
             setClients(clientsData as Client[]);
-            setCuentasPorCobrar(cpcData);
+            setCuentasPorCobrar(cpcData as FinanzaFinal[]);
             setMovimientos(movimientosData.map(m => ({...m, fecha: new Date(m.fecha)})));
         } catch (error) {
              console.error("Failed to fetch data:", error);
@@ -648,10 +540,6 @@ export default function FinanzasPage() {
         fetchData();
     }
     
-    const handleUpdateCpc = async (cpcList: CuentaPorCobrar[]) => {
-        fetchData();
-    };
-    
     if (isLoading) {
         return <div className="flex items-center justify-center min-h-[50vh]"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div></div>
     }
@@ -666,14 +554,14 @@ export default function FinanzasPage() {
             </div>
             <Tabs defaultValue="cuentas-por-cobrar" className="w-full" onValueChange={setActiveTab}>
                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="cuentas-por-cobrar"><DollarSign className="w-4 h-4 mr-2"/>Cuentas por Cobrar</TabsTrigger>
+                    <TabsTrigger value="cuentas-por-cobrar"><DollarSign className="w-4 h-4 mr-2"/>Control de Pagos</TabsTrigger>
                     <TabsTrigger value="tabla-diaria"><TrendingUp className="w-4 h-4 mr-2"/>Tabla Diaria</TabsTrigger>
                 </TabsList>
                 <TabsContent value="cuentas-por-cobrar" className="mt-4">
-                   <CuentasPorCobrarTab data={cuentasPorCobrar} clients={clients} onSave={handleSaveCpc} />
+                   <CuentasPorCobrarTab data={cuentasPorCobrar} clients={clients} onSave={handleSaveCpc} onClientAdd={fetchData} />
                 </TabsContent>
                 <TabsContent value="tabla-diaria" className="mt-4">
-                    <TablaDiariaTab isAdmin={isAdmin} movimientos={movimientos} onAddMovimiento={handleAddMovimiento} cuentasPorCobrar={cuentasPorCobrar} onUpdateCpc={handleUpdateCpc} />
+                    <TablaDiariaTab isAdmin={isAdmin} movimientos={movimientos} onAddMovimiento={handleAddMovimiento} cuentasPorCobrar={[]} onUpdateCpc={() => {}} />
                 </TabsContent>
             </Tabs>
         </div>
@@ -683,3 +571,4 @@ export default function FinanzasPage() {
     
 
     
+

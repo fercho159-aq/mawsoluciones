@@ -1,3 +1,4 @@
+
 import { pgTable, serial, text, varchar, timestamp, boolean, integer, jsonb, real, date } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -73,7 +74,7 @@ export const finanzas_final = pgTable('finanzas_final', {
     serviceType: varchar('service_type', { length: 100 }).notNull(),
     amount: real('amount').notNull(),
     requiresInvoice: boolean('requires_invoice').default(false).notNull(),
-    createdAt: timestamp('created_at').defaultNow(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
 export const movimientosDiarios = pgTable('movimientos_diarios', {
@@ -190,3 +191,5 @@ export type Colaborador = typeof colaboradores.$inferSelect;
 export type NewColaborador = typeof colaboradores.$inferInsert;
 export type ClientFinancialProfile = typeof clientFinancialProfiles.$inferSelect;
 export type NewClientFinancialProfile = typeof clientFinancialProfiles.$inferInsert;
+export type FinanzaFinal = typeof finanzas_final.$inferSelect;
+export type NewFinanzaFinal = typeof finanzas_final.$inferInsert;

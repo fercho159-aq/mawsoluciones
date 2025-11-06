@@ -16,6 +16,19 @@ export async function getCuentasPorCobrar() {
   }
 }
 
+export async function getFinanzasFinal() {
+    try {
+        const allFinanzas = await db.query.finanzas_final.findMany({
+            orderBy: [desc(finanzas_final.createdAt)],
+        });
+        return allFinanzas;
+    } catch (error) {
+        console.error("Error fetching finanzas_final:", error);
+        return [];
+    }
+}
+
+
 export async function getMovimientos() {
   try {
     const allMovimientos = await db.query.movimientosDiarios.findMany({
@@ -32,7 +45,6 @@ export async function addCpc(data: Omit<NewCuentaPorCobrar, 'id'>) {
     try {
         await db.insert(cuentasPorCobrar).values({
             ...data,
-            periodo: "Periodo pendiente"
         });
         revalidatePath("/equipo/dashboard/finanzas");
     } catch (error) {
