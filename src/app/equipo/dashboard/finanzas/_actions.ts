@@ -28,11 +28,9 @@ export async function getMovimientos() {
   }
 }
 
-export async function addCpc(data: Omit<NewCuentaPorCobrar, 'id'>) {
+export async function addCpc(data: NewCuentaPorCobrar) {
     try {
-        await db.insert(cuentasPorCobrar).values({
-            ...data,
-        });
+        await db.insert(cuentasPorCobrar).values(data);
         revalidatePath("/equipo/dashboard/finanzas");
     } catch (error) {
         console.error("Error adding cpc:", error);
@@ -84,3 +82,4 @@ export async function updateCpcAfterPayment(cpc: CuentaPorCobrar, nextPeriod: st
         throw new Error("Could not update cpc");
     }
 }
+

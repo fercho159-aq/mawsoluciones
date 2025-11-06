@@ -31,13 +31,14 @@ import { useAuth } from '@/lib/auth-provider';
 import type { CategoriaIngreso, Cuenta } from '@/lib/finanzas-data';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { getClients as fetchClientsDB } from '../clientes/_actions';
-import type { Client } from '../clientes/page';
 import { addCpc, addMovimiento, getCuentasPorCobrar, getMovimientos, updateCpcAfterPayment, updateCpc } from './_actions';
-import type { MovimientoDiario, CuentaPorCobrar, NewCuentaPorCobrar, NewMovimientoDiario, ClientFinancialProfile } from '@/lib/db/schema';
+import type { MovimientoDiario, CuentaPorCobrar, NewCuentaPorCobrar, NewMovimientoDiario, Client as ClientType, ClientFinancialProfile } from '@/lib/db/schema';
 import { Switch } from '@/components/ui/switch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { ClientFormDialog } from '../clientes/page';
+
+type Client = ClientType & { financialProfile: ClientFinancialProfile | null };
 
 
 // --- Helper Functions ---
@@ -56,7 +57,7 @@ const getNextPeriod = (periodo: string) => {
 }
 
 // --- Components ---
-const AddCpcDialog = ({ clients, onSave, onClientAdd, children }: { clients: Client[], onSave: () => void, onClientAdd: () => void, children: React.ReactNode }) => {
+const AddCpcDialog = ({ clients, onSave, children }: { clients: Client[], onSave: () => void, children: React.ReactNode }) => {
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
     
@@ -122,7 +123,7 @@ const AddCpcDialog = ({ clients, onSave, onClientAdd, children }: { clients: Cli
         const finalBillingDateLabel = format(finalBillingDate, "d MMM yyyy", { locale: es });
 
 
-        const data: Omit<NewCuentaPorCobrar, 'id'> = { 
+        const data: NewCuentaPorCobrar = { 
             clienteId: parseInt(clienteId), 
             clienteName: cliente.name, 
             periodo: finalBillingDateLabel,
@@ -158,9 +159,13 @@ const AddCpcDialog = ({ clients, onSave, onClientAdd, children }: { clients: Cli
                             </SelectContent>
                         </Select>
                         {clients.length === 0 && (
-                             <ClientFormDialog onSave={onClientAdd} isEditing={false}>
-                                <Button size="sm" variant="outline" className="w-full mt-2">Añadir Nuevo Cliente</Button>
-                            </ClientFormDialog>
+                             <Alert>
+                                <AlertTriangle className="h-4 w-4" />
+                                <AlertTitle>No hay clientes</AlertTitle>
+                                <AlertDescription>
+                                    Aún no hay clientes registrados. Ve a la sección de clientes para añadir uno.
+                                </AlertDescription>
+                            </Alert>
                         )}
                     </div>
                     
@@ -221,7 +226,7 @@ const AddCpcDialog = ({ clients, onSave, onClientAdd, children }: { clients: Cli
     )
 }
 
-const CuentasPorCobrarTab = ({ data, clients, onSave, onClientAdd }: { data: CuentaPorCobrar[], clients: Client[], onSave: () => void, onClientAdd: () => void }) => {
+const CuentasPorCobrarTab = ({ data, clients, onSave }: { data: CuentaPorCobrar[], clients: Client[], onSave: () => void }) => {
     
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
     const [clientFilter, setClientFilter] = useState('Todos');
@@ -287,7 +292,7 @@ const CuentasPorCobrarTab = ({ data, clients, onSave, onClientAdd }: { data: Cue
                             {clients.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
                         </SelectContent>
                     </Select>
-                    <AddCpcDialog clients={clients} onSave={onSave} onClientAdd={onClientAdd}>
+                    <AddCpcDialog clients={clients} onSave={onSave}>
                         <Button><PlusCircle className="w-4 h-4 mr-2" />Añadir Cuenta por Cobrar</Button>
                     </AddCpcDialog>
                  </div>
@@ -629,7 +634,7 @@ export default function FinanzasPage() {
                     <TabsTrigger value="tabla-diaria"><TrendingUp className="w-4 h-4 mr-2"/>Tabla Diaria</TabsTrigger>
                 </TabsList>
                 <TabsContent value="cuentas-por-cobrar" className="mt-4">
-                   <CuentasPorCobrarTab data={cuentasPorCobrar} clients={clients} onSave={handleSaveCpc} onClientAdd={fetchData} />
+                   <CuentasPorCobrarTab data={cuentasPorCobrar} clients={clients} onSave={handleSaveCpc} />
                 </TabsContent>
                 <TabsContent value="tabla-diaria" className="mt-4">
                     <TablaDiariaTab isAdmin={isAdmin} movimientos={movimientos} onAddMovimiento={handleAddMovimiento} cuentasPorCobrar={cuentasPorCobrar} onUpdateCpc={() => {}} />
