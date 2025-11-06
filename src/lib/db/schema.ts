@@ -27,30 +27,15 @@ export const pendientes = pgTable('pendientes', {
     status: varchar('status', { length: 50 }).notNull(),
     pendientePrincipal: text('pendiente_principal').notNull(),
     categoria: varchar('categoria', { length: 50 }).notNull(),
+    completed: boolean('completed').default(false).notNull(),
     createdAt: timestamp('created_at').defaultNow(),
 });
 
-export const pendientesRelations = relations(pendientes, ({ many, one }) => ({
-	subTasks: many(subTasks),
+export const pendientesRelations = relations(pendientes, ({ one }) => ({
     recordingEvent: one(recordingEvents, {
         fields: [pendientes.id],
         references: [recordingEvents.pendienteId],
     })
-}));
-
-
-export const subTasks = pgTable('sub_tasks', {
-    id: serial('id').primaryKey(),
-    text: text('text').notNull(),
-    completed: boolean('completed').default(false).notNull(),
-    pendienteId: integer('pendiente_id').references(() => pendientes.id),
-});
-
-export const subTasksRelations = relations(subTasks, ({ one }) => ({
-	pendiente: one(pendientes, {
-		fields: [subTasks.pendienteId],
-		references: [pendientes.id],
-	}),
 }));
 
 export const accesses = pgTable('accesses', {
@@ -147,6 +132,5 @@ export type Lead = typeof leads.$inferSelect;
 export type NewLead = typeof leads.$inferInsert;
 
 export type Pendiente = typeof pendientes.$inferSelect;
-export type SubTask = typeof subTasks.$inferSelect;
 export type RecordingEvent = typeof recordingEvents.$inferSelect;
 export type NewRecordingEvent = typeof recordingEvents.$inferInsert;

@@ -2,7 +2,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { pendientes, subTasks, recordingEvents, NewRecordingEvent } from "@/lib/db/schema";
+import { pendientes, recordingEvents, NewRecordingEvent, Pendiente } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -10,7 +10,6 @@ export async function getPendientes() {
     try {
         const allPendientes = await db.query.pendientes.findMany({
             with: {
-                subTasks: true,
                 recordingEvent: true
             },
         });
@@ -21,7 +20,7 @@ export async function getPendientes() {
     }
 }
 
-export type NewPendienteData = Omit<typeof pendientes.$inferInsert, 'id' | 'createdAt'>;
+export type NewPendienteData = Omit<Pendiente, 'id' | 'createdAt'>;
 
 export async function addPendiente(data: NewPendienteData) {
     try {
@@ -40,27 +39,6 @@ export async function updatePendiente(id: number, data: Partial<NewPendienteData
     } catch (error) {
         console.error("Error updating pendiente:", error);
         throw new Error("Could not update pendiente");
-    }
-}
-
-export async function addSubTask(data: typeof subTasks.$inferInsert) {
-    try {
-        const newSubTask = await db.insert(subTasks).values(data).returning();
-        revalidatePath("/equipo/dashboard/pendientes");
-        return newSubTask[0];
-    } catch (error) {
-        console.error("Error adding subtask:", error);
-        throw new Error("Could not add subtask");
-    }
-}
-
-export async function toggleSubTask(id: number, completed: boolean) {
-    try {
-        await db.update(subTasks).set({ completed }).where(eq(subTasks.id, id));
-        revalidatePath("/equipo/dashboard/pendientes");
-    } catch (error) {
-        console.error("Error toggling subtask:", error);
-        throw new Error("Could not toggle subtask");
     }
 }
 
