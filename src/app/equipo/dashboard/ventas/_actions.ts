@@ -18,9 +18,17 @@ export async function getLeads() {
   }
 }
 
-export async function addProspect(data: Omit<NewLead, 'id' | 'createdAt' | 'data'>) {
+export async function addProspect(data: Partial<Omit<NewLead, 'id' | 'createdAt' | 'data'>>) {
     try {
-        await db.insert(leads).values(data);
+        await db.insert(leads).values({
+            name: data.name || data.company,
+            company: data.company,
+            phone: data.phone,
+            email: data.email,
+            source: data.source || 'Referencia',
+            status: data.status,
+            responsable: data.responsable,
+        });
         revalidatePath("/equipo/dashboard/ventas");
     } catch (error) {
         console.error("Error adding prospect:", error);
