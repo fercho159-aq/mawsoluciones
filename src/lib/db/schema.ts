@@ -136,6 +136,8 @@ export const leads = pgTable('leads', {
   phone: varchar('phone', { length: 50 }),
   email: varchar('email', { length: 255 }),
   source: varchar('source', { length: 100 }).notNull(),
+  status: varchar('status', { length: 50 }),
+  responsable: varchar('responsable', { length: 100 }),
   data: jsonb('data'),
   createdAt: timestamp('created_at').defaultNow(),
 });

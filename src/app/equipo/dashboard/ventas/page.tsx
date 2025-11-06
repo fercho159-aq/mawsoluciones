@@ -31,30 +31,13 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format, getMonth, getYear } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { getLeads, addProspect } from './_actions';
+import type { Lead } from '@/lib/db/schema';
 
-type OrigenLead = "Facebook" | "TikTok" | "Referencia" | "Sitio Web";
+
+type OrigenLead = "Facebook" | "TikTok" | "Referencia" | "Sitio Web" | string;
 type StatusLead = "Lead Nuevo" | "Contactado" | "Videollamada" | "En Negociación" | "Convertido" | "No Interesado";
 type ResponsableVentas = "Alma" | "Fer" | "Julio";
-
-interface Lead {
-  id: string;
-  cliente: string;
-  email?: string;
-  telefono?: string;
-  origen: OrigenLead;
-  status: StatusLead;
-  responsable: ResponsableVentas;
-  createdAt: Date;
-}
-
-const mockLeads: Lead[] = [
-  { id: 'lead1', cliente: "Gimnasio FitnessPro", email: "contacto@fitnesspro.com", telefono: "5511223344", origen: "Facebook", status: "Videollamada", responsable: "Alma", createdAt: new Date('2024-10-05T10:00:00Z') },
-  { id: 'lead2', cliente: "Tacos El Veloz", email: "info@tacoselveloz.com", telefono: "5522334455", origen: "TikTok", status: "Lead Nuevo", responsable: "Julio", createdAt: new Date('2024-10-15T11:00:00Z') },
-  { id: 'lead3', cliente: "Clínica Dental Sonrisa", email: "hola@dentalsonrisa.mx", telefono: "5533445566", origen: "Referencia", status: "En Negociación", responsable: "Fer", createdAt: new Date('2024-09-20T12:00:00Z') },
-  { id: 'lead4', cliente: "Ecommerce de Ropa 'Moda Hoy'", email: "ventas@modahoy.com", telefono: "5544556677", origen: "Facebook", status: "Contactado", responsable: "Julio", createdAt: new Date('2024-09-25T14:00:00Z') },
-  { id: 'lead5', cliente: "Constructora Edifica", email: "proyectos@edifica.com", telefono: "5555667788", origen: "Sitio Web", status: "No Interesado", responsable: "Alma", createdAt: new Date('2024-08-10T16:00:00Z') },
-  { id: 'lead6', cliente: "Restaurante La Toscana", email: "reservas@latoscana.com", telefono: "5566778899", origen: "TikTok", status: "Videollamada", responsable: "Fer", createdAt: new Date('2024-10-01T18:00:00Z') },
-];
 
 const statusColors: Record<StatusLead, string> = {
     "Lead Nuevo": "bg-blue-500",
@@ -65,17 +48,19 @@ const statusColors: Record<StatusLead, string> = {
     "No Interesado": "bg-gray-500",
 };
 
-const origenes: OrigenLead[] = ["Facebook", "TikTok", "Referencia", "Sitio Web"];
 const responsables: ResponsableVentas[] = ["Alma", "Fer", "Julio"];
 const statuses: StatusLead[] = ["Lead Nuevo", "Contactado", "Videollamada", "En Negociación", "Convertido", "No Interesado"];
 
-const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Omit<Lead, 'id' | 'status' | 'responsable' | 'createdAt'>) => void }) => {
+const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Omit<Lead, 'id' | 'createdAt' | 'responsable' | 'status' | 'data'>) => void }) => {
     const [open, setOpen] = useState(false);
     const [cliente, setCliente] = useState('');
     const [email, setEmail] = useState('');
     const [telefono, setTelefono] = useState('');
-    const [origen, setOrigen] = useState<OrigenLead>('Facebook');
+    const [origen, setOrigen] = useState<OrigenLead>('Referencia');
     const { toast } = useToast();
+
+    const origenes: OrigenLead[] = ["Facebook", "TikTok", "Referencia"];
+
 
     const handleAdd = () => {
         if (!cliente || !origen) {
@@ -87,13 +72,12 @@ const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Omit<Lead, 'id' | 'sta
             return;
         }
 
-        onAddLead({ cliente, email, telefono, origen });
+        onAddLead({ name: cliente, email, phone: telefono, source: origen, company: cliente });
         
-        // Reset form and close
         setCliente('');
         setEmail('');
         setTelefono('');
-        setOrigen('Facebook');
+        setOrigen('Referencia');
         setOpen(false);
     };
 
@@ -145,6 +129,7 @@ const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Omit<Lead, 'id' | 'sta
 
 export default function VentasPage() {
     const [leads, setLeads] = useState<Lead[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
     const [isConvertModalOpen, setIsConvertModalOpen] = useState(false);
     const [pautaOption, setPautaOption] = useState<'si' | 'no' | 'ambos'>('si');
@@ -157,71 +142,42 @@ export default function VentasPage() {
     const [monthFilter, setMonthFilter] = useState('Todos');
     const [searchFilter, setSearchFilter] = useState('');
 
-    const handleAddLead = (newLeadData: Omit<Lead, 'id' | 'status' | 'responsable'| 'createdAt'>) => {
-        setLeads(prevLeads => {
-            let lastSellerIndex = parseInt(localStorage.getItem('lastAssignedSellerIndex') || '0');
-            
-            const newSeller = responsables[lastSellerIndex % responsables.length];
-            lastSellerIndex++;
-            
-            const leadToAdd: Lead = {
-                id: `lead-${Date.now()}-${Math.random()}`,
+    const fetchLeads = async () => {
+        setIsLoading(true);
+        const leadsData = await getLeads();
+        setLeads(leadsData as Lead[]);
+        setIsLoading(false);
+    }
+    
+    useEffect(() => {
+        fetchLeads();
+    }, []);
+
+    const handleAddLead = async (newLeadData: Omit<Lead, 'id' | 'createdAt' | 'responsable' | 'status' | 'data'>) => {
+        let lastSellerIndex = parseInt(localStorage.getItem('lastAssignedSellerIndex') || '0');
+        const newSeller = responsables[lastSellerIndex % responsables.length];
+        lastSellerIndex++;
+        localStorage.setItem('lastAssignedSellerIndex', lastSellerIndex.toString());
+
+        try {
+            await addProspect({
                 ...newLeadData,
                 status: 'Lead Nuevo',
                 responsable: newSeller,
-                createdAt: new Date(),
-            };
-    
-            localStorage.setItem('lastAssignedSellerIndex', lastSellerIndex.toString());
-            
+            });
             toast({
                 title: "Prospecto Añadido",
-                description: `${leadToAdd.cliente} se ha añadido al pipeline y asignado a ${newSeller}.`,
+                description: `${newLeadData.name} se ha añadido al pipeline y asignado a ${newSeller}.`,
             });
-
-            return [leadToAdd, ...prevLeads];
-        });
+            fetchLeads();
+        } catch(e) {
+            toast({
+                title: "Error",
+                description: "No se pudo añadir el prospecto.",
+                variant: 'destructive'
+            });
+        }
     };
-
-    useEffect(() => {
-        // This effect runs only once on mount to load initial and stored leads.
-        const loadLeads = () => {
-            let initialLeads = [...mockLeads];
-            const newLeadsJSON = localStorage.getItem('newLeads');
-
-            if (newLeadsJSON) {
-                try {
-                    const newLeadsFromStorage: Omit<Lead, 'id' | 'status' | 'responsable' | 'createdAt'>[] = JSON.parse(newLeadsJSON);
-                    if (Array.isArray(newLeadsFromStorage) && newLeadsFromStorage.length > 0) {
-                        let lastSellerIndex = parseInt(localStorage.getItem('lastAssignedSellerIndex') || '0');
-                        
-                        const leadsToAdd: Lead[] = newLeadsFromStorage.map((newLeadData) => {
-                            const newSeller = responsables[lastSellerIndex % responsables.length];
-                            lastSellerIndex++;
-                            return {
-                                id: `lead-${Date.now()}-${Math.random()}`,
-                                ...newLeadData,
-                                status: 'Lead Nuevo',
-                                responsable: newSeller,
-                                createdAt: new Date(),
-                            };
-                        });
-
-                        initialLeads = [...leadsToAdd, ...initialLeads];
-                        localStorage.setItem('lastAssignedSellerIndex', lastSellerIndex.toString());
-                        localStorage.removeItem('newLeads');
-                    }
-                } catch (e) {
-                    console.error("Error parsing new leads from localStorage", e);
-                    localStorage.removeItem('newLeads');
-                }
-            }
-            setLeads(initialLeads);
-        };
-
-        loadLeads();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
 
     const handleConvertClick = (lead: Lead) => {
@@ -231,10 +187,12 @@ export default function VentasPage() {
 
     const handleConfirmConversion = () => {
         if (selectedLead) {
+            // Here you would typically call a server action to convert the lead
+            // For now, we just update the local state
             setLeads(prev => prev.map(lead => lead.id === selectedLead.id ? {...lead, status: 'Convertido'} : lead));
             setIsConvertModalOpen(false);
             
-            let toastDescription = `El cliente ${selectedLead.cliente} ha sido movido a Pendientes.`;
+            let toastDescription = `El cliente ${selectedLead.name} ha sido movido a Pendientes.`;
             if (pautaOption === 'si') {
                 toastDescription += " Se creó una tarea en Pendientes Ads.";
             } else if (pautaOption === 'no') {
@@ -251,25 +209,37 @@ export default function VentasPage() {
         }
     }
     
+    const origenes = useMemo(() => {
+        const allOrigins = new Set(leads.map(l => l.source.includes('Calculator') ? 'Sitio Web' : l.source));
+        return ['Todos', ...Array.from(allOrigins)];
+    }, [leads]);
+
     const availableMonths = useMemo(() => {
         const months = new Set<string>();
         leads.forEach(lead => {
-            months.add(format(lead.createdAt, 'yyyy-MM'));
+            if (lead.createdAt) {
+                months.add(format(new Date(lead.createdAt), 'yyyy-MM'));
+            }
         });
         return Array.from(months).sort().reverse();
     }, [leads]);
 
     const filteredLeads = useMemo(() => {
         return leads.filter(lead => {
-            const searchMatch = searchFilter === '' || lead.cliente.toLowerCase().includes(searchFilter.toLowerCase());
+            const searchMatch = searchFilter === '' || lead.name?.toLowerCase().includes(searchFilter.toLowerCase());
             const responsableMatch = responsableFilter === 'Todos' || lead.responsable === responsableFilter;
             const statusMatch = statusFilter === 'Todos' || lead.status === statusFilter;
-            const origenMatch = origenFilter === 'Todos' || lead.origen === origenFilter;
-            const monthMatch = monthFilter === 'Todos' || format(lead.createdAt, 'yyyy-MM') === monthFilter;
+            const leadOrigin = lead.source.includes('Calculator') ? 'Sitio Web' : lead.source;
+            const origenMatch = origenFilter === 'Todos' || leadOrigin === origenFilter;
+            const monthMatch = monthFilter === 'Todos' || (lead.createdAt && format(new Date(lead.createdAt), 'yyyy-MM') === monthFilter);
 
             return searchMatch && responsableMatch && statusMatch && origenMatch && monthMatch;
         });
     }, [leads, searchFilter, responsableFilter, statusFilter, origenFilter, monthFilter]);
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center min-h-[50vh]"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div></div>;
+  }
 
   return (
     <div>
@@ -307,7 +277,6 @@ export default function VentasPage() {
                 <Select value={origenFilter} onValueChange={setOrigenFilter}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="Todos">Todos los Orígenes</SelectItem>
                         {origenes.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
                     </SelectContent>
                 </Select>
@@ -335,11 +304,11 @@ export default function VentasPage() {
                     <TableBody>
                         {filteredLeads.filter(l => l.status !== 'Convertido' && l.status !== 'No Interesado').map((lead) => (
                             <TableRow key={lead.id}>
-                                <TableCell className="font-medium">{lead.cliente}</TableCell>
-                                <TableCell>{lead.origen}</TableCell>
+                                <TableCell className="font-medium">{lead.name}</TableCell>
+                                <TableCell>{lead.source.includes('Calculator') ? 'Sitio Web' : lead.source}</TableCell>
                                 <TableCell>{lead.responsable}</TableCell>
                                 <TableCell>
-                                    <Badge className={cn("text-white", statusColors[lead.status])}>
+                                    <Badge className={cn("text-white", statusColors[lead.status as StatusLead])}>
                                         {lead.status}
                                     </Badge>
                                 </TableCell>
@@ -365,7 +334,7 @@ export default function VentasPage() {
         <Dialog open={isConvertModalOpen} onOpenChange={setIsConvertModalOpen}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Convertir a {selectedLead?.cliente} en Cliente</DialogTitle>
+                    <DialogTitle>Convertir a {selectedLead?.name} en Cliente</DialogTitle>
                     <DialogDescription>
                         Esto moverá el lead a la base de datos de clientes activos y creará las tareas iniciales.
                     </DialogDescription>

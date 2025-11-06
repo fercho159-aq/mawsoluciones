@@ -65,7 +65,6 @@ const ClientFormDialog = ({ client, children, isEditing, onSave }: { client?: Cl
             setWhatsapp(client.whatsapp);
             setEmail(client.email || '');
             setAreas(client.managedAreas || []);
-            // Nota: La edición de responsables no se maneja aquí, solo la creación.
             setResponsables({}); 
         } else {
             resetForm();
@@ -112,7 +111,15 @@ const ClientFormDialog = ({ client, children, isEditing, onSave }: { client?: Cl
         }
         
         const clientData = { name, representativeName, whatsapp, email: email || null, managedAreas: areas };
-        const dataToSend = { ...clientData, responsables };
+        
+        const dataToSend = {
+            ...clientData,
+            responsables: {
+                ...((areas.includes('Contenido') && responsables.contenido) && { contenido: responsables.contenido }),
+                ...((areas.includes('Ads') && responsables.ads) && { ads: responsables.ads }),
+                ...((areas.includes('Web') && responsables.web) && { web: responsables.web }),
+            }
+        };
         
         try {
             if (isEditing && client?.id) {
@@ -127,6 +134,7 @@ const ClientFormDialog = ({ client, children, isEditing, onSave }: { client?: Cl
                 if(!isEditing) resetForm();
             });
         } catch (error) {
+            console.error("Error saving client:", error);
             toast({ title: "Error", description: "No se pudo guardar el cliente.", variant: "destructive" });
         }
     };
