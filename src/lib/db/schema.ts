@@ -11,6 +11,10 @@ export const clients = pgTable('clients', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+export const clientsRelations = relations(clients, ({ many }) => ({
+	cuentasPorCobrar: many(cuentasPorCobrar),
+}));
+
 export type Client = typeof clients.$inferSelect;
 export type NewClient = typeof clients.$inferInsert;
 
@@ -70,12 +74,20 @@ export const accesses = pgTable('accesses', {
 
 export const cuentasPorCobrar = pgTable('cuentas_por_cobrar', {
     id: serial('id').primaryKey(),
-    clienteId: integer('cliente_id').references(() => clients.id).notNull(),
+    clienteId: integer('cliente_id').notNull().references(() => clients.id, { onDelete: 'cascade' }),
     clienteName: varchar('cliente_name', { length: 255 }).notNull(),
     periodo: varchar('periodo', { length: 100 }).notNull(),
     monto: real('monto').notNull(),
     tipo: varchar('tipo', { length: 50 }).notNull(),
 });
+
+export const cuentasPorCobrarRelations = relations(cuentasPorCobrar, ({ one }) => ({
+	client: one(clients, {
+		fields: [cuentasPorCobrar.clienteId],
+		references: [clients.id],
+	}),
+}));
+
 
 export type CuentaPorCobrar = typeof cuentasPorCobrar.$inferSelect;
 export type NewCuentaPorCobrar = typeof cuentasPorCobrar.$inferInsert;
