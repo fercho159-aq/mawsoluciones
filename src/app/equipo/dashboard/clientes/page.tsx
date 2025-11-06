@@ -28,10 +28,16 @@ import type { Client } from '@/lib/db/schema';
 import { addClient, updateClient, getClients } from './_actions';
 
 
-const contenidoTeam: TeamMember[] = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel'].includes(m.name));
 const adsTeam: TeamMember[] = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel'].includes(m.name));
 const webTeam: TeamMember[] = teamMembers.filter(m => ['Julio', 'Fernando', 'Alexis'].includes(m.name));
 
+const contenidoEncargados: TeamMember[] = teamMembers.filter(m => ['Luis', 'Carlos', 'Fany'].includes(m.name));
+
+const ejecutoresPorEncargado: Record<string, string[]> = {
+    'Luis': ['Luis', 'Paola', 'Kari', 'Alexis'],
+    'Carlos': ['Carlos', 'Pedro'],
+    'Fany': ['Fany', 'Daniel', 'Cristian', 'Aldair']
+};
 
 const ClientFormDialog = ({ client, children, isEditing, onSave }: { client?: Client, children: React.ReactNode, isEditing: boolean, onSave: () => void }) => {
     const [name, setName] = useState('');
@@ -48,14 +54,18 @@ const ClientFormDialog = ({ client, children, isEditing, onSave }: { client?: Cl
         ads?: { responsable: string };
         web?: { responsable: string };
     }>({});
-    
+
+    const [availableEjecutores, setAvailableEjecutores] = useState<TeamMember[]>([]);
+
     useEffect(() => {
-        if(client && open) {
+        if (client && open) {
             setName(client.name);
             setRepresentativeName(client.representativeName);
             setWhatsapp(client.whatsapp);
             setEmail(client.email || '');
             setAreas(client.managedAreas || []);
+            // Nota: La edición de responsables no se maneja aquí, solo la creación.
+            setResponsables({}); 
         } else {
             resetForm();
         }
@@ -63,8 +73,22 @@ const ClientFormDialog = ({ client, children, isEditing, onSave }: { client?: Cl
 
     const resetForm = () => {
         setName(''); setRepresentativeName(''); setWhatsapp(''); setEmail(''); setServiceType('');
-        setAreas([]); setResponsables({});
+        setAreas([]); setResponsables({}); setAvailableEjecutores([]);
     }
+
+    const handleEncargadoContenidoChange = (encargadoName: string) => {
+        const ejecutoresNombres = ejecutoresPorEncargado[encargadoName] || [];
+        const ejecutoresFiltrados = teamMembers.filter(m => ejecutoresNombres.includes(m.name));
+        setAvailableEjecutores(ejecutoresFiltrados);
+        
+        setResponsables(prev => ({
+            ...prev,
+            contenido: {
+                encargado: encargadoName,
+                ejecutor: '' // Reset ejecutor when encargado changes
+            }
+        }));
+    };
 
     const handleSave = async () => {
         if (!name || !representativeName || !whatsapp) {
@@ -87,12 +111,13 @@ const ClientFormDialog = ({ client, children, isEditing, onSave }: { client?: Cl
         }
         
         const clientData = { name, representativeName, whatsapp, email: email || null, managedAreas: areas };
+        const dataToSend = { ...clientData, responsables };
         
         try {
             if (isEditing && client?.id) {
                 await updateClient(client.id, clientData);
             } else {
-                await addClient({...clientData, responsables});
+                await addClient(dataToSend);
             }
             startTransition(() => {
                 onSave();
@@ -143,20 +168,24 @@ const ClientFormDialog = ({ client, children, isEditing, onSave }: { client?: Cl
                         {areas.includes('Contenido') && (
                             <div className="grid grid-cols-2 gap-4 border p-3 rounded-md">
                             <Label className="col-span-2 font-semibold">Responsables Contenido*</Label>
-                            <Select onValueChange={(v) => setResponsables(p => ({...p, contenido: {...p.contenido!, encargado: v}}))}>
-                                    <SelectTrigger><SelectValue placeholder="Encargado*" /></SelectTrigger>
-                                    <SelectContent>{contenidoTeam.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
+                            <Select onValueChange={handleEncargadoContenidoChange} value={responsables.contenido?.encargado || ''}>
+                                <SelectTrigger><SelectValue placeholder="Encargado*" /></SelectTrigger>
+                                <SelectContent>{contenidoEncargados.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
                             </Select>
-                            <Select onValueChange={(v) => setResponsables(p => ({...p, contenido: {...p.contenido!, ejecutor: v}}))}>
-                                    <SelectTrigger><SelectValue placeholder="Ejecutor*" /></SelectTrigger>
-                                    <SelectContent>{contenidoTeam.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
+                            <Select 
+                                onValueChange={(v) => setResponsables(p => ({...p, contenido: {...p.contenido!, ejecutor: v}}))}
+                                value={responsables.contenido?.ejecutor || ''}
+                                disabled={!responsables.contenido?.encargado}
+                            >
+                                <SelectTrigger><SelectValue placeholder="Ejecutor*" /></SelectTrigger>
+                                <SelectContent>{availableEjecutores.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
                             </Select>
                             </div>
                         )}
                         {areas.includes('Ads') && (
                             <div className="border p-3 rounded-md space-y-2">
                             <Label className="font-semibold">Responsable Ads*</Label>
-                            <Select onValueChange={(v) => setResponsables(p => ({...p, ads: {responsable: v}}))}>
+                            <Select onValueChange={(v) => setResponsables(p => ({...p, ads: {responsable: v}}))} value={responsables.ads?.responsable || ''}>
                                     <SelectTrigger><SelectValue placeholder="Seleccionar responsable*" /></SelectTrigger>
                                     <SelectContent>{adsTeam.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
                             </Select>
@@ -165,7 +194,7 @@ const ClientFormDialog = ({ client, children, isEditing, onSave }: { client?: Cl
                         {areas.includes('Web') && (
                             <div className="border p-3 rounded-md space-y-2">
                             <Label className="font-semibold">Responsable Web*</Label>
-                            <Select onValueChange={(v) => setResponsables(p => ({...p, web: {responsable: v}}))}>
+                            <Select onValueChange={(v) => setResponsables(p => ({...p, web: {responsable: v}}))} value={responsables.web?.responsable || ''}>
                                     <SelectTrigger><SelectValue placeholder="Seleccionar responsable*" /></SelectTrigger>
                                     <SelectContent>{webTeam.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
                             </Select>
@@ -309,5 +338,3 @@ export default function ClientesPage() {
 }
 
 export type { Client };
-
-    

@@ -1,6 +1,6 @@
 
 
-export type Role = 'admin' | 'contabilidad' | 'ventas' | 'team_member' | 'julio' | 'alma' | 'fernando' | 'luis' | 'fany' | 'carlos' | 'paola' | 'cristian' | 'daniel' | 'alexis' | 'bere';
+export type Role = 'admin' | 'contabilidad' | 'ventas' | 'team_member' | 'julio' | 'alma' | 'fernando' | 'luis' | 'fany' | 'carlos' | 'paola' | 'cristian' | 'daniel' | 'alexis' | 'bere' | 'kari' | 'aldair' | 'pedro';
 
 export type TeamMember = {
     id: string;
@@ -232,6 +232,42 @@ export const teamMembers: TeamMember[] = [
             calendario: { cambiarFechas: true, cambiarFechasSoloAsignados: true, verCalendarioTodos: true },
             pendientes: { moverPendientes: true, reasignarResponsables: false }
         },
+        progressConfig: {}
+    },
+    { 
+        id: 'kari-01', 
+        name: 'Kari', 
+        username: 'kari', 
+        password: 'kari2025', 
+        role: 'team_member', 
+        email: 'kari@agencia.com',
+        color: '#F97316', // orange-500
+        accessSections: { pendientes: true, calendario: true },
+        permissions: {},
+        progressConfig: {}
+    },
+    { 
+        id: 'aldair-01', 
+        name: 'Aldair', 
+        username: 'aldair', 
+        password: 'aldair2025', 
+        role: 'team_member', 
+        email: 'aldair@agencia.com',
+        color: '#14B8A6', // teal-500
+        accessSections: { pendientes: true, calendario: true },
+        permissions: {},
+        progressConfig: {}
+    },
+    { 
+        id: 'pedro-01', 
+        name: 'Pedro', 
+        username: 'pedro', 
+        password: 'pedro2025', 
+        role: 'team_member', 
+        email: 'pedro@agencia.com',
+        color: '#65A30D', // lime-600
+        accessSections: { pendientes: true, calendario: true },
+        permissions: {},
         progressConfig: {}
     }
 ];
