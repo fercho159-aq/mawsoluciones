@@ -1,7 +1,8 @@
 import { pgTable, serial, text, varchar, timestamp, boolean, integer, jsonb, real, date } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
-// New Colaboradores table
+// --- TABLE DEFINITIONS ---
+
 export const colaboradores = pgTable('colaboradores', {
   id: varchar('id', { length: 50 }).primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
@@ -10,14 +11,13 @@ export const colaboradores = pgTable('colaboradores', {
   role: varchar('role', { length: 50 }).notNull(),
   email: varchar('email', { length: 255 }).notNull().unique(),
   color: varchar('color', { length: 50 }),
-  birthday: text('birthday'), // Storing as text to be safe with date formats
+  birthday: text('birthday'),
   phone: varchar('phone', { length: 50 }),
   avatarUrl: text('avatar_url'),
   accessSections: jsonb('access_sections'),
   permissions: jsonb('permissions'),
   progressConfig: jsonb('progress_config'),
 });
-
 
 export const clients = pgTable('clients', {
   id: serial('id').primaryKey(),
@@ -27,12 +27,13 @@ export const clients = pgTable('clients', {
   email: varchar('email', { length: 255 }),
   managedAreas: jsonb('managed_areas').$type<string[]>(),
   createdAt: timestamp('created_at').defaultNow(),
+  archived: boolean('archived').default(false).notNull(),
 });
 
 export const clientFinancialProfiles = pgTable('client_financial_profiles', {
     id: serial('id').primaryKey(),
     clientId: integer('client_id').notNull().unique().references(() => clients.id, { onDelete: 'cascade' }),
-    billingDay: integer('billing_day').default(15), // e.g., 15th or 30th
+    billingDay: integer('billing_day').default(15),
     defaultInvoice: boolean('default_invoice').default(false),
 });
 
@@ -78,7 +79,7 @@ export const finanzas_final = pgTable('finanzas_final', {
 export const movimientosDiarios = pgTable('movimientos_diarios', {
     id: serial('id').primaryKey(),
     fecha: timestamp('fecha').defaultNow().notNull(),
-    tipo: varchar('tipo', { length: 50 }).notNull(), // 'Ingreso' o 'Gasto'
+    tipo: varchar('tipo', { length: 50 }).notNull(),
     descripcion: text('descripcion').notNull(),
     monto: real('monto').notNull(),
     cuenta: varchar('cuenta', { length: 100 }).notNull(),
@@ -125,13 +126,21 @@ export const prospects_maw = pgTable('prospects_maw', {
     createdAt: timestamp('created_at').defaultNow(),
 });
 
-// RELATIONS
+// --- RELATIONS ---
+
 export const clientsRelations = relations(clients, ({ one, many }) => ({
 	cuentasPorCobrar: many(cuentasPorCobrar),
     pendientes: many(pendientes_maw),
     financialProfile: one(clientFinancialProfiles, {
         fields: [clients.id],
         references: [clientFinancialProfiles.clientId],
+    })
+}));
+
+export const clientFinancialProfilesRelations = relations(clientFinancialProfiles, ({ one }) => ({
+    client: one(clients, {
+        fields: [clientFinancialProfiles.clientId],
+        references: [clients.id],
     })
 }));
 
@@ -160,7 +169,9 @@ export const recordingEventsRelations = relations(recordingEvents, ({ one }) => 
 	}),
 }));
 
-// TYPES
+
+// --- TYPES ---
+
 export type Client = typeof clients.$inferSelect;
 export type NewClient = typeof clients.$inferInsert;
 export type PendienteMaw = typeof pendientes_maw.$inferSelect;
@@ -178,3 +189,4 @@ export type NewRecordingEvent = typeof recordingEvents.$inferInsert;
 export type Colaborador = typeof colaboradores.$inferSelect;
 export type NewColaborador = typeof colaboradores.$inferInsert;
 export type ClientFinancialProfile = typeof clientFinancialProfiles.$inferSelect;
+export type NewClientFinancialProfile = typeof clientFinancialProfiles.$inferInsert;
