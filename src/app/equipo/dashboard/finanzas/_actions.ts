@@ -62,10 +62,8 @@ export async function addMovimiento(data: Omit<NewMovimientoDiario, 'id'>) {
 
 export async function updateCpcAfterPayment(cpc: CuentaPorCobrar, nextPeriod: string) {
     try {
-        // Delete the paid CPC
         await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, cpc.id));
 
-        // If it's a recurring payment, create the next one
         if (cpc.tipo === 'Iguala Mensual') {
             await db.insert(cuentasPorCobrar).values({
                 clienteId: cpc.clienteId,
@@ -82,4 +80,3 @@ export async function updateCpcAfterPayment(cpc: CuentaPorCobrar, nextPeriod: st
         throw new Error("Could not update cpc");
     }
 }
-
