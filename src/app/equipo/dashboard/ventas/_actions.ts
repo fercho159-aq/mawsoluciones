@@ -2,31 +2,31 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { leads, type NewLead } from "@/lib/db/schema";
+import { prospects, type NewProspect } from "@/lib/db/schema";
 import { desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
-export async function getLeads() {
+export async function getProspects() {
   try {
-    const allLeads = await db.query.leads.findMany({
-      orderBy: [desc(leads.createdAt)],
+    const allProspects = await db.query.prospects.findMany({
+      orderBy: [desc(prospects.createdAt)],
     });
-    return allLeads;
+    return allProspects;
   } catch (error) {
-    console.error("Error fetching leads:", error);
+    console.error("Error fetching prospects:", error);
     return [];
   }
 }
 
-export async function addProspect(data: Partial<Omit<NewLead, 'id' | 'createdAt' | 'data' | 'source' | 'status' | 'responsable'>>) {
+export async function addSalesProspect(data: Partial<Omit<NewProspect, 'id' | 'createdAt'>>) {
     try {
-        await db.insert(leads).values({
+        await db.insert(prospects).values({
             name: data.name || data.company,
             company: data.company,
             phone: data.phone,
             email: data.email,
-            source: 'Manual',
-            status: 'Lead Nuevo',
+            source: data.source,
+            status: data.status,
             responsable: data.responsable,
         });
         revalidatePath("/equipo/dashboard/ventas");

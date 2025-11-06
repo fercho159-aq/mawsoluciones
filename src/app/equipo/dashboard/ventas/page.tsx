@@ -15,7 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Check, Send, Sparkles, PlusCircle } from 'lucide-react';
+import { Check, Sparkles, PlusCircle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -29,10 +29,10 @@ import { useToast } from '@/hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { format, getMonth, getYear } from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { getLeads, addProspect } from './_actions';
-import type { Lead, NewLead } from '@/lib/db/schema';
+import { getProspects, addSalesProspect } from './_actions';
+import type { Prospect, NewProspect } from '@/lib/db/schema';
 
 
 type OrigenLead = "Facebook" | "TikTok" | "Referencia" | "Sitio Web" | string;
@@ -51,7 +51,7 @@ const statusColors: Record<StatusLead, string> = {
 const responsables: ResponsableVentas[] = ["Alma", "Fer", "Julio"];
 const statuses: StatusLead[] = ["Lead Nuevo", "Contactado", "Videollamada", "En Negociación", "Convertido", "No Interesado"];
 
-const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<NewLead>) => void }) => {
+const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<NewProspect>) => void }) => {
     const [open, setOpen] = useState(false);
     const [name, setName] = useState('');
     const [company, setCompany] = useState('');
@@ -69,7 +69,7 @@ const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<NewLead>) => v
             return;
         }
 
-        onAddLead({ name: name || company, company: company || name, email, phone });
+        onAddLead({ name, company, email, phone });
         
         setName('');
         setCompany('');
@@ -118,9 +118,9 @@ const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<NewLead>) => v
 }
 
 export default function VentasPage() {
-    const [leads, setLeads] = useState<Lead[]>([]);
+    const [prospects, setProspects] = useState<Prospect[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+    const [selectedLead, setSelectedLead] = useState<Prospect | null>(null);
     const [isConvertModalOpen, setIsConvertModalOpen] = useState(false);
     const [pautaOption, setPautaOption] = useState<'si' | 'no' | 'ambos'>('si');
     const { toast } = useToast();
@@ -132,64 +132,64 @@ export default function VentasPage() {
     const [monthFilter, setMonthFilter] = useState('Todos');
     const [searchFilter, setSearchFilter] = useState('');
 
-    const fetchLeads = async () => {
+    const fetchProspects = async () => {
         setIsLoading(true);
-        const leadsData = await getLeads();
-        setLeads(leadsData as Lead[]);
+        const prospectsData = await getProspects();
+        setProspects(prospectsData as Prospect[]);
         setIsLoading(false);
     }
     
     useEffect(() => {
-        fetchLeads();
+        fetchProspects();
     }, []);
 
-    const handleAddLead = async (newLeadData: Partial<Omit<NewLead, 'id' | 'createdAt' | 'data'>>) => {
-      let lastSellerIndex = 0;
-      try {
-        const lastIndexStr = localStorage.getItem('lastAssignedSellerIndex');
-        if (lastIndexStr) {
-          lastSellerIndex = parseInt(lastIndexStr, 10);
+    const handleAddLead = async (newProspectData: Partial<Omit<NewProspect, 'id' | 'createdAt'>>) => {
+        let lastSellerIndex = 0;
+        try {
+            const lastIndexStr = localStorage.getItem('lastAssignedSellerIndex');
+            if (lastIndexStr) {
+                lastSellerIndex = parseInt(lastIndexStr, 10);
+            }
+        } catch (error) {
+            console.error('Could not parse lastAssignedSellerIndex from localStorage', error);
         }
-      } catch (error) {
-        console.error('Could not parse lastAssignedSellerIndex from localStorage', error);
-      }
 
-      const newSeller = responsables[lastSellerIndex % responsables.length];
-      const nextSellerIndex = (lastSellerIndex + 1) % responsables.length;
-      localStorage.setItem('lastAssignedSellerIndex', nextSellerIndex.toString());
+        const newSeller = responsables[lastSellerIndex % responsables.length];
+        const nextSellerIndex = (lastSellerIndex + 1) % responsables.length;
+        localStorage.setItem('lastAssignedSellerIndex', nextSellerIndex.toString());
 
-      try {
-        await addProspect({
-            ...newLeadData,
-            responsable: newSeller,
-        });
+        try {
+            await addSalesProspect({
+                ...newProspectData,
+                responsable: newSeller,
+                source: 'Manual',
+                status: 'Lead Nuevo',
+            });
 
-        toast({
-            title: "Prospecto Añadido",
-            description: `${newLeadData.name} se ha añadido al pipeline y asignado a ${newSeller}.`,
-        });
-        fetchLeads();
-      } catch(e) {
-          console.error(e);
-          toast({
-              title: "Error",
-              description: "No se pudo añadir el prospecto.",
-              variant: 'destructive'
-          });
-      }
+            toast({
+                title: "Prospecto Añadido",
+                description: `${newProspectData.name || newProspectData.company} se ha añadido al pipeline y asignado a ${newSeller}.`,
+            });
+            fetchProspects();
+        } catch(e) {
+            console.error(e);
+            toast({
+                title: "Error",
+                description: "No se pudo añadir el prospecto.",
+                variant: 'destructive'
+            });
+        }
     };
 
 
-    const handleConvertClick = (lead: Lead) => {
+    const handleConvertClick = (lead: Prospect) => {
         setSelectedLead(lead);
         setIsConvertModalOpen(true);
     };
 
     const handleConfirmConversion = () => {
         if (selectedLead) {
-            // Here you would typically call a server action to convert the lead
-            // For now, we just update the local state
-            setLeads(prev => prev.map(lead => lead.id === selectedLead.id ? {...lead, status: 'Convertido'} : lead));
+            setProspects(prev => prev.map(lead => lead.id === selectedLead.id ? {...lead, status: 'Convertido'} : lead));
             setIsConvertModalOpen(false);
             
             let toastDescription = `El cliente ${selectedLead.name} ha sido movido a Pendientes.`;
@@ -210,22 +210,22 @@ export default function VentasPage() {
     }
     
     const origenes = useMemo(() => {
-        const allOrigins = new Set(leads.map(l => l.source || 'N/A' ));
+        const allOrigins = new Set(prospects.map(l => l.source || 'N/A' ));
         return ['Todos', ...Array.from(allOrigins)];
-    }, [leads]);
+    }, [prospects]);
 
     const availableMonths = useMemo(() => {
         const months = new Set<string>();
-        leads.forEach(lead => {
+        prospects.forEach(lead => {
             if (lead.createdAt) {
                 months.add(format(new Date(lead.createdAt), 'yyyy-MM'));
             }
         });
         return Array.from(months).sort().reverse();
-    }, [leads]);
+    }, [prospects]);
 
-    const filteredLeads = useMemo(() => {
-        return leads.filter(lead => {
+    const filteredProspects = useMemo(() => {
+        return prospects.filter(lead => {
             const searchMatch = searchFilter === '' || lead.name?.toLowerCase().includes(searchFilter.toLowerCase()) || lead.company?.toLowerCase().includes(searchFilter.toLowerCase());
             const responsableMatch = responsableFilter === 'Todos' || lead.responsable === responsableFilter;
             const statusMatch = statusFilter === 'Todos' || lead.status === statusFilter;
@@ -234,7 +234,7 @@ export default function VentasPage() {
 
             return searchMatch && responsableMatch && statusMatch && origenMatch && monthMatch;
         });
-    }, [leads, searchFilter, responsableFilter, statusFilter, origenFilter, monthFilter]);
+    }, [prospects, searchFilter, responsableFilter, statusFilter, origenFilter, monthFilter]);
 
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-[50vh]"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div></div>;
@@ -301,7 +301,7 @@ export default function VentasPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filteredLeads.filter(l => l.status !== 'Convertido' && l.status !== 'No Interesado').map((lead) => (
+                        {filteredProspects.filter(l => l.status !== 'Convertido' && l.status !== 'No Interesado').map((lead) => (
                             <TableRow key={lead.id}>
                                 <TableCell className="font-medium">{lead.name}</TableCell>
                                 <TableCell>{lead.source}</TableCell>
@@ -321,7 +321,7 @@ export default function VentasPage() {
                         ))}
                     </TableBody>
                 </Table>
-                 {filteredLeads.filter(l => l.status !== 'Convertido' && l.status !== 'No Interesado').length === 0 && (
+                 {filteredProspects.filter(l => l.status !== 'Convertido' && l.status !== 'No Interesado').length === 0 && (
                     <div className="text-center p-8 text-muted-foreground">
                         No hay prospectos activos con los filtros seleccionados.
                     </div>

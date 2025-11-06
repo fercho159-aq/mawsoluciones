@@ -125,12 +125,25 @@ export const leads = pgTable('leads', {
   phone: varchar('phone', { length: 50 }),
   email: varchar('email', { length: 255 }),
   source: varchar('source', { length: 100 }).notNull(),
-  status: varchar('status', { length: 50 }),
-  responsable: varchar('responsable', { length: 100 }),
   data: jsonb('data'),
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+export const prospects = pgTable('prospects', {
+    id: serial('id').primaryKey(),
+    name: varchar('name', { length: 255 }),
+    company: varchar('company', { length: 255 }),
+    phone: varchar('phone', { length: 50 }),
+    email: varchar('email', { length: 255 }),
+    source: varchar('source', { length: 100 }).notNull(),
+    status: varchar('status', { length: 50 }),
+    responsable: varchar('responsable', { length: 100 }),
+    createdAt: timestamp('created_at').defaultNow(),
+});
+
+
+export type Prospect = typeof prospects.$inferSelect;
+export type NewProspect = typeof prospects.$inferInsert;
 export type Lead = typeof leads.$inferSelect;
 export type NewLead = typeof leads.$inferInsert;
 
