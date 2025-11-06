@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect, startTransition } from 'react';
@@ -186,7 +187,6 @@ const AddCpcDialog = ({ clients, onAdd }: { clients: (Client & { financialProfil
                             <SelectTrigger><SelectValue/></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="Iguala Mensual">Iguala Mensual</SelectItem>
-                                <SelectItem value="Ads">Ads</SelectItem>
                                 <SelectItem value="Proyecto">Proyecto</SelectItem>
                             </SelectContent>
                         </Select>
