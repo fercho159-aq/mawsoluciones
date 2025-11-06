@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, startTransition } from 'react';
 import {
   Table,
   TableHeader,
@@ -17,23 +17,24 @@ import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { mockData, type Activity, type StatusPendiente, type SubTask } from '@/lib/activities-data';
 import { useAuth } from '@/lib/auth-provider';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
+import type { Pendiente, SubTask } from '@/lib/db/schema';
+import { getPendientes, addSubTask, toggleSubTask } from './_actions';
+import { useToast } from '@/hooks/use-toast';
 
-const statusColors: Record<StatusPendiente, string> = {
+const statusColors: Record<string, string> = {
   "Pendiente del cliente": "bg-orange-500",
   "Trabajando": "bg-blue-500",
   "No tenemos pendiente": "bg-green-500",
 };
 
-const encargados = Array.from(new Set(mockData.map(item => item.encargado))).sort();
-const statuses = Array.from(new Set(mockData.map(item => item.status)));
+type PendienteWithSubTasks = Pendiente & { subTasks: SubTask[] };
 
-
-const PendientesTable = ({ data, onUpdateTask, currentUser }: { data: Activity[]; onUpdateTask: (task: Activity) => void; currentUser: any; }) => {
+const PendientesTable = ({ data, onUpdateTask, currentUser }: { data: PendienteWithSubTasks[]; onUpdateTask: (task: PendienteWithSubTasks) => void; currentUser: any; }) => {
     const [newSubTaskText, setNewSubTaskText] = useState<Record<string, string>>({});
+    const { toast } = useToast();
 
     if (data.length === 0) {
         return (
@@ -43,31 +44,37 @@ const PendientesTable = ({ data, onUpdateTask, currentUser }: { data: Activity[]
         );
     }
     
-    const handleAddSubTask = (taskId: string) => {
-        const text = newSubTaskText[taskId];
+    const handleAddSubTask = async (taskId: number) => {
+        const text = newSubTaskText[taskId.toString()];
         if (!text) return;
 
-        const task = data.find(t => t.id === taskId);
-        if (task) {
-            const newSubTask: SubTask = {
-                id: `sub-${Date.now()}`,
-                text,
-                completed: false,
-            };
-            const updatedTask = { ...task, subTasks: [...task.subTasks, newSubTask] };
-            onUpdateTask(updatedTask);
-            setNewSubTaskText(prev => ({...prev, [taskId]: ''}));
+        try {
+            const newSubTask = await addSubTask({ text, pendienteId: taskId });
+            const task = data.find(t => t.id === taskId);
+            if (task && newSubTask) {
+                const updatedTask = { ...task, subTasks: [...task.subTasks, newSubTask] };
+                onUpdateTask(updatedTask);
+            }
+            setNewSubTaskText(prev => ({...prev, [taskId.toString()]: ''}));
+            toast({ title: "Sub-tarea añadida" });
+        } catch (error) {
+            toast({ title: "Error", description: "No se pudo añadir la sub-tarea.", variant: "destructive" });
         }
     };
     
-    const handleToggleSubTask = (taskId: string, subTaskId: string) => {
-        const task = data.find(t => t.id === taskId);
-        if (task) {
-            const updatedSubTasks = task.subTasks.map(st => 
-                st.id === subTaskId ? { ...st, completed: !st.completed } : st
-            );
-            const updatedTask = { ...task, subTasks: updatedSubTasks };
-            onUpdateTask(updatedTask);
+    const handleToggleSubTask = async (taskId: number, subTaskId: number, currentStatus: boolean) => {
+        try {
+            await toggleSubTask(subTaskId, !currentStatus);
+            const task = data.find(t => t.id === taskId);
+            if (task) {
+                const updatedSubTasks = task.subTasks.map(st => 
+                    st.id === subTaskId ? { ...st, completed: !st.completed } : st
+                );
+                const updatedTask = { ...task, subTasks: updatedSubTasks };
+                onUpdateTask(updatedTask);
+            }
+        } catch (error) {
+            toast({ title: "Error", description: "No se pudo actualizar la sub-tarea.", variant: "destructive" });
         }
     }
 
@@ -109,7 +116,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser }: { data: Activity[]
                                                     <Checkbox 
                                                         id={`subtask-${subTask.id}`} 
                                                         checked={subTask.completed}
-                                                        onCheckedChange={() => handleToggleSubTask(item.id, subTask.id)}
+                                                        onCheckedChange={() => handleToggleSubTask(item.id, subTask.id, subTask.completed)}
                                                     />
                                                     <label htmlFor={`subtask-${subTask.id}`} className={cn("text-sm", subTask.completed && "line-through text-muted-foreground")}>{subTask.text}</label>
                                                 </div>
@@ -120,8 +127,8 @@ const PendientesTable = ({ data, onUpdateTask, currentUser }: { data: Activity[]
                                                 <Input 
                                                     placeholder="Añadir sub-pendiente..."
                                                     className="h-8 text-sm"
-                                                    value={newSubTaskText[item.id] || ''}
-                                                    onChange={(e) => setNewSubTaskText(prev => ({...prev, [item.id]: e.target.value}))}
+                                                    value={newSubTaskText[item.id.toString()] || ''}
+                                                    onChange={(e) => setNewSubTaskText(prev => ({...prev, [item.id.toString()]: e.target.value}))}
                                                     onKeyDown={(e) => {
                                                         if (e.key === 'Enter') {
                                                             handleAddSubTask(item.id);
@@ -148,42 +155,35 @@ const PendientesTable = ({ data, onUpdateTask, currentUser }: { data: Activity[]
 
 export default function PendientesPage() {
     const { user } = useAuth();
-    const [pendientes, setPendientes] = useState<Activity[]>([]);
+    const [pendientes, setPendientes] = useState<PendienteWithSubTasks[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [encargadoFilter, setEncargadoFilter] = useState('Todos');
     const [ejecutorFilter, setEjecutorFilter] = useState('Todos');
     const [statusFilter, setStatusFilter] = useState('Todos');
     const [searchFilter, setSearchFilter] = useState('');
 
+    const fetchPendientes = async () => {
+        setIsLoading(true);
+        const data = await getPendientes();
+        setPendientes(data);
+        setIsLoading(false);
+    }
+    
     useEffect(() => {
-        try {
-            const storedPendientes = localStorage.getItem('pendientes');
-            if (storedPendientes) {
-                setPendientes(JSON.parse(storedPendientes));
-            } else {
-                setPendientes(mockData);
-            }
-        } catch (e) {
-            console.error("Failed to load pendientes from local storage", e);
-            setPendientes(mockData);
-        }
+        fetchPendientes();
     }, []);
     
-    const handleUpdateTask = (updatedTask: Activity) => {
-        const newPendientes = pendientes.map(p => p.id === updatedTask.id ? updatedTask : p);
-        setPendientes(newPendientes);
-         try {
-            localStorage.setItem('pendientes', JSON.stringify(newPendientes));
-        } catch (e) {
-            console.error("Failed to save pendientes to local storage", e);
-        }
+    const handleUpdateTask = (updatedTask: PendienteWithSubTasks) => {
+        startTransition(() => {
+            setPendientes(prevPendientes => 
+                prevPendientes.map(p => p.id === updatedTask.id ? updatedTask : p)
+            );
+        });
     };
-
-    const ejecutoresDisponibles = useMemo(() => {
-        if (encargadoFilter === 'Todos') {
-            return Array.from(new Set(pendientes.map(item => item.ejecutor))).sort();
-        }
-        return Array.from(new Set(pendientes.filter(item => item.encargado === encargadoFilter).map(item => item.ejecutor))).sort();
-    }, [encargadoFilter, pendientes]);
+    
+    const encargados = useMemo(() => Array.from(new Set(pendientes.map(item => item.encargado))).sort(), [pendientes]);
+    const ejecutoresDisponibles = useMemo(() => Array.from(new Set(pendientes.map(item => item.ejecutor))).sort(), [pendientes]);
+    const statuses = useMemo(() => Array.from(new Set(pendientes.map(item => item.status))), [pendientes]);
 
     const filteredData = useMemo(() => {
         return pendientes.filter(item => {
@@ -194,6 +194,14 @@ export default function PendientesPage() {
             return encargadoMatch && ejecutorMatch && statusMatch && searchMatch;
         });
     }, [encargadoFilter, ejecutorFilter, statusFilter, searchFilter, pendientes]);
+
+  if (isLoading) {
+    return (
+        <div className="flex items-center justify-center min-h-[50vh]">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
+        </div>
+    )
+  }
 
   if (!user) {
     return <div>Cargando...</div>
