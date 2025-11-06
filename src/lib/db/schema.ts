@@ -93,6 +93,15 @@ export const cuentasPorCobrar = pgTable('cuentas_por_cobrar', {
     tipo: varchar('tipo', { length: 50 }).notNull(),
 });
 
+export const finanzas_final = pgTable('finanzas_final', {
+    id: serial('id').primaryKey(),
+    clientName: varchar('client_name', { length: 255 }).notNull(),
+    serviceType: varchar('service_type', { length: 100 }).notNull(),
+    amount: real('amount').notNull(),
+    requiresInvoice: boolean('requires_invoice').default(false).notNull(),
+    createdAt: timestamp('created_at').defaultNow(),
+});
+
 export const cuentasPorCobrarRelations = relations(cuentasPorCobrar, ({ one }) => ({
 	client: one(clients, {
 		fields: [cuentasPorCobrar.clienteId],

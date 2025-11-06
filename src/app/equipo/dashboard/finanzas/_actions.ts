@@ -2,7 +2,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { cuentasPorCobrar, movimientosDiarios, type NewCuentaPorCobrar, type CuentaPorCobrar } from "@/lib/db/schema";
+import { cuentasPorCobrar, movimientosDiarios, type NewCuentaPorCobrar, type CuentaPorCobrar, finanzas_final } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -28,15 +28,19 @@ export async function getMovimientos() {
   }
 }
 
-export async function addCpc(data: NewCuentaPorCobrar) {
-  try {
-    await db.insert(cuentasPorCobrar).values(data);
-    revalidatePath("/equipo/dashboard/finanzas");
-  } catch (error) {
-    console.error("Error adding cpc:", error);
-    throw new Error("Could not add cpc");
-  }
+export async function addCpc(data: Omit<NewCuentaPorCobrar, 'id'>) {
+    try {
+        await db.insert(cuentasPorCobrar).values({
+            ...data,
+            periodo: "Periodo pendiente"
+        });
+        revalidatePath("/equipo/dashboard/finanzas");
+    } catch (error) {
+        console.error("Error adding cpc:", error);
+        throw new Error("Could not add cpc");
+    }
 }
+
 
 export async function updateCpc(id: number, data: Partial<Omit<NewCuentaPorCobrar, 'id'>>) {
     try {
@@ -79,5 +83,20 @@ export async function updateCpcAfterPayment(cpc: CuentaPorCobrar, nextPeriod: st
     } catch (error) {
         console.error("Error updating cpc after payment:", error);
         throw new Error("Could not update cpc");
+    }
+}
+
+export async function addFinanzaFinal(data: { clientName: string; serviceType: string; amount: number; requiresInvoice: boolean; }) {
+    try {
+        await db.insert(finanzas_final).values({
+            clientName: data.clientName,
+            serviceType: data.serviceType,
+            amount: data.amount,
+            requiresInvoice: data.requiresInvoice,
+        });
+        revalidatePath("/equipo/dashboard/finanzas");
+    } catch (error) {
+        console.error("Error adding to finanzas_final:", error);
+        throw new Error("Could not add to finanzas_final");
     }
 }
