@@ -154,12 +154,6 @@ export default function PendientesPage() {
     const [statusFilter, setStatusFilter] = useState('Todos');
     const [searchFilter, setSearchFilter] = useState('');
 
-     useEffect(() => {
-        if (user) {
-            setEjecutorFilter(user.name);
-        }
-    }, [user]);
-
     useEffect(() => {
         try {
             const storedPendientes = localStorage.getItem('pendientes');
