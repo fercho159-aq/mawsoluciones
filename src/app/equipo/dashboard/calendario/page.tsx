@@ -59,8 +59,8 @@ const equipmentCategoryIcons = {
     soporte: <Grip className="w-4 h-4" />
 };
 
-const salesTeam = teamMembers.filter(member => ['admin', 'julio', 'alma', 'fernando'].includes(member.role));
-const productionTeam = teamMembers.filter(member => ['luis', 'julio', 'fernando'].includes(member.role));
+const salesTeam = teamMembers.filter(member => ['julio', 'alma', 'fernando'].includes(member.role));
+const productionTeam = teamMembers.filter(member => ['luis', 'fany', 'carlos', 'paola', 'cristian', 'daniel', 'alexis'].includes(member.role));
 
 
 const EventDialog = ({
@@ -303,10 +303,13 @@ const CalendarSection = ({ title, description, events, team, eventType, onSave, 
     const weeklySummary = useMemo(() => {
         const summary: { [key: string]: number } = {};
         team.forEach(member => { summary[member.name] = 0; });
-        const eventsInWeek = filteredEvents.filter(event => isWithinInterval(event.fullStart, { start: currentWeekStart, end: currentWeekEnd }));
+        const eventsInWeek = events.filter(event => 
+            event.type === eventType &&
+            isWithinInterval(event.fullStart, { start: currentWeekStart, end: currentWeekEnd })
+        );
         eventsInWeek.forEach(event => { if (summary[event.assignedToName] !== undefined) summary[event.assignedToName]++; });
         return summary;
-    }, [currentWeekStart, currentWeekEnd, filteredEvents, team]);
+    }, [currentWeekStart, currentWeekEnd, events, team, eventType]);
 
     const goToPreviousWeek = () => setCurrentDate(subWeeks(currentDate, 1));
     const goToNextWeek = () => setCurrentDate(addWeeks(currentDate, 1));
