@@ -200,6 +200,8 @@ export default function CalendarioPage() {
     const citasVenta = events.filter(e => e.project === 'cita_venta');
 
     const canSeeSalesCalendar = user?.accessSections?.ventas;
+    const canSeeRecordingsCalendar = user?.accessSections?.pendientes; // Solo los usuarios que ven pendientes ven el calendario de grabaciones
+
 
     if (isLoading) {
         return <div className="flex items-center justify-center min-h-[50vh]"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div></div>
@@ -209,13 +211,15 @@ export default function CalendarioPage() {
         <div>
             <h1 className="text-2xl font-bold font-headline mb-4">Planificación Semanal</h1>
             <div className="grid grid-cols-1 gap-8">
-                 <CalendarSection
-                    title="Calendario de Grabaciones"
-                    events={grabaciones}
-                    team={productionTeam}
-                    eventType="grabacion"
-                    onRefresh={fetchEvents}
-                />
+                 {canSeeRecordingsCalendar && (
+                    <CalendarSection
+                        title="Calendario de Grabaciones"
+                        events={grabaciones}
+                        team={productionTeam}
+                        eventType="grabacion"
+                        onRefresh={fetchEvents}
+                    />
+                 )}
                  {canSeeSalesCalendar && (
                     <CalendarSection
                         title="Calendario de Citas de Venta"

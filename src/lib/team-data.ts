@@ -89,10 +89,9 @@ export const teamMembers: TeamMember[] = [
         role: 'alma', 
         email: 'alma@agencia.com',
         color: '#DB2777', // pink-600
-        accessSections: { nosotros: true, introduccion: true, pendientes: false, finanzas: false, ventas: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
+        accessSections: { nosotros: true, introduccion: true, ventas: true, calendario: true },
         permissions: {
             ventas: { cambiarStatusProspectos: true, cambiarStatusSoloAsignados: true },
-            accesos: { ajustarAccesos: true, agregarNuevosAccesos: true },
             calendario: { cambiarFechas: true, cambiarFechasSoloAsignados: true, verCalendarioTodos: true }
         },
         progressConfig: { ventasCerradas: true, statusVentas: true }
