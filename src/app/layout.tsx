@@ -5,8 +5,6 @@ import { cn } from '@/lib/utils';
 import { Toaster } from "@/components/ui/toaster"
 import ChatBubble from '@/components/chat-bubble';
 import { ThemeProvider } from '@/components/theme-provider';
-import { FirebaseProvider } from '@/firebase/provider';
-import { getApp, getAuth, getFirestore } from '@/firebase';
 import { AuthProvider } from '@/lib/auth-provider';
 
 export const metadata: Metadata = {
@@ -19,9 +17,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const app = getApp();
-  const auth = getAuth();
-  const firestore = getFirestore();
 
   return (
     <html lang="es" className="scroll-smooth" suppressHydrationWarning>
@@ -37,17 +32,11 @@ export default function RootLayout({
             enableSystem={false}
             disableTransitionOnChange
         >
-          <FirebaseProvider
-            app={app}
-            auth={auth}
-            firestore={firestore}
-          >
             <AuthProvider>
               {children}
               <ChatBubble />
               <Toaster />
             </AuthProvider>
-          </FirebaseProvider>
         </ThemeProvider>
       </body>
     </html>
