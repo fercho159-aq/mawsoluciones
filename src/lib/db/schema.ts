@@ -1,5 +1,5 @@
 
-import { pgTable, serial, text, varchar, timestamp, boolean, integer, jsonb, real, date } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, varchar, timestamp, boolean, integer, jsonb, real } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // --- TABLE DEFINITIONS ---
@@ -28,7 +28,6 @@ export const clients = pgTable('clients', {
   email: varchar('email', { length: 255 }),
   managedAreas: jsonb('managed_areas').$type<string[]>(),
   createdAt: timestamp('created_at').defaultNow(),
-  archived: boolean('archived').default(false).notNull(),
 });
 
 export const clientFinancialProfiles = pgTable('client_financial_profiles', {
@@ -61,20 +60,11 @@ export const accesses = pgTable('accesses', {
 
 export const cuentasPorCobrar = pgTable('cuentas_por_cobrar', {
     id: serial('id').primaryKey(),
-    clienteId: integer('cliente_id').notNull(),
+    clienteId: integer('cliente_id').notNull().references(() => clients.id, { onDelete: 'cascade' }),
     clienteName: varchar('cliente_name', { length: 255 }).notNull(),
     periodo: varchar('periodo', { length: 100 }).notNull(),
     monto: real('monto').notNull(),
     tipo: varchar('tipo', { length: 50 }).notNull(),
-});
-
-export const finanzas_final = pgTable('finanzas_final', {
-    id: serial('id').primaryKey(),
-    clientName: varchar('client_name', { length: 255 }).notNull(),
-    serviceType: varchar('service_type', { length: 100 }).notNull(),
-    amount: real('amount').notNull(),
-    requiresInvoice: boolean('requires_invoice').default(false).notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
 export const movimientosDiarios = pgTable('movimientos_diarios', {
@@ -191,5 +181,5 @@ export type Colaborador = typeof colaboradores.$inferSelect;
 export type NewColaborador = typeof colaboradores.$inferInsert;
 export type ClientFinancialProfile = typeof clientFinancialProfiles.$inferSelect;
 export type NewClientFinancialProfile = typeof clientFinancialProfiles.$inferInsert;
-export type FinanzaFinal = typeof finanzas_final.$inferSelect;
-export type NewFinanzaFinal = typeof finanzas_final.$inferInsert;
+export type FinanzaFinal = any;
+export type NewFinanzaFinal = any;

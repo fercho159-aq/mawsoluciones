@@ -32,8 +32,8 @@ import type { CategoriaIngreso, Cuenta } from '@/lib/finanzas-data';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { getClients as fetchClientsDB } from '../clientes/_actions';
 import type { Client } from '../clientes/page';
-import { addCpc, addMovimiento, getCuentasPorCobrar, getMovimientos, updateCpcAfterPayment, updateCpc, addFinanzaFinal, getFinanzasFinal } from './_actions';
-import type { MovimientoDiario, CuentaPorCobrar, NewCuentaPorCobrar, NewMovimientoDiario, ClientFinancialProfile, FinanzaFinal } from '@/lib/db/schema';
+import { addCpc, addMovimiento, getCuentasPorCobrar, getMovimientos, updateCpcAfterPayment, updateCpc } from './_actions';
+import type { MovimientoDiario, CuentaPorCobrar, NewCuentaPorCobrar, NewMovimientoDiario, ClientFinancialProfile } from '@/lib/db/schema';
 import { Switch } from '@/components/ui/switch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -87,8 +87,8 @@ const AddCpcDialog = ({ clients, onSave, onClientAdd, children }: { clients: Cli
     }, [monto, requiresInvoice]);
 
     const handleSave = async () => {
-        if (!clienteId || !monto) {
-            toast({ title: "Error", description: "Cliente y monto son obligatorios.", variant: "destructive" });
+        if (!clienteId || !monto || !selectedBillingDateOption) {
+            toast({ title: "Error", description: "Cliente, monto y fecha de cobro son obligatorios.", variant: "destructive" });
             return;
         }
 
@@ -98,18 +98,49 @@ const AddCpcDialog = ({ clients, onSave, onClientAdd, children }: { clients: Cli
             return;
         }
         
-        const data = { 
-            clientName: cliente.name, 
-            serviceType: tipo,
-            amount: parseFloat(monto), 
-            requiresInvoice,
+        const now = new Date();
+        let finalBillingDate: Date;
+        
+        switch (selectedBillingDateOption) {
+            case 'next_15':
+                finalBillingDate = setDate(now.getDate() > 15 ? addMonths(now, 1) : now, 15);
+                break;
+            case 'past_15':
+                finalBillingDate = setDate(now.getDate() <= 15 ? subMonths(now, 1) : now, 15);
+                break;
+            case 'next_30':
+                finalBillingDate = endOfMonth(now.getDate() === getDaysInMonth(now) ? addMonths(now, 1) : now);
+                break;
+            case 'past_30':
+                finalBillingDate = endOfMonth(now.getDate() < getDaysInMonth(now) ? subMonths(now, 1) : now);
+                break;
+            case 'custom':
+                if (!customDate) {
+                    toast({ title: "Error", description: "Por favor, selecciona una fecha personalizada.", variant: "destructive" });
+                    return;
+                }
+                finalBillingDate = customDate;
+                break;
+            default:
+                toast({ title: "Error", description: "Opción de fecha de cobro no válida.", variant: "destructive" });
+                return;
+        }
+        const finalBillingDateLabel = format(finalBillingDate, "d MMM yyyy", { locale: es });
+
+
+        const data: Omit<NewCuentaPorCobrar, 'id'> = { 
+            clienteId: parseInt(clienteId), 
+            clienteName: cliente.name, 
+            periodo: finalBillingDateLabel,
+            monto: parseFloat(monto), 
+            tipo,
         };
 
         try {
-            await addFinanzaFinal(data);
+            await addCpc(data);
             onSave();
             setOpen(false);
-            toast({ title: "Éxito", description: `Cuenta por cobrar guardada.` });
+            toast({ title: "Éxito", description: `Cuenta por cobrar para ${cliente.name} guardada.` });
         } catch (error) {
              toast({ title: "Error", description: `No se pudo guardar la cuenta por cobrar.`, variant: 'destructive' });
         }
@@ -129,7 +160,7 @@ const AddCpcDialog = ({ clients, onSave, onClientAdd, children }: { clients: Cli
                                 {clients.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
                             </SelectContent>
                         </Select>
-                         {clients.length === 0 && (
+                        {clients.length === 0 && (
                             <Alert variant="destructive" className="mt-2">
                                 <AlertDescription className="flex items-center justify-between">
                                     <span>No hay clientes. Añade uno primero.</span>
@@ -157,44 +188,81 @@ const AddCpcDialog = ({ clients, onSave, onClientAdd, children }: { clients: Cli
                         <Label>Monto (MXN)</Label>
                         <Input type="number" value={monto} onChange={e => setMonto(e.target.value)} placeholder="0.00" />
                     </div>
-                    <div className="flex items-center space-x-2">
-                        <Switch id="invoice-switch" checked={requiresInvoice} onCheckedChange={setRequiresInvoice}/>
-                        <Label htmlFor="invoice-switch">Requiere Factura (Añadir 16% IVA)</Label>
+
+                    <div className="space-y-2">
+                         <Label>Fecha de Corte</Label>
+                         <RadioGroup value={billingDay} onValueChange={v => setBillingDay(v as '15' | '30')} className="flex gap-4">
+                            <div className="flex items-center space-x-2"><RadioGroupItem value="15" id="d15" /><Label htmlFor="d15" className="font-normal">Día 15</Label></div>
+                            <div className="flex items-center space-x-2"><RadioGroupItem value="30" id="d30" /><Label htmlFor="d30" className="font-normal">Día 30</Label></div>
+                         </RadioGroup>
                     </div>
-                    {requiresInvoice && (
-                        <Card className="bg-muted p-4">
-                            <p>Monto Base: {parseFloat(monto || '0').toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
-                            <p>IVA (16%): {(parseFloat(monto || '0') * 0.16).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
-                            <p className="font-bold">Total: {totalAmount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
-                        </Card>
-                    )}
+
+                     <div className="space-y-2">
+                        <Label>Fecha de Cobro</Label>
+                        <Select value={selectedBillingDateOption} onValueChange={v => setSelectedBillingDateOption(v)}>
+                            <SelectTrigger><SelectValue placeholder="Seleccionar fecha..."/></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value={`next_${billingDay}`}>Próximo día {billingDay}</SelectItem>
+                                <SelectItem value={`past_${billingDay}`}>Pasado día {billingDay}</SelectItem>
+                                <SelectItem value="custom">Otra fecha</SelectItem>
+                            </SelectContent>
+                        </Select>
+                         {selectedBillingDateOption === 'custom' && (
+                             <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !customDate && "text-muted-foreground")}>
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {customDate ? format(customDate, "d 'de' MMMM, yyyy", { locale: es }) : <span>Seleccionar fecha</span>}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={customDate} onSelect={setCustomDate} initialFocus /></PopoverContent>
+                            </Popover>
+                        )}
+                    </div>
                 </div>
-                <DialogFooter className="flex justify-between w-full">
-                    <div className="flex gap-2">
-                        <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                        <Button onClick={handleSave}>Guardar Cuenta</Button>
-                    </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                    <Button onClick={handleSave}>Guardar Cuenta</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
     )
 }
 
-const CuentasPorCobrarTab = ({ data, clients, onSave, onClientAdd }: { data: FinanzaFinal[], clients: Client[], onSave: () => void, onClientAdd: () => void }) => {
+const CuentasPorCobrarTab = ({ data, clients, onSave, onClientAdd }: { data: CuentaPorCobrar[], clients: Client[], onSave: () => void, onClientAdd: () => void }) => {
     
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
     const [clientFilter, setClientFilter] = useState('Todos');
 
-    const sortedAndFilteredData = useMemo(() => {
-        let filtered = [...data];
-        if(clientFilter !== 'Todos') {
-            filtered = filtered.filter(item => item.clientName === clientFilter);
+    const clientDebts = useMemo(() => {
+        const debtMap = new Map<number, { client: Client; totalDebt: number; debts: CuentaPorCobrar[] }>();
+
+        // Initialize all clients with 0 debt
+        clients.forEach(client => {
+            debtMap.set(client.id, { client, totalDebt: 0, debts: [] });
+        });
+
+        // Add debts to the corresponding clients
+        data.forEach(cpc => {
+            const clientEntry = debtMap.get(cpc.clienteId);
+            if (clientEntry) {
+                clientEntry.totalDebt += cpc.monto;
+                clientEntry.debts.push(cpc);
+            }
+        });
+
+        let clientList = Array.from(debtMap.values());
+
+        if (clientFilter !== 'Todos') {
+            clientList = clientList.filter(item => item.client.name === clientFilter);
         }
+
         if (sortOrder) {
-            filtered.sort((a, b) => sortOrder === 'desc' ? b.amount - a.amount : a.amount - b.amount);
+            clientList.sort((a, b) => sortOrder === 'desc' ? b.totalDebt - a.totalDebt : a.totalDebt - b.totalDebt);
         }
-        return filtered;
-    }, [data, sortOrder, clientFilter]);
+
+        return clientList;
+    }, [data, clients, sortOrder, clientFilter]);
 
     const toggleSort = () => {
         setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc');
@@ -215,7 +283,7 @@ const CuentasPorCobrarTab = ({ data, clients, onSave, onClientAdd }: { data: Fin
             <CardHeader className='flex-col md:flex-row justify-between items-start md:items-center'>
                 <div>
                     <CardTitle>Control de Pagos</CardTitle>
-                    <CardDescription>Gestiona los pagos de tus clientes.</CardDescription>
+                    <CardDescription>Gestiona los pagos pendientes de tus clientes.</CardDescription>
                 </div>
                  <div className="flex gap-2">
                     <Select value={clientFilter} onValueChange={setClientFilter}>
@@ -237,31 +305,42 @@ const CuentasPorCobrarTab = ({ data, clients, onSave, onClientAdd }: { data: Fin
                     <Table>
                         <TableHeader><TableRow>
                             <TableHead>Cliente</TableHead>
-                            <TableHead>Tipo Servicio</TableHead>
+                            <TableHead>Detalle de Deuda</TableHead>
                             <TableHead className='cursor-pointer' onClick={toggleSort}>
                                 <div className="flex items-center gap-1">
-                                    Monto
+                                    Monto Total Pendiente
                                     <ArrowUpDown className="w-4 h-4" />
                                 </div>
                             </TableHead>
-                            <TableHead>Requiere Factura</TableHead>
-                             <TableHead>Fecha</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {sortedAndFilteredData.map((item) => (
-                                <TableRow key={item.id}>
-                                    <TableCell className="font-medium">{item.clientName}</TableCell>
-                                    <TableCell>{item.serviceType}</TableCell>
-                                    <TableCell>{item.amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
-                                    <TableCell>{item.requiresInvoice ? 'Sí' : 'No'}</TableCell>
-                                    <TableCell>{format(new Date(item.createdAt), 'dd MMM yyyy', { locale: es })}</TableCell>
+                            {clientDebts.map(({client, totalDebt, debts}) => (
+                                <TableRow key={client.id}>
+                                    <TableCell className="font-medium">{client.name}</TableCell>
+                                    <TableCell>
+                                        {debts.length > 0 ? (
+                                            <ul className='space-y-1'>
+                                            {debts.map(d => (
+                                                <li key={d.id} className='text-xs flex items-center gap-2'>
+                                                     <Badge variant="secondary" className='font-normal'>{d.periodo}</Badge>
+                                                     <span>{d.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
+                                                </li>
+                                            ))}
+                                            </ul>
+                                        ) : (
+                                            <span className='text-xs text-muted-foreground'>Sin deudas pendientes.</span>
+                                        )}
+                                    </TableCell>
+                                    <TableCell className={cn("font-bold", totalDebt > 0 ? 'text-destructive' : 'text-green-500')}>
+                                        {totalDebt.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
-                     {sortedAndFilteredData.length === 0 && (
-                        <div className="text-center py-8 text-muted-foreground">No hay registros en esta vista.</div>
+                     {clientDebts.length === 0 && (
+                        <div className="text-center py-8 text-muted-foreground">No hay clientes en esta vista.</div>
                     )}
                 </div>
             </CardContent>
@@ -503,7 +582,7 @@ export default function FinanzasPage() {
     const { user } = useAuth();
     const [clients, setClients] = useState<Client[]>([]);
     const [movimientos, setMovimientos] = useState<MovimientoDiario[]>([]);
-    const [cuentasPorCobrar, setCuentasPorCobrar] = useState<FinanzaFinal[]>([]);
+    const [cuentasPorCobrar, setCuentasPorCobrar] = useState<CuentaPorCobrar[]>([]);
     const [activeTab, setActiveTab] = useState("cuentas-por-cobrar");
     const [isLoading, setIsLoading] = useState(true);
 
@@ -514,11 +593,11 @@ export default function FinanzasPage() {
         try {
             const [clientsData, cpcData, movimientosData] = await Promise.all([
                 fetchClientsDB(),
-                getFinanzasFinal(),
+                getCuentasPorCobrar(),
                 getMovimientos(),
             ]);
             setClients(clientsData as Client[]);
-            setCuentasPorCobrar(cpcData as FinanzaFinal[]);
+            setCuentasPorCobrar(cpcData as CuentaPorCobrar[]);
             setMovimientos(movimientosData.map(m => ({...m, fecha: new Date(m.fecha)})));
         } catch (error) {
              console.error("Failed to fetch data:", error);
@@ -561,7 +640,7 @@ export default function FinanzasPage() {
                    <CuentasPorCobrarTab data={cuentasPorCobrar} clients={clients} onSave={handleSaveCpc} onClientAdd={fetchData} />
                 </TabsContent>
                 <TabsContent value="tabla-diaria" className="mt-4">
-                    <TablaDiariaTab isAdmin={isAdmin} movimientos={movimientos} onAddMovimiento={handleAddMovimiento} cuentasPorCobrar={[]} onUpdateCpc={() => {}} />
+                    <TablaDiariaTab isAdmin={isAdmin} movimientos={movimientos} onAddMovimiento={handleAddMovimiento} cuentasPorCobrar={cuentasPorCobrar} onUpdateCpc={() => {}} />
                 </TabsContent>
             </Tabs>
         </div>
@@ -571,4 +650,5 @@ export default function FinanzasPage() {
     
 
     
+
 
