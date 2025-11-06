@@ -397,7 +397,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                     </TableCell>
                                     <TableCell className="p-2 align-middle">
                                         <Select value={pendiente.status} onValueChange={(newStatus) => updatePendiente(pendiente.id, {status: newStatus}).then(onRefresh)}>
-                                            <SelectTrigger className="w-full h-8 text-xs px-0 border-none bg-transparent">
+                                            <SelectTrigger className="w-full h-8 px-0 border-none bg-transparent">
                                                 <SelectValue asChild>
                                                     <Badge className={cn("text-white w-full justify-center", statusColors[pendiente.status])}>{pendiente.status}</Badge>
                                                 </SelectValue>
