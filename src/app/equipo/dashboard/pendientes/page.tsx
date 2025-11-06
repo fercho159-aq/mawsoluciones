@@ -185,8 +185,8 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="w-[40px]"></TableHead>
                         <TableHead>Cliente</TableHead>
+                        <TableHead className="w-[40px]"></TableHead>
                         <TableHead>Pendiente</TableHead>
                         {showEncargado && <TableHead className="w-[120px]">Encargado</TableHead>}
                         {showEjecutor && <TableHead className="w-[120px]">Ejecutor</TableHead>}
@@ -203,16 +203,16 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                         <React.Fragment key={clienteName}>
                                 {pendientes.map((pendiente, index) => (
                                     <TableRow key={pendiente.id} className={cn(index === 0 && "border-t-2 border-border")}>
-                                        <TableCell className="align-top">
+                                        <TableCell className="align-top font-medium">
+                                            {index === 0 ? clienteName : ''}
+                                        </TableCell>
+                                         <TableCell className="align-top">
                                              <Checkbox 
                                                 id={`pendiente-${pendiente.id}`} 
                                                 checked={pendiente.completed}
                                                 onCheckedChange={() => handleTogglePendiente(pendiente)}
                                                 className="mt-1"
                                             />
-                                        </TableCell>
-                                        <TableCell className="align-top font-medium">
-                                            {index === 0 ? clienteName : ''}
                                         </TableCell>
                                         <TableCell className={cn("align-top", pendiente.completed && "line-through text-muted-foreground")}>
                                             <EditablePendiente pendiente={pendiente} onUpdate={onUpdatePendienteText}/>
@@ -479,4 +479,5 @@ export default function PendientesPage() {
     </div>
   );
 }
+
 
