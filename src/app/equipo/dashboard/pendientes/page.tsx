@@ -341,10 +341,10 @@ export default function PendientesPage() {
     
     const encargados = useMemo(() => {
         return Array.from(new Set(teamMembers.map(m => m.name))).sort();
-    }, [teamMembers]);
+    }, []);
     const ejecutores = useMemo(() => {
         return Array.from(new Set(teamMembers.map(m => m.name))).sort();
-    }, [teamMembers]);
+    }, []);
 
 
     const filteredData = useMemo(() => {
@@ -479,3 +479,4 @@ export default function PendientesPage() {
     </div>
   );
 }
+
