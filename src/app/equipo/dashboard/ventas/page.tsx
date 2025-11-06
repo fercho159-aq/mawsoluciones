@@ -144,37 +144,39 @@ export default function VentasPage() {
     }, []);
 
     const handleAddLead = async (newLeadData: Partial<Omit<NewLead, 'id' | 'createdAt' | 'data'>>) => {
-        let lastSellerIndex = 0;
-        try {
-            lastSellerIndex = parseInt(localStorage.getItem('lastAssignedSellerIndex') || '0');
-        } catch (error) {
-            console.error('Could not parse lastAssignedSellerIndex from localStorage');
+      let lastSellerIndex = 0;
+      try {
+        const lastIndexStr = localStorage.getItem('lastAssignedSellerIndex');
+        if (lastIndexStr) {
+          lastSellerIndex = parseInt(lastIndexStr, 10);
         }
-        
-        const newSeller = responsables[lastSellerIndex % responsables.length];
-        lastSellerIndex++;
-        localStorage.setItem('lastAssignedSellerIndex', lastSellerIndex.toString());
+      } catch (error) {
+        console.error('Could not parse lastAssignedSellerIndex from localStorage', error);
+      }
 
-        try {
-            await addProspect({
-                ...newLeadData,
-                status: 'Lead Nuevo',
-                responsable: newSeller,
-                source: 'Referencia' // Manual add is always "Referencia"
-            });
-            toast({
-                title: "Prospecto Añadido",
-                description: `${newLeadData.name} se ha añadido al pipeline y asignado a ${newSeller}.`,
-            });
-            fetchLeads();
-        } catch(e) {
-            console.error(e);
-            toast({
-                title: "Error",
-                description: "No se pudo añadir el prospecto.",
-                variant: 'destructive'
-            });
-        }
+      const newSeller = responsables[lastSellerIndex % responsables.length];
+      const nextSellerIndex = (lastSellerIndex + 1) % responsables.length;
+      localStorage.setItem('lastAssignedSellerIndex', nextSellerIndex.toString());
+
+      try {
+        await addProspect({
+            ...newLeadData,
+            responsable: newSeller,
+        });
+
+        toast({
+            title: "Prospecto Añadido",
+            description: `${newLeadData.name} se ha añadido al pipeline y asignado a ${newSeller}.`,
+        });
+        fetchLeads();
+      } catch(e) {
+          console.error(e);
+          toast({
+              title: "Error",
+              description: "No se pudo añadir el prospecto.",
+              variant: 'destructive'
+          });
+      }
     };
 
 
@@ -208,7 +210,7 @@ export default function VentasPage() {
     }
     
     const origenes = useMemo(() => {
-        const allOrigins = new Set(leads.map(l => l.source && l.source.includes('Calculator') ? 'Sitio Web' : l.source || 'N/A' ));
+        const allOrigins = new Set(leads.map(l => l.source || 'N/A' ));
         return ['Todos', ...Array.from(allOrigins)];
     }, [leads]);
 
@@ -227,8 +229,7 @@ export default function VentasPage() {
             const searchMatch = searchFilter === '' || lead.name?.toLowerCase().includes(searchFilter.toLowerCase()) || lead.company?.toLowerCase().includes(searchFilter.toLowerCase());
             const responsableMatch = responsableFilter === 'Todos' || lead.responsable === responsableFilter;
             const statusMatch = statusFilter === 'Todos' || lead.status === statusFilter;
-            const leadOrigin = lead.source && lead.source.includes('Calculator') ? 'Sitio Web' : lead.source;
-            const origenMatch = origenFilter === 'Todos' || leadOrigin === origenFilter;
+            const origenMatch = origenFilter === 'Todos' || lead.source === origenFilter;
             const monthMatch = monthFilter === 'Todos' || (lead.createdAt && format(new Date(lead.createdAt), 'yyyy-MM') === monthFilter);
 
             return searchMatch && responsableMatch && statusMatch && origenMatch && monthMatch;
@@ -303,7 +304,7 @@ export default function VentasPage() {
                         {filteredLeads.filter(l => l.status !== 'Convertido' && l.status !== 'No Interesado').map((lead) => (
                             <TableRow key={lead.id}>
                                 <TableCell className="font-medium">{lead.name}</TableCell>
-                                <TableCell>{lead.source && lead.source.includes('Calculator') ? 'Sitio Web' : lead.source}</TableCell>
+                                <TableCell>{lead.source}</TableCell>
                                 <TableCell>{lead.responsable}</TableCell>
                                 <TableCell>
                                     <Badge className={cn("text-white", statusColors[lead.status as StatusLead])}>
