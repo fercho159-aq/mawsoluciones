@@ -23,7 +23,7 @@ export const pendientes = pgTable('pendientes', {
     cliente: varchar('cliente', { length: 255 }).notNull(),
     encargado: varchar('encargado', { length: 100 }).notNull(),
     ejecutor: varchar('ejecutor', { length: 100 }).notNull(),
-    fechaCorte: integer('fecha_corte').default(15).notNull(),
+    fechaCorte: integer('fecha_corte').default(15),
     status: varchar('status', { length: 50 }).notNull(),
     pendientePrincipal: text('pendiente_principal').notNull(),
     categoria: varchar('categoria', { length: 50 }).notNull(),
@@ -134,3 +134,5 @@ export type NewLead = typeof leads.$inferInsert;
 export type Pendiente = typeof pendientes.$inferSelect;
 export type RecordingEvent = typeof recordingEvents.$inferSelect;
 export type NewRecordingEvent = typeof recordingEvents.$inferInsert;
+
+    

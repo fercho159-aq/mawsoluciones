@@ -229,10 +229,19 @@ export default function ClientesPage() {
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const router = useRouter();
+    const { toast } = useToast();
 
     const fetchClients = async () => {
-        const clientsData = await getClients();
-        setClients(clientsData);
+        try {
+            const clientsData = await getClients();
+            setClients(clientsData);
+        } catch (error) {
+            toast({
+                title: "Error al cargar clientes",
+                description: "No se pudieron obtener los clientes. Intenta recargar la página.",
+                variant: "destructive"
+            });
+        }
     };
 
     useEffect(() => {
@@ -347,3 +356,5 @@ export default function ClientesPage() {
 }
 
 export type { Client };
+
+    

@@ -210,13 +210,23 @@ export default function PendientesPage() {
 
     const fetchData = async () => {
         setIsLoading(true);
-        const [pendientesData, clientsData] = await Promise.all([
-            getPendientes(),
-            getClients()
-        ]);
-        setPendientes(pendientesData as PendienteWithRelations[]);
-        setClients(clientsData);
-        setIsLoading(false);
+        try {
+            const [pendientesData, clientsData] = await Promise.all([
+                getPendientes(),
+                getClients()
+            ]);
+            setPendientes(pendientesData as PendienteWithRelations[]);
+            setClients(clientsData);
+        } catch (error) {
+            console.error("Failed to fetch data:", error);
+            toast({
+                title: "Error al cargar datos",
+                description: "No se pudieron obtener los pendientes o clientes. Intenta recargar la página.",
+                variant: "destructive"
+            });
+        } finally {
+            setIsLoading(false);
+        }
     }
     
     useEffect(() => {
@@ -241,8 +251,8 @@ export default function PendientesPage() {
         }
     };
 
-    const encargados = useMemo(() => teamMembers.map(m => m.name).sort(), []);
-    const ejecutoresDisponibles = useMemo(() => teamMembers.map(m => m.name).sort(), []);
+    const encargados = useMemo(() => Array.from(new Set(teamMembers.map(m => m.name))).sort(), []);
+    const ejecutoresDisponibles = useMemo(() => Array.from(new Set(teamMembers.map(m => m.name))).sort(), []);
 
 
     const filteredData = useMemo(() => {
@@ -431,3 +441,5 @@ const AddPendienteDialog = ({ clients, onAddPendiente }: { clients: Client[], on
         </Dialog>
     )
 }
+
+    

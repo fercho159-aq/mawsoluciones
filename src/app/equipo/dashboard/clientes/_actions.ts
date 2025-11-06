@@ -59,7 +59,6 @@ export async function addClient(data: NewClientData) {
                     categoria: area,
                     pendientePrincipal: `Kick-off y configuración inicial del área de ${area}.`,
                     status: 'Trabajando',
-                    fechaCorte: 15,
                     completed: false,
                 });
             }
@@ -83,3 +82,5 @@ export async function updateClient(id: number, data: Partial<Omit<typeof clients
     throw new Error("Could not update client");
   }
 }
+
+    

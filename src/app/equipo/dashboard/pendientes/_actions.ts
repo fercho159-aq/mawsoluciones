@@ -8,13 +8,11 @@ import { revalidatePath } from "next/cache";
 
 export async function getPendientes() {
     try {
-        // This is the most direct way to select all records and avoids relation issues.
         const allPendientes = await db.select().from(pendientes);
         return allPendientes;
     } catch (error) {
         console.error("Error fetching pendientes:", error);
-        // Re-throwing the error to make it visible, instead of returning an empty array silently.
-        throw new Error("Could not fetch pendientes from the database.");
+        return [];
     }
 }
 
@@ -86,3 +84,5 @@ export async function getRecordingEvents() {
         return [];
     }
 }
+
+    
