@@ -92,7 +92,7 @@ const getNextPeriod = (periodo: string): Periodo => {
 }
 
 // --- Components ---
-const AddCpcDialog = ({ cpc, clients, onSave, children }: { cpc?: CuentaPorCobrar | null, clients: (Client & { financialProfile: ClientFinancialProfile | null })[], onSave: () => void, children: React.ReactNode }) => {
+const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt }: { cpc?: CuentaPorCobrar | null, clients: (Client & { financialProfile: ClientFinancialProfile | null })[], onSave: () => void, children: React.ReactNode, onGenerateReceipt: (item: CuentaPorCobrar, withInvoice: boolean) => void }) => {
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
     
@@ -110,17 +110,18 @@ const AddCpcDialog = ({ cpc, clients, onSave, children }: { cpc?: CuentaPorCobra
      useEffect(() => {
         if (open) {
             if (isEditing && cpc) {
+                const clientProfile = clients.find(c => c.id === cpc.clienteId)?.financialProfile;
                 setClienteId(cpc.clienteId.toString());
-                setMonto(cpc.monto.toString());
+                setMonto((clientProfile?.defaultInvoice ? cpc.monto / 1.16 : cpc.monto).toFixed(2));
                 setTipo(cpc.tipo as CategoriaIngreso);
                 setBillingDate(cpc.periodo); 
-                setBillingDay(''); 
-                setRequiresInvoice(false);
+                setBillingDay(clientProfile?.billingDay?.toString() as any || '');
+                setRequiresInvoice(clientProfile?.defaultInvoice || false);
             } else {
                 resetForm();
             }
         }
-    }, [open, cpc, isEditing]);
+    }, [open, cpc, isEditing, clients]);
 
 
     const resetForm = () => {
@@ -248,9 +249,19 @@ const AddCpcDialog = ({ cpc, clients, onSave, children }: { cpc?: CuentaPorCobra
                         </Card>
                     )}
                 </div>
-                <DialogFooter>
-                    <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                    <Button onClick={handleSave}>{isEditing ? 'Actualizar Cuenta' : 'Guardar Cuenta'}</Button>
+                <DialogFooter className="flex justify-between w-full">
+                     <div>
+                        {isEditing && cpc && (
+                            <>
+                                <Button variant="secondary" onClick={() => onGenerateReceipt(cpc, false)}><FileText className="w-4 h-4 mr-2"/>Recibo</Button>
+                                <Button variant="secondary" className="ml-2" onClick={() => onGenerateReceipt(cpc, true)}><FileText className="w-4 h-4 mr-2"/>Pre-Factura</Button>
+                            </>
+                        )}
+                    </div>
+                    <div className="flex gap-2">
+                        <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                        <Button onClick={handleSave}>{isEditing ? 'Actualizar Cuenta' : 'Guardar Cuenta'}</Button>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -270,14 +281,21 @@ const CuentasPorCobrarTab = ({ data, clients, onAddCpc, onUpdateCpc }: { data: C
         window.open(whatsappUrl, '_blank');
     }
 
-    const handleGenerateReceipt = (item: CuentaPorCobrar) => {
+    const handleGenerateReceipt = (item: CuentaPorCobrar, withInvoice: boolean = false) => {
         const clientDebts = data.filter(d => d.clienteId === item.clienteId);
-        const totalDebt = clientDebts.reduce((sum, debt) => sum + debt.monto, 0);
+        let totalDebt = clientDebts.reduce((sum, debt) => sum + debt.monto, 0);
+
+        const subtotal = withInvoice ? totalDebt / 1.16 : totalDebt;
+        const iva = withInvoice ? totalDebt - subtotal : 0;
+        
+        if (withInvoice) {
+            totalDebt = subtotal + iva;
+        }
 
         const receiptHtml = `
             <html>
                 <head>
-                    <title>Recibo de Cobro - ${item.clienteName}</title>
+                    <title>${withInvoice ? 'Pre-Factura' : 'Recibo de Cobro'} - ${item.clienteName}</title>
                     <script src="https://cdn.tailwindcss.com"></script>
                     <style> body { font-family: sans-serif; } </style>
                 </head>
@@ -291,7 +309,7 @@ const CuentasPorCobrarTab = ({ data, clients, onAddCpc, onUpdateCpc }: { data: C
                             <p class="text-sm text-gray-600">Fecha: ${format(new Date(), 'd MMMM, yyyy', { locale: es })}</p>
                         </div>
                         <div class="mb-8">
-                            <h2 class="text-lg font-semibold mb-2">Recibo para:</h2>
+                            <h2 class="text-lg font-semibold mb-2">${withInvoice ? 'Pre-Factura para:' : 'Recibo para:'}</h2>
                             <p class="font-bold text-gray-800">${item.clienteName}</p>
                         </div>
                         <h3 class="text-xl font-semibold border-b pb-2 mb-4">Detalle de Adeudos</h3>
@@ -306,7 +324,7 @@ const CuentasPorCobrarTab = ({ data, clients, onAddCpc, onUpdateCpc }: { data: C
                                 ${clientDebts.map(debt => `
                                     <tr class="border-b">
                                         <td class="p-3">${debt.periodo} (${debt.tipo})</td>
-                                        <td class="p-3 text-right">${debt.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</td>
+                                        <td class="p-3 text-right">${(withInvoice ? debt.monto / 1.16 : debt.monto).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -315,8 +333,14 @@ const CuentasPorCobrarTab = ({ data, clients, onAddCpc, onUpdateCpc }: { data: C
                             <div class="w-full max-w-xs">
                                 <div class="flex justify-between py-2 border-b">
                                     <span class="font-semibold text-gray-700">Subtotal:</span>
-                                    <span>${totalDebt.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
+                                    <span>${subtotal.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
                                 </div>
+                                ${withInvoice ? `
+                                <div class="flex justify-between py-2 border-b">
+                                    <span class="font-semibold text-gray-700">IVA (16%):</span>
+                                    <span>${iva.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
+                                </div>
+                                ` : ''}
                                 <div class="flex justify-between py-3 bg-gray-200 px-3 rounded-md mt-4">
                                     <span class="font-bold text-lg">Total Adeudado:</span>
                                     <span class="font-bold text-lg">${totalDebt.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
@@ -324,7 +348,7 @@ const CuentasPorCobrarTab = ({ data, clients, onAddCpc, onUpdateCpc }: { data: C
                             </div>
                         </div>
                         <div class="mt-12 text-center text-xs text-gray-500">
-                            <p>Este es un recibo informativo y no un comprobante fiscal.</p>
+                            <p>${withInvoice ? 'Esta es una pre-factura y no un comprobante fiscal.' : 'Este es un recibo informativo y no un comprobante fiscal.'}</p>
                             <p>MAW Soluciones | hola@mawsoluciones.com</p>
                         </div>
                     </div>
@@ -343,7 +367,7 @@ const CuentasPorCobrarTab = ({ data, clients, onAddCpc, onUpdateCpc }: { data: C
                     <CardTitle>Control de Pagos Pendientes</CardTitle>
                     <CardDescription>Gestiona los pagos pendientes de tus clientes y envía recordatorios.</CardDescription>
                 </div>
-                <AddCpcDialog clients={clients} onSave={onUpdateCpc}>
+                <AddCpcDialog clients={clients} onSave={onUpdateCpc} onGenerateReceipt={handleGenerateReceipt}>
                     <Button><PlusCircle className="w-4 h-4 mr-2" />Añadir Cuenta por Cobrar</Button>
                 </AddCpcDialog>
             </CardHeader>
@@ -353,7 +377,7 @@ const CuentasPorCobrarTab = ({ data, clients, onAddCpc, onUpdateCpc }: { data: C
                         <TableHeader><TableRow><TableHead>Cliente</TableHead><TableHead>Periodo</TableHead><TableHead>Monto Adeudado</TableHead><TableHead>Tipo</TableHead><TableHead colSpan={2} className="text-right">Acciones</TableHead></TableRow></TableHeader>
                         <TableBody>
                             {data.map((item) => (
-                                <AddCpcDialog key={item.id} cpc={item} clients={clients} onSave={onUpdateCpc}>
+                                <AddCpcDialog key={item.id} cpc={item} clients={clients} onSave={onUpdateCpc} onGenerateReceipt={handleGenerateReceipt}>
                                     <TableRow className="cursor-pointer">
                                         <TableCell className="font-medium">{item.clienteName}</TableCell>
                                         <TableCell><Badge variant="outline">{item.periodo}</Badge></TableCell>
@@ -680,3 +704,4 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
