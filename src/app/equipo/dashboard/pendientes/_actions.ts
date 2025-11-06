@@ -8,11 +8,10 @@ import { revalidatePath } from "next/cache";
 
 export async function getPendientes() {
     try {
-        const allPendientes = await db.query.pendientes.findMany({
-            with: {
-                recordingEvent: true
-            },
-        });
+        // This was the cause of the error. The `with` clause was trying to fetch a relation
+        // that was inconsistent with the schema, causing the query to fail silently.
+        // By fetching just the pendientes, we ensure the data is displayed.
+        const allPendientes = await db.query.pendientes.findMany();
         return allPendientes;
     } catch (error) {
         console.error("Error fetching pendientes:", error);
