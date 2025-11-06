@@ -23,14 +23,16 @@ import { initialClients, initialCuentasPorCobrar, type Client, type CuentasPorCo
 import { useRouter } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { teamMembers } from '@/lib/team-data';
+import { teamMembers, type TeamMember } from '@/lib/team-data';
 import { mockData as pendientesData, type Activity, type StatusPendiente } from '@/lib/activities-data';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 
-const contenidoTeam = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel'].includes(m.name));
-const adsTeam = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel', 'Bere'].includes(m.name));
-const webTeam = teamMembers.filter(m => ['Julio', 'Fernando', 'Alexis'].includes(m.name));
+
+const contenidoTeam: TeamMember[] = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel'].includes(m.name));
+const adsTeam: TeamMember[] = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel', 'Bere'].includes(m.name));
+const webTeam: TeamMember[] = teamMembers.filter(m => ['Julio', 'Fernando', 'Alexis'].includes(m.name));
+
 
 const ClientFormDialog = ({ client, onSave, children, isEditing }: { client?: Client, onSave: (clientData: any, pendientes: Omit<Activity, 'id'>[]) => void, children: React.ReactNode, isEditing: boolean }) => {
     const [name, setName] = useState('');
@@ -55,10 +57,11 @@ const ClientFormDialog = ({ client, onSave, children, isEditing }: { client?: Cl
             setWhatsapp(client.whatsapp);
             setEmail(client.email || '');
             setAreas(client.managedAreas || []);
-        } else {
+            // Nota: La edición de servicios/responsables está deshabilitada para mantener la integridad de las tareas existentes.
+        } else if (!isEditing) {
             resetForm();
         }
-    }, [client, open]);
+    }, [client, open, isEditing]);
 
     const resetForm = () => {
         setName(''); setRepresentativeName(''); setWhatsapp(''); setEmail(''); setServiceType('');
@@ -66,8 +69,13 @@ const ClientFormDialog = ({ client, onSave, children, isEditing }: { client?: Cl
     }
 
     const handleSave = () => {
-        if (!name || !representativeName || !whatsapp || (!isEditing && ( !serviceType || areas.length === 0))) {
-            toast({ title: "Error", description: "Todos los campos marcados con * son obligatorios.", variant: "destructive" });
+        if (!name || !representativeName || !whatsapp) {
+             toast({ title: "Error", description: "Nombre de la empresa, representante y WhatsApp son obligatorios.", variant: "destructive" });
+            return;
+        }
+
+        if (!isEditing && (!serviceType || areas.length === 0)) {
+            toast({ title: "Error", description: "Debes configurar los servicios para un nuevo cliente.", variant: "destructive" });
             return;
         }
         
@@ -85,16 +93,18 @@ const ClientFormDialog = ({ client, onSave, children, isEditing }: { client?: Cl
 
         if (!isEditing) {
              areas.forEach(area => {
-                let pendiente: Omit<Activity, 'id' | 'status' | 'fechaCorte'>;
+                let pendiente: Omit<Activity, 'id' | 'status' | 'fechaCorte' | 'subTasks'>;
                 if (area === 'Contenido' && responsables.contenido) {
                     pendiente = { cliente: name, encargado: responsables.contenido.encargado, ejecutor: responsables.contenido.ejecutor, pendientePrincipal: `Definir estrategia inicial de Contenido para ${serviceType}`, categoria: 'Contenido' }
-                    nuevosPendientes.push({ ...pendiente, status: 'Trabajando', fechaCorte: 15 });
+                    nuevosPendientes.push({ ...pendiente, status: 'Trabajando', fechaCorte: 15, subTasks: [] });
                 } else if (area === 'Ads' && responsables.ads) {
-                    pendiente = { cliente: name, encargado: responsables.ads.responsable, ejecutor: responsables.ads.responsable, pendientePrincipal: `Configurar campaña inicial de Ads para ${serviceType}`, categoria: 'Ads' }
-                    nuevosPendientes.push({ ...pendiente, status: 'Trabajando', fechaCorte: 15 });
+                    const responsable = responsables.ads.responsable;
+                    pendiente = { cliente: name, encargado: responsable, ejecutor: responsable, pendientePrincipal: `Configurar campaña inicial de Ads para ${serviceType}`, categoria: 'Ads' }
+                    nuevosPendientes.push({ ...pendiente, status: 'Trabajando', fechaCorte: 15, subTasks: [] });
                 } else if (area === 'Web' && responsables.web) {
-                    pendiente = { cliente: name, encargado: responsables.web.responsable, ejecutor: responsables.web.responsable, pendientePrincipal: `Planear desarrollo/ajustes Web para ${serviceType}`, categoria: 'Web' }
-                    nuevosPendientes.push({ ...pendiente, status: 'Trabajando', fechaCorte: 15 });
+                    const responsable = responsables.web.responsable;
+                    pendiente = { cliente: name, encargado: responsable, ejecutor: responsable, pendientePrincipal: `Planear desarrollo/ajustes Web para ${serviceType}`, categoria: 'Web' }
+                    nuevosPendientes.push({ ...pendiente, status: 'Trabajando', fechaCorte: 15, subTasks: [] });
                 }
             });
         }
@@ -185,8 +195,7 @@ const ClientFormDialog = ({ client, onSave, children, isEditing }: { client?: Cl
 
 export default function ClientesPage() {
     const { user, loading } = useAuth();
-    const router = useRouter();
-
+    
     const [clients, setClients] = useState<Client[]>(initialClients);
     const [cuentasPorCobrar, setCuentasPorCobrar] = useState<CuentasPorCobrar[]>(initialCuentasPorCobrar);
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -197,7 +206,7 @@ export default function ClientesPage() {
         
         setClients(prev => {
             if (isEditing) {
-                return prev.map(c => c.id === clientData.id ? clientData : c);
+                return prev.map(c => c.id === clientData.id ? { ...c, ...clientData } : c);
             } else {
                 return [...prev, { ...clientData, id: `client-${Date.now()}` }];
             }
@@ -212,8 +221,10 @@ export default function ClientesPage() {
     }
     
     const handleRowClick = (client: Client) => {
-        setSelectedClient(client);
-        setIsEditModalOpen(true);
+        if(user?.permissions?.clientes?.editarClientes) {
+            setSelectedClient(client);
+            setIsEditModalOpen(true);
+        }
     };
 
     const clientBalances = useMemo(() => {
@@ -235,7 +246,7 @@ export default function ClientesPage() {
         )
     }
 
-    if (!user || (user.role !== 'admin' && user.role !== 'contabilidad')) {
+    if (!user || !user.accessSections?.clientes) {
         return (
             <Card>
                 <CardHeader>
@@ -280,7 +291,7 @@ export default function ClientesPage() {
                             </TableHeader>
                             <TableBody>
                                 {clients.map(client => (
-                                    <TableRow key={client.id} onClick={() => handleRowClick(client)} className="cursor-pointer">
+                                    <TableRow key={client.id} onClick={() => handleRowClick(client)} className={cn(user?.permissions?.clientes?.editarClientes && "cursor-pointer")}>
                                         <TableCell className="font-medium">{client.name}</TableCell>
                                         <TableCell>{client.representativeName || 'N/A'}</TableCell>
                                         <TableCell>{client.whatsapp || 'N/A'}</TableCell>
@@ -305,12 +316,7 @@ export default function ClientesPage() {
                 </CardContent>
             </Card>
 
-            {selectedClient && (
-                <ClientFormDialog client={selectedClient} onSave={handleSaveClient} isEditing={true}>
-                    <div style={{ display: 'none' }} />
-                </ClientFormDialog>
-            )}
-             {isEditModalOpen && selectedClient && (
+             {selectedClient && isEditModalOpen && (
                  <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
                     <ClientFormDialog client={selectedClient} onSave={handleSaveClient} isEditing={true}>
                        <></>
