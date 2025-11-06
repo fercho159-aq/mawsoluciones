@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
-import { Users, BookOpen, ListTodo, KeyRound, DollarSign, Calendar, LineChart, Handshake } from "lucide-react";
+import { Users, BookOpen, ListTodo, KeyRound, DollarSign, Calendar, LineChart, Handshake, Settings } from "lucide-react";
 import { useAuth } from "@/lib/auth-provider";
 
 const navItems = [
@@ -18,6 +18,7 @@ const navItems = [
     { href: "/equipo/dashboard/accesos", label: "Accesos", icon: <KeyRound className="w-4 h-4" />, section: 'accesos' },
     { href: "/equipo/dashboard/calendario", label: "Calendario", icon: <Calendar className="w-4 h-4" />, section: 'calendario' },
     { href: "/equipo/dashboard/mi-progreso", label: "Mi Progreso", icon: <LineChart className="w-4 h-4" />, section: 'miProgreso' },
+    { href: "/equipo/dashboard/configuracion", label: "Configuración", icon: <Settings className="w-4 h-4" />, section: 'configuracion' },
 ];
 
 export default function DashboardNav() {

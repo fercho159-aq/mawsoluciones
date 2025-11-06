@@ -10,6 +10,7 @@ interface AuthContextType {
   loading: boolean;
   login: (user: TeamMember) => void;
   logout: () => void;
+  updateUser: (user: TeamMember) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -52,8 +53,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateUser = (userData: TeamMember) => {
+    // This is the same as login, it just overwrites the user data.
+    login(userData);
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, updateUser }}>
       {loading ? (
         <div className="flex items-center justify-center min-h-screen bg-background">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>

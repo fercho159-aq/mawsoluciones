@@ -5,7 +5,8 @@ import DashboardNav from "@/components/dashboard-nav";
 import { useAuth } from "@/lib/auth-provider";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
+import Link from "next/link";
 
 export default function DashboardLayout({
   children,
@@ -31,9 +32,16 @@ export default function DashboardLayout({
                     </h2>
                 </div>
             </div>
-            <Button variant="ghost" size="icon" onClick={logout} title="Cerrar Sesión">
-                <LogOut className="w-5 h-5" />
-            </Button>
+            <div className='flex items-center'>
+                 <Button variant="ghost" size="icon" asChild>
+                    <Link href="/equipo/dashboard/configuracion" title="Configuración">
+                        <Settings className="w-5 h-5" />
+                    </Link>
+                </Button>
+                <Button variant="ghost" size="icon" onClick={logout} title="Cerrar Sesión">
+                    <LogOut className="w-5 h-5" />
+                </Button>
+            </div>
         </div>
         <DashboardNav />
       </aside>

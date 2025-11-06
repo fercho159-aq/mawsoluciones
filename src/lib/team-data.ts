@@ -10,6 +10,7 @@ export type TeamMember = {
     role: Role;
     email: string;
     color: string;
+    birthday?: string;
     accessSections?: Record<string, boolean>;
     permissions?: Record<string, any>;
     progressConfig?: Record<string, boolean>;
@@ -24,7 +25,7 @@ export const teamMembers: TeamMember[] = [
         role: 'admin', 
         email: 'admin@agencia.com',
         color: '#7C3AED', // purple-600
-        accessSections: { nosotros: true, introduccion: true, pendientes: true, finanzas: true, ventas: true, accesos: true, calendario: true, miProgreso: true, clientes: true },
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, finanzas: true, ventas: true, accesos: true, calendario: true, miProgreso: true, clientes: true, configuracion: true },
         permissions: {
             finanzas: { agregarPagos: true, agregarGastos: true, agregarCuentasPorCobrar: true },
             ventas: { agregarProspectosDirecto: true, cambiarStatusProspectos: true, cambiarStatusSoloAsignados: false, verTodosProspectos: true },
@@ -43,7 +44,7 @@ export const teamMembers: TeamMember[] = [
         role: 'contabilidad', 
         email: 'conta@agencia.com',
         color: '#6B7280', // gray-500
-        accessSections: { nosotros: true, introduccion: true, pendientes: false, finanzas: true, ventas: false, accesos: false, calendario: false, miProgreso: false, clientes: true },
+        accessSections: { nosotros: true, introduccion: true, pendientes: false, finanzas: true, ventas: false, accesos: false, calendario: false, miProgreso: false, clientes: true, configuracion: true },
         permissions: {
             finanzas: { agregarPagos: true, agregarGastos: true, agregarCuentasPorCobrar: true },
             clientes: { agregarClientes: true, editarClientes: true, verSaldo: true },
@@ -58,7 +59,7 @@ export const teamMembers: TeamMember[] = [
         role: 'ventas', 
         email: 'ventas@agencia.com',
         color: '#2563EB', // blue-600
-        accessSections: { nosotros: false, introduccion: false, pendientes: false, finanzas: false, ventas: true, accesos: false, calendario: false, miProgreso: false, clientes: false },
+        accessSections: { nosotros: false, introduccion: false, pendientes: false, finanzas: false, ventas: true, accesos: false, calendario: false, miProgreso: false, clientes: false, configuracion: true },
         permissions: {
             ventas: { agregarProspectosDirecto: true, cambiarStatusProspectos: true, cambiarStatusSoloAsignados: false, verTodosProspectos: true }
         },
@@ -72,7 +73,7 @@ export const teamMembers: TeamMember[] = [
         role: 'julio', 
         email: 'julio@agencia.com',
         color: '#D97706', // amber-600
-        accessSections: { nosotros: true, introduccion: true, pendientes: true, finanzas: false, ventas: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, finanzas: false, ventas: true, accesos: true, calendario: true, miProgreso: true, clientes: false, configuracion: true },
         permissions: {
             ventas: { cambiarStatusProspectos: true, cambiarStatusSoloAsignados: true },
             accesos: { ajustarAccesos: true, agregarNuevosAccesos: true },
@@ -89,7 +90,7 @@ export const teamMembers: TeamMember[] = [
         role: 'alma', 
         email: 'alma@agencia.com',
         color: '#DB2777', // pink-600
-        accessSections: { nosotros: true, introduccion: true, ventas: true, calendario: true },
+        accessSections: { nosotros: true, introduccion: true, ventas: true, calendario: true, configuracion: true },
         permissions: {
             ventas: { cambiarStatusProspectos: true, cambiarStatusSoloAsignados: true },
             calendario: { cambiarFechas: true, cambiarFechasSoloAsignados: true, verCalendarioTodos: true }
@@ -104,7 +105,7 @@ export const teamMembers: TeamMember[] = [
         role: 'fernando', 
         email: 'fer@agencia.com',
         color: '#059669', // emerald-600
-        accessSections: { nosotros: true, introduccion: true, pendientes: true, finanzas: false, ventas: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, finanzas: false, ventas: true, accesos: true, calendario: true, miProgreso: true, clientes: false, configuracion: true },
         permissions: {
             ventas: { cambiarStatusProspectos: true, cambiarStatusSoloAsignados: true },
             accesos: { ajustarAccesos: true, agregarNuevosAccesos: true },
@@ -121,7 +122,7 @@ export const teamMembers: TeamMember[] = [
         role: 'luis', 
         email: 'luis@agencia.com',
         color: '#2563EB', // blue-600
-        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false, configuracion: true },
         permissions: {
             calendario: { cambiarFechas: true, cambiarFechasSoloAsignados: true, verCalendarioTodos: true },
              pendientes: { moverPendientes: true, reasignarResponsables: false }
@@ -136,7 +137,7 @@ export const teamMembers: TeamMember[] = [
         role: 'fany', 
         email: 'fany@agencia.com',
         color: '#9333EA', // purple-500
-        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false, configuracion: true },
         permissions: {
             calendario: { cambiarFechas: true, cambiarFechasSoloAsignados: true, verCalendarioTodos: true },
             pendientes: { moverPendientes: true, reasignarResponsables: false }
@@ -151,7 +152,7 @@ export const teamMembers: TeamMember[] = [
         role: 'carlos', 
         email: 'carlos@agencia.com',
         color: '#F59E0B', // amber-500
-        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false, configuracion: true },
         permissions: {
             calendario: { cambiarFechas: true, cambiarFechasSoloAsignados: true, verCalendarioTodos: true },
             pendientes: { moverPendientes: true, reasignarResponsables: false }
@@ -166,7 +167,7 @@ export const teamMembers: TeamMember[] = [
         role: 'paola', 
         email: 'paola@agencia.com',
         color: '#EC4899', // pink-500
-        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false, configuracion: true },
         permissions: {
             calendario: { cambiarFechas: true, cambiarFechasSoloAsignados: true, verCalendarioTodos: true },
             pendientes: { moverPendientes: true, reasignarResponsables: false }
@@ -181,7 +182,7 @@ export const teamMembers: TeamMember[] = [
         role: 'cristian', 
         email: 'cristian@agencia.com',
         color: '#10B981', // emerald-500
-        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false, configuracion: true },
         permissions: {
             calendario: { cambiarFechas: true, cambiarFechasSoloAsignados: true, verCalendarioTodos: true },
             pendientes: { moverPendientes: true, reasignarResponsables: false }
@@ -196,7 +197,7 @@ export const teamMembers: TeamMember[] = [
         role: 'daniel', 
         email: 'daniel@agencia.com',
         color: '#3B82F6', // blue-500
-        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false, configuracion: true },
         permissions: {
             calendario: { cambiarFechas: true, cambiarFechasSoloAsignados: true, verCalendarioTodos: true },
             pendientes: { moverPendientes: true, reasignarResponsables: false }
@@ -211,7 +212,7 @@ export const teamMembers: TeamMember[] = [
         role: 'alexis', 
         email: 'alexis@agencia.com',
         color: '#EF4444', // red-500
-        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false, configuracion: true },
         permissions: {
             calendario: { cambiarFechas: true, cambiarFechasSoloAsignados: true, verCalendarioTodos: true },
             pendientes: { moverPendientes: true, reasignarResponsables: false }
@@ -226,7 +227,7 @@ export const teamMembers: TeamMember[] = [
         role: 'bere', 
         email: 'bere@agencia.com',
         color: '#8B5CF6', // violet-500
-        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false },
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false, configuracion: true },
         permissions: {
             calendario: { cambiarFechas: true, cambiarFechasSoloAsignados: true, verCalendarioTodos: true },
             pendientes: { moverPendientes: true, reasignarResponsables: false }
@@ -241,7 +242,7 @@ export const teamMembers: TeamMember[] = [
         role: 'team_member', 
         email: 'kari@agencia.com',
         color: '#F97316', // orange-500
-        accessSections: { pendientes: true, calendario: true },
+        accessSections: { pendientes: true, calendario: true, configuracion: true },
         permissions: {},
         progressConfig: {}
     },
@@ -253,7 +254,7 @@ export const teamMembers: TeamMember[] = [
         role: 'team_member', 
         email: 'aldair@agencia.com',
         color: '#14B8A6', // teal-500
-        accessSections: { pendientes: true, calendario: true },
+        accessSections: { pendientes: true, calendario: true, configuracion: true },
         permissions: {},
         progressConfig: {}
     },
@@ -265,7 +266,7 @@ export const teamMembers: TeamMember[] = [
         role: 'team_member', 
         email: 'pedro@agencia.com',
         color: '#65A30D', // lime-600
-        accessSections: { pendientes: true, calendario: true },
+        accessSections: { pendientes: true, calendario: true, configuracion: true },
         permissions: {},
         progressConfig: {}
     }
