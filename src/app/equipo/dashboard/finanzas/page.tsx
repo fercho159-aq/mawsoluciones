@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useMemo, useEffect, startTransition } from 'react';
@@ -100,7 +99,7 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt, onCli
 
         const cliente = clients.find(c => c.id === parseInt(clienteId));
         if (!cliente) {
-             toast({ title: "Error", description: "Cliente no encontrado.", variant: "destructive" });
+             toast({ title: "Error", description: "Cliente no encontrado.", variant: 'destructive' });
             return;
         }
         
@@ -108,7 +107,7 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt, onCli
             clienteId: cliente.id, 
             clienteName: cliente.name, 
             periodo: "Periodo pendiente", 
-            monto: totalAmount, 
+            monto: parseFloat(monto), 
             tipo 
         };
 
@@ -693,7 +692,5 @@ export default function FinanzasPage() {
         </div>
     );
 }
-
-
 
     
