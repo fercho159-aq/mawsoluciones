@@ -30,7 +30,8 @@ import { es } from 'date-fns/locale';
 import { useAuth } from '@/lib/auth-provider';
 import type { CategoriaIngreso, Cuenta } from '@/lib/finanzas-data';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { getClients as fetchClientsDB, type Client } from '../clientes/_actions';
+import { getClients as fetchClientsDB } from '../clientes/_actions';
+import type { Client } from '../clientes/page';
 import { ClientFormDialog } from '../clientes/page';
 import { addCpc, addMovimiento, getCuentasPorCobrar, getMovimientos, updateCpcAfterPayment, updateCpc } from './_actions';
 import type { MovimientoDiario, CuentaPorCobrar, NewCuentaPorCobrar, NewMovimientoDiario, ClientFinancialProfile } from '@/lib/db/schema';
@@ -98,7 +99,10 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt, onCli
         }
 
         const cliente = clients.find(c => c.id === parseInt(clienteId));
-        if (!cliente) return;
+        if (!cliente) {
+             toast({ title: "Error", description: "Cliente no encontrado.", variant: "destructive" });
+            return;
+        }
         
         const data: Omit<NewCuentaPorCobrar, 'id'> = { 
             clienteId: cliente.id, 
@@ -193,7 +197,7 @@ const AddCpcDialog = ({ cpc, clients, onSave, children, onGenerateReceipt, onCli
     )
 }
 
-const CuentasPorCobrarTab = ({ data, clients, onAddCpc, onUpdateCpc, onClientAdded }: { data: CuentaPorCobrar[], clients: Client[], onAddCpc: (cpc: Omit<NewCuentaPorCobrar, 'id'>) => void, onUpdateCpc: () => void, onClientAdded: () => void }) => {
+const CuentasPorCobrarTab = ({ data, clients, onSave, onClientAdded }: { data: CuentaPorCobrar[], clients: Client[], onSave: () => void, onClientAdded: () => void }) => {
     
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
     const [clientFilter, setClientFilter] = useState('Todos');
@@ -330,7 +334,7 @@ const CuentasPorCobrarTab = ({ data, clients, onAddCpc, onUpdateCpc, onClientAdd
                             {clients.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
                         </SelectContent>
                     </Select>
-                    <AddCpcDialog clients={clients} onSave={onUpdateCpc} onGenerateReceipt={handleGenerateReceipt} onClientAdded={onClientAdded}>
+                    <AddCpcDialog clients={clients} onSave={onSave} onGenerateReceipt={handleGenerateReceipt} onClientAdded={onClientAdded}>
                         <Button><PlusCircle className="w-4 h-4 mr-2" />Añadir CxC</Button>
                     </AddCpcDialog>
                  </div>
@@ -353,7 +357,7 @@ const CuentasPorCobrarTab = ({ data, clients, onAddCpc, onUpdateCpc, onClientAdd
                         </TableHeader>
                         <TableBody>
                             {sortedAndFilteredData.map((item) => (
-                                <AddCpcDialog key={item.id} cpc={item} clients={clients} onSave={onUpdateCpc} onGenerateReceipt={handleGenerateReceipt} onClientAdded={onClientAdded}>
+                                <AddCpcDialog key={item.id} cpc={item} clients={clients} onSave={onSave} onGenerateReceipt={handleGenerateReceipt} onClientAdded={onClientAdded}>
                                     <TableRow className="cursor-pointer">
                                         <TableCell className="font-medium">{item.clienteName}</TableCell>
                                         <TableCell><Badge variant="outline">{item.periodo}</Badge></TableCell>
@@ -629,15 +633,20 @@ export default function FinanzasPage() {
 
     const fetchData = async () => {
         setIsLoading(true);
-        const [clientsData, cpcData, movimientosData] = await Promise.all([
-            fetchClientsDB(),
-            getCuentasPorCobrar(),
-            getMovimientos(),
-        ]);
-        setClients(clientsData as Client[]);
-        setCuentasPorCobrar(cpcData);
-        setMovimientos(movimientosData.map(m => ({...m, fecha: new Date(m.fecha)})));
-        setIsLoading(false);
+        try {
+            const [clientsData, cpcData, movimientosData] = await Promise.all([
+                fetchClientsDB(),
+                getCuentasPorCobrar(),
+                getMovimientos(),
+            ]);
+            setClients(clientsData as Client[]);
+            setCuentasPorCobrar(cpcData);
+            setMovimientos(movimientosData.map(m => ({...m, fecha: new Date(m.fecha)})));
+        } catch (error) {
+             console.error("Failed to fetch data:", error);
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     useEffect(() => {
@@ -654,7 +663,6 @@ export default function FinanzasPage() {
     }
     
     const handleUpdateCpc = async (cpcList: CuentaPorCobrar[]) => {
-        // This logic is now handled on the server side in `updateCpcAfterPayment`
         fetchData();
     };
     
@@ -676,7 +684,7 @@ export default function FinanzasPage() {
                     <TabsTrigger value="tabla-diaria"><TrendingUp className="w-4 h-4 mr-2"/>Tabla Diaria</TabsTrigger>
                 </TabsList>
                 <TabsContent value="cuentas-por-cobrar" className="mt-4">
-                   <CuentasPorCobrarTab data={cuentasPorCobrar} clients={clients} onAddCpc={handleSaveCpc} onUpdateCpc={handleSaveCpc} onClientAdded={fetchData}/>
+                   <CuentasPorCobrarTab data={cuentasPorCobrar} clients={clients} onSave={handleSaveCpc} onClientAdded={fetchData}/>
                 </TabsContent>
                 <TabsContent value="tabla-diaria" className="mt-4">
                     <TablaDiariaTab isAdmin={isAdmin} movimientos={movimientos} onAddMovimiento={handleAddMovimiento} cuentasPorCobrar={cuentasPorCobrar} onUpdateCpc={handleUpdateCpc} />
@@ -686,3 +694,6 @@ export default function FinanzasPage() {
     );
 }
 
+
+
+    

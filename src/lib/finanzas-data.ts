@@ -1,4 +1,4 @@
-import { parseISO } from 'date-fns';
+
 
 export type Periodo = string;
 export type MovimientoTipo = "Ingreso" | "Gasto";
@@ -6,14 +6,8 @@ export type CategoriaIngreso = "Proyecto" | "Iguala Mensual" | "Renovaciones" | 
 export type CategoriaGasto = "Publicidad" | "Sueldos" | "Comisiones" | "Impuestos" | "Personales" | "Otros" | "Renta";
 export type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo" | "Efectivo";
 
-export interface Client {
-  id: string;
-  name: string;
-  representativeName: string;
-  whatsapp: string;
-  email?: string;
-  managedAreas?: string[];
-}
+// These types and initial data arrays are no longer needed as we fetch from the database.
+// They are kept here for type reference if needed, but the arrays should be empty.
 
 export interface CuentasPorCobrar {
   id: string;
@@ -36,6 +30,8 @@ export interface MovimientoDiario {
   nombreOtro?: string;
 }
 
-export const initialClients: Client[] = [];
 export const initialCuentasPorCobrar: CuentasPorCobrar[] = [];
 export const initialMovimientosDiarios: MovimientoDiario[] = [];
+
+
+    
