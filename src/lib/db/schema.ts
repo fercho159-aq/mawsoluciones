@@ -27,6 +27,12 @@ export const clients = pgTable('clients', {
   whatsapp: varchar('whatsapp', { length: 50 }).notNull(),
   email: varchar('email', { length: 255 }),
   managedAreas: jsonb('managed_areas').$type<string[]>(),
+  instagramUrl: text('instagram_url'),
+  facebookUrl: text('facebook_url'),
+  tiktokUrl: text('tiktok_url'),
+  instagramFollowers: integer('instagram_followers'),
+  facebookFollowers: integer('facebook_followers'),
+  tiktokFollowers: integer('tiktok_followers'),
   createdAt: timestamp('created_at').defaultNow(),
 });
 
@@ -117,15 +123,6 @@ export const prospects_maw = pgTable('prospects_maw', {
     createdAt: timestamp('created_at').defaultNow(),
 });
 
-export const finanzas_final = pgTable('finanzas_final', {
-    id: serial('id').primaryKey(),
-    clientName: varchar('client_name', { length: 255 }).notNull(),
-    serviceType: varchar('service_type', { length: 100 }).notNull(),
-    amount: real('amount').notNull(),
-    requiresInvoice: boolean('requires_invoice').default(false).notNull(),
-    createdAt: timestamp('created_at').defaultNow(),
-});
-
 // --- RELATIONS ---
 
 export const clientsRelations = relations(clients, ({ one, many }) => ({
@@ -190,5 +187,5 @@ export type Colaborador = typeof colaboradores.$inferSelect;
 export type NewColaborador = typeof colaboradores.$inferInsert;
 export type ClientFinancialProfile = typeof clientFinancialProfiles.$inferSelect;
 export type NewClientFinancialProfile = typeof clientFinancialProfiles.$inferInsert;
-export type FinanzaFinal = typeof finanzas_final.$inferSelect;
-export type NewFinanzaFinal = typeof finanzas_final.$inferInsert;
+
+```

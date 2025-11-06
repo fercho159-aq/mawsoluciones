@@ -30,12 +30,23 @@ export type NewClientData = Omit<typeof clients.$inferInsert, 'id' | 'createdAt'
 
 export async function addClient(data: NewClientData) {
   try {
+    // Simulate fetching follower counts
+    const instagramFollowers = data.instagramUrl ? Math.floor(Math.random() * 5000) + 500 : 0;
+    const facebookFollowers = data.facebookUrl ? Math.floor(Math.random() * 10000) + 1000 : 0;
+    const tiktokFollowers = data.tiktokUrl ? Math.floor(Math.random() * 20000) + 200 : 0;
+
     const [newClient] = await db.insert(clients).values({
         name: data.name,
         representativeName: data.representativeName,
         whatsapp: data.whatsapp,
         email: data.email,
-        managedAreas: data.managedAreas
+        managedAreas: data.managedAreas,
+        instagramUrl: data.instagramUrl,
+        facebookUrl: data.facebookUrl,
+        tiktokUrl: data.tiktokUrl,
+        instagramFollowers,
+        facebookFollowers,
+        tiktokFollowers,
     }).returning({ id: clients.id });
     
     // Create financial profile for the new client
@@ -103,3 +114,4 @@ export async function deleteClients(ids: number[]) {
         throw new Error("Could not delete clients");
     }
 }
+```

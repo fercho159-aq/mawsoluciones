@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useMemo, useEffect, startTransition } from 'react';
@@ -14,7 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Edit, Trash, X } from 'lucide-react';
+import { PlusCircle, Edit, Trash, X, Instagram, Facebook, Link as LinkIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -47,6 +46,9 @@ export const ClientFormDialog = ({ client, children, isEditing, onSave }: { clie
     const [representativeName, setRepresentativeName] = useState('');
     const [whatsapp, setWhatsapp] = useState('');
     const [email, setEmail] = useState('');
+    const [instagramUrl, setInstagramUrl] = useState('');
+    const [facebookUrl, setFacebookUrl] = useState('');
+    const [tiktokUrl, setTiktokUrl] = useState('');
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
 
@@ -66,6 +68,9 @@ export const ClientFormDialog = ({ client, children, isEditing, onSave }: { clie
             setRepresentativeName(client.representativeName);
             setWhatsapp(client.whatsapp);
             setEmail(client.email || '');
+            setInstagramUrl(client.instagramUrl || '');
+            setFacebookUrl(client.facebookUrl || '');
+            setTiktokUrl(client.tiktokUrl || '');
             setAreas(client.managedAreas || []);
             setResponsables({}); 
         } else {
@@ -74,8 +79,9 @@ export const ClientFormDialog = ({ client, children, isEditing, onSave }: { clie
     }, [client, open]);
 
     const resetForm = () => {
-        setName(''); setRepresentativeName(''); setWhatsapp(''); setEmail(''); setServiceType('');
-        setAreas([]); setResponsables({}); setAvailableEjecutores([]);
+        setName(''); setRepresentativeName(''); setWhatsapp(''); setEmail('');
+        setInstagramUrl(''); setFacebookUrl(''); setTiktokUrl('');
+        setServiceType(''); setAreas([]); setResponsables({}); setAvailableEjecutores([]);
     }
 
     const handleEncargadoContenidoChange = (encargadoName: string) => {
@@ -112,7 +118,10 @@ export const ClientFormDialog = ({ client, children, isEditing, onSave }: { clie
             return;
         }
         
-        const clientData = { name, representativeName, whatsapp, email: email || null, managedAreas: areas };
+        const clientData = { 
+            name, representativeName, whatsapp, email: email || null, managedAreas: areas,
+            instagramUrl: instagramUrl || null, facebookUrl: facebookUrl || null, tiktokUrl: tiktokUrl || null
+        };
         
         const dataToSend = {
             ...clientData,
@@ -151,6 +160,12 @@ export const ClientFormDialog = ({ client, children, isEditing, onSave }: { clie
                     <Input value={representativeName} onChange={e => setRepresentativeName(e.target.value)} placeholder="Nombre del Representante*" />
                     <Input value={whatsapp} onChange={e => setWhatsapp(e.target.value)} placeholder="WhatsApp* (Ej. 52155...)" />
                     <Input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email (Opcional)" />
+
+                    <Separator className="my-2"/>
+                    <h4 className="font-medium">Redes Sociales</h4>
+                    <Input value={instagramUrl} onChange={e => setInstagramUrl(e.target.value)} placeholder="URL de Instagram (Opcional)" />
+                    <Input value={facebookUrl} onChange={e => setFacebookUrl(e.target.value)} placeholder="URL de Facebook (Opcional)" />
+                    <Input value={tiktokUrl} onChange={e => setTiktokUrl(e.target.value)} placeholder="URL de TikTok (Opcional)" />
                     
                     {!isEditing && (
                         <>
@@ -224,6 +239,12 @@ export const ClientFormDialog = ({ client, children, isEditing, onSave }: { clie
 }
 
 export type Client = ClientType & { financialProfile: ClientFinancialProfile | null };
+
+const TikTokIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={cn("w-4 h-4", className)}>
+        <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.04-5.36-.01-4.03-.01-8.05.02-12.07z" />
+    </svg>
+)
 
 export default function ClientesPage() {
     const { user, loading } = useAuth();
@@ -361,10 +382,9 @@ export default function ClientesPage() {
                                         />
                                     </TableHead>
                                     <TableHead>Nombre de la Empresa</TableHead>
-                                    <TableHead>Nombre Representante</TableHead>
-                                    <TableHead>Teléfono</TableHead>
-                                    <TableHead>Email</TableHead>
+                                    <TableHead>Representante</TableHead>
                                     <TableHead>Áreas Gestionadas</TableHead>
+                                    <TableHead>Redes Sociales</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -384,13 +404,18 @@ export default function ClientesPage() {
                                         </TableCell>
                                         <TableCell className="font-medium">{client.name}</TableCell>
                                         <TableCell>{client.representativeName || 'N/A'}</TableCell>
-                                        <TableCell>{client.whatsapp || 'N/A'}</TableCell>
-                                        <TableCell>{client.email || 'N/A'}</TableCell>
                                         <TableCell>
                                             <div className="flex gap-1 flex-wrap">
                                                 {client.managedAreas?.map(area => (
                                                     <Badge key={area} variant="secondary">{area}</Badge>
                                                 ))}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex flex-col gap-2 text-xs">
+                                                {client.instagramFollowers && <div className="flex items-center gap-1.5"><Instagram className="w-4 h-4" /> {client.instagramFollowers.toLocaleString()} (inicio)</div>}
+                                                {client.facebookFollowers && <div className="flex items-center gap-1.5"><Facebook className="w-4 h-4" /> {client.facebookFollowers.toLocaleString()} (inicio)</div>}
+                                                {client.tiktokFollowers && <div className="flex items-center gap-1.5"><TikTokIcon className="w-4 h-4" /> {client.tiktokFollowers.toLocaleString()} (inicio)</div>}
                                             </div>
                                         </TableCell>
                                     </TableRow>
@@ -415,5 +440,4 @@ export default function ClientesPage() {
         </div>
     );
 }
-
-    
+```
