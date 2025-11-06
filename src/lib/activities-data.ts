@@ -1,5 +1,4 @@
 
-
 import { addDays, startOfMonth } from 'date-fns';
 
 export type EventType = "grabacion" | "cita_venta";
@@ -82,6 +81,12 @@ export const initialEvents: ActivityEvent[] = [
 
 export type StatusPendiente = "Pendiente del cliente" | "Trabajando" | "No tenemos pendiente";
 
+export interface SubTask {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
 export interface Activity {
     id: string;
     cliente: string;
@@ -90,23 +95,24 @@ export interface Activity {
     fechaCorte: number;
     status: StatusPendiente;
     pendientePrincipal: string;
+    subTasks: SubTask[];
     categoria: 'Contenido' | 'Ads' | 'Web' | 'Ventas';
 }
 
 export const mockData: Activity[] = [
   // Contenido
-  { id: "c1", cliente: "DELICIAS", encargado: "Fany", ejecutor: "Aldair", fechaCorte: 15, status: "Trabajando", pendientePrincipal: "Revisar estrategia de contenido Q4", categoria: 'Contenido' },
-  { id: "c2", cliente: "DEASA", encargado: "Luis", ejecutor: "Alexis", fechaCorte: 30, status: "Pendiente del cliente", pendientePrincipal: "Aprobación de parrilla de noviembre", categoria: 'Contenido' },
-  { id: "c3", cliente: "CREDITOS", encargado: "Carlos", ejecutor: "Pedro", fechaCorte: 15, status: "No tenemos pendiente", pendientePrincipal: "Escritura de 2 nuevos artículos para blog", categoria: 'Contenido' },
-  { id: "c4", cliente: "Shaddai", encargado: "Julio", ejecutor: "Julio", fechaCorte: 15, status: "Trabajando", pendientePrincipal: "Planificar calendario de publicaciones de Diciembre", categoria: 'Contenido' },
+  { id: "c1", cliente: "DELICIAS", encargado: "Fany", ejecutor: "Aldair", fechaCorte: 15, status: "Trabajando", pendientePrincipal: "Revisar estrategia de contenido Q4", subTasks: [{id: 'sub1', text: 'Analizar competencia', completed: false}], categoria: 'Contenido' },
+  { id: "c2", cliente: "DEASA", encargado: "Luis", ejecutor: "Alexis", fechaCorte: 30, status: "Pendiente del cliente", pendientePrincipal: "Aprobación de parrilla de noviembre", subTasks: [], categoria: 'Contenido' },
+  { id: "c3", cliente: "CREDITOS", encargado: "Carlos", ejecutor: "Pedro", fechaCorte: 15, status: "No tenemos pendiente", pendientePrincipal: "Escritura de 2 nuevos artículos para blog", subTasks: [{id: 'sub2', text: 'Investigar palabras clave', completed: true}, {id: 'sub3', text: 'Redactar borrador', completed: false}], categoria: 'Contenido' },
+  { id: "c4", cliente: "Shaddai", encargado: "Julio", ejecutor: "Julio", fechaCorte: 15, status: "Trabajando", pendientePrincipal: "Planificar calendario de publicaciones de Diciembre", subTasks: [], categoria: 'Contenido' },
   // Ads
-  { id: "a1", cliente: "DEASA", encargado: "Luis", ejecutor: "Alexis", fechaCorte: 30, status: "Trabajando", pendientePrincipal: "Lanzar campaña de Google Ads 'Fin de Año'", categoria: 'Ads' },
-  { id: "a2", cliente: "Calzones", encargado: "Carlos", ejecutor: "Pedro", fechaCorte: 30, status: "Pendiente del cliente", pendientePrincipal: "Esperando creativos para campaña de San Valentín", categoria: 'Ads' },
-  { id: "a3", cliente: "Sinube Pauta", encargado: "Julio", ejecutor: "Bere", fechaCorte: 15, status: "Trabajando", pendientePrincipal: "Optimización de presupuesto de pauta", categoria: 'Ads' },
-  { id: "a4", cliente: "MEDICAL TOWER", encargado: "Fany", ejecutor: "Aldair", fechaCorte: 15, status: "No tenemos pendiente", pendientePrincipal: "Reporte de rendimiento de campaña de Octubre", categoria: 'Ads' },
+  { id: "a1", cliente: "DEASA", encargado: "Luis", ejecutor: "Alexis", fechaCorte: 30, status: "Trabajando", pendientePrincipal: "Lanzar campaña de Google Ads 'Fin de Año'", subTasks: [], categoria: 'Ads' },
+  { id: "a2", cliente: "Calzones", encargado: "Carlos", ejecutor: "Pedro", fechaCorte: 30, status: "Pendiente del cliente", pendientePrincipal: "Esperando creativos para campaña de San Valentín", subTasks: [], categoria: 'Ads' },
+  { id: "a3", cliente: "Sinube Pauta", encargado: "Julio", ejecutor: "Bere", fechaCorte: 15, status: "Trabajando", pendientePrincipal: "Optimización de presupuesto de pauta", subTasks: [], categoria: 'Ads' },
+  { id: "a4", cliente: "MEDICAL TOWER", encargado: "Fany", ejecutor: "Aldair", fechaCorte: 15, status: "No tenemos pendiente", pendientePrincipal: "Reporte de rendimiento de campaña de Octubre", subTasks: [], categoria: 'Ads' },
   // Web
-  { id: "w1", cliente: "CREDITOS", encargado: "Carlos", ejecutor: "Pedro", fechaCorte: 15, status: "Trabajando", pendientePrincipal: "Optimización SEO de la landing page 'Préstamos'", categoria: 'Web' },
-  { id: "w2", cliente: "PROPERTY TRADERS", encargado: "Carlos", ejecutor: "Pedro", fechaCorte: 30, status: "Pendiente del cliente", pendientePrincipal: "Esperando fotos para nueva sección de 'Desarrollos'", categoria: 'Web' },
-  { id: "w3", cliente: "ALDO", encargado: "Carlos", ejecutor: "Carlos", fechaCorte: 30, status: "No tenemos pendiente", pendientePrincipal: "Actualización de plugins del sitio", categoria: 'Web' },
-  { id: "w4", cliente: "KIBOOK", encargado: "Fany", ejecutor: "Dani", fechaCorte: 15, status: "Trabajando", pendientePrincipal: "Desarrollo de nueva funcionalidad de carrito", categoria: 'Web' },
+  { id: "w1", cliente: "CREDITOS", encargado: "Carlos", ejecutor: "Pedro", fechaCorte: 15, status: "Trabajando", pendientePrincipal: "Optimización SEO de la landing page 'Préstamos'", subTasks: [], categoria: 'Web' },
+  { id: "w2", cliente: "PROPERTY TRADERS", encargado: "Carlos", ejecutor: "Pedro", fechaCorte: 30, status: "Pendiente del cliente", pendientePrincipal: "Esperando fotos para nueva sección de 'Desarrollos'", subTasks: [], categoria: 'Web' },
+  { id: "w3", cliente: "ALDO", encargado: "Carlos", ejecutor: "Carlos", fechaCorte: 30, status: "No tenemos pendiente", pendientePrincipal: "Actualización de plugins del sitio", subTasks: [], categoria: 'Web' },
+  { id: "w4", cliente: "KIBOOK", encargado: "Fany", ejecutor: "Dani", fechaCorte: 15, status: "Trabajando", pendientePrincipal: "Desarrollo de nueva funcionalidad de carrito", subTasks: [], categoria: 'Web' },
 ];
