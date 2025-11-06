@@ -1,7 +1,7 @@
 
-import { FirebaseApp, getApps, initializeApp, getApp } from 'firebase/app';
-import { Auth, getAuth } from 'firebase/auth';
-import { Firestore, getFirestore } from 'firebase/firestore';
+import { FirebaseApp, getApps, initializeApp, getApp as getExistingApp } from 'firebase/app';
+import { Auth, getAuth as getFirebaseAuth } from 'firebase/auth';
+import { Firestore, getFirestore as getFirebaseFirestore } from 'firebase/firestore';
 import { firebaseConfig } from './config';
 import { useAuth, useFirebaseApp, useFirestore } from './provider';
 import { useUser } from './auth/use-user';
@@ -14,13 +14,35 @@ let app: FirebaseApp;
 let auth: Auth;
 let firestore: Firestore;
 
-if (getApps().length) {
-  app = getApp();
-} else {
-  app = initializeApp(firebaseConfig);
+function initialize() {
+  if (!getApps().length) {
+    app = initializeApp(firebaseConfig);
+    auth = getFirebaseAuth(app);
+    firestore = getFirebaseFirestore(app);
+  } else {
+    app = getExistingApp();
+    auth = getFirebaseAuth(app);
+    firestore = getFirebaseFirestore(app);
+  }
 }
 
-auth = getAuth(app);
-firestore = getFirestore(app);
+export function getApp() {
+  if (!app) {
+    initialize();
+  }
+  return app;
+}
 
-export { app, auth, firestore };
+export function getAuth() {
+  if (!auth) {
+    initialize();
+  }
+  return auth;
+}
+
+export function getFirestore() {
+  if (!firestore) {
+    initialize();
+  }
+  return firestore;
+}

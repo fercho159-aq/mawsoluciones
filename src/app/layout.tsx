@@ -6,18 +6,23 @@ import { Toaster } from "@/components/ui/toaster"
 import ChatBubble from '@/components/chat-bubble';
 import { ThemeProvider } from '@/components/theme-provider';
 import { FirebaseProvider } from '@/firebase/provider';
-import { app, auth, firestore } from '@/firebase';
+import { getApp, getAuth, getFirestore } from '@/firebase';
+import { AuthProvider } from '@/lib/auth-provider';
 
 export const metadata: Metadata = {
   title: 'MAW Soluciones | Agencia de Marketing Digital',
   description: 'Potenciamos tu marca con estrategias de marketing digital innovadoras. Creación de contenido, desarrollo web, y más.',
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const app = getApp();
+  const auth = getAuth();
+  const firestore = getFirestore();
+
   return (
     <html lang="es" className="scroll-smooth" suppressHydrationWarning>
       <head>
@@ -37,9 +42,11 @@ export default async function RootLayout({
             auth={auth}
             firestore={firestore}
           >
-            {children}
-            <ChatBubble />
-            <Toaster />
+            <AuthProvider>
+              {children}
+              <ChatBubble />
+              <Toaster />
+            </AuthProvider>
           </FirebaseProvider>
         </ThemeProvider>
       </body>
