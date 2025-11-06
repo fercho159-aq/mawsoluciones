@@ -509,9 +509,9 @@ export default function PendientesPage() {
 
     const tasksPerCategory = useMemo(() => {
         return {
-            contenido: filteredData.some(d => d.categoria === 'Contenido'),
-            ads: filteredData.some(d => d.categoria === 'Ads'),
-            web: filteredData.some(d => d.categoria === 'Web'),
+            contenido: filteredData.some(d => d.categoria.toLowerCase() === 'contenido'),
+            ads: filteredData.some(d => d.categoria.toLowerCase() === 'ads'),
+            web: filteredData.some(d => d.categoria.toLowerCase() === 'web'),
         };
     }, [filteredData]);
     
@@ -530,7 +530,7 @@ export default function PendientesPage() {
   }
   
   const getFilteredDataForTab = (categoria: string) => {
-      return filteredData.filter(d => d.categoria === categoria);
+      return filteredData.filter(d => d.categoria.toLowerCase() === categoria);
   }
 
   return (
@@ -585,22 +585,22 @@ export default function PendientesPage() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="contenido" className="flex items-center gap-2">
-                    {tasksPerCategory.contenido && <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>}
+                    {tasksPerCategory.contenido && <ChevronRight className="w-4 h-4 text-primary" />}
                     Pendientes Contenido
                 </TabsTrigger>
                 <TabsTrigger value="ads" className="flex items-center gap-2">
-                    {tasksPerCategory.ads && <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>}
+                    {tasksPerCategory.ads && <ChevronRight className="w-4 h-4 text-primary" />}
                     Pendientes Ads
                 </TabsTrigger>
                 <TabsTrigger value="web" className="flex items-center gap-2">
-                    {tasksPerCategory.web && <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>}
+                    {tasksPerCategory.web && <ChevronRight className="w-4 h-4 text-primary" />}
                     Pendientes Web
                 </TabsTrigger>
             </TabsList>
             
             <TabsContent value="contenido">
                <PendientesTable 
-                    data={getFilteredDataForTab('Contenido')} 
+                    data={getFilteredDataForTab('contenido')} 
                     onUpdateTask={handleUpdateTask} 
                     currentUser={user} 
                     onRefresh={fetchData}
@@ -612,7 +612,7 @@ export default function PendientesPage() {
 
             <TabsContent value="ads">
                 <PendientesTable 
-                    data={getFilteredDataForTab('Ads')} 
+                    data={getFilteredDataForTab('ads')} 
                     onUpdateTask={handleUpdateTask} 
                     currentUser={user} 
                     onRefresh={fetchData}
@@ -624,7 +624,7 @@ export default function PendientesPage() {
             
             <TabsContent value="web">
                  <PendientesTable 
-                    data={getFilteredDataForTab('Web')} 
+                    data={getFilteredDataForTab('web')} 
                     onUpdateTask={handleUpdateTask} 
                     currentUser={user} 
                     onRefresh={fetchData}
