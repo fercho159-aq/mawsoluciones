@@ -31,7 +31,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { getProspects, addSalesProspect } from './_actions';
+import { getProspects, addMawProspect } from './_actions';
 import type { Prospect, NewProspect } from '@/lib/db/schema';
 
 
@@ -51,7 +51,7 @@ const statusColors: Record<StatusLead, string> = {
 const responsables: ResponsableVentas[] = ["Alma", "Fer", "Julio"];
 const statuses: StatusLead[] = ["Lead Nuevo", "Contactado", "Videollamada", "En Negociación", "Convertido", "No Interesado"];
 
-const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<NewProspect>) => void }) => {
+const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<Omit<NewProspect, 'id' | 'createdAt'>>) => void }) => {
     const [open, setOpen] = useState(false);
     const [name, setName] = useState('');
     const [company, setCompany] = useState('');
@@ -59,7 +59,7 @@ const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<NewProspect>) 
     const [phone, setPhone] = useState('');
     const { toast } = useToast();
 
-    const handleAdd = () => {
+    const handleAdd = async () => {
         if (!name && !company) {
             toast({
                 title: "Error",
@@ -69,13 +69,24 @@ const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<NewProspect>) 
             return;
         }
 
-        onAddLead({ name, company, email, phone });
-        
-        setName('');
-        setCompany('');
-        setEmail('');
-        setPhone('');
-        setOpen(false);
+        try {
+            await onAddLead({ name, company, email, phone });
+            toast({
+                title: "Prospecto Añadido",
+                description: `${name || company} se ha añadido al pipeline.`,
+            });
+            setName('');
+            setCompany('');
+            setEmail('');
+            setPhone('');
+            setOpen(false);
+        } catch (error) {
+             toast({
+                title: "Error",
+                description: "No se pudo añadir el prospecto.",
+                variant: 'destructive'
+            });
+        }
     };
 
     return (
@@ -144,41 +155,8 @@ export default function VentasPage() {
     }, []);
 
     const handleAddLead = async (newProspectData: Partial<Omit<NewProspect, 'id' | 'createdAt'>>) => {
-        let lastSellerIndex = 0;
-        try {
-            const lastIndexStr = localStorage.getItem('lastAssignedSellerIndex');
-            if (lastIndexStr) {
-                lastSellerIndex = parseInt(lastIndexStr, 10);
-            }
-        } catch (error) {
-            console.error('Could not parse lastAssignedSellerIndex from localStorage', error);
-        }
-
-        const newSeller = responsables[lastSellerIndex % responsables.length];
-        const nextSellerIndex = (lastSellerIndex + 1) % responsables.length;
-        localStorage.setItem('lastAssignedSellerIndex', nextSellerIndex.toString());
-
-        try {
-            await addSalesProspect({
-                ...newProspectData,
-                responsable: newSeller,
-                source: 'Manual',
-                status: 'Lead Nuevo',
-            });
-
-            toast({
-                title: "Prospecto Añadido",
-                description: `${newProspectData.name || newProspectData.company} se ha añadido al pipeline y asignado a ${newSeller}.`,
-            });
-            fetchProspects();
-        } catch(e) {
-            console.error(e);
-            toast({
-                title: "Error",
-                description: "No se pudo añadir el prospecto.",
-                variant: 'destructive'
-            });
-        }
+        await addMawProspect(newProspectData);
+        fetchProspects();
     };
 
 

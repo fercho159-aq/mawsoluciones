@@ -129,7 +129,7 @@ export const leads = pgTable('leads', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
-export const prospects = pgTable('prospects', {
+export const prospects_maw = pgTable('prospects_maw', {
     id: serial('id').primaryKey(),
     name: varchar('name', { length: 255 }),
     company: varchar('company', { length: 255 }),
@@ -141,9 +141,8 @@ export const prospects = pgTable('prospects', {
     createdAt: timestamp('created_at').defaultNow(),
 });
 
-
-export type Prospect = typeof prospects.$inferSelect;
-export type NewProspect = typeof prospects.$inferInsert;
+export type Prospect = typeof prospects_maw.$inferSelect;
+export type NewProspect = typeof prospects_maw.$inferInsert;
 export type Lead = typeof leads.$inferSelect;
 export type NewLead = typeof leads.$inferInsert;
 
