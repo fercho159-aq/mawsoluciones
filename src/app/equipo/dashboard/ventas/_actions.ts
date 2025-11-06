@@ -31,7 +31,7 @@ export async function addMawProspect(data: Partial<Omit<NewProspect, 'id' | 'cre
             company: data.company,
             phone: data.phone,
             email: data.email,
-            source: 'Manual',
+            source: data.source || 'Manual',
             status: 'Lead Nuevo',
             responsable: newSeller,
         });

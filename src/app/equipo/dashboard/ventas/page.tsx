@@ -50,6 +50,7 @@ const statusColors: Record<StatusLead, string> = {
 
 const responsables: ResponsableVentas[] = ["Alma", "Fer", "Julio"];
 const statuses: StatusLead[] = ["Lead Nuevo", "Contactado", "Videollamada", "En Negociación", "Convertido", "No Interesado"];
+const leadSources: OrigenLead[] = ["Referencia", "Sitio Web", "TikTok", "Facebook", "Instagram"];
 
 const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<Omit<NewProspect, 'id' | 'createdAt'>>) => void }) => {
     const [open, setOpen] = useState(false);
@@ -57,6 +58,7 @@ const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<Omit<NewProspe
     const [company, setCompany] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
+    const [source, setSource] = useState<OrigenLead>('Referencia');
     const { toast } = useToast();
 
     const handleAdd = async () => {
@@ -70,7 +72,7 @@ const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<Omit<NewProspe
         }
 
         try {
-            await onAddLead({ name, company, email, phone });
+            await onAddLead({ name, company, email, phone, source });
             toast({
                 title: "Prospecto Añadido",
                 description: `${name || company} se ha añadido al pipeline.`,
@@ -79,6 +81,7 @@ const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<Omit<NewProspe
             setCompany('');
             setEmail('');
             setPhone('');
+            setSource('Referencia');
             setOpen(false);
         } catch (error) {
              toast({
@@ -117,6 +120,15 @@ const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<Omit<NewProspe
                      <div className="space-y-2">
                         <Label htmlFor="telefono">Teléfono (Opcional)</Label>
                         <Input id="telefono" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="5512345678" />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="source">Origen del Prospecto</Label>
+                        <Select value={source} onValueChange={(value) => setSource(value as OrigenLead)}>
+                            <SelectTrigger id="source"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                {leadSources.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
                 <DialogFooter>
@@ -281,7 +293,7 @@ export default function VentasPage() {
                     <TableBody>
                         {filteredProspects.filter(l => l.status !== 'Convertido' && l.status !== 'No Interesado').map((lead) => (
                             <TableRow key={lead.id}>
-                                <TableCell className="font-medium">{lead.name}</TableCell>
+                                <TableCell className="font-medium">{lead.name || lead.company}</TableCell>
                                 <TableCell>{lead.source}</TableCell>
                                 <TableCell>{lead.responsable}</TableCell>
                                 <TableCell>
