@@ -446,3 +446,5 @@ const AddPendienteDialog = ({ clients, onAddPendiente }: { clients: Client[], on
         </Dialog>
     )
 }
+
+    
