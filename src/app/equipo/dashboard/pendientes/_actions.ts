@@ -8,14 +8,13 @@ import { revalidatePath } from "next/cache";
 
 export async function getPendientes() {
     try {
-        // This was the cause of the error. The `with` clause was trying to fetch a relation
-        // that was inconsistent with the schema, causing the query to fail silently.
-        // By fetching just the pendientes, we ensure the data is displayed.
-        const allPendientes = await db.query.pendientes.findMany();
+        // This is the most direct way to select all records and avoids relation issues.
+        const allPendientes = await db.select().from(pendientes);
         return allPendientes;
     } catch (error) {
         console.error("Error fetching pendientes:", error);
-        return [];
+        // Re-throwing the error to make it visible, instead of returning an empty array silently.
+        throw new Error("Could not fetch pendientes from the database.");
     }
 }
 
@@ -25,6 +24,7 @@ export async function addPendiente(data: Omit<NewPendienteData, 'id' | 'createdA
     try {
         await db.insert(pendientes).values({
             ...data,
+            cliente: data.cliente,
             fechaCorte: 15, // Default value
         });
         revalidatePath("/equipo/dashboard/pendientes");
