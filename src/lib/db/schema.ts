@@ -29,24 +29,12 @@ export const clients = pgTable('clients', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
-export const clientsRelations = relations(clients, ({ one, many }) => ({
-	cuentasPorCobrar: many(cuentasPorCobrar),
-    pendientes: many(pendientes_maw),
-    financialProfile: one(clientFinancialProfiles, {
-        fields: [clients.id],
-        references: [clientFinancialProfiles.clientId],
-    })
-}));
-
 export const clientFinancialProfiles = pgTable('client_financial_profiles', {
     id: serial('id').primaryKey(),
     clientId: integer('client_id').notNull().unique().references(() => clients.id, { onDelete: 'cascade' }),
     billingDay: integer('billing_day').default(15), // e.g., 15th or 30th
     defaultInvoice: boolean('default_invoice').default(false),
 });
-
-export type Client = typeof clients.$inferSelect;
-export type NewClient = typeof clients.$inferInsert;
 
 export const pendientes_maw = pgTable('pendientes_maw', {
     id: serial('id').primaryKey(),
@@ -60,21 +48,6 @@ export const pendientes_maw = pgTable('pendientes_maw', {
     completed: boolean('completed').default(false).notNull(),
     createdAt: timestamp('created_at').defaultNow(),
 });
-
-export const pendientesMawRelations = relations(pendientes_maw, ({ one }) => ({
-    client: one(clients, {
-        fields: [pendientes_maw.clientId],
-        references: [clients.id],
-    }),
-    recordingEvent: one(recordingEvents, {
-        fields: [pendientes_maw.id],
-        references: [recordingEvents.pendienteId],
-    })
-}));
-
-export type PendienteMaw = typeof pendientes_maw.$inferSelect;
-export type NewPendienteMaw = typeof pendientes_maw.$inferInsert;
-
 
 export const accesses = pgTable('accesses', {
     id: serial('id').primaryKey(),
@@ -102,17 +75,6 @@ export const finanzas_final = pgTable('finanzas_final', {
     createdAt: timestamp('created_at').defaultNow(),
 });
 
-export const cuentasPorCobrarRelations = relations(cuentasPorCobrar, ({ one }) => ({
-	client: one(clients, {
-		fields: [cuentasPorCobrar.clienteId],
-		references: [clients.id],
-	}),
-}));
-
-
-export type CuentaPorCobrar = typeof cuentasPorCobrar.$inferSelect;
-export type NewCuentaPorCobrar = typeof cuentasPorCobrar.$inferInsert;
-
 export const movimientosDiarios = pgTable('movimientos_diarios', {
     id: serial('id').primaryKey(),
     fecha: timestamp('fecha').defaultNow().notNull(),
@@ -124,9 +86,6 @@ export const movimientosDiarios = pgTable('movimientos_diarios', {
     categoria: varchar('categoria', { length: 100 }),
     nombreOtro: varchar('nombre_otro', { length: 255 }),
 });
-
-export type MovimientoDiario = typeof movimientosDiarios.$inferSelect;
-export type NewMovimientoDiario = typeof movimientosDiarios.$inferInsert;
 
 export const recordingEvents = pgTable('recording_events', {
     id: serial('id').primaryKey(),
@@ -142,13 +101,6 @@ export const recordingEvents = pgTable('recording_events', {
     equipmentNames: jsonb('equipment_names').$type<string[]>(),
     pendienteId: integer('pendiente_id').references(() => pendientes_maw.id, { onDelete: 'cascade' }),
 });
-
-export const recordingEventsRelations = relations(recordingEvents, ({ one }) => ({
-	pendiente: one(pendientes_maw, {
-		fields: [recordingEvents.pendienteId],
-		references: [pendientes_maw.id],
-	}),
-}));
 
 export const leads = pgTable('leads', {
   id: serial('id').primaryKey(),
@@ -173,14 +125,56 @@ export const prospects_maw = pgTable('prospects_maw', {
     createdAt: timestamp('created_at').defaultNow(),
 });
 
+// RELATIONS
+export const clientsRelations = relations(clients, ({ one, many }) => ({
+	cuentasPorCobrar: many(cuentasPorCobrar),
+    pendientes: many(pendientes_maw),
+    financialProfile: one(clientFinancialProfiles, {
+        fields: [clients.id],
+        references: [clientFinancialProfiles.clientId],
+    })
+}));
+
+export const pendientesMawRelations = relations(pendientes_maw, ({ one }) => ({
+    client: one(clients, {
+        fields: [pendientes_maw.clientId],
+        references: [clients.id],
+    }),
+    recordingEvent: one(recordingEvents, {
+        fields: [pendientes_maw.id],
+        references: [recordingEvents.pendienteId],
+    })
+}));
+
+export const cuentasPorCobrarRelations = relations(cuentasPorCobrar, ({ one }) => ({
+	client: one(clients, {
+		fields: [cuentasPorCobrar.clienteId],
+		references: [clients.id],
+	}),
+}));
+
+export const recordingEventsRelations = relations(recordingEvents, ({ one }) => ({
+	pendiente: one(pendientes_maw, {
+		fields: [recordingEvents.pendienteId],
+		references: [pendientes_maw.id],
+	}),
+}));
+
+// TYPES
+export type Client = typeof clients.$inferSelect;
+export type NewClient = typeof clients.$inferInsert;
+export type PendienteMaw = typeof pendientes_maw.$inferSelect;
+export type NewPendienteMaw = typeof pendientes_maw.$inferInsert;
+export type CuentaPorCobrar = typeof cuentasPorCobrar.$inferSelect;
+export type NewCuentaPorCobrar = typeof cuentasPorCobrar.$inferInsert;
+export type MovimientoDiario = typeof movimientosDiarios.$inferSelect;
+export type NewMovimientoDiario = typeof movimientosDiarios.$inferInsert;
 export type Prospect = typeof prospects_maw.$inferSelect;
 export type NewProspect = typeof prospects_maw.$inferInsert;
 export type Lead = typeof leads.$inferSelect;
 export type NewLead = typeof leads.$inferInsert;
-
 export type RecordingEvent = typeof recordingEvents.$inferSelect;
 export type NewRecordingEvent = typeof recordingEvents.$inferInsert;
-
 export type Colaborador = typeof colaboradores.$inferSelect;
 export type NewColaborador = typeof colaboradores.$inferInsert;
 export type ClientFinancialProfile = typeof clientFinancialProfiles.$inferSelect;
