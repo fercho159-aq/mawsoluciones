@@ -51,7 +51,11 @@ export default function ConfiguracionPage() {
                 return;
             }
             setSelectedFile(file);
-            setAvatarUrl(URL.createObjectURL(file));
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setAvatarUrl(reader.result as string);
+            };
+            reader.readAsDataURL(file);
         }
     }
 
