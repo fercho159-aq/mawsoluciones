@@ -27,7 +27,7 @@ export default function DashboardNav() {
 
     const navItems = baseNavItems.map(item => {
         if (item.section === 'miProgreso' && user?.role === 'admin') {
-            return { ...item, label: '¿CÓMO VA LA EMPRESA?' };
+            return { ...item, label: '¿Cómo va la empresa?' };
         }
         return item;
     });
@@ -35,10 +35,14 @@ export default function DashboardNav() {
     const userHasAccess = (section: string) => {
         if (!user) return false;
         
-        // Admin has access to everything
-        if (user.role === 'admin') return true;
+        // Admin has access to everything except their own "Mi Progreso" page, which is relabeled.
+        if (user.role === 'admin') {
+            // Special case for collaborators, only admin sees it
+             if (section === 'colaboradores') return true;
+             return true;
+        }
 
-        // Specific logic for 'colaboradores'
+        // For non-admins, collaborators section is hidden
         if (section === 'colaboradores') return false;
 
         if (!user.accessSections) return false;
