@@ -4,13 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
-import { Users, BookOpen, ListTodo, KeyRound, DollarSign, Calendar, LineChart, Handshake, Settings, UserPlus } from "lucide-react";
+import { Users, BookOpen, ListTodo, KeyRound, DollarSign, Calendar, LineChart, Handshake, Settings, FileArchive } from "lucide-react";
 import { useAuth } from "@/lib/auth-provider";
 
 const baseNavItems = [
     { href: "/equipo/dashboard/nosotros", label: "Nosotros", icon: <Users className="w-4 h-4" />, section: 'nosotros' },
     { href: "/equipo/dashboard/introduccion", label: "Introducción", icon: <BookOpen className="w-4 h-4" />, section: 'introduccion' },
-    { href: "/equipo/dashboard/colaboradores", label: "Colaboradores", icon: <UserPlus className="w-4 h-4" />, section: 'colaboradores' },
+    { href: "/equipo/dashboard/colaboradores", label: "Colaboradores", icon: <Users className="w-4 h-4" />, section: 'colaboradores' },
     { href: "/equipo/dashboard/clientes", label: "Clientes", icon: <Users className="w-4 h-4" />, section: 'clientes' },
     { href: "/equipo/dashboard/pendientes", label: "Pendientes", icon: <ListTodo className="w-4 h-4" />, section: 'pendientes' },
     { href: "/equipo/dashboard/finanzas", label: "Finanzas", icon: <DollarSign className="w-4 h-4" />, section: 'finanzas' },
@@ -18,6 +18,7 @@ const baseNavItems = [
     { href: "/equipo/dashboard/accesos", label: "Accesos", icon: <KeyRound className="w-4 h-4" />, section: 'accesos' },
     { href: "/equipo/dashboard/calendario", label: "Calendario", icon: <Calendar className="w-4 h-4" />, section: 'calendario' },
     { href: "/equipo/dashboard/mi-progreso", label: "Mi Progreso", icon: <LineChart className="w-4 h-4" />, section: 'miProgreso' },
+    { href: "/equipo/dashboard/documentacion", label: "Documentación", icon: <FileArchive className="w-4 h-4" />, section: 'documentacion' },
 ];
 
 export default function DashboardNav() {

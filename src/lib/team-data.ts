@@ -27,7 +27,7 @@ export const teamMembers: TeamMember[] = [
         role: 'admin', 
         email: 'admin@agencia.com',
         color: '#7C3AED', // purple-600
-        accessSections: { nosotros: true, introduccion: true, pendientes: true, finanzas: true, ventas: true, accesos: true, calendario: true, miProgreso: true, clientes: true, configuracion: true },
+        accessSections: { nosotros: true, introduccion: true, pendientes: true, finanzas: true, ventas: true, accesos: true, calendario: true, miProgreso: true, clientes: true, configuracion: true, documentacion: true },
         permissions: {
             finanzas: { agregarPagos: true, agregarGastos: true, agregarCuentasPorCobrar: true },
             ventas: { agregarProspectosDirecto: true, cambiarStatusProspectos: true, cambiarStatusSoloAsignados: false, verTodosProspectos: true },
@@ -46,7 +46,7 @@ export const teamMembers: TeamMember[] = [
         role: 'contabilidad', 
         email: 'conta@agencia.com',
         color: '#6B7280', // gray-500
-        accessSections: { nosotros: true, introduccion: true, pendientes: false, finanzas: true, ventas: false, accesos: false, calendario: false, miProgreso: false, clientes: true, configuracion: true },
+        accessSections: { nosotros: true, introduccion: true, pendientes: false, finanzas: true, ventas: false, accesos: false, calendario: false, miProgreso: false, clientes: true, configuracion: true, documentacion: true },
         permissions: {
             finanzas: { agregarPagos: true, agregarGastos: true, agregarCuentasPorCobrar: true },
             clientes: { agregarClientes: true, editarClientes: true, verSaldo: true },
@@ -61,7 +61,7 @@ export const teamMembers: TeamMember[] = [
         role: 'ventas', 
         email: 'ventas@agencia.com',
         color: '#2563EB', // blue-600
-        accessSections: { nosotros: false, introduccion: false, pendientes: false, finanzas: false, ventas: true, accesos: false, calendario: false, miProgreso: false, clientes: false, configuracion: true },
+        accessSections: { nosotros: true, introduccion: true, pendientes: false, finanzas: false, ventas: true, accesos: false, calendario: false, miProgreso: false, clientes: false, configuracion: true },
         permissions: {
             ventas: { agregarProspectosDirecto: true, cambiarStatusProspectos: true, cambiarStatusSoloAsignados: false, verTodosProspectos: true }
         },
