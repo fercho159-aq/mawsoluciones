@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect, startTransition } from 'react';
@@ -396,13 +397,15 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                     </TableCell>
                                     <TableCell className="p-2 align-middle">
                                         <Select value={pendiente.status} onValueChange={(newStatus) => updatePendiente(pendiente.id, {status: newStatus}).then(onRefresh)}>
-                                            <SelectTrigger className="w-full h-8 text-xs">
-                                                <SelectValue />
+                                            <SelectTrigger className="w-full h-8 text-xs px-0 border-none bg-transparent">
+                                                <SelectValue asChild>
+                                                    <Badge className={cn("text-white w-full justify-center", statusColors[pendiente.status])}>{pendiente.status}</Badge>
+                                                </SelectValue>
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {Object.entries(statusColors).map(([status, color]) => (
                                                     <SelectItem key={status} value={status}>
-                                                        <Badge className={cn("text-white", color)}>{status}</Badge>
+                                                        {status}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
@@ -684,3 +687,4 @@ export default function PendientesPage() {
     </div>
   );
 }
+
