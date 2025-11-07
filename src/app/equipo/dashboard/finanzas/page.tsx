@@ -488,7 +488,10 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
     const monthlyFilteredMovements = useMemo(() => {
         const start = startOfMonth(parseISO(`${selectedMonth}-01`));
         const end = endOfMonth(start);
-        return movimientos.filter(mov => isWithinInterval(new Date(mov.fecha), { start, end }));
+        return movimientos.filter(mov => {
+            const movDate = new Date(mov.fecha);
+            return isWithinInterval(movDate, { start, end });
+        });
     }, [movimientos, selectedMonth]);
 
     const summary = useMemo(() => {
@@ -586,9 +589,9 @@ export default function FinanzasPage() {
                 getCuentasPorCobrar(),
                 getMovimientos()
             ]);
-            setClients(clientsData);
-            setCuentasPorCobrar(cpcData);
-            setMovimientos(movimientosData);
+            setClients(clientsData as Client[]);
+            setCuentasPorCobrar(cpcData as CuentaPorCobrar[]);
+            setMovimientos(movimientosData as MovimientoDiario[]);
         } catch (error) {
              toast({
                 title: "Error al cargar datos",
@@ -606,6 +609,19 @@ export default function FinanzasPage() {
 
     if (isLoading) {
         return <div className="flex items-center justify-center min-h-[50vh]"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div></div>
+    }
+
+    if (!user || !user.accessSections?.finanzas) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Acceso Denegado</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p>No tienes permiso para ver esta sección.</p>
+                </CardContent>
+            </Card>
+        );
     }
 
     return (

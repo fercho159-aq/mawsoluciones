@@ -4,7 +4,7 @@
 
 import { db } from "@/lib/db";
 import { cuentasPorCobrar, movimientosDiarios, type NewCuentaPorCobrar, type CuentaPorCobrar, type MovimientoDiario, type NewMovimientoDiario } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function getCuentasPorCobrar() {
@@ -20,7 +20,7 @@ export async function getCuentasPorCobrar() {
 export async function getMovimientos() {
   try {
     const allMovimientos = await db.query.movimientosDiarios.findMany({
-        orderBy: [eq(movimientosDiarios.fecha, 'desc')],
+        orderBy: [desc(movimientosDiarios.fecha)],
     });
     return allMovimientos;
   } catch (error) {
@@ -87,11 +87,15 @@ export async function registrarPagoCpc(cpcId: number, cuentaDestino: string, det
         // 2. Actualizar el movimiento diario correspondiente para reflejar el pago
         const movimiento = await db.query.movimientosDiarios.findFirst({ where: eq(movimientosDiarios.cpcId, cpcId) });
 
+        if (!movimiento) {
+             throw new Error("Movimiento asociado no encontrado.");
+        }
+
         await db.update(movimientosDiarios)
             .set({ 
                 cuenta: cuentaDestino,
                 detalleCuenta: detalleCuenta,
-                descripcion: movimiento?.descripcion.replace(' (pendiente)', '') || 'Ingreso registrado',
+                descripcion: movimiento.descripcion.replace(' (pendiente)', '') || 'Ingreso registrado',
                 fecha: new Date(),
             })
             .where(eq(movimientosDiarios.cpcId, cpcId));
