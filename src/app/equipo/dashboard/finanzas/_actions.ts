@@ -38,6 +38,27 @@ export async function addCpc(data: Omit<NewCuentaPorCobrar, 'id'>) {
     }
 }
 
+export async function updateCpc(id: number, data: Partial<Omit<NewCuentaPorCobrar, 'id'>>) {
+    try {
+        await db.update(cuentasPorCobrar).set(data).where(eq(cuentasPorCobrar.id, id));
+        revalidatePath("/equipo/dashboard/finanzas");
+    } catch (error) {
+        console.error("Error updating cpc:", error);
+        throw new Error("Could not update cpc");
+    }
+}
+
+export async function deleteCpc(id: number) {
+    try {
+        await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, id));
+        revalidatePath("/equipo/dashboard/finanzas");
+    } catch (error) {
+        console.error("Error deleting cpc:", error);
+        throw new Error("Could not delete cpc");
+    }
+}
+
+
 export async function addMovimiento(data: Omit<NewMovimientoDiario, 'id'>) {
   try {
     await db.insert(movimientosDiarios).values(data);

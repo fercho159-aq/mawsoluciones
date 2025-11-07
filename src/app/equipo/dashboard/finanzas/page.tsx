@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Info } from 'lucide-react';
+import { ArrowUpDown, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Info, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -27,13 +27,128 @@ import { useAuth } from '@/lib/auth-provider';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { MovimientoDiario, CuentaPorCobrar, NewCuentaPorCobrar, NewMovimientoDiario, Client, ClientFinancialProfile } from '@/lib/db/schema';
 import { ClientFormDialog } from '../clientes/page';
-import { getCuentasPorCobrar, getMovimientos, addCpc, addMovimiento } from './_actions';
+import { getCuentasPorCobrar, getMovimientos, addCpc, addMovimiento, updateCpc, deleteCpc } from './_actions';
 import { getClients } from '../clientes/_actions';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+
 
 type CategoriaIngreso = "Proyecto" | "Iguala Mensual" | "Renovaciones" | "Otros";
 type CategoriaGasto = "Publicidad" | "Sueldos" | "Comisiones" | "Impuestos" | "Personales" | "Otros" | "Renta";
 type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo" | "Efectivo";
+
+const EditCpcDialog = ({ cpc, onSave, children }: { cpc: CuentaPorCobrar | null, onSave: () => void, children: React.ReactNode }) => {
+    const [open, setOpen] = useState(false);
+    const { toast } = useToast();
+    
+    const [monto, setMonto] = useState('');
+    const [tipo, setTipo] = useState<CategoriaIngreso>('Iguala Mensual');
+    const [periodo, setPeriodo] = useState('');
+
+    useEffect(() => {
+        if (open && cpc) {
+            setMonto(cpc.monto.toString());
+            setTipo(cpc.tipo as CategoriaIngreso);
+            setPeriodo(cpc.periodo);
+        }
+    }, [open, cpc]);
+
+    const handleSave = async () => {
+        if (!cpc || !monto || !periodo) {
+            toast({ title: "Error", description: "Monto y periodo son obligatorios.", variant: "destructive" });
+            return;
+        }
+        
+        const data: Partial<Omit<NewCuentaPorCobrar, 'id'>> = {
+            periodo,
+            monto: parseFloat(monto),
+            tipo,
+        };
+
+        try {
+            await updateCpc(cpc.id, data);
+            startTransition(() => {
+                onSave();
+                setOpen(false);
+                toast({ title: "Éxito", description: `Cuenta por cobrar actualizada.` });
+            });
+        } catch (error) {
+             toast({ title: "Error", description: `No se pudo actualizar la cuenta por cobrar.`, variant: 'destructive' });
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!cpc) return;
+        try {
+            await deleteCpc(cpc.id);
+            toast({ title: "Eliminado", description: "La cuenta por cobrar ha sido eliminada." });
+            onSave();
+            setOpen(false);
+        } catch (error) {
+            toast({ title: "Error", description: "No se pudo eliminar la cuenta por cobrar.", variant: "destructive" });
+        }
+    }
+    
+    if (!cpc) return null;
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>{children}</DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Editar Cuenta por Cobrar</DialogTitle>
+                    <DialogDescription>Cliente: {cpc.clienteName}</DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="space-y-2">
+                        <Label>Tipo de Servicio</Label>
+                        <Select value={tipo} onValueChange={(v) => setTipo(v as CategoriaIngreso)}>
+                            <SelectTrigger><SelectValue/></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Iguala Mensual">Iguala Mensual</SelectItem>
+                                <SelectItem value="Proyecto">Proyecto</SelectItem>
+                                <SelectItem value="Web">Web</SelectItem>
+                                <SelectItem value="Renovaciones">Renovaciones</SelectItem>
+                                <SelectItem value="Otros">Otros</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                     <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                           <Label>Periodo</Label>
+                           <Input value={periodo} onChange={e => setPeriodo(e.target.value)} placeholder="Ej. Noviembre 2024" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Monto (MXN)</Label>
+                            <Input type="number" value={monto} onChange={e => setMonto(e.target.value)} placeholder="0.00" />
+                        </div>
+                     </div>
+                </div>
+                <DialogFooter className="justify-between">
+                     <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive"><Trash2 className="w-4 h-4 mr-2"/>Eliminar</Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                <AlertDialogDescription>Esta acción eliminará permanentemente la cuenta por cobrar.</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDelete}>Confirmar</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                    <div className='flex gap-2'>
+                        <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                        <Button onClick={handleSave}>Guardar Cambios</Button>
+                    </div>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
 
 const AddCpcDialog = ({ clients, onSave, onRefreshClients, children }: { clients: Client[], onSave: () => void, onRefreshClients: () => void, children: React.ReactNode }) => {
     const [open, setOpen] = useState(false);
@@ -148,6 +263,7 @@ const CuentasPorCobrarTab = ({ data, clients, onSave, onRefresh }: { data: Cuent
     
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
     const [clientFilter, setClientFilter] = useState('Todos');
+    const [selectedCpc, setSelectedCpc] = useState<CuentaPorCobrar | null>(null);
 
     const clientDebts = useMemo(() => {
         const debtMap = new Map<number, { client: Client; totalDebt: number; debts: CuentaPorCobrar[] }>();
@@ -225,10 +341,12 @@ const CuentasPorCobrarTab = ({ data, clients, onSave, onRefresh }: { data: Cuent
                                         {debts.length > 0 ? (
                                             <ul className='space-y-1'>
                                             {debts.map(d => (
-                                                <li key={d.id} className='text-xs flex items-center gap-2'>
-                                                     <Badge variant="secondary" className='font-normal'>{d.periodo}</Badge>
-                                                     <span>{d.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
-                                                </li>
+                                                <EditCpcDialog key={d.id} cpc={d} onSave={onRefresh}>
+                                                    <li className='text-xs flex items-center gap-2 cursor-pointer p-1 rounded-md hover:bg-muted'>
+                                                        <Badge variant="secondary" className='font-normal'>{d.periodo}</Badge>
+                                                        <span>{d.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
+                                                    </li>
+                                                </EditCpcDialog>
                                             ))}
                                             </ul>
                                         ) : (
@@ -309,8 +427,8 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
                     categoria: selectedCpc.tipo,
                 });
                 // Here you might want to delete the CPC record or mark it as paid.
-                // await deleteCpc(selectedCpc.id);
-                toast({ title: "Éxito", description: `Ingreso de ${selectedCpc.clienteName} registrado.` });
+                await deleteCpc(selectedCpc.id);
+                toast({ title: "Éxito", description: `Ingreso de ${selectedCpc.clienteName} registrado y cuenta por cobrar eliminada.` });
             } catch (error) {
                 toast({ title: "Error", description: "No se pudo registrar el ingreso.", variant: "destructive" });
                 return;
