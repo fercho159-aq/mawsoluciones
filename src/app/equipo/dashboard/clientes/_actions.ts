@@ -30,73 +30,72 @@ export type NewClientData = Omit<NewClient, 'id' | 'createdAt'> & {
 
 export async function addClient(data: NewClientData) {
   try {
-    await db.transaction(async (tx) => {
-      const instagramFollowers = data.instagramUrl ? Math.floor(Math.random() * 5000) + 500 : 0;
-      const facebookFollowers = data.facebookUrl ? Math.floor(Math.random() * 10000) + 1000 : 0;
-      const tiktokFollowers = data.tiktokUrl ? Math.floor(Math.random() * 20000) + 200 : 0;
+    const instagramFollowers = data.instagramUrl ? Math.floor(Math.random() * 5000) + 500 : 0;
+    const facebookFollowers = data.facebookUrl ? Math.floor(Math.random() * 10000) + 1000 : 0;
+    const tiktokFollowers = data.tiktokUrl ? Math.floor(Math.random() * 20000) + 200 : 0;
 
-      const clientValues = {
-          name: data.name,
-          representativeName: data.representativeName,
-          whatsapp: data.whatsapp,
-          email: data.email,
-          managedAreas: data.managedAreas,
-          instagramUrl: data.instagramUrl,
-          facebookUrl: data.facebookUrl,
-          tiktokUrl: data.tiktokUrl,
-          instagramFollowers,
-          facebookFollowers,
-          tiktokFollowers,
-      };
-      
-      const [newClient] = await tx.insert(clients).values(clientValues).returning({ id: clients.id });
-      
-      if (!newClient) {
-          throw new Error("Failed to create client record.");
-      }
+    const clientValues = {
+        name: data.name,
+        representativeName: data.representativeName,
+        whatsapp: data.whatsapp,
+        email: data.email,
+        managedAreas: data.managedAreas,
+        instagramUrl: data.instagramUrl,
+        facebookUrl: data.facebookUrl,
+        tiktokUrl: data.tiktokUrl,
+        instagramFollowers,
+        facebookFollowers,
+        tiktokFollowers,
+    };
+    
+    // 1. Insertar el cliente y obtener su ID
+    const [newClient] = await db.insert(clients).values(clientValues).returning({ id: clients.id });
+    
+    if (!newClient || !newClient.id) {
+        throw new Error("Failed to create client record and get an ID.");
+    }
 
-      // Crear perfil financiero asociado
-      await tx.insert(clientFinancialProfiles).values({
-          clientId: newClient.id,
-      });
-
-      // Crear pendientes iniciales si hay áreas gestionadas
-      if (data.managedAreas && data.responsables) {
-          const pendientesToInsert: Omit<typeof pendientes_maw.$inferInsert, 'id' | 'createdAt'>[] = [];
-          
-          for (const area of data.managedAreas) {
-              let encargado = '';
-              let ejecutor = '';
-
-              if (area === 'Contenido' && data.responsables.contenido?.encargado && data.responsables.contenido?.ejecutor) {
-                  encargado = data.responsables.contenido.encargado;
-                  ejecutor = data.responsables.contenido.ejecutor;
-              } else if (area === 'Ads' && data.responsables.ads?.responsable) {
-                  encargado = data.responsables.ads.responsable;
-                  ejecutor = data.responsables.ads.responsable;
-              } else if (area === 'Web' && data.responsables.web?.responsable) {
-                  encargado = data.responsables.web.responsable;
-                  ejecutor = data.responsables.web.responsable;
-              }
-
-              if (encargado && ejecutor) {
-                  pendientesToInsert.push({
-                      clientId: newClient.id,
-                      clienteName: data.name,
-                      encargado,
-                      ejecutor,
-                      categoria: area,
-                      pendientePrincipal: `Kick-off y configuración inicial del área de ${area}.`,
-                      status: 'Trabajando',
-                      completed: false,
-                  });
-              }
-          }
-          if(pendientesToInsert.length > 0){
-              await tx.insert(pendientes_maw).values(pendientesToInsert);
-          }
-      }
+    // 2. Crear perfil financiero asociado
+    await db.insert(clientFinancialProfiles).values({
+        clientId: newClient.id,
     });
+
+    // 3. Crear pendientes iniciales si hay áreas gestionadas
+    if (data.managedAreas && data.managedAreas.length > 0 && data.responsables) {
+        const pendientesToInsert: Omit<typeof pendientes_maw.$inferInsert, 'id' | 'createdAt'>[] = [];
+        
+        for (const area of data.managedAreas) {
+            let encargado = '';
+            let ejecutor = '';
+
+            if (area === 'Contenido' && data.responsables.contenido?.encargado && data.responsables.contenido?.ejecutor) {
+                encargado = data.responsables.contenido.encargado;
+                ejecutor = data.responsables.contenido.ejecutor;
+            } else if (area === 'Ads' && data.responsables.ads?.responsable) {
+                encargado = data.responsables.ads.responsable;
+                ejecutor = data.responsables.ads.responsable;
+            } else if (area === 'Web' && data.responsables.web?.responsable) {
+                encargado = data.responsables.web.responsable;
+                ejecutor = data.responsables.web.responsable;
+            }
+
+            if (encargado && ejecutor) {
+                pendientesToInsert.push({
+                    clientId: newClient.id,
+                    clienteName: data.name,
+                    encargado,
+                    ejecutor,
+                    categoria: area,
+                    pendientePrincipal: `Kick-off y configuración inicial del área de ${area}.`,
+                    status: 'Trabajando',
+                    completed: false,
+                });
+            }
+        }
+        if(pendientesToInsert.length > 0){
+            await db.insert(pendientes_maw).values(pendientesToInsert);
+        }
+    }
 
     revalidatePath("/equipo/dashboard/clientes");
     revalidatePath("/equipo/dashboard/pendientes");
@@ -123,11 +122,8 @@ export async function updateClient(id: number, data: Partial<Omit<NewClient, 'id
 export async function deleteClients(ids: number[]) {
     try {
         await db.transaction(async (tx) => {
-            // Es posible que necesites eliminar registros dependientes primero si hay restricciones de clave externa.
-            // Por ejemplo, eliminar pendientes asociados a los clientes.
             await tx.delete(pendientes_maw).where(inArray(pendientes_maw.clientId, ids));
             await tx.delete(clientFinancialProfiles).where(inArray(clientFinancialProfiles.clientId, ids));
-            // Finalmente, eliminar los clientes
             await tx.delete(clients).where(inArray(clients.id, ids));
         });
         revalidatePath('/equipo/dashboard/clientes');
@@ -135,6 +131,6 @@ export async function deleteClients(ids: number[]) {
         revalidatePath('/equipo/dashboard/finanzas');
     } catch (error) {
         console.error("Error deleting clients:", error);
-        throw new Error("Could not delete clients");
+        throw new Error("Could not delete clients. Note: The current database driver may not support transactions for bulk deletion.");
     }
 }
