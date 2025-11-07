@@ -27,7 +27,7 @@ import { es } from 'date-fns/locale';
 import { useAuth } from '@/lib/auth-provider';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { MovimientoDiario, CuentaPorCobrar, NewCuentaPorCobrar, NewMovimientoDiario, Client, ClientFinancialProfile } from '@/lib/db/schema';
-import { getCuentasPorCobrar, getMovimientos, addCpc, addMovimiento, updateCpc, deleteCpc, registrarPagoCpc } from './_actions';
+import { getCuentasPorCobrar, getMovimientos, addCpc, addMovimiento, updateCpc, deleteCpc, registrarPagoCpc, updateMovimiento, deleteMovimiento } from './_actions';
 import { getClients } from '../clientes/_actions';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -401,7 +401,7 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
     )
 }
 
-const RegistrarGastoDialog = ({ onSave }: { onSave: () => void }) => {
+const MovimientoFormDialog = ({ movimiento, onSave, children }: { movimiento: MovimientoDiario, onSave: () => void, children: React.ReactNode }) => {
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
     
@@ -409,61 +409,74 @@ const RegistrarGastoDialog = ({ onSave }: { onSave: () => void }) => {
     const [monto, setMonto] = useState('');
     const [cuenta, setCuenta] = useState<Cuenta | ''>('');
     const [detalleEfectivo, setDetalleEfectivo] = useState('');
-    const [categoriaGasto, setCategoriaGasto] = useState<CategoriaGasto | ''>('');
+    const [categoria, setCategoria] = useState<CategoriaIngreso | CategoriaGasto | ''>('');
     const [nombreOtro, setNombreOtro] = useState('');
 
-    const resetForm = () => {
-        setDescripcion(''); setMonto(''); setCuenta(''); setDetalleEfectivo('');
-        setCategoriaGasto(''); setNombreOtro('');
-    };
+    const isGasto = movimiento.tipo === 'Gasto';
+    const categoriasDisponibles = isGasto ? 
+        (["Publicidad", "Sueldos", "Comisiones", "Impuestos", "Personales", "Renta", "Otros"] as CategoriaGasto[]) :
+        (["Proyecto", "Iguala Mensual", "Renovaciones", "Otros"] as CategoriaIngreso[]);
 
     useEffect(() => {
-        if(open) resetForm();
-    }, [open]);
+        if (open) {
+            setDescripcion(movimiento.descripcion);
+            setMonto(movimiento.monto.toString());
+            setCuenta(movimiento.cuenta as Cuenta);
+            setDetalleEfectivo(movimiento.detalleCuenta || '');
+            setCategoria(movimiento.categoria as any || '');
+            setNombreOtro(movimiento.nombreOtro || '');
+        }
+    }, [open, movimiento]);
 
     const handleSave = async () => {
-         if (!descripcion || !monto || !cuenta || !categoriaGasto) {
-             toast({ title: "Error", description: "Todos los campos son obligatorios.", variant: "destructive" });
-             return;
-         }
-         
-        try {
-             await addMovimiento({
-                fecha: new Date(),
-                tipo: 'Gasto',
-                descripcion, 
-                monto: parseFloat(monto), 
-                cuenta: cuenta, 
-                categoria: categoriaGasto,
-                detalleCuenta: cuenta === 'Efectivo' ? detalleEfectivo : null,
-                nombreOtro: ['Personales', 'Otros'].includes(categoriaGasto) ? nombreOtro : null,
-            });
-
-            startTransition(() => {
-                onSave();
-                setOpen(false);
-                toast({ title: "Éxito", description: `Gasto registrado.` });
-            });
-        } catch(error) {
-            toast({ title: "Error", description: "No se pudo registrar el gasto.", variant: "destructive" });
+        if (!descripcion || !monto || !cuenta || !categoria) {
+            toast({ title: "Error", description: "Todos los campos son obligatorios.", variant: "destructive" });
+            return;
         }
-    };
+
+        try {
+            await updateMovimiento(movimiento.id, {
+                descripcion,
+                monto: parseFloat(monto),
+                cuenta,
+                categoria,
+                detalleCuenta: cuenta === 'Efectivo' ? detalleEfectivo : null,
+                nombreOtro: ['Personales', 'Otros'].includes(categoria) ? nombreOtro : null,
+            });
+            toast({ title: "Éxito", description: "Movimiento actualizado." });
+            onSave();
+            setOpen(false);
+        } catch (error) {
+            toast({ title: "Error", description: "No se pudo actualizar el movimiento.", variant: "destructive" });
+        }
+    }
+
+    const handleDelete = async () => {
+        try {
+            await deleteMovimiento(movimiento.id);
+            toast({ title: "Eliminado", description: "El movimiento ha sido eliminado." });
+            onSave();
+            setOpen(false);
+        } catch (error) {
+            toast({ title: "Error", description: "No se pudo eliminar el movimiento.", variant: "destructive" });
+        }
+    }
 
     return (
-         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild><Button variant="destructive"><MinusCircle className="w-4 h-4 mr-2" />Registrar Gasto</Button></DialogTrigger>
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>{children}</DialogTrigger>
             <DialogContent>
-                <DialogHeader><DialogTitle>Registrar Gasto</DialogTitle></DialogHeader>
-                 <div className="grid gap-4 py-4">
-                    <Input value={descripcion} onChange={e => setDescripcion(e.target.value)} placeholder="Descripción (Ej. Pago de software)" />
+                <DialogHeader><DialogTitle>Editar Movimiento</DialogTitle></DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <Input value={descripcion} onChange={e => setDescripcion(e.target.value)} placeholder="Descripción" />
                     <Input type="number" value={monto} onChange={e => setMonto(e.target.value)} placeholder="Monto (MXN)" />
-                    <Select value={categoriaGasto} onValueChange={(v) => setCategoriaGasto(v as CategoriaGasto)}>
-                        <SelectTrigger><SelectValue placeholder="Categoría de Gasto" /></SelectTrigger>
-                        <SelectContent>{(["Publicidad", "Sueldos", "Comisiones", "Impuestos", "Personales", "Renta", "Otros"] as CategoriaGasto[]).map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}</SelectContent>
+                    <Select value={categoria} onValueChange={(v) => setCategoria(v as any)}>
+                        <SelectTrigger><SelectValue placeholder="Categoría" /></SelectTrigger>
+                        <SelectContent>{categoriasDisponibles.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}</SelectContent>
                     </Select>
-                    {(categoriaGasto === 'Personales' || categoriaGasto === 'Otros') && <Input value={nombreOtro} onChange={e => setNombreOtro(e.target.value)} placeholder="Nombre Específico (Ej. Fany)"/>}
+                    {(categoria === 'Personales' || categoria === 'Otros') && <Input value={nombreOtro} onChange={e => setNombreOtro(e.target.value)} placeholder="Nombre Específico (Ej. Fany)"/>}
                     <Select value={cuenta} onValueChange={(v) => setCuenta(v as any)}>
-                        <SelectTrigger><SelectValue placeholder="Cuenta de Origen" /></SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder="Cuenta" /></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="Cuenta Paola">Cuenta Paola</SelectItem>
                             <SelectItem value="Cuenta MAW">Cuenta MAW</SelectItem>
@@ -473,9 +486,24 @@ const RegistrarGastoDialog = ({ onSave }: { onSave: () => void }) => {
                     </Select>
                     {cuenta === 'Efectivo' && <Input value={detalleEfectivo} onChange={e => setDetalleEfectivo(e.target.value)} placeholder="Especifique (ej. Caja chica)"/>}
                 </div>
-                <DialogFooter>
-                    <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                    <Button onClick={handleSave}>Guardar Gasto</Button>
+                <DialogFooter className="justify-between">
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild><Button variant="destructive"><Trash2 className="w-4 h-4 mr-2"/>Eliminar</Button></AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                <AlertDialogDescription>Esta acción eliminará permanentemente el movimiento. No se puede deshacer.</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDelete}>Confirmar Eliminación</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                    <div className='flex gap-2'>
+                        <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                        <Button onClick={handleSave}>Guardar Cambios</Button>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -496,7 +524,7 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
 
     const summary = useMemo(() => {
         return monthlyFilteredMovements.reduce((acc, mov) => {
-            if (mov.tipo === 'Ingreso' && mov.cuenta !== 'Pendiente') acc.totalIngresos += mov.monto;
+            if (mov.tipo === 'Ingreso') acc.totalIngresos += mov.monto;
             else if (mov.tipo === 'Gasto') acc.totalGastos += mov.monto;
             return acc;
         }, { totalIngresos: 0, totalGastos: 0 });
@@ -543,18 +571,20 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
                             <TableHeader><TableRow><TableHead>Fecha</TableHead><TableHead>Tipo</TableHead><TableHead>Descripción</TableHead><TableHead>Categoría / Detalle</TableHead><TableHead>Cuenta</TableHead><TableHead className="text-right">Monto</TableHead></TableRow></TableHeader>
                             <TableBody>
                                 {monthlyFilteredMovements.map(mov => (
-                                    <TableRow key={mov.id}>
-                                        <TableCell>{format(new Date(mov.fecha), 'dd MMM yyyy, HH:mm', { locale: es })}</TableCell>
-                                        <TableCell><Badge variant={mov.tipo === 'Ingreso' ? 'default' : 'destructive'} className={cn(mov.tipo === 'Ingreso' && 'bg-green-500 hover:bg-green-500/80')}>{mov.tipo}</Badge></TableCell>
-                                        <TableCell>{mov.descripcion}</TableCell>
-                                        <TableCell>{mov.categoria}{mov.nombreOtro ? ` (${mov.nombreOtro})` : ''}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={mov.cuenta === 'Pendiente' ? 'outline' : 'secondary'}>
-                                                {mov.cuenta}{mov.detalleCuenta ? ` (${mov.detalleCuenta})` : ''}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className={cn("text-right font-bold", mov.tipo === 'Ingreso' ? 'text-green-500' : 'text-destructive')}>{mov.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
-                                    </TableRow>
+                                    <MovimientoFormDialog key={mov.id} movimiento={mov} onSave={onSave}>
+                                        <TableRow className="cursor-pointer">
+                                            <TableCell>{format(new Date(mov.fecha), 'dd MMM yyyy, HH:mm', { locale: es })}</TableCell>
+                                            <TableCell><Badge variant={mov.tipo === 'Ingreso' ? 'default' : 'destructive'} className={cn(mov.tipo === 'Ingreso' && 'bg-green-500 hover:bg-green-500/80')}>{mov.tipo}</Badge></TableCell>
+                                            <TableCell>{mov.descripcion}</TableCell>
+                                            <TableCell>{mov.categoria}{mov.nombreOtro ? ` (${mov.nombreOtro})` : ''}</TableCell>
+                                            <TableCell>
+                                                <Badge variant={mov.cuenta === 'Pendiente' ? 'outline' : 'secondary'}>
+                                                    {mov.cuenta}{mov.detalleCuenta ? ` (${mov.detalleCuenta})` : ''}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className={cn("text-right font-bold", mov.tipo === 'Ingreso' ? 'text-green-500' : 'text-destructive')}>{mov.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                        </TableRow>
+                                    </MovimientoFormDialog>
                                 ))}
                             </TableBody>
                         </Table>
@@ -647,3 +677,4 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
