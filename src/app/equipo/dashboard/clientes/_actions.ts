@@ -30,12 +30,11 @@ export type NewClientData = Omit<typeof clients.$inferInsert, 'id' | 'createdAt'
 
 export async function addClient(data: NewClientData) {
   try {
-    // Simulate fetching follower counts
     const instagramFollowers = data.instagramUrl ? Math.floor(Math.random() * 5000) + 500 : 0;
     const facebookFollowers = data.facebookUrl ? Math.floor(Math.random() * 10000) + 1000 : 0;
     const tiktokFollowers = data.tiktokUrl ? Math.floor(Math.random() * 20000) + 200 : 0;
 
-    const [newClient] = await db.insert(clients).values({
+    const clientValues = {
         name: data.name,
         representativeName: data.representativeName,
         whatsapp: data.whatsapp,
@@ -47,42 +46,50 @@ export async function addClient(data: NewClientData) {
         instagramFollowers,
         facebookFollowers,
         tiktokFollowers,
-    }).returning({ id: clients.id });
+    };
     
-    // Create financial profile for the new client
+    const [newClient] = await db.insert(clients).values(clientValues).returning({ id: clients.id });
+    
+    if (!newClient) {
+        throw new Error("Failed to create client record.");
+    }
+
     await db.insert(clientFinancialProfiles).values({
         clientId: newClient.id,
     });
 
-    // Create pendientes if areas are selected
     if (data.managedAreas && data.responsables) {
+        const pendientesToInsert = [];
         for (const area of data.managedAreas) {
             let encargado = '';
             let ejecutor = '';
-            
-            if (area === 'Contenido' && data.responsables.contenido) {
+
+            if (area === 'Contenido' && data.responsables.contenido?.encargado && data.responsables.contenido?.ejecutor) {
                 encargado = data.responsables.contenido.encargado;
                 ejecutor = data.responsables.contenido.ejecutor;
-            } else if (area === 'Ads' && data.responsables.ads) {
+            } else if (area === 'Ads' && data.responsables.ads?.responsable) {
                 encargado = data.responsables.ads.responsable;
-                ejecutor = data.responsables.ads.responsable; 
-            } else if (area === 'Web' && data.responsables.web) {
+                ejecutor = data.responsables.ads.responsable;
+            } else if (area === 'Web' && data.responsables.web?.responsable) {
                 encargado = data.responsables.web.responsable;
                 ejecutor = data.responsables.web.responsable;
             }
 
             if (encargado && ejecutor) {
-                 await db.insert(pendientes_maw).values({
+                pendientesToInsert.push({
                     clientId: newClient.id,
                     clienteName: data.name,
-                    encargado: encargado,
-                    ejecutor: ejecutor,
+                    encargado,
+                    ejecutor,
                     categoria: area,
                     pendientePrincipal: `Kick-off y configuración inicial del área de ${area}.`,
                     status: 'Trabajando',
                     completed: false,
                 });
             }
+        }
+        if(pendientesToInsert.length > 0){
+            await db.insert(pendientes_maw).values(pendientesToInsert);
         }
     }
 
@@ -95,7 +102,8 @@ export async function addClient(data: NewClientData) {
   }
 }
 
-export async function updateClient(id: number, data: Partial<Omit<typeof clients.$inferInsert, 'id' | 'createdAt'>>) {
+
+export async function updateClient(id: number, data: Partial<Omit<typeof clients.$inferInsert, 'id'| 'createdAt'>>) {
   try {
     await db.update(clients).set(data).where(eq(clients.id, id));
     revalidatePath("/equipo/dashboard/clientes");
