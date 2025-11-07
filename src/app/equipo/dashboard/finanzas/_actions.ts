@@ -33,14 +33,14 @@ export async function addCpc(data: Omit<NewCuentaPorCobrar, 'id'>) {
     try {
         // Add to Cuentas por Cobrar
         await db.insert(cuentasPorCobrar).values(data);
-
+        
         // Also add as an Income to Movimientos Diarios
         await db.insert(movimientosDiarios).values({
             fecha: new Date(),
             tipo: 'Ingreso',
-            descripcion: `Ingreso de ${data.clienteName} por ${data.tipo}`,
+            descripcion: `Ingreso (pendiente) de ${data.clienteName} por ${data.tipo}`,
             monto: data.monto,
-            cuenta: 'Cuenta MAW', // O una cuenta por defecto
+            cuenta: 'Pendiente', // Marcar como pendiente hasta que se cobre
             categoria: data.tipo,
         });
 
@@ -51,13 +51,10 @@ export async function addCpc(data: Omit<NewCuentaPorCobrar, 'id'>) {
     }
 }
 
+
 export async function updateCpc(id: number, data: Partial<Omit<NewCuentaPorCobrar, 'id' | 'clienteId' | 'clienteName'>>) {
     try {
         await db.update(cuentasPorCobrar).set(data).where(eq(cuentasPorCobrar.id, id));
-        
-        // Optionally, update or add a corresponding movimiento
-        // For simplicity, we can just add a new one or decide on a more complex logic
-        
         revalidatePath("/equipo/dashboard/finanzas");
     } catch (error: any) {
         console.error("Error updating cpc:", error);

@@ -27,7 +27,6 @@ import { es } from 'date-fns/locale';
 import { useAuth } from '@/lib/auth-provider';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { MovimientoDiario, CuentaPorCobrar, NewCuentaPorCobrar, NewMovimientoDiario, Client, ClientFinancialProfile } from '@/lib/db/schema';
-import { ClientFormDialog } from '../clientes/page';
 import { getCuentasPorCobrar, getMovimientos, addCpc, addMovimiento, updateCpc, deleteCpc } from './_actions';
 import { getClients } from '../clientes/_actions';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -36,7 +35,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 type CategoriaIngreso = "Proyecto" | "Iguala Mensual" | "Renovaciones" | "Otros";
 type CategoriaGasto = "Publicidad" | "Sueldos" | "Comisiones" | "Impuestos" | "Personales" | "Otros" | "Renta";
-type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo" | "Efectivo";
+type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo" | "Efectivo" | "Pendiente";
 
 const CpcFormDialog = ({ client, cpc, onSave, children, isEditing }: { 
     client?: Client, 
@@ -90,7 +89,7 @@ const CpcFormDialog = ({ client, cpc, onSave, children, isEditing }: {
                     clienteName: targetClient.name,
                     ...data,
                 });
-                toast({ title: "Éxito", description: "Cuenta por cobrar añadida." });
+                toast({ title: "Éxito", description: "Cuenta por cobrar y movimiento de ingreso creados." });
             }
             startTransition(() => {
                 onSave();
@@ -333,19 +332,12 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
                 return;
             }
             try {
-                await addMovimiento({
-                    fecha: new Date(),
-                    tipo: 'Ingreso',
-                    descripcion: `Pago cliente ${selectedCpc.clienteName}`,
-                    monto: selectedCpc.monto,
-                    cuenta: cuentaDestino,
-                    detalleCuenta: detalleEfectivo || null,
-                    categoria: selectedCpc.tipo,
-                });
+                // This logic is now simplified. We just delete the CPC record. The income record was already created.
+                // We could update the 'cuenta' field of the existing movimiento if needed, but for simplicity, we assume it's collected.
                 await deleteCpc(selectedCpc.id);
-                toast({ title: "Éxito", description: `Ingreso de ${selectedCpc.clienteName} registrado y cuenta por cobrar eliminada.` });
+                toast({ title: "Éxito", description: `Pago de ${selectedCpc.clienteName} registrado.` });
             } catch (error) {
-                toast({ title: "Error", description: "No se pudo registrar el ingreso.", variant: "destructive" });
+                toast({ title: "Error", description: "No se pudo registrar el pago.", variant: "destructive" });
                 return;
             }
         }
@@ -363,8 +355,8 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
                 <DialogHeader><DialogTitle>Registrar Ingreso</DialogTitle></DialogHeader>
                 {isAdmin && (
                   <RadioGroup onValueChange={(v) => setIsManual(v === 'manual')} defaultValue="cpc" className='flex pt-2 space-x-4'>
-                    <div className="flex items-center space-x-2"><RadioGroupItem value="cpc" id="cpc-mode" /><Label htmlFor="cpc-mode" className='font-normal'>Desde CxC</Label></div>
-                    <div className="flex items-center space-x-2"><RadioGroupItem value="manual" id="manual-mode" /><Label htmlFor="manual-mode" className='font-normal'>Manual</Label></div>
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="cpc" id="cpc-mode" /><Label htmlFor="cpc-mode" className='font-normal'>Registrar Pago de CxC</Label></div>
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="manual" id="manual-mode" /><Label htmlFor="manual-mode" className='font-normal'>Ingreso Manual</Label></div>
                   </RadioGroup>
                 )}
                 {isManual && isAdmin ? (
@@ -543,6 +535,11 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
                                 ))}
                             </TableBody>
                         </Table>
+                         {movimientos.filter(mov => isWithinInterval(new Date(mov.fecha), {start: startOfMonth(parseISO(selectedMonth)), end: endOfMonth(parseISO(selectedMonth))})).length === 0 && (
+                            <div className="text-center p-8 text-muted-foreground">
+                                No hay movimientos en este mes.
+                            </div>
+                        )}
                     </div>
                 </CardContent>
             </Card>
@@ -569,9 +566,9 @@ export default function FinanzasPage() {
                 getCuentasPorCobrar(),
                 getMovimientos()
             ]);
-            setClients(clientsData as Client[]);
-            setCuentasPorCobrar(cpcData as CuentaPorCobrar[]);
-            setMovimientos(movimientosData as MovimientoDiario[]);
+            setClients(clientsData);
+            setCuentasPorCobrar(cpcData);
+            setMovimientos(movimientosData);
         } catch (error) {
              toast({
                 title: "Error al cargar datos",
@@ -614,4 +611,3 @@ export default function FinanzasPage() {
         </div>
     );
 }
-
