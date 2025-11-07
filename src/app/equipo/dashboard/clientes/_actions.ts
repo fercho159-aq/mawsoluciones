@@ -114,4 +114,3 @@ export async function deleteClients(ids: number[]) {
         throw new Error("Could not delete clients");
     }
 }
-```
