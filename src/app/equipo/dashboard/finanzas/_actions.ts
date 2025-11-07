@@ -3,7 +3,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { cuentasPorCobrar, movimientosDiarios, type NewCuentaPorCobrar, type CuentaPorCobrar, type NewMovimientoDiario } from "@/lib/db/schema";
+import { cuentasPorCobrar, movimientosDiarios, type NewCuentaPorCobrar, type CuentaPorCobrar, type MovimientoDiario, type NewMovimientoDiario } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -29,7 +29,7 @@ export async function getMovimientos() {
   }
 }
 
-export async function addCpc(data: Omit<NewCuentaPorCobrar, 'id'>): Promise<{cpc: CuentaPorCobrar, movimiento: MovimientoDiario}> {
+export async function addCpc(data: Omit<NewCuentaPorCobrar, 'id'>): Promise<{cpc: CuentaPorCobrar}> {
     try {
         // 1. Insertar en Cuentas por Cobrar
         const [newCpc] = await db.insert(cuentasPorCobrar).values(data).returning();
@@ -39,24 +39,18 @@ export async function addCpc(data: Omit<NewCuentaPorCobrar, 'id'>): Promise<{cpc
         }
 
         // 2. Insertar como un Ingreso pendiente en Movimientos Diarios
-        const [newMovimiento] = await db.insert(movimientosDiarios).values({
+        await db.insert(movimientosDiarios).values({
             fecha: new Date(),
             tipo: 'Ingreso',
             descripcion: `Ingreso (pendiente) de ${data.clienteName} por ${data.tipo}`,
             monto: data.monto,
-            cuenta: 'Pendiente', // Marcar como pendiente hasta que se cobre
+            cuenta: 'Pendiente',
             categoria: data.tipo,
-            cpcId: newCpc.id, // Link to the cpc record
-        }).returning();
-
-        if (!newMovimiento) {
-             // Rollback logic could be added here if the DB supported transactions
-            await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, newCpc.id));
-            throw new Error("Failed to create the corresponding movimiento record.");
-        }
+            cpcId: newCpc.id, 
+        });
 
         revalidatePath("/equipo/dashboard/finanzas");
-        return { cpc: newCpc, movimiento: newMovimiento };
+        return { cpc: newCpc };
 
     } catch (error: any) {
         console.error("Error adding cpc:", error);
@@ -91,11 +85,14 @@ export async function registrarPagoCpc(cpcId: number, cuentaDestino: string, det
         await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, cpcId));
 
         // 2. Actualizar el movimiento diario correspondiente para reflejar el pago
+        const movimiento = await db.query.movimientosDiarios.findFirst({ where: eq(movimientosDiarios.cpcId, cpcId) });
+
         await db.update(movimientosDiarios)
             .set({ 
                 cuenta: cuentaDestino,
                 detalleCuenta: detalleCuenta,
-                descripcion: `Ingreso de ${(await db.query.movimientosDiarios.findFirst({ where: eq(movimientosDiarios.cpcId, cpcId) }))?.descripcion.replace(' (pendiente)', '')}`
+                descripcion: movimiento?.descripcion.replace(' (pendiente)', '') || 'Ingreso registrado',
+                fecha: new Date(),
             })
             .where(eq(movimientosDiarios.cpcId, cpcId));
             
@@ -112,8 +109,7 @@ export async function deleteCpc(id: number) {
         // Also delete the associated pending movimiento
         await db.delete(movimientosDiarios).where(
             and(
-                eq(movimientosDiarios.cpcId, id), 
-                eq(movimientosDiarios.cuenta, 'Pendiente')
+                eq(movimientosDiarios.cpcId, id)
             ));
         await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, id));
         revalidatePath("/equipo/dashboard/finanzas");

@@ -157,7 +157,7 @@ const CpcFormDialog = ({ client, cpc, onSave, children, isEditing }: {
                             <AlertDialogContent onClick={(e) => e.stopPropagation()}>
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                                    <AlertDialogDescription>Esta acción eliminará permanentemente la cuenta por cobrar.</AlertDialogDescription>
+                                    <AlertDialogDescription>Esta acción eliminará permanentemente la cuenta por cobrar y su movimiento asociado.</AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
