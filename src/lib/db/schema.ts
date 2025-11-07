@@ -187,5 +187,3 @@ export type Colaborador = typeof colaboradores.$inferSelect;
 export type NewColaborador = typeof colaboradores.$inferInsert;
 export type ClientFinancialProfile = typeof clientFinancialProfiles.$inferSelect;
 export type NewClientFinancialProfile = typeof clientFinancialProfiles.$inferInsert;
-
-```
