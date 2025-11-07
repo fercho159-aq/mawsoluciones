@@ -1,4 +1,5 @@
 
+
 import { pgTable, serial, text, varchar, timestamp, boolean, integer, jsonb, real } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -49,6 +50,7 @@ export const prospects_maw = pgTable('prospects_maw', {
     status: varchar('status', { length: 50 }),
     responsable: varchar('responsable', { length: 100 }),
     createdAt: timestamp('created_at').defaultNow(),
+    data: jsonb('data'),
 });
 
 
@@ -113,6 +115,7 @@ export const movimientosDiarios = pgTable('movimientos_diarios', {
     detalleCuenta: varchar('detalle_cuenta', { length: 255 }),
     categoria: varchar('categoria', { length: 100 }),
     nombreOtro: varchar('nombre_otro', { length: 255 }),
+    cpcId: integer('cpc_id').references(() => cuentasPorCobrar.id, { onDelete: 'set null' }),
 });
 
 // Credenciales de acceso para plataformas de clientes
@@ -154,11 +157,19 @@ export const pendientesMawRelations = relations(pendientes_maw, ({ one }) => ({
     })
 }));
 
-export const cuentasPorCobrarRelations = relations(cuentasPorCobrar, ({ one }) => ({
+export const cuentasPorCobrarRelations = relations(cuentasPorCobrar, ({ one, many }) => ({
 	client: one(clients, {
 		fields: [cuentasPorCobrar.clienteId],
 		references: [clients.id],
 	}),
+    movimientos: many(movimientosDiarios)
+}));
+
+export const movimientosDiariosRelations = relations(movimientosDiarios, ({ one }) => ({
+    cuentaPorCobrar: one(cuentasPorCobrar, {
+        fields: [movimientosDiarios.cpcId],
+        references: [cuentasPorCobrar.id]
+    })
 }));
 
 export const recordingEventsRelations = relations(recordingEvents, ({ one }) => ({

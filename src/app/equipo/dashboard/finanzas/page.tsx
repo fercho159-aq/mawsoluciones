@@ -27,7 +27,7 @@ import { es } from 'date-fns/locale';
 import { useAuth } from '@/lib/auth-provider';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { MovimientoDiario, CuentaPorCobrar, NewCuentaPorCobrar, NewMovimientoDiario, Client, ClientFinancialProfile } from '@/lib/db/schema';
-import { getCuentasPorCobrar, getMovimientos, addCpc, addMovimiento, updateCpc, deleteCpc } from './_actions';
+import { getCuentasPorCobrar, getMovimientos, addCpc, addMovimiento, updateCpc, deleteCpc, registrarPagoCpc } from './_actions';
 import { getClients } from '../clientes/_actions';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -253,14 +253,14 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh }: { data: CuentaPorCobr
                                     <TableCell className="font-medium">{client.name}</TableCell>
                                     <TableCell>
                                         <div className="flex flex-col items-start gap-1">
-                                            {debts.map(d => (
+                                            {debts.length > 0 ? debts.map(d => (
                                                 <CpcFormDialog key={d.id} cpc={d} onSave={onRefresh} isEditing={true}>
                                                     <div className='text-xs flex items-center gap-2 cursor-pointer p-1 rounded-md hover:bg-muted w-full'>
                                                         <Badge variant="secondary" className='font-normal'>{d.periodo}</Badge>
                                                         <span>{d.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
                                                     </div>
                                                 </CpcFormDialog>
-                                            ))}
+                                            )) : <span className="text-xs text-muted-foreground">Sin deudas pendientes.</span>}
                                             <CpcFormDialog client={client} onSave={onRefresh} isEditing={false}>
                                                 <Button variant="ghost" size="sm" className='text-xs text-muted-foreground'>
                                                     <Plus className='w-3 h-3 mr-1'/> Añadir Cuenta
@@ -332,9 +332,7 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
                 return;
             }
             try {
-                // This logic is now simplified. We just delete the CPC record. The income record was already created.
-                // We could update the 'cuenta' field of the existing movimiento if needed, but for simplicity, we assume it's collected.
-                await deleteCpc(selectedCpc.id);
+                await registrarPagoCpc(selectedCpc.id, cuentaDestino as Cuenta, detalleEfectivo || null);
                 toast({ title: "Éxito", description: `Pago de ${selectedCpc.clienteName} registrado.` });
             } catch (error) {
                 toast({ title: "Error", description: "No se pudo registrar el pago.", variant: "destructive" });
@@ -485,8 +483,8 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
         const monthlyData = movimientos.filter(mov => isWithinInterval(new Date(mov.fecha), { start, end }));
         
         return monthlyData.reduce((acc, mov) => {
-            if (mov.tipo === 'Ingreso') acc.totalIngresos += mov.monto;
-            else acc.totalGastos += mov.monto;
+            if (mov.tipo === 'Ingreso' && mov.cuenta !== 'Pendiente') acc.totalIngresos += mov.monto;
+            else if (mov.tipo === 'Gasto') acc.totalGastos += mov.monto;
             return acc;
         }, { totalIngresos: 0, totalGastos: 0 });
     }, [movimientos, selectedMonth]);
@@ -529,7 +527,11 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
                                         <TableCell><Badge variant={mov.tipo === 'Ingreso' ? 'default' : 'destructive'} className={cn(mov.tipo === 'Ingreso' && 'bg-green-500 hover:bg-green-500/80')}>{mov.tipo}</Badge></TableCell>
                                         <TableCell>{mov.descripcion}</TableCell>
                                         <TableCell>{mov.categoria}{mov.nombreOtro ? ` (${mov.nombreOtro})` : ''}</TableCell>
-                                        <TableCell>{mov.cuenta}{mov.detalleCuenta ? ` (${mov.detalleCuenta})` : ''}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={mov.cuenta === 'Pendiente' ? 'outline' : 'secondary'}>
+                                                {mov.cuenta}{mov.detalleCuenta ? ` (${mov.detalleCuenta})` : ''}
+                                            </Badge>
+                                        </TableCell>
                                         <TableCell className={cn("text-right font-bold", mov.tipo === 'Ingreso' ? 'text-green-500' : 'text-destructive')}>{mov.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
                                     </TableRow>
                                 ))}
