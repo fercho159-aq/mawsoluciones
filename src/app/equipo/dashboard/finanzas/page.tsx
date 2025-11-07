@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowUpDown, ArrowRight, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Users, CalendarIcon, FileText, Edit, Camera, Zap, RefreshCw, AlertTriangle, UserPlus, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
@@ -36,19 +36,6 @@ import Link from 'next/link';
 
 type Client = ClientType & { financialProfile: ClientFinancialProfile | null };
 
-const getNextPeriod = (periodo: string) => {
-    try {
-        const [startStr] = periodo.split(' - ');
-        const startDate = parse(startStr, 'd MMM', new Date(), { locale: es });
-        
-        const nextStartDate = addMonths(startDate, 1);
-        const nextEndDate = endOfMonth(nextStartDate);
-        return `${format(nextStartDate, 'd MMM', { locale: es })} - ${format(nextEndDate, 'd MMM', { locale: es })}`;
-    } catch(e) {
-        console.error("Error parsing period", e);
-        return "Error al generar periodo";
-    }
-}
 
 const AddCpcDialog = ({ clients, onSave, onRefreshClients, children }: { clients: Client[], onSave: () => void, onRefreshClients: () => void, children: React.ReactNode }) => {
     const [open, setOpen] = useState(false);
@@ -57,60 +44,23 @@ const AddCpcDialog = ({ clients, onSave, onRefreshClients, children }: { clients
     const [clientId, setClientId] = useState('');
     const [monto, setMonto] = useState('');
     const [tipo, setTipo] = useState<CategoriaIngreso>('Iguala Mensual');
-    
-    const [billingCycleDay, setBillingCycleDay] = useState(15);
-    const [selectedBillingDate, setSelectedBillingDate] = useState('');
+    const [periodo, setPeriodo] = useState('');
 
-    const [isClientFormOpen, setIsClientFormOpen] = useState(false);
-
-    const selectedClient = useMemo(() => clients.find(c => c.id === parseInt(clientId)), [clients, clientId]);
 
     useEffect(() => {
-        if (selectedClient?.financialProfile?.billingDay) {
-            setBillingCycleDay(selectedClient.financialProfile.billingDay);
-        } else if (clientId) {
-            setBillingCycleDay(15); 
-        }
-    }, [clientId, selectedClient]);
-    
-     useEffect(() => {
         if (!open) {
             resetForm();
         }
     }, [open]);
 
-    const billingDateOptions = useMemo(() => {
-        const today = new Date();
-        const billingDay = billingCycleDay;
-        
-        // Próximo día de corte
-        let nextBillingDate = setDate(today, billingDay);
-        if (today.getDate() > billingDay) {
-            nextBillingDate = addMonths(nextBillingDate, 1);
-        }
-        
-        // Pasado día de corte
-        let prevBillingDate = setDate(today, billingDay);
-        if (today.getDate() <= billingDay) {
-            prevBillingDate = subMonths(prevBillingDate, 1);
-        }
-
-        return [
-            { label: `Próximo día ${billingDay} (${format(nextBillingDate, "d MMM", { locale: es })})`, value: nextBillingDate.toISOString() },
-            { label: `Pasado día ${billingDay} (${format(prevBillingDate, "d MMM", { locale: es })})`, value: prevBillingDate.toISOString() },
-            { label: `Próximo día ${billingDay === 15 ? 30 : 15}`, value: 'other' },
-            { label: "Otra fecha", value: 'custom' },
-        ];
-    }, [billingCycleDay]);
-
 
     const resetForm = () => {
-        setClientId(''); setMonto(''); setTipo('Iguala Mensual'); setSelectedBillingDate(''); setBillingCycleDay(15);
+        setClientId(''); setMonto(''); setTipo('Iguala Mensual'); setPeriodo('');
     }
     
     const handleSave = async () => {
-        if (!clientId || !monto || !selectedBillingDate) {
-            toast({ title: "Error", description: "Cliente, monto y fecha de cobro son obligatorios.", variant: "destructive" });
+        if (!clientId || !monto || !periodo) {
+            toast({ title: "Error", description: "Cliente, monto y periodo son obligatorios.", variant: "destructive" });
             return;
         }
 
@@ -123,19 +73,23 @@ const AddCpcDialog = ({ clients, onSave, onRefreshClients, children }: { clients
         const data: Omit<NewCuentaPorCobrar, 'id'> = {
             clienteId: parseInt(clientId),
             clienteName: cliente.name,
-            periodo: selectedBillingDate, // Storing the label for now.
+            periodo,
             monto: parseFloat(monto),
             tipo,
         };
 
         try {
-            await addCpc(data);
-            startTransition(() => {
-                onSave();
-                setOpen(false);
-                toast({ title: "Éxito", description: `Cuenta por cobrar para ${cliente.name} guardada.` });
-                resetForm();
-            });
+            // This now saves to localStorage
+            const currentCuentas = JSON.parse(localStorage.getItem('cuentasPorCobrar') || '[]');
+            const newCuenta = { ...data, id: Date.now().toString() };
+            currentCuentas.push(newCuenta);
+            localStorage.setItem('cuentasPorCobrar', JSON.stringify(currentCuentas));
+
+            onSave();
+            setOpen(false);
+            toast({ title: "Éxito (Local)", description: `Cuenta por cobrar para ${cliente.name} guardada localmente.` });
+            resetForm();
+
         } catch (error) {
              toast({ title: "Error", description: `No se pudo guardar la cuenta por cobrar.`, variant: 'destructive' });
         }
@@ -183,27 +137,14 @@ const AddCpcDialog = ({ clients, onSave, onRefreshClients, children }: { clients
                     </div>
                      <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label>Día de Corte (15 o 30)</Label>
-                            <Input type="number" value={billingCycleDay} onChange={e => setBillingCycleDay(parseInt(e.target.value))} placeholder="15" disabled={!clientId} />
+                           <Label>Periodo</Label>
+                           <Input value={periodo} onChange={e => setPeriodo(e.target.value)} placeholder="Ej. Noviembre 2024" />
                         </div>
                         <div className="space-y-2">
                             <Label>Monto (MXN)</Label>
                             <Input type="number" value={monto} onChange={e => setMonto(e.target.value)} placeholder="0.00" />
                         </div>
                      </div>
-                     <div className="space-y-2">
-                        <Label>Fecha de Cobro</Label>
-                        <RadioGroup value={selectedBillingDate} onValueChange={setSelectedBillingDate} className="grid grid-cols-2 gap-2">
-                            {billingDateOptions.map(opt => (
-                                 <div key={opt.value}>
-                                    <RadioGroupItem value={opt.label} id={opt.value} className="peer sr-only"/>
-                                    <Label htmlFor={opt.value} className="flex h-16 flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-2 text-center text-xs hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
-                                        {opt.label}
-                                    </Label>
-                                </div>
-                            ))}
-                        </RadioGroup>
-                    </div>
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
@@ -338,23 +279,29 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
         if (cuentaDestino === 'Efectivo' && !detalleEfectivo) return;
         
         try {
-            await addMovimiento({
+            const newMovimiento = {
+                id: Date.now().toString(),
                 fecha: new Date(),
                 tipo: 'Ingreso',
                 descripcion: `Pago cliente ${selectedCpc.clienteName}`,
                 monto: selectedCpc.monto,
                 cuenta: cuentaDestino,
-                detalleCuenta: detalleEfectivo || null,
+                detalleCuenta: detalleEfectivo || undefined,
                 categoria: selectedCpc.tipo,
-            });
-            await updateCpcAfterPayment(selectedCpc, getNextPeriod(selectedCpc.periodo));
+            };
+
+            const currentMovimientos = JSON.parse(localStorage.getItem('movimientosDiarios') || '[]');
+            currentMovimientos.push(newMovimiento);
+            localStorage.setItem('movimientosDiarios', JSON.stringify(currentMovimientos));
             
-            startTransition(() => {
-                onSave({});
-                setOpen(false);
-                toast({ title: "Éxito", description: `Ingreso de ${selectedCpc.clienteName} registrado.` });
-                resetForm();
-            })
+            const currentCuentas = JSON.parse(localStorage.getItem('cuentasPorCobrar') || '[]');
+            const updatedCuentas = currentCuentas.filter((c: CuentaPorCobrar) => c.id !== selectedCpc.id);
+            localStorage.setItem('cuentasPorCobrar', JSON.stringify(updatedCuentas));
+            
+            onSave({});
+            setOpen(false);
+            toast({ title: "Éxito (Local)", description: `Ingreso de ${selectedCpc.clienteName} registrado localmente.` });
+            resetForm();
 
         } catch (error) {
             toast({ title: "Error", description: "No se pudo registrar el ingreso.", variant: 'destructive' });
@@ -364,21 +311,26 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
     const handleManualIngreso = async () => {
         if(!manualAmount || !manualDesc || !cuentaDestino) return;
         try {
-            await addMovimiento({
+            const newMovimiento = {
+                 id: Date.now().toString(),
                 fecha: new Date(),
                 tipo: 'Ingreso',
                 descripcion: manualDesc,
                 monto: parseFloat(manualAmount),
                 cuenta: cuentaDestino,
-                detalleCuenta: detalleEfectivo || null,
+                detalleCuenta: detalleEfectivo || undefined,
                 categoria: 'Proyecto', // Default
-            });
-            startTransition(() => {
-                onSave({});
-                setOpen(false);
-                toast({ title: "Éxito", description: "Ingreso manual registrado."});
-                resetForm();
-            })
+            };
+
+            const currentMovimientos = JSON.parse(localStorage.getItem('movimientosDiarios') || '[]');
+            currentMovimientos.push(newMovimiento);
+            localStorage.setItem('movimientosDiarios', JSON.stringify(currentMovimientos));
+
+            onSave({});
+            setOpen(false);
+            toast({ title: "Éxito (Local)", description: "Ingreso manual registrado localmente."});
+            resetForm();
+
         } catch(e) {
             toast({ title: "Error", description: "No se pudo registrar el ingreso manual.", variant: 'destructive' });
         }
@@ -458,7 +410,8 @@ const RegistrarGastoDialog = ({ onSave }: { onSave: () => void }) => {
          if (!descripcion || !monto || !cuenta || !categoriaGasto) return;
          
         try {
-            await addMovimiento({
+             const newGasto = {
+                id: Date.now().toString(),
                 fecha: new Date(),
                 tipo: 'Gasto',
                 descripcion, 
@@ -467,14 +420,16 @@ const RegistrarGastoDialog = ({ onSave }: { onSave: () => void }) => {
                 categoria: categoriaGasto,
                 detalleCuenta: cuenta === 'Efectivo' ? detalleEfectivo : undefined,
                 nombreOtro: ['Personales', 'Otros'].includes(categoriaGasto) ? nombreOtro : undefined,
-            });
+            };
 
-            startTransition(() => {
-                onSave();
-                setOpen(false);
-                toast({ title: "Éxito", description: `Gasto registrado.` });
-                setDescripcion(''); setMonto(''); setCuenta(''); setDetalleEfectivo(''); setCategoriaGasto(''); setNombreOtro('');
-            });
+            const currentMovimientos = JSON.parse(localStorage.getItem('movimientosDiarios') || '[]');
+            currentMovimientos.push(newGasto);
+            localStorage.setItem('movimientosDiarios', JSON.stringify(currentMovimientos));
+
+            onSave();
+            setOpen(false);
+            toast({ title: "Éxito (Local)", description: `Gasto registrado localmente.` });
+            setDescripcion(''); setMonto(''); setCuenta(''); setDetalleEfectivo(''); setCategoriaGasto(''); setNombreOtro('');
 
         } catch(error) {
             toast({ title: "Error", description: "No se pudo registrar el gasto.", variant: 'destructive' });
@@ -592,19 +547,19 @@ export default function FinanzasPage() {
 
     const fetchData = async () => {
         setIsLoading(true);
+        // LOCAL STORAGE FETCH
+        const localCpc = JSON.parse(localStorage.getItem('cuentasPorCobrar') || '[]');
+        const localMovimientos = JSON.parse(localStorage.getItem('movimientosDiarios') || '[]');
+        setCuentasPorCobrar(localCpc);
+        setMovimientos(localMovimientos);
+
         try {
-            const [cpcData, clientsData, movimientosData] = await Promise.all([
-                getCuentasPorCobrar(),
-                getClients(),
-                getMovimientos(),
-            ]);
-            setCuentasPorCobrar(cpcData as CuentaPorCobrar[]);
+            const clientsData = await getClients();
             setClients(clientsData as Client[]);
-            setMovimientos(movimientosData as MovimientoDiario[]);
         } catch (error) {
              toast({
-                title: "Error al cargar datos",
-                description: "No se pudieron obtener los datos financieros. Intenta recargar la página.",
+                title: "Error al cargar clientes",
+                description: "No se pudieron obtener los datos de clientes.",
                 variant: "destructive"
             });
         } finally {
