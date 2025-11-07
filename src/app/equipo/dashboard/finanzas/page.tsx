@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Info, Trash2 } from 'lucide-react';
+import { ArrowUpDown, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Info, Trash2, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -37,7 +37,14 @@ type CategoriaIngreso = "Proyecto" | "Iguala Mensual" | "Renovaciones" | "Otros"
 type CategoriaGasto = "Publicidad" | "Sueldos" | "Comisiones" | "Impuestos" | "Personales" | "Otros" | "Renta";
 type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo" | "Efectivo";
 
-const EditCpcDialog = ({ cpc, onSave, children }: { cpc: CuentaPorCobrar | null, onSave: () => void, children: React.ReactNode }) => {
+const CpcFormDialog = ({ client, cpc, onSave, onRefreshClients, children, isEditing }: { 
+    client?: Client, 
+    cpc?: CuentaPorCobrar | null, 
+    onSave: () => void, 
+    onRefreshClients?: () => void, 
+    children: React.ReactNode, 
+    isEditing: boolean 
+}) => {
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
     
@@ -46,34 +53,47 @@ const EditCpcDialog = ({ cpc, onSave, children }: { cpc: CuentaPorCobrar | null,
     const [periodo, setPeriodo] = useState('');
 
     useEffect(() => {
-        if (open && cpc) {
-            setMonto(cpc.monto.toString());
-            setTipo(cpc.tipo as CategoriaIngreso);
-            setPeriodo(cpc.periodo);
+        if (open) {
+            if (isEditing && cpc) {
+                setMonto(cpc.monto.toString());
+                setTipo(cpc.tipo as CategoriaIngreso);
+                setPeriodo(cpc.periodo);
+            } else {
+                 setMonto('');
+                 setTipo('Iguala Mensual');
+                 setPeriodo('');
+            }
         }
-    }, [open, cpc]);
+    }, [open, cpc, isEditing]);
 
     const handleSave = async () => {
-        if (!cpc || !monto || !periodo) {
+        const targetClient = client || (cpc ? { id: cpc.clienteId, name: cpc.clienteName } : null);
+        if (!targetClient || !monto || !periodo) {
             toast({ title: "Error", description: "Monto y periodo son obligatorios.", variant: "destructive" });
             return;
         }
         
-        const data: Partial<Omit<NewCuentaPorCobrar, 'id'>> = {
+        const data = {
+            clienteId: targetClient.id,
+            clienteName: targetClient.name,
             periodo,
             monto: parseFloat(monto),
             tipo,
         };
 
         try {
-            await updateCpc(cpc.id, data);
+            if (isEditing && cpc) {
+                await updateCpc(cpc.id, data);
+            } else {
+                await addCpc(data);
+            }
             startTransition(() => {
                 onSave();
                 setOpen(false);
-                toast({ title: "Éxito", description: `Cuenta por cobrar actualizada.` });
+                toast({ title: "Éxito", description: `Cuenta por cobrar ${isEditing ? 'actualizada' : 'añadida'}.` });
             });
         } catch (error) {
-             toast({ title: "Error", description: `No se pudo actualizar la cuenta por cobrar.`, variant: 'destructive' });
+             toast({ title: "Error", description: `No se pudo guardar la cuenta por cobrar.`, variant: 'destructive' });
         }
     };
 
@@ -89,15 +109,15 @@ const EditCpcDialog = ({ cpc, onSave, children }: { cpc: CuentaPorCobrar | null,
         }
     }
     
-    if (!cpc) return null;
+    const clientName = client?.name || cpc?.clienteName;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>{children}</DialogTrigger>
+            <DialogTrigger asChild onClick={(e) => e.stopPropagation()}>{children}</DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Editar Cuenta por Cobrar</DialogTitle>
-                    <DialogDescription>Cliente: {cpc.clienteName}</DialogDescription>
+                    <DialogTitle>{isEditing ? 'Editar' : 'Añadir'} Cuenta por Cobrar</DialogTitle>
+                    <DialogDescription>Cliente: {clientName}</DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="space-y-2">
@@ -125,134 +145,29 @@ const EditCpcDialog = ({ cpc, onSave, children }: { cpc: CuentaPorCobrar | null,
                      </div>
                 </div>
                 <DialogFooter className="justify-between">
-                     <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="destructive"><Trash2 className="w-4 h-4 mr-2"/>Eliminar</Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                                <AlertDialogDescription>Esta acción eliminará permanentemente la cuenta por cobrar.</AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDelete}>Confirmar</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                     <div>
+                     {isEditing && (
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive"><Trash2 className="w-4 h-4 mr-2"/>Eliminar</Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                    <AlertDialogDescription>Esta acción eliminará permanentemente la cuenta por cobrar.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleDelete}>Confirmar</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    )}
+                     </div>
                     <div className='flex gap-2'>
                         <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                        <Button onClick={handleSave}>Guardar Cambios</Button>
+                        <Button onClick={handleSave}>{isEditing ? 'Guardar Cambios' : 'Añadir Cuenta'}</Button>
                     </div>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    )
-}
-
-const AddCpcDialog = ({ clients, onSave, onRefreshClients, children }: { clients: Client[], onSave: () => void, onRefreshClients: () => void, children: React.ReactNode }) => {
-    const [open, setOpen] = useState(false);
-    const { toast } = useToast();
-    
-    const [clientId, setClientId] = useState('');
-    const [monto, setMonto] = useState('');
-    const [tipo, setTipo] = useState<CategoriaIngreso>('Iguala Mensual');
-    const [periodo, setPeriodo] = useState('');
-
-    useEffect(() => {
-        if (open) resetForm();
-    }, [open]);
-
-    const resetForm = () => {
-        setClientId(''); setMonto(''); setTipo('Iguala Mensual'); setPeriodo('');
-    }
-    
-    const handleSave = async () => {
-        if (!clientId || !monto || !periodo) {
-            toast({ title: "Error", description: "Cliente, monto y periodo son obligatorios.", variant: "destructive" });
-            return;
-        }
-        const cliente = clients.find(c => c.id === parseInt(clientId));
-        if (!cliente) {
-             toast({ title: "Error", description: "Cliente no encontrado.", variant: 'destructive' });
-            return;
-        }
-        
-        const data: Omit<NewCuentaPorCobrar, 'id'> = {
-            clienteId: parseInt(clientId),
-            clienteName: cliente.name,
-            periodo,
-            monto: parseFloat(monto),
-            tipo,
-        };
-
-        try {
-            await addCpc(data);
-            startTransition(() => {
-                onSave();
-                setOpen(false);
-                toast({ title: "Éxito", description: `Cuenta por cobrar para ${cliente.name} guardada.` });
-            });
-        } catch (error) {
-             toast({ title: "Error", description: `No se pudo guardar la cuenta por cobrar.`, variant: 'destructive' });
-        }
-    };
-    
-    return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>{children}</DialogTrigger>
-            <DialogContent>
-                <DialogHeader><DialogTitle>Añadir Cuenta por Cobrar</DialogTitle></DialogHeader>
-                <div className="grid gap-4 py-4">
-                     <div className="space-y-2">
-                        <Label>Cliente</Label>
-                        {clients.length > 0 ? (
-                            <Select value={clientId} onValueChange={setClientId}>
-                                <SelectTrigger><SelectValue placeholder="Seleccionar cliente" /></SelectTrigger>
-                                <SelectContent>
-                                    {clients.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                        ) : (
-                             <Alert variant="default" className="mt-2">
-                                <Info className="h-4 w-4" />
-                                <AlertDescription className="text-xs">
-                                    No hay clientes. 
-                                     <ClientFormDialog onSave={onRefreshClients} isEditing={false}>
-                                        <Button variant="link" className="p-0 h-auto ml-1">Añade uno nuevo.</Button>
-                                    </ClientFormDialog>
-                                </AlertDescription>
-                            </Alert>
-                        )}
-                    </div>
-                    
-                    <div className="space-y-2">
-                        <Label>Tipo de Servicio</Label>
-                        <Select value={tipo} onValueChange={(v) => setTipo(v as CategoriaIngreso)}>
-                            <SelectTrigger><SelectValue/></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="Iguala Mensual">Iguala Mensual</SelectItem>
-                                <SelectItem value="Proyecto">Proyecto</SelectItem>
-                                <SelectItem value="Web">Web</SelectItem>
-                                <SelectItem value="Renovaciones">Renovaciones</SelectItem>
-                                <SelectItem value="Otros">Otros</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                           <Label>Periodo</Label>
-                           <Input value={periodo} onChange={e => setPeriodo(e.target.value)} placeholder="Ej. Noviembre 2024" />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Monto (MXN)</Label>
-                            <Input type="number" value={monto} onChange={e => setMonto(e.target.value)} placeholder="0.00" />
-                        </div>
-                     </div>
-                </div>
-                <DialogFooter>
-                    <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                    <Button onClick={handleSave}>Guardar Cuenta</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -263,7 +178,6 @@ const CuentasPorCobrarTab = ({ data, clients, onSave, onRefresh }: { data: Cuent
     
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
     const [clientFilter, setClientFilter] = useState('Todos');
-    const [selectedCpc, setSelectedCpc] = useState<CuentaPorCobrar | null>(null);
 
     const clientDebts = useMemo(() => {
         const debtMap = new Map<number, { client: Client; totalDebt: number; debts: CuentaPorCobrar[] }>();
@@ -314,9 +228,7 @@ const CuentasPorCobrarTab = ({ data, clients, onSave, onRefresh }: { data: Cuent
                             {clients.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
                         </SelectContent>
                     </Select>
-                    <AddCpcDialog clients={clients} onSave={onRefresh} onRefreshClients={onRefresh}>
-                        <Button><PlusCircle className="w-4 h-4 mr-2" />Añadir Cuenta por Cobrar</Button>
-                    </AddCpcDialog>
+                    {/* El botón principal de añadir se podría poner aquí si se quisiera, pero la lógica por fila es más intuitiva */}
                  </div>
             </CardHeader>
             <CardContent>
@@ -341,16 +253,20 @@ const CuentasPorCobrarTab = ({ data, clients, onSave, onRefresh }: { data: Cuent
                                         {debts.length > 0 ? (
                                             <ul className='space-y-1'>
                                             {debts.map(d => (
-                                                <EditCpcDialog key={d.id} cpc={d} onSave={onRefresh}>
+                                                <CpcFormDialog key={d.id} cpc={d} onSave={onRefresh} isEditing={true}>
                                                     <li className='text-xs flex items-center gap-2 cursor-pointer p-1 rounded-md hover:bg-muted'>
                                                         <Badge variant="secondary" className='font-normal'>{d.periodo}</Badge>
                                                         <span>{d.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
                                                     </li>
-                                                </EditCpcDialog>
+                                                </CpcFormDialog>
                                             ))}
                                             </ul>
                                         ) : (
-                                            <span className='text-xs text-muted-foreground'>Sin deudas pendientes.</span>
+                                            <CpcFormDialog client={client} onSave={onRefresh} isEditing={false}>
+                                                <Button variant="ghost" size="sm" className='text-xs text-muted-foreground'>
+                                                    <Plus className='w-3 h-3 mr-1'/> Añadir
+                                                </Button>
+                                            </CpcFormDialog>
                                         )}
                                     </TableCell>
                                     <TableCell className={cn("font-bold", totalDebt > 0 ? 'text-destructive' : 'text-green-500')}>
