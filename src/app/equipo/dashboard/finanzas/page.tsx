@@ -75,11 +75,9 @@ const CpcFormDialog = ({ client, cpc, onSave, children, isEditing }: {
         }
         
         const data = {
-            clienteId: targetClient.id,
-            clienteName: targetClient.name,
-            periodo,
             monto: parseFloat(monto),
             tipo,
+            periodo,
         };
 
         try {
@@ -87,7 +85,11 @@ const CpcFormDialog = ({ client, cpc, onSave, children, isEditing }: {
                 await updateCpc(cpc.id, data);
                 toast({ title: "Éxito", description: "Cuenta por cobrar actualizada." });
             } else {
-                await addCpc(data);
+                 await addCpc({
+                    clienteId: targetClient.id,
+                    clienteName: targetClient.name,
+                    ...data,
+                });
                 toast({ title: "Éxito", description: "Cuenta por cobrar añadida." });
             }
             startTransition(() => {
@@ -340,7 +342,6 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
                     detalleCuenta: detalleEfectivo || null,
                     categoria: selectedCpc.tipo,
                 });
-                // Here you might want to delete the CPC record or mark it as paid.
                 await deleteCpc(selectedCpc.id);
                 toast({ title: "Éxito", description: `Ingreso de ${selectedCpc.clienteName} registrado y cuenta por cobrar eliminada.` });
             } catch (error) {
@@ -613,3 +614,4 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
