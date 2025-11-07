@@ -37,7 +37,8 @@ type CategoriaIngreso = "Proyecto" | "Iguala Mensual" | "Renovaciones" | "Otros"
 type CategoriaGasto = "Publicidad" | "Sueldos" | "Comisiones" | "Impuestos" | "Personales" | "Otros" | "Renta";
 type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo" | "Efectivo" | "Pendiente";
 
-const CpcFormDialog = ({ client, cpc, onSave, children, isEditing }: { 
+const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: { 
+    clients?: Client[],
     client?: Client, 
     cpc?: CuentaPorCobrar | null, 
     onSave: () => void, 
@@ -47,6 +48,7 @@ const CpcFormDialog = ({ client, cpc, onSave, children, isEditing }: {
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
     
+    const [selectedClientId, setSelectedClientId] = useState<string>('');
     const [monto, setMonto] = useState('');
     const [tipo, setTipo] = useState<CategoriaIngreso>('Iguala Mensual');
     const [periodo, setPeriodo] = useState('');
@@ -57,17 +59,33 @@ const CpcFormDialog = ({ client, cpc, onSave, children, isEditing }: {
                 setMonto(cpc.monto.toString());
                 setTipo(cpc.tipo as CategoriaIngreso);
                 setPeriodo(cpc.periodo);
-            } else {
+                setSelectedClientId(cpc.clienteId.toString());
+            } else if (client) { // Pre-fill client if adding from a specific row
                  setMonto('');
                  setTipo('Iguala Mensual');
                  setPeriodo(format(new Date(), 'MMMM yyyy', { locale: es }));
+                 setSelectedClientId(client.id.toString());
+            } else { // Reset for global "add"
+                setMonto('');
+                 setTipo('Iguala Mensual');
+                 setPeriodo(format(new Date(), 'MMMM yyyy', { locale: es }));
+                 setSelectedClientId('');
             }
         }
-    }, [open, cpc, isEditing]);
+    }, [open, client, cpc, isEditing]);
 
     const handleSave = async () => {
-        const targetClient = client || (cpc ? { id: cpc.clienteId, name: cpc.clienteName } : null);
+        let targetClient: {id: number, name: string} | undefined;
 
+        if (isEditing && cpc) {
+            targetClient = { id: cpc.clienteId, name: cpc.clienteName };
+        } else if (selectedClientId) {
+            const foundClient = clients?.find(c => c.id.toString() === selectedClientId);
+            if (foundClient) {
+                targetClient = foundClient;
+            }
+        }
+        
         if (!targetClient || !monto || !periodo) {
             toast({ title: "Error", description: "Cliente, monto y periodo son obligatorios.", variant: "destructive" });
             return;
@@ -120,9 +138,20 @@ const CpcFormDialog = ({ client, cpc, onSave, children, isEditing }: {
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>{isEditing ? 'Editar' : 'Añadir'} Cuenta por Cobrar</DialogTitle>
-                    <DialogDescription>Cliente: {clientName}</DialogDescription>
+                    <DialogDescription>{clientName ? `Cliente: ${clientName}` : 'Selecciona un cliente'}</DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
+                    { !isEditing && !client && clients && (
+                         <div className="space-y-2">
+                            <Label>Cliente</Label>
+                            <Select value={selectedClientId} onValueChange={setSelectedClientId}>
+                                <SelectTrigger><SelectValue placeholder="Seleccionar un cliente..."/></SelectTrigger>
+                                <SelectContent>
+                                    {clients.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
                     <div className="space-y-2">
                         <Label>Tipo de Servicio</Label>
                         <Select value={tipo} onValueChange={(v) => setTipo(v as CategoriaIngreso)}>
@@ -177,7 +206,7 @@ const CpcFormDialog = ({ client, cpc, onSave, children, isEditing }: {
     )
 }
 
-const CuentasPorCobrarTab = ({ data, clients, onRefresh }: { data: CuentaPorCobrar[], clients: Client[], onRefresh: () => void }) => {
+const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: CuentaPorCobrar[], clients: Client[], onRefresh: () => void, isAdmin: boolean }) => {
     
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
     const [clientFilter, setClientFilter] = useState('Todos');
@@ -231,6 +260,11 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh }: { data: CuentaPorCobr
                             {clients.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
                         </SelectContent>
                     </Select>
+                     {isAdmin && (
+                        <CpcFormDialog clients={clients} onSave={onRefresh} isEditing={false}>
+                            <Button><PlusCircle className="w-4 h-4 mr-2" /> Añadir Cuenta por Cobrar</Button>
+                        </CpcFormDialog>
+                    )}
                  </div>
             </CardHeader>
             <CardContent>
@@ -627,7 +661,7 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
                 />
                 <div className="flex gap-2">
                     <RegistrarIngresoDialog isAdmin={isAdmin} cuentasPorCobrar={cuentasPorCobrar} onSave={onSave} />
-                    <RegistrarGastoDialog onSave={onSave} />
+                    {isAdmin && <RegistrarGastoDialog onSave={onSave} />}
                 </div>
             </div>
              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -752,7 +786,7 @@ export default function FinanzasPage() {
                     <TabsTrigger value="tabla-diaria"><TrendingUp className="w-4 h-4 mr-2"/>Tabla Diaria</TabsTrigger>
                 </TabsList>
                 <TabsContent value="cuentas-por-cobrar" className="mt-4">
-                   <CuentasPorCobrarTab data={cuentasPorCobrar} clients={clients} onRefresh={fetchData} />
+                   <CuentasPorCobrarTab data={cuentasPorCobrar} clients={clients} onRefresh={fetchData} isAdmin={isAdmin}/>
                 </TabsContent>
                 <TabsContent value="tabla-diaria" className="mt-4">
                     <TablaDiariaTab isAdmin={isAdmin} movimientos={movimientos} onSave={fetchData} cuentasPorCobrar={cuentasPorCobrar} />
@@ -761,4 +795,3 @@ export default function FinanzasPage() {
         </div>
     );
 }
-

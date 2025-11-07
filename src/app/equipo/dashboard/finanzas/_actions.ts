@@ -61,7 +61,7 @@ export async function updateCpc(id: number, data: Partial<Omit<NewCuentaPorCobra
     try {
         const [updatedCpc] = await db.update(cuentasPorCobrar).set(data).where(eq(cuentasPorCobrar.id, id)).returning();
         
-        if (updatedCpc && updatedCpc.cpcId) {
+        if (updatedCpc) {
             await db.update(movimientosDiarios).set({
                 monto: data.monto,
                 descripcion: `Ingreso (pendiente) de ${updatedCpc.clienteName} por ${data.tipo || updatedCpc.tipo}`,
@@ -81,7 +81,11 @@ export async function registrarPagoCpc(cpcId: number, cuentaDestino: string, det
         const movimiento = await db.query.movimientosDiarios.findFirst({ where: eq(movimientosDiarios.cpcId, cpcId) });
 
         if (!movimiento) {
-             throw new Error("Movimiento asociado no encontrado.");
+             // If no movement is found, it's an inconsistency, but we should still mark the debt as paid by deleting it.
+             await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, cpcId));
+             revalidatePath("/equipo/dashboard/finanzas");
+             console.warn(`CPC record ${cpcId} deleted, but no corresponding movement was found to update.`);
+             return;
         }
 
         await db.update(movimientosDiarios)
@@ -105,10 +109,7 @@ export async function registrarPagoCpc(cpcId: number, cuentaDestino: string, det
 
 export async function deleteCpc(id: number) {
     try {
-        await db.delete(movimientosDiarios).where(
-            and(
-                eq(movimientosDiarios.cpcId, id)
-            ));
+        await db.delete(movimientosDiarios).where(eq(movimientosDiarios.cpcId, id));
         await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, id));
         revalidatePath("/equipo/dashboard/finanzas");
     } catch (error: any) {
@@ -147,4 +148,3 @@ export async function deleteMovimiento(id: number) {
         throw new Error(error.message || "Could not delete movimiento");
     }
 }
-
