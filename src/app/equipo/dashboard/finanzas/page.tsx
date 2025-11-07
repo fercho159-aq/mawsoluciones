@@ -19,7 +19,7 @@ import { ArrowUpDown, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingD
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from "@/components/ui/label";
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO } from 'date-fns';
@@ -401,6 +401,86 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
     )
 }
 
+const RegistrarGastoDialog = ({ onSave }: { onSave: () => void }) => {
+    const [open, setOpen] = useState(false);
+    const { toast } = useToast();
+    
+    const [descripcion, setDescripcion] = useState('');
+    const [monto, setMonto] = useState('');
+    const [cuenta, setCuenta] = useState<Cuenta | ''>('');
+    const [detalleEfectivo, setDetalleEfectivo] = useState('');
+    const [categoria, setCategoria] = useState<CategoriaGasto | ''>('');
+    const [nombreOtro, setNombreOtro] = useState('');
+
+    const categoriasDisponibles: CategoriaGasto[] = ["Publicidad", "Sueldos", "Comisiones", "Impuestos", "Personales", "Renta", "Otros"];
+
+    const resetForm = () => {
+        setDescripcion(''); setMonto(''); setCuenta(''); setDetalleEfectivo('');
+        setCategoria(''); setNombreOtro('');
+    };
+
+    useEffect(() => {
+        if(open) resetForm();
+    }, [open]);
+
+    const handleSave = async () => {
+        if (!descripcion || !monto || !cuenta || !categoria) {
+            toast({ title: "Error", description: "Todos los campos son obligatorios.", variant: "destructive" });
+            return;
+        }
+
+        try {
+            await addMovimiento({
+                fecha: new Date(),
+                tipo: 'Gasto',
+                descripcion,
+                monto: parseFloat(monto),
+                cuenta,
+                detalleCuenta: cuenta === 'Efectivo' ? detalleEfectivo : null,
+                categoria,
+                nombreOtro: ['Personales', 'Otros'].includes(categoria) ? nombreOtro : null,
+            });
+            toast({ title: "Éxito", description: "Gasto registrado." });
+            onSave();
+            setOpen(false);
+        } catch (error) {
+            toast({ title: "Error", description: "No se pudo registrar el gasto.", variant: "destructive" });
+        }
+    };
+    
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild><Button variant="destructive"><MinusCircle className="w-4 h-4 mr-2" />Registrar Gasto</Button></DialogTrigger>
+            <DialogContent>
+                <DialogHeader><DialogTitle>Registrar Gasto</DialogTitle></DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <Input value={descripcion} onChange={e => setDescripcion(e.target.value)} placeholder="Descripción del gasto" />
+                    <Input type="number" value={monto} onChange={e => setMonto(e.target.value)} placeholder="Monto (MXN)" />
+                    <Select value={categoria} onValueChange={(v) => setCategoria(v as CategoriaGasto)}>
+                        <SelectTrigger><SelectValue placeholder="Categoría" /></SelectTrigger>
+                        <SelectContent>{categoriasDisponibles.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}</SelectContent>
+                    </Select>
+                    {(categoria === 'Personales' || categoria === 'Otros') && <Input value={nombreOtro} onChange={e => setNombreOtro(e.target.value)} placeholder="Nombre Específico (Ej. Fany)"/>}
+                    <Select value={cuenta} onValueChange={(v) => setCuenta(v as Cuenta)}>
+                        <SelectTrigger><SelectValue placeholder="Cuenta de Origen" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Cuenta Paola">Cuenta Paola</SelectItem>
+                            <SelectItem value="Cuenta MAW">Cuenta MAW</SelectItem>
+                            <SelectItem value="Cuenta Aldo">Cuenta Aldo</SelectItem>
+                            <SelectItem value="Efectivo">Efectivo</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    {cuenta === 'Efectivo' && <Input value={detalleEfectivo} onChange={e => setDetalleEfectivo(e.target.value)} placeholder="Especifique (ej. Caja chica)"/>}
+                </div>
+                <DialogFooter className='mt-4'>
+                    <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                    <Button variant="destructive" onClick={handleSave}>Registrar Gasto</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
 const MovimientoFormDialog = ({ movimiento, onSave, children }: { movimiento: MovimientoDiario, onSave: () => void, children: React.ReactNode }) => {
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
@@ -514,6 +594,7 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
     const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
 
     const monthlyFilteredMovements = useMemo(() => {
+        if (!selectedMonth) return [];
         const start = startOfMonth(parseISO(`${selectedMonth}-01`));
         const end = endOfMonth(start);
         return movimientos.filter(mov => {
@@ -524,8 +605,11 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
 
     const summary = useMemo(() => {
         return monthlyFilteredMovements.reduce((acc, mov) => {
-            if (mov.tipo === 'Ingreso') acc.totalIngresos += mov.monto;
-            else if (mov.tipo === 'Gasto') acc.totalGastos += mov.monto;
+             if (mov.tipo === 'Ingreso') {
+                acc.totalIngresos += mov.monto;
+            } else if (mov.tipo === 'Gasto') {
+                acc.totalGastos += mov.monto;
+            }
             return acc;
         }, { totalIngresos: 0, totalGastos: 0 });
     }, [monthlyFilteredMovements]);
@@ -562,7 +646,7 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
             </div>
             <Card>
                 <CardHeader>
-                    <CardTitle>Movimientos de {format(parseISO(`${selectedMonth}-01`), 'MMMM yyyy', { locale: es })}</CardTitle>
+                    <CardTitle>Movimientos de {selectedMonth ? format(parseISO(`${selectedMonth}-01`), 'MMMM yyyy', { locale: es }) : ''}</CardTitle>
                     <CardDescription>Registro de todos los ingresos y gastos del mes.</CardDescription>
                 </CardHeader>
                 <CardContent>
