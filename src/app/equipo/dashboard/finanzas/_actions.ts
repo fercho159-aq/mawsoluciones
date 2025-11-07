@@ -1,4 +1,5 @@
 
+
 "use server";
 
 import { db } from "@/lib/db";
@@ -32,19 +33,19 @@ export async function addCpc(data: Omit<NewCuentaPorCobrar, 'id'>) {
     try {
         await db.insert(cuentasPorCobrar).values(data);
         revalidatePath("/equipo/dashboard/finanzas");
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error adding cpc:", error);
-        throw new Error("Could not add cpc");
+        throw new Error(error.message || "Could not add cpc");
     }
 }
 
-export async function updateCpc(id: number, data: Partial<Omit<NewCuentaPorCobrar, 'id'>>) {
+export async function updateCpc(id: number, data: Partial<Omit<NewCuentaPorCobrar, 'id' | 'clienteId' | 'clienteName'>>) {
     try {
         await db.update(cuentasPorCobrar).set(data).where(eq(cuentasPorCobrar.id, id));
         revalidatePath("/equipo/dashboard/finanzas");
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error updating cpc:", error);
-        throw new Error("Could not update cpc");
+        throw new Error(error.message || "Could not update cpc");
     }
 }
 
@@ -52,9 +53,9 @@ export async function deleteCpc(id: number) {
     try {
         await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, id));
         revalidatePath("/equipo/dashboard/finanzas");
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error deleting cpc:", error);
-        throw new Error("Could not delete cpc");
+        throw new Error(error.message || "Could not delete cpc");
     }
 }
 
@@ -63,8 +64,8 @@ export async function addMovimiento(data: Omit<NewMovimientoDiario, 'id'>) {
   try {
     await db.insert(movimientosDiarios).values(data);
     revalidatePath("/equipo/dashboard/finanzas");
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error adding movimiento:", error);
-    throw new Error("Could not add movimiento");
+    throw new Error(error.message || "Could not add movimiento");
   }
 }

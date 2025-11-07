@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect, startTransition } from 'react';
@@ -37,11 +38,10 @@ type CategoriaIngreso = "Proyecto" | "Iguala Mensual" | "Renovaciones" | "Otros"
 type CategoriaGasto = "Publicidad" | "Sueldos" | "Comisiones" | "Impuestos" | "Personales" | "Otros" | "Renta";
 type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo" | "Efectivo";
 
-const CpcFormDialog = ({ client, cpc, onSave, onRefreshClients, children, isEditing }: { 
+const CpcFormDialog = ({ client, cpc, onSave, children, isEditing }: { 
     client?: Client, 
     cpc?: CuentaPorCobrar | null, 
     onSave: () => void, 
-    onRefreshClients?: () => void, 
     children: React.ReactNode, 
     isEditing: boolean 
 }) => {
@@ -61,15 +61,16 @@ const CpcFormDialog = ({ client, cpc, onSave, onRefreshClients, children, isEdit
             } else {
                  setMonto('');
                  setTipo('Iguala Mensual');
-                 setPeriodo('');
+                 setPeriodo(format(new Date(), 'MMMM yyyy', { locale: es }));
             }
         }
     }, [open, cpc, isEditing]);
 
     const handleSave = async () => {
         const targetClient = client || (cpc ? { id: cpc.clienteId, name: cpc.clienteName } : null);
+
         if (!targetClient || !monto || !periodo) {
-            toast({ title: "Error", description: "Monto y periodo son obligatorios.", variant: "destructive" });
+            toast({ title: "Error", description: "Cliente, monto y periodo son obligatorios.", variant: "destructive" });
             return;
         }
         
@@ -82,18 +83,19 @@ const CpcFormDialog = ({ client, cpc, onSave, onRefreshClients, children, isEdit
         };
 
         try {
-            if (isEditing && cpc) {
+            if (isEditing && cpc?.id) {
                 await updateCpc(cpc.id, data);
+                toast({ title: "Éxito", description: "Cuenta por cobrar actualizada." });
             } else {
                 await addCpc(data);
+                toast({ title: "Éxito", description: "Cuenta por cobrar añadida." });
             }
             startTransition(() => {
                 onSave();
                 setOpen(false);
-                toast({ title: "Éxito", description: `Cuenta por cobrar ${isEditing ? 'actualizada' : 'añadida'}.` });
             });
-        } catch (error) {
-             toast({ title: "Error", description: `No se pudo guardar la cuenta por cobrar.`, variant: 'destructive' });
+        } catch (error: any) {
+             toast({ title: "Error", description: `No se pudo guardar la cuenta por cobrar: ${error.message}`, variant: 'destructive' });
         }
     };
 
@@ -149,9 +151,9 @@ const CpcFormDialog = ({ client, cpc, onSave, onRefreshClients, children, isEdit
                      {isEditing && (
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="destructive"><Trash2 className="w-4 h-4 mr-2"/>Eliminar</Button>
+                                <Button variant="destructive" onClick={(e) => e.stopPropagation()}><Trash2 className="w-4 h-4 mr-2"/>Eliminar</Button>
                             </AlertDialogTrigger>
-                            <AlertDialogContent>
+                            <AlertDialogContent onClick={(e) => e.stopPropagation()}>
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
                                     <AlertDialogDescription>Esta acción eliminará permanentemente la cuenta por cobrar.</AlertDialogDescription>
@@ -174,7 +176,7 @@ const CpcFormDialog = ({ client, cpc, onSave, onRefreshClients, children, isEdit
     )
 }
 
-const CuentasPorCobrarTab = ({ data, clients, onSave, onRefresh }: { data: CuentaPorCobrar[], clients: Client[], onSave: () => void, onRefresh: () => void }) => {
+const CuentasPorCobrarTab = ({ data, clients, onRefresh }: { data: CuentaPorCobrar[], clients: Client[], onRefresh: () => void }) => {
     
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
     const [clientFilter, setClientFilter] = useState('Todos');
@@ -228,7 +230,6 @@ const CuentasPorCobrarTab = ({ data, clients, onSave, onRefresh }: { data: Cuent
                             {clients.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
                         </SelectContent>
                     </Select>
-                    {/* El botón principal de añadir se podría poner aquí si se quisiera, pero la lógica por fila es más intuitiva */}
                  </div>
             </CardHeader>
             <CardContent>
@@ -250,24 +251,21 @@ const CuentasPorCobrarTab = ({ data, clients, onSave, onRefresh }: { data: Cuent
                                 <TableRow key={client.id}>
                                     <TableCell className="font-medium">{client.name}</TableCell>
                                     <TableCell>
-                                        {debts.length > 0 ? (
-                                            <ul className='space-y-1'>
+                                        <div className="flex flex-col items-start gap-1">
                                             {debts.map(d => (
                                                 <CpcFormDialog key={d.id} cpc={d} onSave={onRefresh} isEditing={true}>
-                                                    <li className='text-xs flex items-center gap-2 cursor-pointer p-1 rounded-md hover:bg-muted'>
+                                                    <div className='text-xs flex items-center gap-2 cursor-pointer p-1 rounded-md hover:bg-muted w-full'>
                                                         <Badge variant="secondary" className='font-normal'>{d.periodo}</Badge>
                                                         <span>{d.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
-                                                    </li>
+                                                    </div>
                                                 </CpcFormDialog>
                                             ))}
-                                            </ul>
-                                        ) : (
                                             <CpcFormDialog client={client} onSave={onRefresh} isEditing={false}>
                                                 <Button variant="ghost" size="sm" className='text-xs text-muted-foreground'>
-                                                    <Plus className='w-3 h-3 mr-1'/> Añadir
+                                                    <Plus className='w-3 h-3 mr-1'/> Añadir Cuenta
                                                 </Button>
                                             </CpcFormDialog>
-                                        )}
+                                        </div>
                                     </TableCell>
                                     <TableCell className={cn("font-bold", totalDebt > 0 ? 'text-destructive' : 'text-green-500')}>
                                         {totalDebt.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
@@ -606,7 +604,7 @@ export default function FinanzasPage() {
                     <TabsTrigger value="tabla-diaria"><TrendingUp className="w-4 h-4 mr-2"/>Tabla Diaria</TabsTrigger>
                 </TabsList>
                 <TabsContent value="cuentas-por-cobrar" className="mt-4">
-                   <CuentasPorCobrarTab data={cuentasPorCobrar} clients={clients} onSave={fetchData} onRefresh={fetchData} />
+                   <CuentasPorCobrarTab data={cuentasPorCobrar} clients={clients} onRefresh={fetchData} />
                 </TabsContent>
                 <TabsContent value="tabla-diaria" className="mt-4">
                     <TablaDiariaTab isAdmin={isAdmin} movimientos={movimientos} onSave={fetchData} cuentasPorCobrar={cuentasPorCobrar} />
