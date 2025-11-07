@@ -1,10 +1,10 @@
 
-
 import { pgTable, serial, text, varchar, timestamp, boolean, integer, jsonb, real } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
-// --- TABLE DEFINITIONS ---
+// --- TABLAS PRINCIPALES ---
 
+// Tabla de Colaboradores (Usuarios del sistema)
 export const colaboradores = pgTable('colaboradores', {
   id: varchar('id', { length: 50 }).primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
@@ -21,6 +21,7 @@ export const colaboradores = pgTable('colaboradores', {
   progressConfig: jsonb('progress_config'),
 });
 
+// Tabla de Clientes Activos
 export const clients = pgTable('clients', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
@@ -37,6 +38,23 @@ export const clients = pgTable('clients', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+// Tabla de Prospectos (Pipeline de Ventas)
+export const prospects_maw = pgTable('prospects_maw', {
+    id: serial('id').primaryKey(),
+    name: varchar('name', { length: 255 }),
+    company: varchar('company', { length: 255 }),
+    phone: varchar('phone', { length: 50 }),
+    email: varchar('email', { length: 255 }),
+    source: varchar('source', { length: 100 }).notNull(),
+    status: varchar('status', { length: 50 }),
+    responsable: varchar('responsable', { length: 100 }),
+    createdAt: timestamp('created_at').defaultNow(),
+});
+
+
+// --- TABLAS RELACIONADAS ---
+
+// Perfil financiero de cada cliente
 export const clientFinancialProfiles = pgTable('client_financial_profiles', {
     id: serial('id').primaryKey(),
     clientId: integer('client_id').notNull().unique().references(() => clients.id, { onDelete: 'cascade' }),
@@ -44,6 +62,7 @@ export const clientFinancialProfiles = pgTable('client_financial_profiles', {
     defaultInvoice: boolean('default_invoice').default(false),
 });
 
+// Tareas o "Pendientes" asignados a cada cliente
 export const pendientes_maw = pgTable('pendientes_maw', {
     id: serial('id').primaryKey(),
     clientId: integer('client_id').notNull().references(() => clients.id, { onDelete: 'cascade' }),
@@ -57,35 +76,7 @@ export const pendientes_maw = pgTable('pendientes_maw', {
     createdAt: timestamp('created_at').defaultNow(),
 });
 
-export const accesses = pgTable('accesses', {
-    id: serial('id').primaryKey(),
-    platform: varchar('platform', { length: 100 }).notNull(),
-    client: varchar('client', { length: 255 }).notNull(),
-    email: varchar('email', { length: 255 }).notNull(),
-    password: varchar('password', { length: 255 }).notNull(),
-});
-
-export const cuentasPorCobrar = pgTable('cuentas_por_cobrar', {
-    id: serial('id').primaryKey(),
-    clienteId: integer('client_id').notNull().references(() => clients.id, { onDelete: 'cascade' }),
-    clienteName: varchar('cliente_name', { length: 255 }).notNull(),
-    periodo: varchar('periodo', { length: 100 }).notNull(),
-    monto: real('monto').notNull(),
-    tipo: varchar('tipo', { length: 50 }).notNull(),
-});
-
-export const movimientosDiarios = pgTable('movimientos_diarios', {
-    id: serial('id').primaryKey(),
-    fecha: timestamp('fecha').defaultNow().notNull(),
-    tipo: varchar('tipo', { length: 50 }).notNull(),
-    descripcion: text('descripcion').notNull(),
-    monto: real('monto').notNull(),
-    cuenta: varchar('cuenta', { length: 100 }).notNull(),
-    detalleCuenta: varchar('detalle_cuenta', { length: 255 }),
-    categoria: varchar('categoria', { length: 100 }),
-    nombreOtro: varchar('nombre_otro', { length: 255 }),
-});
-
+// Eventos de grabación asociados a un pendiente
 export const recordingEvents = pgTable('recording_events', {
     id: serial('id').primaryKey(),
     clientName: varchar('client_name', { length: 255 }).notNull(),
@@ -98,33 +89,43 @@ export const recordingEvents = pgTable('recording_events', {
     project: text('project'),
     assignedEquipment: jsonb('assigned_equipment').$type<string[]>(),
     equipmentNames: jsonb('equipment_names').$type<string[]>(),
-    pendienteId: integer('pendiente_id').references(() => pendientes_maw.id, { onDelete: 'cascade' }),
+    pendienteId: integer('pendiente_id').unique().references(() => pendientes_maw.id, { onDelete: 'cascade' }),
 });
 
-export const leads = pgTable('leads', {
-  id: serial('id').primaryKey(),
-  name: varchar('name', { length: 255 }),
-  company: varchar('company', { length: 255 }),
-  phone: varchar('phone', { length: 50 }),
-  email: varchar('email', { length: 255 }),
-  source: varchar('source', { length: 100 }).notNull(),
-  data: jsonb('data'),
-  createdAt: timestamp('created_at').defaultNow(),
-});
-
-export const prospects_maw = pgTable('prospects_maw', {
+// Cuentas por cobrar de cada cliente
+export const cuentasPorCobrar = pgTable('cuentas_por_cobrar', {
     id: serial('id').primaryKey(),
-    name: varchar('name', { length: 255 }),
-    company: varchar('company', { length: 255 }),
-    phone: varchar('phone', { length: 50 }),
-    email: varchar('email', { length: 255 }),
-    source: varchar('source', { length: 100 }).notNull(),
-    status: varchar('status', { length: 50 }),
-    responsable: varchar('responsable', { length: 100 }),
-    createdAt: timestamp('created_at').defaultNow(),
+    clienteId: integer('client_id').notNull().references(() => clients.id, { onDelete: 'cascade' }),
+    clienteName: varchar('cliente_name', { length: 255 }).notNull(),
+    periodo: varchar('periodo', { length: 100 }).notNull(),
+    monto: real('monto').notNull(),
+    tipo: varchar('tipo', { length: 50 }).notNull(), // Ej: Iguala, Proyecto, Web
 });
 
-// --- RELATIONS ---
+// Movimientos financieros diarios (ingresos y gastos)
+export const movimientosDiarios = pgTable('movimientos_diarios', {
+    id: serial('id').primaryKey(),
+    fecha: timestamp('fecha').defaultNow().notNull(),
+    tipo: varchar('tipo', { length: 50 }).notNull(), // "Ingreso" o "Gasto"
+    descripcion: text('descripcion').notNull(),
+    monto: real('monto').notNull(),
+    cuenta: varchar('cuenta', { length: 100 }).notNull(), // Banco o cuenta de origen/destino
+    detalleCuenta: varchar('detalle_cuenta', { length: 255 }),
+    categoria: varchar('categoria', { length: 100 }),
+    nombreOtro: varchar('nombre_otro', { length: 255 }),
+});
+
+// Credenciales de acceso para plataformas de clientes
+export const accesses = pgTable('accesses', {
+    id: serial('id').primaryKey(),
+    platform: varchar('platform', { length: 100 }).notNull(),
+    client: varchar('client', { length: 255 }).notNull(),
+    email: varchar('email', { length: 255 }).notNull(),
+    password: varchar('password', { length: 255 }).notNull(),
+});
+
+
+// --- RELACIONES ---
 
 export const clientsRelations = relations(clients, ({ one, many }) => ({
 	cuentasPorCobrar: many(cuentasPorCobrar),
@@ -168,23 +169,23 @@ export const recordingEventsRelations = relations(recordingEvents, ({ one }) => 
 }));
 
 
-// --- TYPES ---
+// --- TIPOS INFERIDOS ---
 
 export type Client = typeof clients.$inferSelect;
 export type NewClient = typeof clients.$inferInsert;
+export type ClientFinancialProfile = typeof clientFinancialProfiles.$inferSelect;
+export type NewClientFinancialProfile = typeof clientFinancialProfiles.$inferInsert;
 export type PendienteMaw = typeof pendientes_maw.$inferSelect;
 export type NewPendienteMaw = typeof pendientes_maw.$inferInsert;
+export type RecordingEvent = typeof recordingEvents.$inferSelect;
+export type NewRecordingEvent = typeof recordingEvents.$inferInsert;
 export type CuentaPorCobrar = typeof cuentasPorCobrar.$inferSelect;
 export type NewCuentaPorCobrar = typeof cuentasPorCobrar.$inferInsert;
 export type MovimientoDiario = typeof movimientosDiarios.$inferSelect;
 export type NewMovimientoDiario = typeof movimientosDiarios.$inferInsert;
 export type Prospect = typeof prospects_maw.$inferSelect;
 export type NewProspect = typeof prospects_maw.$inferInsert;
-export type Lead = typeof leads.$inferSelect;
-export type NewLead = typeof leads.$inferInsert;
-export type RecordingEvent = typeof recordingEvents.$inferSelect;
-export type NewRecordingEvent = typeof recordingEvents.$inferInsert;
 export type Colaborador = typeof colaboradores.$inferSelect;
 export type NewColaborador = typeof colaboradores.$inferInsert;
-export type ClientFinancialProfile = typeof clientFinancialProfiles.$inferSelect;
-export type NewClientFinancialProfile = typeof clientFinancialProfiles.$inferInsert;
+export type Access = typeof accesses.$inferSelect;
+export type NewAccess = typeof accesses.$inferInsert;

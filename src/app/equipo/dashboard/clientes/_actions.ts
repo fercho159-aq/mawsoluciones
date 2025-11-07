@@ -1,9 +1,8 @@
 
-
 "use server";
 
 import { db } from "@/lib/db";
-import { clients, pendientes_maw, clientFinancialProfiles } from "@/lib/db/schema";
+import { clients, pendientes_maw, clientFinancialProfiles, NewClient } from "@/lib/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -21,7 +20,7 @@ export async function getClients() {
   }
 }
 
-export type NewClientData = Omit<typeof clients.$inferInsert, 'id' | 'createdAt'> & {
+export type NewClientData = Omit<NewClient, 'id' | 'createdAt'> & {
     responsables?: {
         contenido?: { encargado: string; ejecutor: string };
         ads?: { responsable: string };
@@ -55,10 +54,12 @@ export async function addClient(data: NewClientData) {
         throw new Error("Failed to create client record.");
     }
 
+    // Crear perfil financiero asociado
     await db.insert(clientFinancialProfiles).values({
         clientId: newClient.id,
     });
 
+    // Crear pendientes iniciales si hay áreas gestionadas
     if (data.managedAreas && data.responsables) {
         const pendientesToInsert = [];
         for (const area of data.managedAreas) {
@@ -104,7 +105,7 @@ export async function addClient(data: NewClientData) {
 }
 
 
-export async function updateClient(id: number, data: Partial<Omit<typeof clients.$inferInsert, 'id'| 'createdAt'>>) {
+export async function updateClient(id: number, data: Partial<Omit<NewClient, 'id'| 'createdAt'>>) {
   try {
     await db.update(clients).set(data).where(eq(clients.id, id));
     revalidatePath("/equipo/dashboard/clientes");

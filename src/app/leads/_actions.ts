@@ -8,7 +8,7 @@ import { revalidatePath } from "next/cache";
 const responsables: ("Alma" | "Fer" | "Julio")[] = ["Alma", "Fer", "Julio"];
 let lastSellerIndex = 0;
 
-export async function addLead(data: Partial<Omit<NewProspect, 'id' | 'createdAt'>>) {
+export async function addLead(data: Partial<Omit<NewProspect, 'id' | 'createdAt' | 'responsable' | 'status'>>) {
   try {
     const newSeller = responsables[lastSellerIndex % responsables.length];
     lastSellerIndex = (lastSellerIndex + 1) % responsables.length;
@@ -18,10 +18,9 @@ export async function addLead(data: Partial<Omit<NewProspect, 'id' | 'createdAt'
         company: data.company,
         phone: data.phone,
         email: data.email,
-        source: 'Sitio Web',
+        source: data.source || 'Sitio Web',
         status: 'Lead Nuevo',
         responsable: newSeller,
-        // data: data.data, // This field is no longer in prospects_maw, but was in leads. Removing.
     });
     
     revalidatePath("/equipo/dashboard/ventas"); 
@@ -29,6 +28,5 @@ export async function addLead(data: Partial<Omit<NewProspect, 'id' | 'createdAt'
   } catch (error) {
     console.error("Error adding lead to prospects_maw:", error);
     // We don't want to throw an error to the client, just log it.
-    // The main functionality for the user is sending the WhatsApp message.
   }
 }

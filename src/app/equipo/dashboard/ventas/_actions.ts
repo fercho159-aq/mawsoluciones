@@ -2,7 +2,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { prospects_maw, type NewProspect, clients } from "@/lib/db/schema";
+import { prospects_maw, type NewProspect } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { addClient, type NewClientData } from '../clientes/_actions';

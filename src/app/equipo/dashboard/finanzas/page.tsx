@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useMemo, useEffect, startTransition } from 'react';
@@ -15,27 +14,26 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, ArrowRight, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Users, CalendarIcon, FileText, Edit, Camera, Zap, RefreshCw, AlertTriangle, UserPlus, Info } from 'lucide-react';
+import { ArrowUpDown, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { format, startOfMonth, endOfMonth, isWithinInterval, parse, addMonths, getDaysInMonth, parseISO, subMonths, setDate, addDays, subDays } from 'date-fns';
+import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useAuth } from '@/lib/auth-provider';
-import type { CategoriaIngreso, Cuenta } from '@/lib/finanzas-data';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import type { MovimientoDiario, CuentaPorCobrar, NewCuentaPorCobrar, NewMovimientoDiario, Client as ClientType, ClientFinancialProfile } from '@/lib/db/schema';
+import type { MovimientoDiario, CuentaPorCobrar, NewCuentaPorCobrar, NewMovimientoDiario, Client, ClientFinancialProfile } from '@/lib/db/schema';
 import { ClientFormDialog } from '../clientes/page';
-import { getCuentasPorCobrar, getMovimientos, addCpc, updateCpc, addMovimiento, updateCpcAfterPayment } from './_actions';
+import { getCuentasPorCobrar, getMovimientos, addCpc, addMovimiento } from './_actions';
 import { getClients } from '../clientes/_actions';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import Link from 'next/link';
 
-type Client = ClientType & { financialProfile: ClientFinancialProfile | null };
-
+type CategoriaIngreso = "Proyecto" | "Iguala Mensual" | "Renovaciones" | "Otros";
+type CategoriaGasto = "Publicidad" | "Sueldos" | "Comisiones" | "Impuestos" | "Personales" | "Otros" | "Renta";
+type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo" | "Efectivo";
 
 const AddCpcDialog = ({ clients, onSave, onRefreshClients, children }: { clients: Client[], onSave: () => void, onRefreshClients: () => void, children: React.ReactNode }) => {
     const [open, setOpen] = useState(false);
@@ -46,13 +44,9 @@ const AddCpcDialog = ({ clients, onSave, onRefreshClients, children }: { clients
     const [tipo, setTipo] = useState<CategoriaIngreso>('Iguala Mensual');
     const [periodo, setPeriodo] = useState('');
 
-
     useEffect(() => {
-        if (!open) {
-            resetForm();
-        }
+        if (open) resetForm();
     }, [open]);
-
 
     const resetForm = () => {
         setClientId(''); setMonto(''); setTipo('Iguala Mensual'); setPeriodo('');
@@ -63,7 +57,6 @@ const AddCpcDialog = ({ clients, onSave, onRefreshClients, children }: { clients
             toast({ title: "Error", description: "Cliente, monto y periodo son obligatorios.", variant: "destructive" });
             return;
         }
-
         const cliente = clients.find(c => c.id === parseInt(clientId));
         if (!cliente) {
              toast({ title: "Error", description: "Cliente no encontrado.", variant: 'destructive' });
@@ -79,17 +72,12 @@ const AddCpcDialog = ({ clients, onSave, onRefreshClients, children }: { clients
         };
 
         try {
-            // This now saves to localStorage
-            const currentCuentas = JSON.parse(localStorage.getItem('cuentasPorCobrar') || '[]');
-            const newCuenta = { ...data, id: Date.now().toString() };
-            currentCuentas.push(newCuenta);
-            localStorage.setItem('cuentasPorCobrar', JSON.stringify(currentCuentas));
-
-            onSave();
-            setOpen(false);
-            toast({ title: "Éxito (Local)", description: `Cuenta por cobrar para ${cliente.name} guardada localmente.` });
-            resetForm();
-
+            await addCpc(data);
+            startTransition(() => {
+                onSave();
+                setOpen(false);
+                toast({ title: "Éxito", description: `Cuenta por cobrar para ${cliente.name} guardada.` });
+            });
         } catch (error) {
              toast({ title: "Error", description: `No se pudo guardar la cuenta por cobrar.`, variant: 'destructive' });
         }
@@ -130,6 +118,7 @@ const AddCpcDialog = ({ clients, onSave, onRefreshClients, children }: { clients
                             <SelectContent>
                                 <SelectItem value="Iguala Mensual">Iguala Mensual</SelectItem>
                                 <SelectItem value="Proyecto">Proyecto</SelectItem>
+                                <SelectItem value="Web">Web</SelectItem>
                                 <SelectItem value="Renovaciones">Renovaciones</SelectItem>
                                 <SelectItem value="Otros">Otros</SelectItem>
                             </SelectContent>
@@ -262,103 +251,88 @@ const CuentasPorCobrarTab = ({ data, clients, onSave, onRefresh }: { data: Cuent
     );
 };
 
-const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin: boolean, cuentasPorCobrar: CuentaPorCobrar[], onSave: (pago: any) => void }) => {
+const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin: boolean, cuentasPorCobrar: CuentaPorCobrar[], onSave: () => void }) => {
+    const [open, setOpen] = useState(false);
+    const { toast } = useToast();
+    
     const [selectedCpcId, setSelectedCpcId] = useState<string>('');
     const [cuentaDestino, setCuentaDestino] = useState<Cuenta | ''>('');
     const [detalleEfectivo, setDetalleEfectivo] = useState('');
-    const [open, setOpen] = useState(false);
-    const { toast } = useToast();
-    const selectedCpc = useMemo(() => cuentasPorCobrar.find(c => c.id.toString() === selectedCpcId), [selectedCpcId, cuentasPorCobrar]);
-    
     const [isManual, setIsManual] = useState(false);
     const [manualAmount, setManualAmount] = useState('');
     const [manualDesc, setManualDesc] = useState('');
-
-    const handleSave = async () => {
-        if (!selectedCpc || !cuentaDestino) return;
-        if (cuentaDestino === 'Efectivo' && !detalleEfectivo) return;
-        
-        try {
-            const newMovimiento = {
-                id: Date.now().toString(),
-                fecha: new Date(),
-                tipo: 'Ingreso',
-                descripcion: `Pago cliente ${selectedCpc.clienteName}`,
-                monto: selectedCpc.monto,
-                cuenta: cuentaDestino,
-                detalleCuenta: detalleEfectivo || undefined,
-                categoria: selectedCpc.tipo,
-            };
-
-            const currentMovimientos = JSON.parse(localStorage.getItem('movimientosDiarios') || '[]');
-            currentMovimientos.push(newMovimiento);
-            localStorage.setItem('movimientosDiarios', JSON.stringify(currentMovimientos));
-            
-            const currentCuentas = JSON.parse(localStorage.getItem('cuentasPorCobrar') || '[]');
-            const updatedCuentas = currentCuentas.filter((c: CuentaPorCobrar) => c.id !== selectedCpc.id);
-            localStorage.setItem('cuentasPorCobrar', JSON.stringify(updatedCuentas));
-            
-            onSave({});
-            setOpen(false);
-            toast({ title: "Éxito (Local)", description: `Ingreso de ${selectedCpc.clienteName} registrado localmente.` });
-            resetForm();
-
-        } catch (error) {
-            toast({ title: "Error", description: "No se pudo registrar el ingreso.", variant: 'destructive' });
-        }
-    };
     
-    const handleManualIngreso = async () => {
-        if(!manualAmount || !manualDesc || !cuentaDestino) return;
-        try {
-            const newMovimiento = {
-                 id: Date.now().toString(),
-                fecha: new Date(),
-                tipo: 'Ingreso',
-                descripcion: manualDesc,
-                monto: parseFloat(manualAmount),
-                cuenta: cuentaDestino,
-                detalleCuenta: detalleEfectivo || undefined,
-                categoria: 'Proyecto', // Default
-            };
-
-            const currentMovimientos = JSON.parse(localStorage.getItem('movimientosDiarios') || '[]');
-            currentMovimientos.push(newMovimiento);
-            localStorage.setItem('movimientosDiarios', JSON.stringify(currentMovimientos));
-
-            onSave({});
-            setOpen(false);
-            toast({ title: "Éxito (Local)", description: "Ingreso manual registrado localmente."});
-            resetForm();
-
-        } catch(e) {
-            toast({ title: "Error", description: "No se pudo registrar el ingreso manual.", variant: 'destructive' });
-        }
-    }
+    const selectedCpc = useMemo(() => cuentasPorCobrar.find(c => c.id.toString() === selectedCpcId), [selectedCpcId, cuentasPorCobrar]);
 
     const resetForm = () => {
-        setSelectedCpcId(''); setCuentaDestino(''); setDetalleEfectivo(''); setManualAmount(''); setManualDesc(''); setIsManual(false);
+        setSelectedCpcId(''); setCuentaDestino(''); setDetalleEfectivo('');
+        setManualAmount(''); setManualDesc(''); setIsManual(false);
     };
 
+    useEffect(() => {
+        if(open) resetForm();
+    }, [open]);
+    
+    const handleSave = async () => {
+        if (isManual) {
+            if(!manualAmount || !manualDesc || !cuentaDestino) {
+                toast({ title: "Error", description: "Descripción, monto y cuenta son obligatorios.", variant: "destructive" });
+                return;
+            }
+            try {
+                await addMovimiento({
+                    fecha: new Date(),
+                    tipo: 'Ingreso',
+                    descripcion: manualDesc,
+                    monto: parseFloat(manualAmount),
+                    cuenta: cuentaDestino,
+                    detalleCuenta: detalleEfectivo || null,
+                    categoria: 'Otros',
+                });
+                toast({ title: "Éxito", description: "Ingreso manual registrado."});
+            } catch(e) {
+                toast({ title: "Error", description: "No se pudo registrar el ingreso manual.", variant: "destructive" });
+            }
+        } else {
+            if (!selectedCpc || !cuentaDestino) {
+                toast({ title: "Error", description: "Selecciona una cuenta por cobrar y una cuenta de destino.", variant: "destructive" });
+                return;
+            }
+            try {
+                await addMovimiento({
+                    fecha: new Date(),
+                    tipo: 'Ingreso',
+                    descripcion: `Pago cliente ${selectedCpc.clienteName}`,
+                    monto: selectedCpc.monto,
+                    cuenta: cuentaDestino,
+                    detalleCuenta: detalleEfectivo || null,
+                    categoria: selectedCpc.tipo,
+                });
+                // Here you might want to delete the CPC record or mark it as paid.
+                // await deleteCpc(selectedCpc.id);
+                toast({ title: "Éxito", description: `Ingreso de ${selectedCpc.clienteName} registrado.` });
+            } catch (error) {
+                toast({ title: "Error", description: "No se pudo registrar el ingreso.", variant: "destructive" });
+                return;
+            }
+        }
+        
+        startTransition(() => {
+            onSave();
+            setOpen(false);
+        });
+    };
+    
     return (
-        <Dialog open={open} onOpenChange={(o) => {setOpen(o); if(!o) resetForm();}}>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button><PlusCircle className="w-4 h-4 mr-2" />Registrar Ingreso</Button></DialogTrigger>
             <DialogContent>
                 <DialogHeader><DialogTitle>Registrar Ingreso</DialogTitle></DialogHeader>
                 {isAdmin && (
-                  <div className="flex items-center space-x-4 pt-2">
-                    <Label htmlFor="manual-mode">Modo:</Label>
-                    <RadioGroup onValueChange={(v) => setIsManual(v === 'manual')} defaultValue="cpc" className='flex'>
-                        <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="cpc" id="cpc-mode" />
-                            <Label htmlFor="cpc-mode" className='font-normal'>Desde CxC</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="manual" id="manual-mode" />
-                            <Label htmlFor="manual-mode" className='font-normal'>Manual (Admin)</Label>
-                        </div>
-                    </RadioGroup>
-                  </div>
+                  <RadioGroup onValueChange={(v) => setIsManual(v === 'manual')} defaultValue="cpc" className='flex pt-2 space-x-4'>
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="cpc" id="cpc-mode" /><Label htmlFor="cpc-mode" className='font-normal'>Desde CxC</Label></div>
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="manual" id="manual-mode" /><Label htmlFor="manual-mode" className='font-normal'>Manual</Label></div>
+                  </RadioGroup>
                 )}
                 {isManual && isAdmin ? (
                     <div className="grid gap-4 py-4">
@@ -371,7 +345,7 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
                             <SelectTrigger><SelectValue placeholder="Seleccionar cliente pendiente" /></SelectTrigger>
                             <SelectContent>{cuentasPorCobrar.map(cpc => <SelectItem key={cpc.id} value={cpc.id.toString()}>{cpc.clienteName} - {cpc.periodo}</SelectItem>)}</SelectContent>
                         </Select>
-                        {cuentasPorCobrar.length === 0 && <AlertDescription>No hay cuentas por cobrar pendientes.</AlertDescription>}
+                        {cuentasPorCobrar.length === 0 && <p className="text-sm text-muted-foreground">No hay cuentas por cobrar pendientes.</p>}
                         {selectedCpc && <Card className="bg-muted p-4"><p><strong>Monto:</strong> {selectedCpc.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p></Card>}
                     </div>
                 )}
@@ -389,7 +363,7 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
                 </div>
                 <DialogFooter className='mt-4'>
                     <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                    <Button onClick={isManual ? handleManualIngreso : handleSave} disabled={isManual ? (!manualAmount || !manualDesc || !cuentaDestino) : (!selectedCpc || !cuentaDestino)}>Registrar</Button>
+                    <Button onClick={handleSave} disabled={isManual ? (!manualAmount || !manualDesc || !cuentaDestino) : (!selectedCpc || !cuentaDestino)}>Registrar</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -397,42 +371,50 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
 }
 
 const RegistrarGastoDialog = ({ onSave }: { onSave: () => void }) => {
+    const [open, setOpen] = useState(false);
+    const { toast } = useToast();
+    
     const [descripcion, setDescripcion] = useState('');
     const [monto, setMonto] = useState('');
     const [cuenta, setCuenta] = useState<Cuenta | ''>('');
     const [detalleEfectivo, setDetalleEfectivo] = useState('');
     const [categoriaGasto, setCategoriaGasto] = useState<CategoriaGasto | ''>('');
     const [nombreOtro, setNombreOtro] = useState('');
-    const [open, setOpen] = useState(false);
-    const { toast } = useToast();
+
+    const resetForm = () => {
+        setDescripcion(''); setMonto(''); setCuenta(''); setDetalleEfectivo('');
+        setCategoriaGasto(''); setNombreOtro('');
+    };
+
+    useEffect(() => {
+        if(open) resetForm();
+    }, [open]);
 
     const handleSave = async () => {
-         if (!descripcion || !monto || !cuenta || !categoriaGasto) return;
+         if (!descripcion || !monto || !cuenta || !categoriaGasto) {
+             toast({ title: "Error", description: "Todos los campos son obligatorios.", variant: "destructive" });
+             return;
+         }
          
         try {
-             const newGasto = {
-                id: Date.now().toString(),
+             await addMovimiento({
                 fecha: new Date(),
                 tipo: 'Gasto',
                 descripcion, 
                 monto: parseFloat(monto), 
                 cuenta: cuenta, 
                 categoria: categoriaGasto,
-                detalleCuenta: cuenta === 'Efectivo' ? detalleEfectivo : undefined,
-                nombreOtro: ['Personales', 'Otros'].includes(categoriaGasto) ? nombreOtro : undefined,
-            };
+                detalleCuenta: cuenta === 'Efectivo' ? detalleEfectivo : null,
+                nombreOtro: ['Personales', 'Otros'].includes(categoriaGasto) ? nombreOtro : null,
+            });
 
-            const currentMovimientos = JSON.parse(localStorage.getItem('movimientosDiarios') || '[]');
-            currentMovimientos.push(newGasto);
-            localStorage.setItem('movimientosDiarios', JSON.stringify(currentMovimientos));
-
-            onSave();
-            setOpen(false);
-            toast({ title: "Éxito (Local)", description: `Gasto registrado localmente.` });
-            setDescripcion(''); setMonto(''); setCuenta(''); setDetalleEfectivo(''); setCategoriaGasto(''); setNombreOtro('');
-
+            startTransition(() => {
+                onSave();
+                setOpen(false);
+                toast({ title: "Éxito", description: `Gasto registrado.` });
+            });
         } catch(error) {
-            toast({ title: "Error", description: "No se pudo registrar el gasto.", variant: 'destructive' });
+            toast({ title: "Error", description: "No se pudo registrar el gasto.", variant: "destructive" });
         }
     };
 
@@ -470,7 +452,7 @@ const RegistrarGastoDialog = ({ onSave }: { onSave: () => void }) => {
 }
 
 const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { isAdmin: boolean, movimientos: MovimientoDiario[], onSave: () => void, cuentasPorCobrar: CuentaPorCobrar[] }) => {
-    const [selectedMonth, setSelectedMonth] = useState(format(startOfMonth(new Date(2024, 10, 1)), 'yyyy-MM-dd'));
+    const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM-dd'));
 
     const summary = useMemo(() => {
         const start = startOfMonth(parseISO(selectedMonth));
@@ -544,22 +526,23 @@ export default function FinanzasPage() {
     const [isLoading, setIsLoading] = useState(true);
 
     const isAdmin = user?.role === 'admin' || user?.role === 'contabilidad';
+    const { toast } = useToast();
 
     const fetchData = async () => {
         setIsLoading(true);
-        // LOCAL STORAGE FETCH
-        const localCpc = JSON.parse(localStorage.getItem('cuentasPorCobrar') || '[]');
-        const localMovimientos = JSON.parse(localStorage.getItem('movimientosDiarios') || '[]');
-        setCuentasPorCobrar(localCpc);
-        setMovimientos(localMovimientos);
-
         try {
-            const clientsData = await getClients();
+            const [clientsData, cpcData, movimientosData] = await Promise.all([
+                getClients(),
+                getCuentasPorCobrar(),
+                getMovimientos()
+            ]);
             setClients(clientsData as Client[]);
+            setCuentasPorCobrar(cpcData as CuentaPorCobrar[]);
+            setMovimientos(movimientosData as MovimientoDiario[]);
         } catch (error) {
              toast({
-                title: "Error al cargar clientes",
-                description: "No se pudieron obtener los datos de clientes.",
+                title: "Error al cargar datos",
+                description: "No se pudieron obtener los datos financieros. Intenta recargar la página.",
                 variant: "destructive"
             });
         } finally {
@@ -570,8 +553,6 @@ export default function FinanzasPage() {
     useEffect(() => {
         fetchData();
     }, []);
-    
-    const toast = useToast();
 
     if (isLoading) {
         return <div className="flex items-center justify-center min-h-[50vh]"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div></div>
@@ -600,4 +581,3 @@ export default function FinanzasPage() {
         </div>
     );
 }
-

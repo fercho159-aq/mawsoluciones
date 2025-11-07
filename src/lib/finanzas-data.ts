@@ -1,5 +1,4 @@
 
-
 export type Periodo = string;
 export type MovimientoTipo = "Ingreso" | "Gasto";
 export type CategoriaIngreso = "Proyecto" | "Iguala Mensual" | "Renovaciones" | "Otros";
@@ -30,8 +29,6 @@ export interface MovimientoDiario {
   nombreOtro?: string;
 }
 
+// These are now fetched from the DB, so we keep the arrays empty.
 export const initialCuentasPorCobrar: CuentasPorCobrar[] = [];
 export const initialMovimientosDiarios: MovimientoDiario[] = [];
-
-
-    

@@ -1,9 +1,8 @@
 
-
 "use server";
 
 import { db } from "@/lib/db";
-import { cuentasPorCobrar, movimientosDiarios, type NewCuentaPorCobrar, type CuentaPorCobrar, NewMovimientoDiario, clients } from "@/lib/db/schema";
+import { cuentasPorCobrar, movimientosDiarios, type NewCuentaPorCobrar, type CuentaPorCobrar, type NewMovimientoDiario } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -29,7 +28,7 @@ export async function getMovimientos() {
   }
 }
 
-export async function addCpc(data: NewCuentaPorCobrar) {
+export async function addCpc(data: Omit<NewCuentaPorCobrar, 'id'>) {
     try {
         await db.insert(cuentasPorCobrar).values(data);
         revalidatePath("/equipo/dashboard/finanzas");
@@ -39,18 +38,6 @@ export async function addCpc(data: NewCuentaPorCobrar) {
     }
 }
 
-
-export async function updateCpc(id: number, data: Partial<Omit<NewCuentaPorCobrar, 'id'>>) {
-    try {
-        await db.update(cuentasPorCobrar).set(data).where(eq(cuentasPorCobrar.id, id));
-        revalidatePath("/equipo/dashboard/finanzas");
-    } catch (error) {
-        console.error("Error updating cpc:", error);
-        throw new Error("Could not update cpc");
-    }
-}
-
-
 export async function addMovimiento(data: Omit<NewMovimientoDiario, 'id'>) {
   try {
     await db.insert(movimientosDiarios).values(data);
@@ -59,25 +46,4 @@ export async function addMovimiento(data: Omit<NewMovimientoDiario, 'id'>) {
     console.error("Error adding movimiento:", error);
     throw new Error("Could not add movimiento");
   }
-}
-
-export async function updateCpcAfterPayment(cpc: CuentaPorCobrar, nextPeriod: string) {
-    try {
-        await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, cpc.id));
-
-        if (cpc.tipo === 'Iguala Mensual') {
-            await db.insert(cuentasPorCobrar).values({
-                clienteId: cpc.clienteId,
-                clienteName: cpc.clienteName,
-                periodo: nextPeriod,
-                monto: cpc.monto,
-                tipo: cpc.tipo,
-            });
-        }
-
-        revalidatePath("/equipo/dashboard/finanzas");
-    } catch (error) {
-        console.error("Error updating cpc after payment:", error);
-        throw new Error("Could not update cpc");
-    }
 }
