@@ -125,29 +125,43 @@ const Services = () => {
               Ofrecemos una gama completa de soluciones de marketing digital diseñadas para llevar tu negocio al siguiente nivel.
             </p>
           </AnimatedDiv>
-          <AnimatedDiv
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-4xl mx-auto"
-            variants={containerVariants}
-          >
-            {services.map((service, index) => (
-              <AnimatedDiv key={index} variants={itemVariants}>
-                <Link href={service.href} className="h-full block group">
-                  <Card className="h-full flex flex-col bg-background/50 hover:bg-background border-border/50 hover:border-border transition-all duration-300 ease-in-out transform hover:-translate-y-2 shadow-sm hover:shadow-2xl">
-                      <CardHeader className="p-6 pb-4">
-                        {service.icon}
-                      </CardHeader>
-                      <CardContent className="flex-grow flex flex-col p-6 pt-0">
-                        <CardTitle className="font-headline text-2xl mb-2">{service.title}</CardTitle>
-                        <CardDescription className="flex-grow text-base text-foreground/70">{service.description}</CardDescription>
-                        <div className="flex items-center text-primary mt-4 font-semibold">
-                            Saber más <ArrowRight className="w-4 h-4 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
-                        </div>
-                      </CardContent>
-                  </Card>
-                </Link>
-              </AnimatedDiv>
-            ))}
-          </AnimatedDiv>
+          <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+            <AnimatedDiv
+              className="grid grid-cols-1 md:grid-cols-2 gap-8"
+              variants={containerVariants}
+            >
+              {services.map((service, index) => (
+                <AnimatedDiv key={index} variants={itemVariants}>
+                  <Link href={service.href} className="h-full block group">
+                    <Card className="h-full flex flex-col bg-background/50 hover:bg-background border-border/50 hover:border-border transition-all duration-300 ease-in-out transform hover:-translate-y-2 shadow-sm hover:shadow-2xl">
+                        <CardHeader className="p-6 pb-4">
+                          {service.icon}
+                        </CardHeader>
+                        <CardContent className="flex-grow flex flex-col p-6 pt-0">
+                          <CardTitle className="font-headline text-2xl mb-2">{service.title}</CardTitle>
+                          <CardDescription className="flex-grow text-base text-foreground/70">{service.description}</CardDescription>
+                          <div className="flex items-center text-primary mt-4 font-semibold">
+                              Saber más <ArrowRight className="w-4 h-4 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
+                          </div>
+                        </CardContent>
+                    </Card>
+                  </Link>
+                </AnimatedDiv>
+              ))}
+            </AnimatedDiv>
+            <AnimatedDiv>
+              <div className="relative aspect-[9/16] max-w-sm mx-auto w-full rounded-lg overflow-hidden shadow-2xl">
+                <iframe
+                    className="absolute top-0 left-0 w-full h-full"
+                    src="https://www.youtube.com/embed/fnuCiuhV0WA"
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                ></iframe>
+              </div>
+            </AnimatedDiv>
+          </div>
         </div>
       </section>
 
