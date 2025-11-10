@@ -21,13 +21,6 @@ const baseNavItems = [
     { href: "/equipo/dashboard/documentacion", label: "Documentación", icon: <FileArchive className="w-4 h-4" />, section: 'documentacion' },
 ];
 
-const graciasNavItems = [
-    { href: "/equipo/dashboard/gracias-sitio-web", label: "Gracias Sitio Web", icon: <FileArchive className="w-4 h-4" />, section: 'clientes' },
-    { href: "/equipo/dashboard/gracias-contenido", label: "Gracias Contenido", icon: <FileArchive className="w-4 h-4" />, section: 'clientes' },
-    { href: "/equipo/dashboard/renovacion", label: "Renovación", icon: <FileArchive className="w-4 h-4" />, section: 'clientes' },
-    { href: "/equipo/dashboard/correo", label: "Correo", icon: <FileArchive className="w-4 h-4" />, section: 'clientes' },
-];
-
 export default function DashboardNav() {
     const pathname = usePathname();
     const { user } = useAuth();
@@ -64,25 +57,6 @@ export default function DashboardNav() {
         <nav className="flex flex-col gap-2 flex-grow">
             <div className="flex-grow">
                 {navItems.map(item => {
-                    if (!userHasAccess(item.section)) {
-                        return null;
-                    }
-                    return (
-                        <Button 
-                            key={item.href}
-                            variant={pathname === item.href ? "secondary" : "ghost"}
-                            asChild
-                            className="justify-start w-full mb-1"
-                        >
-                            <Link href={item.href} className="flex items-center gap-2">
-                                {item.icon}
-                                {item.label}
-                            </Link>
-                        </Button>
-                    );
-                })}
-                 <div className="my-4 border-t border-border/20"></div>
-                 {graciasNavItems.map(item => {
                     if (!userHasAccess(item.section)) {
                         return null;
                     }
