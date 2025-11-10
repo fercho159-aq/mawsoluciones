@@ -153,49 +153,105 @@ const AddPendienteDialog = ({ clients, onAdd, children }: { clients: Client[], o
 
 export type PendienteWithRelations = PendienteMaw & { recordingEvent?: RecordingEvent | null };
 
-const EditablePendiente = ({ pendiente, onUpdate }: { pendiente: PendienteWithRelations, onUpdate: (id: number, text: string) => void }) => {
-    const [isEditing, setIsEditing] = useState(false);
+const PendienteDialog = ({ pendiente, onSave, onRefresh, children, canReassign }: { pendiente: PendienteWithRelations, onSave: (data: Partial<PendienteMaw>) => void, onRefresh: () => void, children: React.ReactNode, canReassign: boolean }) => {
+    const [open, setOpen] = useState(false);
     const [text, setText] = useState(pendiente.pendientePrincipal);
+    const [encargado, setEncargado] = useState(pendiente.encargado);
+    const [ejecutor, setEjecutor] = useState(pendiente.ejecutor);
+    const [status, setStatus] = useState(pendiente.status);
 
-    const handleBlur = () => {
-        setIsEditing(false);
-        if(text !== pendiente.pendientePrincipal) {
-            onUpdate(pendiente.id, text);
-        }
-    };
-    
     useEffect(() => {
-        setText(pendiente.pendientePrincipal);
-    }, [pendiente.pendientePrincipal]);
+        if(open) {
+            setText(pendiente.pendientePrincipal);
+            setEncargado(pendiente.encargado);
+            setEjecutor(pendiente.ejecutor);
+            setStatus(pendiente.status);
+        }
+    }, [open, pendiente]);
 
-    if (isEditing) {
-        return (
-            <Textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                onBlur={handleBlur}
-                onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        handleBlur();
-                        e.preventDefault();
-                    }
-                    if (e.key === 'Escape') {
-                        setIsEditing(false);
-                        setText(pendiente.pendientePrincipal);
-                    }
-                }}
-                autoFocus
-                className="w-full text-sm"
-            />
-        );
+    const handleSave = () => {
+        const dataToSave: Partial<PendienteMaw> = {};
+        if (text !== pendiente.pendientePrincipal) dataToSave.pendientePrincipal = text;
+        if (encargado !== pendiente.encargado) dataToSave.encargado = encargado;
+        if (ejecutor !== pendiente.ejecutor) dataToSave.ejecutor = ejecutor;
+        if (status !== pendiente.status) dataToSave.status = status;
+        
+        if (Object.keys(dataToSave).length > 0) {
+            onSave(dataToSave);
+        }
+        setOpen(false);
     }
-    return (
-        <p className="text-sm cursor-pointer" onClick={() => setIsEditing(true)}>
-            {pendiente.pendientePrincipal}
-        </p>
-    );
-};
 
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>{children}</DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                    <DialogTitle>Editar Pendiente</DialogTitle>
+                    <DialogDescription>Cliente: {pendiente.clienteName}</DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                     <div className="space-y-2">
+                        <Label>Pendiente</Label>
+                        <Textarea value={text} onChange={(e) => setText(e.target.value)} className="min-h-[100px]" />
+                    </div>
+                     <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label>Encargado</Label>
+                            <Select value={encargado} onValueChange={setEncargado} disabled={!canReassign}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>{teamMembers.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Ejecutor</Label>
+                            <Select value={ejecutor} onValueChange={setEjecutor} disabled={!canReassign}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>{teamMembers.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}</SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Status</Label>
+                        <Select value={status} onValueChange={setStatus}>
+                           <SelectTrigger><SelectValue asChild><Badge className={cn("text-white w-full justify-center", statusColors[status])}>{status}</Badge></SelectValue></SelectTrigger>
+                            <SelectContent>
+                                {Object.keys(statusColors).map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Próxima Grabación</Label>
+                        <ScheduleRecordingDialog 
+                            event={pendiente.recordingEvent}
+                            pendienteId={pendiente.id}
+                            clientName={pendiente.clienteName}
+                            project={pendiente.pendientePrincipal}
+                            assignedToName={pendiente.ejecutor}
+                            onSave={onRefresh}
+                        >
+                            {pendiente.recordingEvent ? (
+                                <Button variant="outline" className="w-full justify-start gap-2">
+                                    <CalendarIcon className='w-4 h-4' />
+                                    {format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM yyyy, HH:mm', { locale: es })}
+                                </Button>
+                            ) : (
+                                <Button variant="secondary" className="w-full justify-start gap-2">
+                                    <CalendarIcon className='w-4 h-4' />
+                                    Agendar Grabación
+                                </Button>
+                            )}
+                        </ScheduleRecordingDialog>
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                    <Button onClick={handleSave}>Guardar Cambios</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
 
 const AddPendienteInline = ({ client, categoria, onAdd, onCancel }: { client: Client, categoria: string, onAdd: (pendienteText: string) => void, onCancel: () => void }) => {
     const [text, setText] = useState('');
@@ -255,7 +311,7 @@ const ClientProgress = ({ pendientes }: { pendientes: PendienteWithRelations[] }
 
 const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdatePendienteText, clients, categoria }: { 
     data: PendienteWithRelations[]; 
-    onUpdateTask: (task: PendienteWithRelations) => void; 
+    onUpdateTask: (task: PendienteWithRelations, data: Partial<PendienteMaw>) => void; 
     currentUser: any; 
     onRefresh: () => void;
     onUpdatePendienteText: (id: number, text: string) => void;
@@ -269,10 +325,8 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
 
     const handleTogglePendiente = async (pendiente: PendienteWithRelations) => {
         try {
-            const updatedPendiente = { ...pendiente, completed: !pendiente.completed };
-            await updatePendiente(pendiente.id, { completed: updatedPendiente.completed });
-            onUpdateTask(updatedPendiente); 
-            onRefresh(); // Refresh data to update progress
+            await updatePendiente(pendiente.id, { completed: !pendiente.completed });
+            onRefresh();
         } catch (error) {
             toast({ title: "Error", description: "No se pudo actualizar el pendiente.", variant: "destructive" });
         }
@@ -295,16 +349,6 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
             setAddingToClientId(null);
         } catch (error) {
             toast({ title: "Error", description: "No se pudo crear el pendiente.", variant: "destructive" });
-        }
-    }
-
-    const handleResponsableChange = async (pendienteId: number, field: 'encargado' | 'ejecutor', value: string) => {
-        try {
-            await updatePendiente(pendienteId, { [field]: value });
-            toast({ title: 'Actualizado', description: `Se ha cambiado el ${field}.` });
-            onRefresh();
-        } catch (error) {
-            toast({ title: "Error", description: `No se pudo actualizar el ${field}.`, variant: "destructive" });
         }
     }
 
@@ -345,95 +389,50 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                         return (
                         <React.Fragment key={clienteName}>
                             {pendientes.map((pendiente, index) => (
-                                <TableRow key={pendiente.id} className="h-12 p-0">
-                                    {index === 0 && (
-                                        <TableCell 
-                                            rowSpan={pendientes.length} 
-                                            className="align-top text-center font-medium p-2 border-r"
-                                        >
-                                            <div className='flex flex-col h-full justify-between'>
-                                              <span>{clienteName}</span>
-                                              <ClientProgress pendientes={pendientes} />
-                                            </div>
+                                <PendienteDialog 
+                                    key={pendiente.id}
+                                    pendiente={pendiente} 
+                                    onSave={(data) => onUpdateTask(pendiente, data)}
+                                    onRefresh={onRefresh}
+                                    canReassign={canReassign}
+                                >
+                                    <TableRow className="h-12 p-0 cursor-pointer">
+                                        {index === 0 && (
+                                            <TableCell 
+                                                rowSpan={pendientes.length} 
+                                                className="align-top text-center font-medium p-2 border-r"
+                                            >
+                                                <div className='flex flex-col h-full justify-between'>
+                                                <span>{clienteName}</span>
+                                                <ClientProgress pendientes={pendientes} />
+                                                </div>
+                                            </TableCell>
+                                        )}
+                                        <TableCell className="p-2 align-middle" onClick={(e) => e.stopPropagation()}>
+                                            <Checkbox 
+                                                id={`pendiente-${pendiente.id}`} 
+                                                checked={pendiente.completed}
+                                                onCheckedChange={() => handleTogglePendiente(pendiente)}
+                                            />
                                         </TableCell>
-                                    )}
-                                    <TableCell className="p-2 align-middle">
-                                         <Checkbox 
-                                            id={`pendiente-${pendiente.id}`} 
-                                            checked={pendiente.completed}
-                                            onCheckedChange={() => handleTogglePendiente(pendiente)}
-                                        />
-                                    </TableCell>
-                                    <TableCell className={cn("p-2 align-middle", pendiente.completed && "line-through text-muted-foreground")}>
-                                        <EditablePendiente pendiente={pendiente} onUpdate={onUpdatePendienteText}/>
-                                    </TableCell>
-                                    <TableCell className="p-2 align-middle">
-                                        <Select
-                                            value={pendiente.encargado}
-                                            onValueChange={(newEncargado) => handleResponsableChange(pendiente.id, 'encargado', newEncargado)}
-                                            disabled={!canReassign}
-                                        >
-                                            <SelectTrigger className="w-full text-xs h-8">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {teamMembers.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
-                                    </TableCell>
-                                    <TableCell className="p-2 align-middle">
-                                        <Select
-                                            value={pendiente.ejecutor}
-                                            onValueChange={(newEjecutor) => handleResponsableChange(pendiente.id, 'ejecutor', newEjecutor)}
-                                            disabled={!canReassign}
-                                        >
-                                            <SelectTrigger className="w-full text-xs h-8">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {teamMembers.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
-                                    </TableCell>
-                                    <TableCell className="p-2 align-middle">
-                                        <Select value={pendiente.status} onValueChange={(newStatus) => updatePendiente(pendiente.id, {status: newStatus}).then(onRefresh)}>
-                                            <SelectTrigger className="w-full h-8 px-0 border-none bg-transparent">
-                                                <SelectValue asChild>
-                                                    <Badge className={cn("text-white w-full justify-center", statusColors[pendiente.status])}>{pendiente.status}</Badge>
-                                                </SelectValue>
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {Object.entries(statusColors).map(([status, color]) => (
-                                                    <SelectItem key={status} value={status}>
-                                                        {status}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </TableCell>
-                                    <TableCell className="p-2 text-center align-middle">
-                                        <ScheduleRecordingDialog 
-                                            event={pendiente.recordingEvent}
-                                            pendienteId={pendiente.id}
-                                            clientName={pendiente.clienteName}
-                                            project={pendiente.pendientePrincipal}
-                                            assignedToName={pendiente.ejecutor}
-                                            onSave={onRefresh}
-                                        >
+                                        <TableCell className={cn("p-2 align-middle", pendiente.completed && "line-through text-muted-foreground")}>
+                                            <p className="text-sm">{pendiente.pendientePrincipal}</p>
+                                        </TableCell>
+                                        <TableCell className="p-2 align-middle text-xs">{pendiente.encargado}</TableCell>
+                                        <TableCell className="p-2 align-middle text-xs">{pendiente.ejecutor}</TableCell>
+                                        <TableCell className="p-2 align-middle">
+                                            <Badge className={cn("text-white w-full justify-center", statusColors[pendiente.status])}>{pendiente.status}</Badge>
+                                        </TableCell>
+                                        <TableCell className="p-2 text-center align-middle">
                                             {pendiente.recordingEvent ? (
-                                                <Button variant="outline" size="sm" className="flex flex-col h-auto text-xs">
-                                                    <span className='font-bold'>{format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}</span>
+                                                <div className="flex flex-col h-auto text-xs font-semibold">
+                                                    <span>{format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}</span>
                                                     <span className='text-xs text-muted-foreground'>{format(new Date(pendiente.recordingEvent.fullStart), 'HH:mm')}</span>
-                                                </Button>
-                                            ) : (
-                                                <Button variant="secondary" size="sm" className="h-8">
-                                                    <CalendarIcon className='w-4 h-4 mr-2' />
-                                                    Agendar
-                                                </Button>
-                                            )}
-                                        </ScheduleRecordingDialog>
-                                    </TableCell>
-                                </TableRow>
+                                                </div>
+                                            ) : <span className="text-xs text-muted-foreground">No agendado</span>}
+                                        </TableCell>
+                                    </TableRow>
+                                </PendienteDialog>
                             ))}
                              {currentUser?.permissions?.pendientes?.reasignarResponsables && (
                                 <TableRow>
@@ -465,12 +464,13 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
 
 const BoardView = ({ data, onUpdateTask, currentUser, onRefresh, onUpdatePendienteText }: {
     data: PendienteWithRelations[];
-    onUpdateTask: (task: PendienteWithRelations) => void;
+    onUpdateTask: (task: PendienteWithRelations, data: Partial<PendienteMaw>) => void;
     currentUser: any;
     onRefresh: () => void;
     onUpdatePendienteText: (id: number, text: string) => void;
 }) => {
     const statuses = Object.keys(statusColors);
+     const canReassign = currentUser?.role === 'admin' || currentUser?.permissions?.pendientes?.reasignarResponsables;
     const groupedByStatus = useMemo(() => {
         const initialGroups: Record<string, PendienteWithRelations[]> = {};
         statuses.forEach(status => initialGroups[status] = []);
@@ -495,19 +495,29 @@ const BoardView = ({ data, onUpdateTask, currentUser, onRefresh, onUpdatePendien
                     </div>
                     <div className="p-2 space-y-3 flex-grow overflow-y-auto">
                         {groupedByStatus[status].map(pendiente => (
-                            <Card key={pendiente.id} className="p-3 bg-background/50">
-                                <p className="font-semibold text-sm mb-1">{pendiente.clienteName}</p>
-                                <EditablePendiente pendiente={pendiente} onUpdate={onUpdatePendienteText} />
-                                <div className="flex justify-between items-center mt-3 text-xs text-muted-foreground">
-                                    <span>{pendiente.ejecutor}</span>
-                                    {pendiente.recordingEvent && (
-                                        <span className="flex items-center gap-1">
-                                            <CalendarIcon className="w-3 h-3"/>
-                                            {format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}
-                                        </span>
-                                    )}
-                                </div>
-                            </Card>
+                            <PendienteDialog
+                                key={pendiente.id}
+                                pendiente={pendiente}
+                                onSave={(data) => onUpdateTask(pendiente, data)}
+                                onRefresh={onRefresh}
+                                canReassign={canReassign}
+                            >
+                                <Card className="p-3 bg-background/50 cursor-pointer hover:bg-accent">
+                                    <p className="font-semibold text-sm mb-1">{pendiente.clienteName}</p>
+                                    <p className={cn("text-sm", pendiente.completed && "line-through text-muted-foreground")}>
+                                        {pendiente.pendientePrincipal}
+                                    </p>
+                                    <div className="flex justify-between items-center mt-3 text-xs text-muted-foreground">
+                                        <span>{pendiente.ejecutor}</span>
+                                        {pendiente.recordingEvent && (
+                                            <span className="flex items-center gap-1">
+                                                <CalendarIcon className="w-3 h-3"/>
+                                                {format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}
+                                            </span>
+                                        )}
+                                    </div>
+                                </Card>
+                            </PendienteDialog>
                         ))}
                          {groupedByStatus[status].length === 0 && (
                             <div className="text-center py-8 text-xs text-muted-foreground">
@@ -560,12 +570,14 @@ export default function PendientesPage() {
         fetchData();
     }, []);
     
-    const handleUpdateTask = (updatedTask: PendienteWithRelations) => {
-        startTransition(() => {
-            setPendientes(prevPendientes => 
-                prevPendientes.map(p => p.id === updatedTask.id ? updatedTask : p)
-            );
-        });
+    const handleUpdateTask = async (task: PendienteWithRelations, data: Partial<PendienteMaw>) => {
+       try {
+            await updatePendiente(task.id, data);
+            toast({ title: 'Éxito', description: 'El pendiente ha sido actualizado.' });
+            fetchData();
+        } catch (error) {
+            toast({ title: "Error", description: "No se pudo actualizar el pendiente.", variant: "destructive" });
+        }
     };
     
     const handleUpdatePendienteText = async (id: number, text: string) => {
