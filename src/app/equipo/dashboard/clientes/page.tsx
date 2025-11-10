@@ -241,6 +241,28 @@ export const ClientFormDialog = ({ client, children, isEditing, onSave }: { clie
 
 export type Client = ClientType & { financialProfile: ClientFinancialProfile | null };
 
+const mockClients: Client[] = [
+    { id: 1, name: 'SIFSA', representativeName: 'Emmanuel', whatsapp: '', email: 'sifsafumigacionescdmx@...', managedAreas: ['WEB'], instagramFollowers: null, facebookFollowers: null, tiktokFollowers: null, createdAt: new Date(), instagramUrl: null, facebookUrl: null, tiktokUrl: null, financialProfile: null },
+    { id: 2, name: 'DEASA', representativeName: 'Rebeca', whatsapp: '5527883970', email: 'administracion@gpoauda...', managedAreas: ['CONTENIDO', 'ADS'], instagramFollowers: null, facebookFollowers: null, tiktokFollowers: null, createdAt: new Date(), instagramUrl: null, facebookUrl: null, tiktokUrl: null, financialProfile: null },
+    { id: 3, name: 'SINUBE', representativeName: 'Jorge', whatsapp: '', email: 'jcasanas@sinube.mx', managedAreas: ['ADS'], instagramFollowers: null, facebookFollowers: null, tiktokFollowers: null, createdAt: new Date(), instagramUrl: null, facebookUrl: null, tiktokUrl: null, financialProfile: null },
+    { id: 4, name: 'CAF', representativeName: '', whatsapp: '', email: 'go@consultorescaf.mx', managedAreas: ['WEB'], instagramFollowers: null, facebookFollowers: null, tiktokFollowers: null, createdAt: new Date(), instagramUrl: null, facebookUrl: null, tiktokUrl: null, financialProfile: null },
+    { id: 5, name: 'BENJA CONTADOR', representativeName: 'Benjamin', whatsapp: '5548749477', email: null, managedAreas: ['CONTENIDO', 'ADS'], instagramFollowers: null, facebookFollowers: null, tiktokFollowers: null, createdAt: new Date(), instagramUrl: null, facebookUrl: null, tiktokUrl: null, financialProfile: null },
+    { id: 6, name: 'BATERIAS', representativeName: 'Jesus', whatsapp: '5549868279', email: null, managedAreas: ['ADS'], instagramFollowers: null, facebookFollowers: null, tiktokFollowers: null, createdAt: new Date(), instagramUrl: null, facebookUrl: null, tiktokUrl: null, financialProfile: null },
+    { id: 7, name: 'DFAC', representativeName: 'Luis', whatsapp: '5564220884', email: null, managedAreas: ['CONTENIDO', 'ADS', 'WEB'], instagramFollowers: null, facebookFollowers: null, tiktokFollowers: null, createdAt: new Date(), instagramUrl: null, facebookUrl: null, tiktokUrl: null, financialProfile: null },
+    { id: 8, name: 'FRANK OVNI', representativeName: 'Frank Schwarz', whatsapp: '5214425928924', email: null, managedAreas: ['CONTENIDO', 'WEB'], instagramFollowers: null, facebookFollowers: null, tiktokFollowers: null, createdAt: new Date(), instagramUrl: null, facebookUrl: null, tiktokUrl: null, financialProfile: null },
+    { id: 9, name: 'MARISQUERIA', representativeName: 'Omar', whatsapp: '5215536656040', email: null, managedAreas: ['CONTENIDO', 'ADS'], instagramFollowers: null, facebookFollowers: null, tiktokFollowers: null, createdAt: new Date(), instagramUrl: null, facebookUrl: null, tiktokUrl: null, financialProfile: null },
+    { id: 10, name: 'CREDITOS - DIMEX', representativeName: 'Luis', whatsapp: '5513931110', email: null, managedAreas: ['CONTENIDO', 'ADS'], instagramFollowers: null, facebookFollowers: null, tiktokFollowers: null, createdAt: new Date(), instagramUrl: null, facebookUrl: null, tiktokUrl: null, financialProfile: null },
+    { id: 11, name: 'DELICIAS', representativeName: 'Olivia', whatsapp: '5519915154', email: null, managedAreas: ['CONTENIDO', 'ADS'], instagramFollowers: null, facebookFollowers: null, tiktokFollowers: null, createdAt: new Date(), instagramUrl: null, facebookUrl: null, tiktokUrl: null, financialProfile: null },
+    { id: 12, name: 'MEDICAL TOWER', representativeName: 'Erik', whatsapp: '5548508611', email: null, managedAreas: ['CONTENIDO', 'ADS'], instagramFollowers: null, facebookFollowers: null, tiktokFollowers: null, createdAt: new Date(), instagramUrl: null, facebookUrl: null, tiktokUrl: null, financialProfile: null },
+    { id: 13, name: 'HAIDE', representativeName: 'Haide Unique', whatsapp: '5519219830', email: null, managedAreas: ['CONTENIDO'], instagramFollowers: null, facebookFollowers: null, tiktokFollowers: null, createdAt: new Date(), instagramUrl: null, facebookUrl: null, tiktokUrl: null, financialProfile: null },
+    { id: 14, name: 'TOLTEC', representativeName: '', whatsapp: '', email: null, managedAreas: ['WEB'], instagramFollowers: null, facebookFollowers: null, tiktokFollowers: null, createdAt: new Date(), instagramUrl: null, facebookUrl: null, tiktokUrl: null, financialProfile: null },
+    { id: 15, name: 'BUFFALO', representativeName: 'Isaac Buffalo', whatsapp: '5633898168', email: null, managedAreas: ['CONTENIDO', 'ADS'], instagramFollowers: null, facebookFollowers: null, tiktokFollowers: null, createdAt: new Date(), instagramUrl: null, facebookUrl: null, tiktokUrl: null, financialProfile: null },
+    { id: 16, name: 'ELECTRICA', representativeName: 'Ana Paula', whatsapp: '5513338087', email: null, managedAreas: ['CONTENIDO', 'ADS'], instagramFollowers: null, facebookFollowers: null, tiktokFollowers: null, createdAt: new Date(), instagramUrl: null, facebookUrl: null, tiktokUrl: null, financialProfile: null },
+    { id: 17, name: 'MAQTECH', representativeName: 'Arturo', whatsapp: '5578116222', email: 'anapaula.edtorial@gmai...', managedAreas: ['CONTENIDO', 'ADS'], instagramFollowers: null, facebookFollowers: null, tiktokFollowers: null, createdAt: new Date(), instagramUrl: null, facebookUrl: null, tiktokUrl: null, financialProfile: null },
+    { id: 18, name: 'DC SOLUTIONS', representativeName: 'Viviana Huerta', whatsapp: '5580200901', email: 'viviana.huerta@dcsolut...', managedAreas: ['CONTENIDO', 'ADS', 'WEB'], instagramFollowers: null, facebookFollowers: null, tiktokFollowers: null, createdAt: new Date(), instagramUrl: null, facebookUrl: null, tiktokUrl: null, financialProfile: null },
+    { id: 19, name: 'CALZADO ALLENDE VERO', representativeName: 'Veronica Tellez', whatsapp: '5218262619570', email: null, managedAreas: ['CONTENIDO', 'ADS'], instagramFollowers: null, facebookFollowers: null, tiktokFollowers: null, createdAt: new Date(), instagramUrl: null, facebookUrl: null, tiktokUrl: null, financialProfile: null },
+];
+
 const TikTokIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={cn("w-4 h-4", className)}>
         <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.04-5.36-.01-4.03-.01-8.05.02-12.07z" />
@@ -250,14 +272,17 @@ const TikTokIcon = ({ className }: { className?: string }) => (
 export default function ClientesPage() {
     const { user, loading } = useAuth();
     
-    const [clients, setClients] = useState<Client[]>([]);
+    const [clients, setClients] = useState<Client[]>(mockClients);
     const [selectedClients, setSelectedClients] = useState<number[]>([]);
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const { toast } = useToast();
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false); // Changed to false as we use mock data
 
     const fetchClients = async () => {
+        // We are using mock data, so no need to fetch
+        // If you switch back to DB, you can use this:
+        /*
         setIsLoading(true);
         try {
             const clientsData = await fetchClientsDB();
@@ -271,11 +296,12 @@ export default function ClientesPage() {
         } finally {
             setIsLoading(false);
         }
+        */
+       // For now, we just reset to the mock data.
+       setClients(mockClients);
     };
 
-    useEffect(() => {
-        fetchClients();
-    }, []);
+    // No need for useEffect to fetch data on mount for mock data
     
     const handleRowClick = (client: Client) => {
         if(user?.permissions?.clientes?.editarClientes) {
@@ -301,10 +327,11 @@ export default function ClientesPage() {
     const handleBulkDelete = async () => {
         if (selectedClients.length === 0) return;
         try {
-            await deleteClients(selectedClients);
+            // Simulate deletion for mock data
+            const newClients = clients.filter(c => !selectedClients.includes(c.id));
+            setClients(newClients);
             toast({ title: 'Éxito', description: `${selectedClients.length} cliente(s) eliminados.` });
             setSelectedClients([]);
-            fetchClients();
         } catch (e) {
             toast({ title: 'Error', description: 'No se pudo completar la acción.', variant: 'destructive' });
         }
@@ -385,7 +412,8 @@ export default function ClientesPage() {
                                     <TableHead>Nombre de la Empresa</TableHead>
                                     <TableHead>Representante</TableHead>
                                     <TableHead>Áreas Gestionadas</TableHead>
-                                    <TableHead>Redes Sociales</TableHead>
+                                    <TableHead>WhatsApp</TableHead>
+                                    <TableHead>Email</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -412,13 +440,8 @@ export default function ClientesPage() {
                                                 ))}
                                             </div>
                                         </TableCell>
-                                        <TableCell>
-                                            <div className="flex flex-col gap-2 text-xs">
-                                                {client.instagramFollowers && <div className="flex items-center gap-1.5"><Instagram className="w-4 h-4" /> {client.instagramFollowers.toLocaleString()} (inicio)</div>}
-                                                {client.facebookFollowers && <div className="flex items-center gap-1.5"><Facebook className="w-4 h-4" /> {client.facebookFollowers.toLocaleString()} (inicio)</div>}
-                                                {client.tiktokFollowers && <div className="flex items-center gap-1.5"><TikTokIcon className="w-4 h-4" /> {client.tiktokFollowers.toLocaleString()} (inicio)</div>}
-                                            </div>
-                                        </TableCell>
+                                        <TableCell>{client.whatsapp || 'N/A'}</TableCell>
+                                        <TableCell>{client.email || 'N/A'}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -441,3 +464,4 @@ export default function ClientesPage() {
         </div>
     );
 }
+
