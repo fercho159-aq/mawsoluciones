@@ -42,7 +42,7 @@ const ejecutoresPorEncargado: Record<string, string[]> = {
     'Fany': ['Fany', 'Daniel', 'Cristian', 'Aldair']
 };
 
-export const ClientFormDialog = ({ client, children, isEditing, onSave }: { client?: Client, children: React.ReactNode, isEditing: boolean, onSave: () => void }) => {
+export const ClientFormDialog = ({ client, children, isEditing, onSave, open, onOpenChange }: { client?: Client, children: React.ReactNode, isEditing: boolean, onSave: () => void, open: boolean, onOpenChange: (open: boolean) => void }) => {
     const [name, setName] = useState('');
     const [representativeName, setRepresentativeName] = useState('');
     const [whatsapp, setWhatsapp] = useState('');
@@ -50,7 +50,6 @@ export const ClientFormDialog = ({ client, children, isEditing, onSave }: { clie
     const [instagramUrl, setInstagramUrl] = useState('');
     const [facebookUrl, setFacebookUrl] = useState('');
     const [tiktokUrl, setTiktokUrl] = useState('');
-    const [open, setOpen] = useState(false);
     const { toast } = useToast();
 
     const [serviceType, setServiceType] = useState<'Iguala' | 'Proyecto' | 'Ambos' | ''>('');
@@ -141,7 +140,7 @@ export const ClientFormDialog = ({ client, children, isEditing, onSave }: { clie
             }
             startTransition(() => {
                 onSave();
-                setOpen(false);
+                onOpenChange(false);
                 toast({ title: "Éxito", description: `Cliente "${name}" ${isEditing ? 'actualizado' : 'añadido'}.` });
                 if(!isEditing) resetForm();
             });
@@ -152,7 +151,7 @@ export const ClientFormDialog = ({ client, children, isEditing, onSave }: { clie
     };
 
     return (
-        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if(!o) resetForm();}}>
+        <Dialog open={open} onOpenChange={(o) => { onOpenChange(o); if(!o) resetForm();}}>
             <DialogTrigger asChild>{children}</DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader><DialogTitle>{isEditing ? 'Editar Cliente' : 'Nuevo Cliente'}</DialogTitle></DialogHeader>
@@ -231,7 +230,7 @@ export const ClientFormDialog = ({ client, children, isEditing, onSave }: { clie
                     )}
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                    <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
                     <Button onClick={handleSave}>{isEditing ? 'Guardar Cambios' : 'Guardar Cliente'}</Button>
                 </DialogFooter>
             </DialogContent>
@@ -254,6 +253,7 @@ export default function ClientesPage() {
     const [selectedClients, setSelectedClients] = useState<number[]>([]);
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(true);
 
@@ -343,8 +343,8 @@ export default function ClientesPage() {
                         <CardDescription>Añade nuevos clientes y consulta su estado.</CardDescription>
                     </div>
                     { (user?.permissions?.clientes?.agregarClientes) && (
-                         <ClientFormDialog onSave={fetchClients} isEditing={false}>
-                            <Button><PlusCircle className="w-4 h-4 mr-2" /> Añadir Nuevo Cliente</Button>
+                         <ClientFormDialog onSave={fetchClients} isEditing={false} open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+                            <Button onClick={() => setIsAddModalOpen(true)}><PlusCircle className="w-4 h-4 mr-2" /> Añadir Nuevo Cliente</Button>
                         </ClientFormDialog>
                     )}
                 </CardHeader>
@@ -427,13 +427,18 @@ export default function ClientesPage() {
                     </div>
                 </CardContent>
             </Card>
-
-             <Dialog open={isEditModalOpen} onOpenChange={(open) => { if(!open) { setSelectedClient(null); setIsEditModalOpen(false); } else { setIsEditModalOpen(true); } }}>
-                <ClientFormDialog client={selectedClient!} onSave={() => { fetchClients(); setSelectedClient(null); setIsEditModalOpen(false); }} isEditing={true}>
-                    <DialogContent onClick={(e) => e.stopPropagation()}>
-                    </DialogContent>
+            
+            {selectedClient && (
+                <ClientFormDialog 
+                    client={selectedClient} 
+                    onSave={() => { fetchClients(); setSelectedClient(null); }} 
+                    isEditing={true}
+                    open={isEditModalOpen}
+                    onOpenChange={setIsEditModalOpen}
+                >
+                    {/* The trigger is implicit in the row click */}
                 </ClientFormDialog>
-            </Dialog>
+            )}
         </div>
     );
 }
