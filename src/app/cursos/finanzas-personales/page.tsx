@@ -401,15 +401,15 @@ export default function CoursePage() {
                                 </>
                              ) : (
                                 <>
-                                    <div className="aspect-video bg-muted rounded-md flex items-center justify-center mb-6 relative overflow-hidden">
-                                        {currentTopic.video_url ? (
-                                            <video controls src={currentTopic.video_url} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="text-center text-muted-foreground">
-                                                <PlayCircle className="w-16 h-16 mx-auto mb-2" />
-                                                <p>Video no disponible.</p>
-                                            </div>
-                                        )}
+                                    <div className="relative aspect-[9/16] max-w-sm mx-auto w-full rounded-lg overflow-hidden shadow-xl mb-6">
+                                        <iframe
+                                            className="absolute top-0 left-0 w-full h-full"
+                                            src="https://www.youtube.com/embed/fnuCiuhV0WA"
+                                            title="YouTube video player"
+                                            frameBorder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                        ></iframe>
                                     </div>
 
                                     <div className="prose prose-lg max-w-none text-foreground/80 prose-headings:font-headline prose-headings:text-foreground prose-strong:text-foreground mb-8">
@@ -453,4 +453,3 @@ export default function CoursePage() {
     </div>
   );
 }
-
