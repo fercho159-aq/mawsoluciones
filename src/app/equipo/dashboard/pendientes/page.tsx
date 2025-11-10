@@ -25,7 +25,7 @@ import type { PendienteMaw, Client, RecordingEvent, Colaborador } from '@/lib/db
 import { getPendientes, addPendiente, updatePendiente } from './_actions';
 import { getClients } from '../clientes/_actions';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { teamMembers } from '@/lib/team-data';
