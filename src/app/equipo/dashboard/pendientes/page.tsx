@@ -14,13 +14,13 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/lib/auth-provider';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, CalendarIcon, Plus, ChevronRight, Lightbulb } from 'lucide-react';
+import { PlusCircle, CalendarIcon, Plus, ChevronRight, Lightbulb, Kanban, List } from 'lucide-react';
 import type { PendienteMaw, Client, RecordingEvent, Colaborador } from '@/lib/db/schema';
 import { getPendientes, addPendiente, updatePendiente } from './_actions';
 import { getClients } from '../clientes/_actions';
@@ -463,6 +463,64 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
     );
 };
 
+const BoardView = ({ data, onUpdateTask, currentUser, onRefresh, onUpdatePendienteText }: {
+    data: PendienteWithRelations[];
+    onUpdateTask: (task: PendienteWithRelations) => void;
+    currentUser: any;
+    onRefresh: () => void;
+    onUpdatePendienteText: (id: number, text: string) => void;
+}) => {
+    const statuses = Object.keys(statusColors);
+    const groupedByStatus = useMemo(() => {
+        const initialGroups: Record<string, PendienteWithRelations[]> = {};
+        statuses.forEach(status => initialGroups[status] = []);
+        return data.reduce((acc, pendiente) => {
+            if (acc[pendiente.status]) {
+                acc[pendiente.status].push(pendiente);
+            }
+            return acc;
+        }, initialGroups);
+    }, [data, statuses]);
+
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 overflow-x-auto pb-4">
+            {statuses.map(status => (
+                <div key={status} className="bg-card rounded-lg flex flex-col min-w-[300px]">
+                    <div className="p-4 border-b">
+                        <h3 className="font-semibold flex items-center gap-2">
+                           <span className={cn("w-3 h-3 rounded-full", statusColors[status])}></span>
+                           {status}
+                           <Badge variant="secondary" className="ml-2">{groupedByStatus[status].length}</Badge>
+                        </h3>
+                    </div>
+                    <div className="p-2 space-y-3 flex-grow overflow-y-auto">
+                        {groupedByStatus[status].map(pendiente => (
+                            <Card key={pendiente.id} className="p-3 bg-background/50">
+                                <p className="font-semibold text-sm mb-1">{pendiente.clienteName}</p>
+                                <EditablePendiente pendiente={pendiente} onUpdate={onUpdatePendienteText} />
+                                <div className="flex justify-between items-center mt-3 text-xs text-muted-foreground">
+                                    <span>{pendiente.ejecutor}</span>
+                                    {pendiente.recordingEvent && (
+                                        <span className="flex items-center gap-1">
+                                            <CalendarIcon className="w-3 h-3"/>
+                                            {format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}
+                                        </span>
+                                    )}
+                                </div>
+                            </Card>
+                        ))}
+                         {groupedByStatus[status].length === 0 && (
+                            <div className="text-center py-8 text-xs text-muted-foreground">
+                                No hay pendientes en este estado.
+                            </div>
+                         )}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
 
 export default function PendientesPage() {
     const { user } = useAuth();
@@ -472,6 +530,7 @@ export default function PendientesPage() {
     const [encargadoFilter, setEncargadoFilter] = useState('Todos');
     const [ejecutorFilter, setEjecutorFilter] = useState('Todos');
     const [searchFilter, setSearchFilter] = useState('');
+    const [viewMode, setViewMode] = useState<'table' | 'board'>('table');
 
     const [activeTab, setActiveTab] = useState('contenido');
     const { toast } = useToast();
@@ -599,6 +658,10 @@ export default function PendientesPage() {
                         {ejecutores.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
                     </SelectContent>
                 </Select>
+                <div className="flex items-center gap-2 ml-auto">
+                    <Button variant={viewMode === 'table' ? 'secondary' : 'ghost'} size="icon" onClick={() => setViewMode('table')}><List className="w-5 h-5"/></Button>
+                    <Button variant={viewMode === 'board' ? 'secondary' : 'ghost'} size="icon" onClick={() => setViewMode('board')}><Kanban className="w-5 h-5"/></Button>
+                </div>
             </CardContent>
         </Card>
 
@@ -649,42 +712,71 @@ export default function PendientesPage() {
             </TabsList>
             
             <TabsContent value="contenido">
-               <PendientesTable 
-                    data={getFilteredDataForTab('contenido')} 
-                    onUpdateTask={handleUpdateTask} 
-                    currentUser={user} 
-                    onRefresh={fetchData}
-                    onUpdatePendienteText={handleUpdatePendienteText}
-                    clients={clients}
-                    categoria="Contenido"
-                />
+               {viewMode === 'table' ? (
+                    <PendientesTable 
+                        data={getFilteredDataForTab('contenido')} 
+                        onUpdateTask={handleUpdateTask} 
+                        currentUser={user} 
+                        onRefresh={fetchData}
+                        onUpdatePendienteText={handleUpdatePendienteText}
+                        clients={clients}
+                        categoria="Contenido"
+                    />
+               ) : (
+                    <BoardView 
+                        data={getFilteredDataForTab('contenido')}
+                        onUpdateTask={handleUpdateTask}
+                        currentUser={user}
+                        onRefresh={fetchData}
+                        onUpdatePendienteText={handleUpdatePendienteText}
+                    />
+               )}
             </TabsContent>
 
             <TabsContent value="ads">
-                <PendientesTable 
-                    data={getFilteredDataForTab('ads')} 
-                    onUpdateTask={handleUpdateTask} 
-                    currentUser={user} 
-                    onRefresh={fetchData}
-                    onUpdatePendienteText={handleUpdatePendienteText}
-                    clients={clients}
-                    categoria="Ads"
-                />
+                {viewMode === 'table' ? (
+                    <PendientesTable 
+                        data={getFilteredDataForTab('ads')} 
+                        onUpdateTask={handleUpdateTask} 
+                        currentUser={user} 
+                        onRefresh={fetchData}
+                        onUpdatePendienteText={handleUpdatePendienteText}
+                        clients={clients}
+                        categoria="Ads"
+                    />
+                ) : (
+                     <BoardView 
+                        data={getFilteredDataForTab('ads')}
+                        onUpdateTask={handleUpdateTask}
+                        currentUser={user}
+                        onRefresh={fetchData}
+                        onUpdatePendienteText={handleUpdatePendienteText}
+                    />
+                )}
             </TabsContent>
             
             <TabsContent value="web">
-                 <PendientesTable 
-                    data={getFilteredDataForTab('web')} 
-                    onUpdateTask={handleUpdateTask} 
-                    currentUser={user} 
-                    onRefresh={fetchData}
-                    onUpdatePendienteText={handleUpdatePendienteText}
-                    clients={clients}
-                    categoria="Web"
-                />
+                 {viewMode === 'table' ? (
+                    <PendientesTable 
+                        data={getFilteredDataForTab('web')} 
+                        onUpdateTask={handleUpdateTask} 
+                        currentUser={user} 
+                        onRefresh={fetchData}
+                        onUpdatePendienteText={handleUpdatePendienteText}
+                        clients={clients}
+                        categoria="Web"
+                    />
+                 ) : (
+                     <BoardView 
+                        data={getFilteredDataForTab('web')}
+                        onUpdateTask={handleUpdateTask}
+                        currentUser={user}
+                        onRefresh={fetchData}
+                        onUpdatePendienteText={handleUpdatePendienteText}
+                    />
+                 )}
             </TabsContent>
         </Tabs>
     </div>
   );
 }
-
