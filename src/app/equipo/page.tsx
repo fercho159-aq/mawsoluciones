@@ -2,10 +2,11 @@
 "use client";
 
 import React from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { LogIn } from 'lucide-react';
+import { LogIn, FileArchive } from 'lucide-react';
 import Logo from '@/components/logo';
 import { teamMembers } from '@/lib/team-data';
 import { useAuth } from '@/lib/auth-provider';
@@ -13,6 +14,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Colaborador } from '@/lib/db/schema';
+
+const graciasLinks = [
+    { href: "/equipo/dashboard/gracias-sitio-web", label: "Gracias Sitio Web" },
+    { href: "/equipo/dashboard/gracias-contenido", label: "Gracias Contenido" },
+    { href: "/equipo/dashboard/renovacion", label: "Renovación" },
+    { href: "/equipo/dashboard/correo", label: "Correo" },
+];
 
 export default function LoginPage() {
   const router = useRouter();
@@ -29,7 +37,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
@@ -54,6 +62,25 @@ export default function LoginPage() {
               </Button>
             ))}
           </div>
+        </CardContent>
+      </Card>
+      
+      <Card className="w-full max-w-md mt-8">
+        <CardHeader>
+            <CardTitle>Recursos para Clientes</CardTitle>
+            <CardDescription>Accede a guías y requisitos para empezar a trabajar con nosotros.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+                {graciasLinks.map(link => (
+                    <Button key={link.href} variant="outline" asChild className="justify-start">
+                        <Link href={link.href}>
+                            <FileArchive className="w-4 h-4 mr-2"/>
+                            {link.label}
+                        </Link>
+                    </Button>
+                ))}
+            </div>
         </CardContent>
       </Card>
     </div>
