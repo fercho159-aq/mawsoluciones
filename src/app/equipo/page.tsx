@@ -65,24 +65,6 @@ export default function LoginPage() {
         </CardContent>
       </Card>
       
-      <Card className="w-full max-w-md mt-8">
-        <CardHeader>
-            <CardTitle>Recursos para Clientes</CardTitle>
-            <CardDescription>Accede a guías y requisitos para empezar a trabajar con nosotros.</CardDescription>
-        </CardHeader>
-        <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-                {graciasLinks.map(link => (
-                    <Button key={link.href} variant="outline" asChild className="justify-start">
-                        <Link href={link.href}>
-                            <FileArchive className="w-4 h-4 mr-2"/>
-                            {link.label}
-                        </Link>
-                    </Button>
-                ))}
-            </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

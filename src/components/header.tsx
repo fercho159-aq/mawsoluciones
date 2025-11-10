@@ -1,9 +1,8 @@
-
 "use client";
 
 import * as React from "react";
 import Link from "next/link";
-import { Menu, X, ChevronDown, CodeXml, PenSquare, Megaphone, Bot, Newspaper, Mic2, LayoutGrid, FileText, GraduationCap, Target, Wallet, BarChart4, DollarSign, Database, Users } from "lucide-react";
+import { Menu, X, ChevronDown, CodeXml, PenSquare, Megaphone, Bot, Newspaper, Mic2, LayoutGrid, FileText, GraduationCap, Target, Wallet, BarChart4, DollarSign, Database, Users, Archive } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -82,6 +81,13 @@ const portfolioLinks = [
     description: "Descubre las campañas de contenido y estrategias de redes sociales que hemos creado.",
     icon: <FileText className="w-5 h-5" />
   },
+];
+
+const resourcesLinks = [
+  { href: "/recursos/gracias-sitio-web", label: "Gracias Sitio Web", description: "Requisitos iniciales para tu nuevo sitio web.", icon: <CodeXml className="w-5 h-5" /> },
+  { href: "/recursos/gracias-contenido", label: "Gracias Contenido", description: "Materiales necesarios para empezar con tu contenido.", icon: <PenSquare className="w-5 h-5" /> },
+  { href: "/recursos/renovacion", label: "Renovación de Servicio", description: "Pasos a seguir para continuar nuestra colaboración.", icon: <Users className="w-5 h-5" /> },
+  { href: "/recursos/correo", label: "Configuración de Correo", description: "Guía para configurar tu correo corporativo.", icon: <Megaphone className="w-5 h-5" /> },
 ];
 
 const coursesLinks = [
@@ -269,6 +275,24 @@ const Header = () => {
                 </ul>
               </NavigationMenuContent>
             </NavigationMenuItem>
+            
+            <NavigationMenuItem>
+              <NavigationMenuTrigger>Recursos para Clientes</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                 <ul className="grid w-[400px] gap-3 p-4 md:w-[500px]">
+                  {resourcesLinks.map((link) => (
+                    <ListItem
+                      key={link.label}
+                      title={link.label}
+                      href={link.href}
+                      icon={link.icon}
+                    >
+                      {link.description}
+                    </ListItem>
+                  ))}
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
 
             {navLinks.map((link) => (
               <NavigationMenuItem key={link.href}>
@@ -376,6 +400,25 @@ const Header = () => {
                       <AccordionContent className="pl-4">
                         <div className="flex flex-col gap-4 pt-2">
                           {blogLinks.map((link) => (
+                            <Link
+                              key={link.href}
+                              href={link.href}
+                              className="text-base font-medium text-foreground/80"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              {link.label}
+                            </Link>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                     <AccordionItem value="item-5" className="border-b-0">
+                      <AccordionTrigger className="text-lg font-medium py-2 hover:no-underline">
+                        Recursos para Clientes
+                      </AccordionTrigger>
+                      <AccordionContent className="pl-4">
+                        <div className="flex flex-col gap-4 pt-2">
+                          {resourcesLinks.map((link) => (
                             <Link
                               key={link.href}
                               href={link.href}
