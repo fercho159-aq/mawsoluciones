@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CodeXml, Send, Link as LinkIcon, ShoppingCart } from "lucide-react";
 import Image from "next/image";
@@ -49,14 +50,15 @@ const ServicePage = () => {
       <section className="py-20 md:py-28">
         <div className="container mx-auto px-4 md:px-6">
           <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="relative aspect-square">
-              <Image
-                src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx3ZWIlMjBkZXZlbG9wbWVudHxlbnwwfHx8fDE3NjIwOTM0MTF8MA&ixlib=rb-4.1.0&q=80&w=1080"
-                alt="Desarrollo Web"
-                fill
-                className="rounded-lg object-cover shadow-xl"
-                data-ai-hint="web development"
-              />
+            <div className="relative aspect-video rounded-lg overflow-hidden shadow-xl">
+              <iframe
+                className="absolute top-0 left-0 w-full h-full"
+                src="https://www.youtube.com/embed/FjJBFoXqrRU"
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
             </div>
             <div className="prose prose-lg max-w-none text-foreground/80">
               <h2 className="font-headline text-3xl sm:text-4xl font-bold text-foreground">Tu Negocio, Tu Sitio Web, Tus Reglas.</h2>
