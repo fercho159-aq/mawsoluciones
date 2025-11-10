@@ -29,6 +29,7 @@ import { Badge } from '@/components/ui/badge';
 import type { Client as ClientType, ClientFinancialProfile } from '@/lib/db/schema';
 import { addClient, updateClient, getClients as fetchClientsDB, deleteClients } from './_actions';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import WhatsappIcon from '@/components/icons/whatsapp-icon';
 
 
 const adsTeam: TeamMember[] = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel'].includes(m.name));
@@ -386,7 +387,7 @@ export default function ClientesPage() {
                                     <TableHead>Representante</TableHead>
                                     <TableHead>Áreas Gestionadas</TableHead>
                                     <TableHead>WhatsApp</TableHead>
-                                    <TableHead>Email</TableHead>
+                                    <TableHead>Acciones</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -394,8 +395,7 @@ export default function ClientesPage() {
                                     <TableRow 
                                         key={client.id} 
                                         data-state={selectedClients.includes(client.id) && "selected"}
-                                        onClick={() => handleRowClick(client)}
-                                        className={cn(user?.permissions?.clientes?.editarClientes && "cursor-pointer")}
+                                        
                                     >
                                         <TableCell onClick={(e) => e.stopPropagation()}>
                                             <Checkbox
@@ -404,17 +404,28 @@ export default function ClientesPage() {
                                                 aria-label={`Select client ${client.name}`}
                                             />
                                         </TableCell>
-                                        <TableCell className="font-medium">{client.name}</TableCell>
-                                        <TableCell>{client.representativeName || 'N/A'}</TableCell>
-                                        <TableCell>
+                                        <TableCell onClick={() => handleRowClick(client)} className={cn("font-medium", user?.permissions?.clientes?.editarClientes && "cursor-pointer")}>{client.name}</TableCell>
+                                        <TableCell onClick={() => handleRowClick(client)} className={cn(user?.permissions?.clientes?.editarClientes && "cursor-pointer")}>{client.representativeName || 'N/A'}</TableCell>
+                                        <TableCell onClick={() => handleRowClick(client)} className={cn(user?.permissions?.clientes?.editarClientes && "cursor-pointer")}>
                                             <div className="flex gap-1 flex-wrap">
                                                 {client.managedAreas?.map(area => (
                                                     <Badge key={area} variant="secondary">{area}</Badge>
                                                 ))}
                                             </div>
                                         </TableCell>
-                                        <TableCell>{client.whatsapp || 'N/A'}</TableCell>
-                                        <TableCell>{client.email || 'N/A'}</TableCell>
+                                        <TableCell onClick={() => handleRowClick(client)} className={cn(user?.permissions?.clientes?.editarClientes && "cursor-pointer")}>{client.whatsapp || 'N/A'}</TableCell>
+                                        <TableCell>
+                                            <Button 
+                                                variant="whatsapp" 
+                                                size="icon"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    window.open(`https://wa.me/${client.whatsapp}`, '_blank');
+                                                }}
+                                            >
+                                                <WhatsappIcon className="w-5 h-5 text-white" />
+                                            </Button>
+                                        </TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
