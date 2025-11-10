@@ -10,7 +10,7 @@ export default function GraciasContenidoPage() {
         <div className="relative aspect-[9/16] max-w-sm mx-auto w-full rounded-lg overflow-hidden shadow-xl">
           <iframe
             className="absolute top-0 left-0 w-full h-full"
-            src="https://www.youtube.com/embed/fnuCiuhV0WA"
+            src="https://www.youtube.com/embed/t17eWu6lviA"
             title="YouTube video player"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
