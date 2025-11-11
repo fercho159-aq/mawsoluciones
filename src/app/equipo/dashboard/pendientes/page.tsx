@@ -30,7 +30,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { teamMembers } from '@/lib/team-data';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ScheduleRecordingDialog } from '@/components/schedule-recording-dialog';
 import { motion } from 'framer-motion';
@@ -920,8 +920,11 @@ export default function PendientesPage() {
         return <div>Cargando...</div>
     }
   
-    const getFilteredDataForTab = (categoria: string, completed: boolean) => {
-        return filteredData.filter(d => d.categoria.toLowerCase() === categoria.toLowerCase() && d.completed === completed);
+    const getFilteredDataForTab = (categoria: string, showCompleted: boolean) => {
+        return filteredData.filter(d => 
+            d.categoria.toLowerCase() === categoria.toLowerCase() && 
+            (showCompleted ? d.completed : true)
+        );
     }
     
     const allCompleted = filteredData.filter(d => d.completed);
