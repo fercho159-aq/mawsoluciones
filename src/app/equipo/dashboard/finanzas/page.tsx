@@ -106,63 +106,38 @@ type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo" | "Efectivo" | "Pend
 const generatePeriodOptions = () => {
     const today = new Date();
     const options: string[] = [];
-    
+
+    // Generate for the last 6 and next 3 months
     for (let i = -6; i <= 3; i++) {
         const month = addMonths(today, i);
         const startOfMonthDate = startOfMonth(month);
         const endOfMonthDate = endOfMonth(month);
 
         // Mes completo
-        options.push(`${format(startOfMonthDate, '1 \'de\' MMMM', { locale: es })} al ${format(endOfMonthDate, 'd \'de\' MMMM', { locale: es })}`);
+        options.push(`1 de ${format(startOfMonthDate, 'MMMM', { locale: es })} al ${format(endOfMonthDate, 'd \'de\' MMMM', { locale: es })}`);
         
         // Quincena 1-15
-        options.push(`${format(startOfMonthDate, '1 \'de\' MMMM', { locale: es })} al ${format(setDate(startOfMonthDate, 15), 'd \'de\' MMMM', { locale: es })}`);
-
+        options.push(`1 de ${format(startOfMonthDate, 'MMMM', { locale: es })} al 15 de ${format(startOfMonthDate, 'MMMM', { locale: es })}`);
+        
         // Quincena 16-fin de mes
-        options.push(`${format(setDate(startOfMonthDate, 16), 'd \'de\' MMMM', { locale: es })} al ${format(endOfMonthDate, 'd \'de\' MMMM', { locale: es })}`);
+        options.push(`16 de ${format(startOfMonthDate, 'MMMM', { locale: es })} al ${format(endOfMonthDate, 'd \'de\' MMMM', { locale: es })}`);
     }
 
     const uniqueOptions = [...new Set(options)];
     
-    // Helper function to parse a date string like "1 de Enero" to a Date object.
-    const parseDate = (dateStr: string): Date => {
-      const spanishMonths: { [key: string]: number } = {
-          'enero': 0, 'febrero': 1, 'marzo': 2, 'abril': 3, 'mayo': 4, 'junio': 5,
-          'julio': 6, 'agosto': 7, 'septiembre': 8, 'octubre': 9, 'noviembre': 10, 'diciembre': 11
-      };
-      const parts = dateStr.toLowerCase().split(' de ');
-      const day = parseInt(parts[0]);
-      const month = spanishMonths[parts[1]];
-      
-      if (isNaN(day) || month === undefined) {
-        return new Date(); // Fallback
-      }
-      
-      let year = today.getFullYear();
-      const tempDate = new Date(year, month, day);
-
-      // Handle year wrap-around for sorting across years
-      if (i > 0 && month < today.getMonth()) {
-          year += 1;
-      } else if (i < 0 && month > today.getMonth()) {
-          year -= 1;
-      }
-      
-      return new Date(year, month, day);
-    };
-    
     uniqueOptions.sort((a, b) => {
-        const aStartDateStr = a.split(' al ')[0];
-        const bStartDateStr = b.split(' al ')[0];
-
-        const aDate = parse(aStartDateStr, "d 'de' MMMM", new Date(), { locale: es });
-        const bDate = parse(bStartDateStr, "d 'de' MMMM", new Date(), { locale: es });
-
-        return aDate.getTime() - bDate.getTime();
+        const parseDateFromPeriod = (period: string) => {
+            const datePart = period.split(' al ')[0];
+            return parse(datePart, "d 'de' MMMM", new Date(), { locale: es });
+        };
+        const dateA = parseDateFromPeriod(a);
+        const dateB = parseDateFromPeriod(b);
+        return dateA.getTime() - dateB.getTime();
     });
     
     return uniqueOptions;
 };
+
 
 
 const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: { 
@@ -182,6 +157,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
     const [periodo, setPeriodo] = useState('');
     const [fechaCobro, setFechaCobro] = useState<Date | undefined>();
     const [conIva, setConIva] = useState(false);
+    const [periodoManual, setPeriodoManual] = useState('');
     const periodOptions = useMemo(() => generatePeriodOptions(), [open]);
 
     useEffect(() => {
@@ -189,10 +165,16 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
             if (isEditing && cpc) {
                 setMonto(cpc.monto.toString());
                 setTipo(cpc.tipo as CategoriaIngreso);
-                setPeriodo(cpc.periodo);
                 setSelectedClientId(cpc.clienteId.toString());
                 setFechaCobro(cpc.fecha_cobro ? new Date(cpc.fecha_cobro) : undefined);
                 setConIva(cpc.conIva ?? false);
+                 if (periodOptions.includes(cpc.periodo)) {
+                    setPeriodo(cpc.periodo);
+                    setPeriodoManual('');
+                } else {
+                    setPeriodo('Otro');
+                    setPeriodoManual(cpc.periodo);
+                }
             } else if (client) { // Pre-fill client if adding from a specific row
                  setMonto('');
                  setTipo('Iguala Mensual');
@@ -200,6 +182,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                  setSelectedClientId(client.id.toString());
                  setFechaCobro(undefined);
                  setConIva(false);
+                 setPeriodoManual('');
             } else { // Reset for global "add"
                 setMonto('');
                  setTipo('Iguala Mensual');
@@ -207,12 +190,14 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                  setSelectedClientId('');
                  setFechaCobro(undefined);
                  setConIva(false);
+                 setPeriodoManual('');
             }
         }
     }, [open, client, cpc, isEditing, periodOptions]);
 
     const handleSave = async () => {
         let targetClient: {id: number, name: string} | undefined;
+        const finalPeriodo = periodo === 'Otro' ? periodoManual : periodo;
 
         if (client) {
             targetClient = { id: client.id, name: client.name };
@@ -225,7 +210,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
             }
         }
         
-        if (!targetClient || !monto || !periodo) {
+        if (!targetClient || !monto || !finalPeriodo) {
             toast({ title: "Error", description: "Cliente, monto y periodo son obligatorios.", variant: "destructive" });
             return;
         }
@@ -233,7 +218,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
         const data: Partial<NewCuentaPorCobrar> = {
             monto: parseFloat(monto),
             tipo,
-            periodo,
+            periodo: finalPeriodo,
             fecha_cobro: fechaCobro,
             conIva,
         };
@@ -315,6 +300,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                                 <SelectTrigger><SelectValue placeholder="Seleccionar periodo..."/></SelectTrigger>
                                 <SelectContent>
                                     {periodOptions.map(option => <SelectItem key={option} value={option}>{option}</SelectItem>)}
+                                    <SelectItem value="Otro">Otro (especificar)</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -323,6 +309,12 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                             <Input type="number" value={monto} onChange={e => setMonto(e.target.value)} placeholder="0.00" />
                         </div>
                      </div>
+                      {periodo === 'Otro' && (
+                        <div className="space-y-2">
+                            <Label>Especificar Periodo</Label>
+                            <Input value={periodoManual} onChange={e => setPeriodoManual(e.target.value)} placeholder="Ej. Semana 40, Proyecto X..." />
+                        </div>
+                     )}
                       <div className="space-y-2">
                         <Label>Fecha de Cobro</Label>
                         <Popover>
