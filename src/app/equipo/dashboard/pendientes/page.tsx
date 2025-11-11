@@ -367,6 +367,7 @@ const ClientDataDialog = ({ pendientes, onSave, onRefresh, children }: { pendien
                     <Button onClick={handleSave}>Guardar</Button>
                 </DialogFooter>
             </DialogContent>
+    </Dialog>
     )
 }
 
@@ -868,6 +869,7 @@ export default function PendientesPage() {
     </div>
   );
 }
+
 
 
 
