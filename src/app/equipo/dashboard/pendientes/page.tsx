@@ -610,8 +610,26 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                             </TableCell>
                                         </>
                                     )}
-                                    <TableCell className="p-2 align-middle text-xs">{pendiente.encargado}</TableCell>
-                                    <TableCell className="p-2 align-middle text-xs">{pendiente.ejecutor}</TableCell>
+                                    <TableCell className="p-2 align-middle text-xs">
+                                         <Select value={pendiente.encargado} onValueChange={(newEncargado) => onUpdateTask(pendiente, { encargado: newEncargado })} disabled={!canReassign}>
+                                            <SelectTrigger className="text-xs h-8 border-0 bg-transparent focus:ring-0">
+                                                <SelectValue/>
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {teamMembers.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    </TableCell>
+                                    <TableCell className="p-2 align-middle text-xs">
+                                        <Select value={pendiente.ejecutor} onValueChange={(newEjecutor) => onUpdateTask(pendiente, { ejecutor: newEjecutor })} disabled={!canReassign}>
+                                            <SelectTrigger className="text-xs h-8 border-0 bg-transparent focus:ring-0">
+                                                <SelectValue/>
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {teamMembers.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    </TableCell>
                                     <TableCell className="p-2 align-middle">
                                         <Select value={pendiente.status} onValueChange={(newStatus) => onUpdateTask(pendiente, { status: newStatus })}>
                                             <SelectTrigger className={cn("text-white w-full justify-center text-xs h-8 border-0", statusColors[pendiente.status])}>
@@ -1025,4 +1043,5 @@ export default function PendientesPage() {
 }
 
     
+
 
