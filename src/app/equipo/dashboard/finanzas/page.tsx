@@ -109,12 +109,9 @@ const generatePeriodOptions = () => {
 
     for (let i = -2; i <= 2; i++) {
         const month = addMonths(today, i);
-        const startOfMonthDate = startOfMonth(month);
-        const endOfMonthDate = endOfMonth(month);
-
-        const year = format(startOfMonthDate, "yyyy");
-        const monthName = format(startOfMonthDate, "MMMM", { locale: es });
-        const endDay = format(endOfMonthDate, "d");
+        const year = format(month, "yyyy");
+        const monthName = format(month, "MMMM", { locale: es });
+        const endDay = format(endOfMonth(month), "d");
 
         options.push(`1 al 15 de ${monthName} de ${year}`);
         options.push(`16 al ${endDay} de ${monthName} de ${year}`);
@@ -122,23 +119,21 @@ const generatePeriodOptions = () => {
 
     return [...new Set(options)].sort((a, b) => {
         try {
-            const datePartA = a.split(' al ')[0].trim();
-            const datePartB = b.split(' al ')[0].trim();
+            const parseDate = (periodString: string): Date => {
+                const parts = periodString.split(' ');
+                const day = parseInt(parts[0]);
+                const monthName = parts[3];
+                const year = parseInt(parts[5]);
+                const monthIndex = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'].indexOf(monthName.toLowerCase());
+                return new Date(year, monthIndex, day);
+            };
             
-            const parseDate = (part: string) => parse(part, "d 'de' MMMM 'de' yyyy", new Date(), { locale: es });
+            const dateA = parseDate(a);
+            const dateB = parseDate(b);
             
-            const dateA = parseDate(`1 de ${a.split(' de ')[1]} de ${a.split(' de ')[2]}`);
-            const dateB = parseDate(`1 de ${b.split(' de ')[1]} de ${b.split(' de ')[2]}`);
-            
-            if (dateA.getTime() !== dateB.getTime()) {
-                return dateA.getTime() - dateB.getTime();
-            }
-
-            const dayA = parseInt(datePartA);
-            const dayB = parseInt(datePartB);
-
-            return dayA - dayB;
+            return dateA.getTime() - dateB.getTime();
         } catch (e) {
+            console.error("Error parsing date for sorting:", e);
             return 0;
         }
     });
@@ -384,16 +379,33 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
 
 const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: CuentaPorCobrar[], clients: Client[], onRefresh: () => void, isAdmin: boolean }) => {
     
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
+    type SortField = 'totalDebt' | 'dueDate';
+    const [sortField, setSortField] = useState<SortField>('totalDebt');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [clientFilter, setClientFilter] = useState('Todos');
     const [typeFilter, setTypeFilter] = useState<CategoriaIngreso | 'Todos'>('Todos');
 
     const clientDebts = useMemo(() => {
-        const debtMap = new Map<number, { client: Client; totalDebt: number; debts: CuentaPorCobrar[] }>();
+        const debtMap = new Map<number, { client: Client; totalDebt: number; debts: CuentaPorCobrar[]; nextDueDate?: Date }>();
 
         clients.forEach(client => {
             debtMap.set(client.id, { client, totalDebt: 0, debts: [] });
         });
+
+        const parseDate = (dateString: string | null | undefined): Date | null => {
+            if (!dateString) return null;
+            try {
+                // Example format: "15 de noviembre de 2024"
+                const parts = dateString.split(' de ');
+                if (parts.length < 3) return null;
+                const day = parts[0];
+                const month = parts[1];
+                const year = parts[2];
+                return parse(`${day} ${month} ${year}`, 'd MMMM yyyy', new Date(), { locale: es });
+            } catch {
+                return null;
+            }
+        };
 
         data.forEach(cpc => {
             if (typeFilter !== 'Todos' && cpc.tipo !== typeFilter) {
@@ -403,24 +415,41 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
             if (clientEntry) {
                 clientEntry.totalDebt += cpc.monto;
                 clientEntry.debts.push(cpc);
+                const dueDate = parseDate(cpc.fecha_cobro);
+                if (dueDate && (!clientEntry.nextDueDate || dueDate < clientEntry.nextDueDate)) {
+                    clientEntry.nextDueDate = dueDate;
+                }
             }
         });
 
-        let clientList = Array.from(debtMap.values()).sort((a,b) => a.client.name.localeCompare(b.client.name));
+        let clientList = Array.from(debtMap.values());
 
         if (clientFilter !== 'Todos') {
             clientList = clientList.filter(item => item.client.name === clientFilter);
         }
 
-        if (sortOrder) {
-            clientList.sort((a, b) => sortOrder === 'desc' ? b.totalDebt - a.totalDebt : a.totalDebt - b.totalDebt);
-        }
+        clientList.sort((a, b) => {
+            if (sortField === 'totalDebt') {
+                return sortOrder === 'desc' ? b.totalDebt - a.totalDebt : a.totalDebt - b.totalDebt;
+            }
+            if (sortField === 'dueDate') {
+                const dateA = a.nextDueDate?.getTime() || Infinity;
+                const dateB = b.nextDueDate?.getTime() || Infinity;
+                return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+            }
+            return a.client.name.localeCompare(b.client.name);
+        });
 
         return clientList;
-    }, [data, clients, sortOrder, clientFilter, typeFilter]);
+    }, [data, clients, sortField, sortOrder, clientFilter, typeFilter]);
 
-    const toggleSort = () => {
-        setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc');
+    const toggleSort = (field: SortField) => {
+        if (field === sortField) {
+            setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc');
+        } else {
+            setSortField(field);
+            setSortOrder(field === 'dueDate' ? 'asc' : 'desc');
+        }
     };
     
     const allServiceTypes = Array.from(new Set(data.map(d => d.tipo))) as CategoriaIngreso[];
@@ -464,7 +493,13 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
                         <TableHeader><TableRow>
                             <TableHead>Cliente</TableHead>
                             <TableHead>Detalle de Deuda</TableHead>
-                            <TableHead className='cursor-pointer' onClick={toggleSort}>
+                            <TableHead className="cursor-pointer" onClick={() => toggleSort('dueDate')}>
+                                <div className="flex items-center gap-1">
+                                    Fecha de Cobro
+                                    <ArrowUpDown className="w-4 h-4" />
+                                </div>
+                            </TableHead>
+                            <TableHead className='cursor-pointer' onClick={() => toggleSort('totalDebt')}>
                                 <div className="flex items-center gap-1">
                                     Monto Total Pendiente
                                     <ArrowUpDown className="w-4 h-4" />
@@ -474,7 +509,7 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {clientDebts.map(({client, totalDebt, debts}) => (
+                            {clientDebts.map(({client, totalDebt, debts, nextDueDate}) => (
                                 <TableRow key={client.id}>
                                     <TableCell className="font-medium">{client.name}</TableCell>
                                     <TableCell>
@@ -484,6 +519,7 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
                                                     <div className='text-xs flex items-center gap-2 cursor-pointer p-1 rounded-md hover:bg-muted w-full'>
                                                         <Badge variant="secondary" className='font-normal'>{d.periodo}</Badge>
                                                         <span>{d.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
+                                                        {d.fecha_cobro && <span className='text-muted-foreground hidden sm:inline'>({d.fecha_cobro})</span>}
                                                     </div>
                                                 </CpcFormDialog>
                                             )) : (
@@ -501,6 +537,9 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
                                                 </CpcFormDialog>
                                             )}
                                         </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        {nextDueDate ? format(nextDueDate, "d 'de' MMMM", { locale: es }) : 'N/A'}
                                     </TableCell>
                                     <TableCell className={cn("font-bold", totalDebt > 0 ? 'text-destructive' : 'text-green-500')}>
                                         {totalDebt.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
@@ -1121,3 +1160,4 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
