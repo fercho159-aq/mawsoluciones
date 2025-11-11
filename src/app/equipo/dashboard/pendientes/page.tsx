@@ -218,7 +218,9 @@ const PendienteDialog = ({ pendiente, onSave, canReassign }: { pendiente: Pendie
                     <div className="space-y-2">
                         <Label>Status</Label>
                         <Select value={status} onValueChange={setStatus}>
-                           <SelectTrigger><SelectValue asChild><Badge className={cn("text-white w-full justify-center", statusColors[status])}>{status}</Badge></SelectValue></SelectTrigger>
+                           <SelectTrigger className={cn("text-white w-full justify-center", statusColors[status])}>
+                             <SelectValue />
+                           </SelectTrigger>
                             <SelectContent>
                                 {Object.keys(statusColors).map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                             </SelectContent>
@@ -548,10 +550,11 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                             </ClientDataDialog>
                                         </TableCell>
                                     )}
-                                    <TableCell className={cn("p-2 align-middle text-sm", pendiente.completed && "line-through text-muted-foreground")}>
+                                    <TableCell className={cn("p-0 align-middle text-sm", pendiente.completed && "line-through text-muted-foreground")}>
                                         <div className="flex items-center gap-2">
                                             <Checkbox 
-                                                id={`pendiente-${pendiente.id}`} 
+                                                id={`pendiente-${pendiente.id}`}
+                                                className='ml-2' 
                                                 checked={pendiente.completed}
                                                 onCheckedChange={() => handleTogglePendiente(pendiente)}
                                             />
@@ -561,7 +564,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                                 onSave={(data) => onUpdateTask(pendiente, data)}
                                                 canReassign={canReassign}
                                             >
-                                                <div className="cursor-pointer flex-1">{pendiente.pendientePrincipal}</div>
+                                                <div className="cursor-pointer flex-1 p-2">{pendiente.pendientePrincipal}</div>
                                             </PendienteDialog>
                                         </div>
                                     </TableCell>
@@ -612,7 +615,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                     <TableCell className="p-2 align-middle">
                                         <Select value={pendiente.status} onValueChange={(newStatus) => onUpdateTask(pendiente, { status: newStatus })}>
                                             <SelectTrigger className={cn("text-white w-full justify-center text-xs h-8 border-0", statusColors[pendiente.status])}>
-                                                <SelectValue>{pendiente.status}</SelectValue>
+                                                <SelectValue/>
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {Object.keys(statusColors).map(s => (
@@ -623,19 +626,30 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                     </TableCell>
                                     {isContenido && index === 0 && (
                                         <TableCell className="p-2 text-center align-middle" rowSpan={pendientes.length  + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)}>
-                                            {pendiente.recordingEvent ? (
-                                                <div className="flex flex-col h-auto text-xs font-semibold">
-                                                    <span>{format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}</span>
-                                                    <span className='text-xs text-muted-foreground'>{format(new Date(pendiente.recordingEvent.fullStart), 'HH:mm')}</span>
-                                                </div>
-                                            ) : <span className="text-xs text-muted-foreground">No agendado</span>}
+                                            <ScheduleRecordingDialog
+                                                event={pendiente.recordingEvent}
+                                                pendienteId={pendiente.id}
+                                                clientName={pendiente.clienteName}
+                                                project={pendiente.pendientePrincipal}
+                                                assignedToName={pendiente.ejecutor}
+                                                onSave={onRefresh}
+                                            >
+                                            <div className="cursor-pointer hover:bg-muted p-2 rounded-md h-full flex flex-col justify-center">
+                                                {pendiente.recordingEvent ? (
+                                                    <div className="flex flex-col h-auto text-xs font-semibold">
+                                                        <span>{format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}</span>
+                                                        <span className='text-xs text-muted-foreground'>{format(new Date(pendiente.recordingEvent.fullStart), 'HH:mm')}</span>
+                                                    </div>
+                                                ) : <span className="text-xs text-muted-foreground">No agendado</span>}
+                                            </div>
+                                            </ScheduleRecordingDialog>
                                         </TableCell>
                                     )}
                                 </TableRow>
                             ))}
                              {currentUser?.permissions?.pendientes?.reasignarResponsables && (
                                 <TableRow>
-                                    <TableCell colSpan={isAds ? 5 : 1} className="p-0">
+                                    <TableCell colSpan={isAds ? 5 : 1} className="p-0 h-full">
                                         {addingToClientId === client.id ? (
                                             <AddPendienteInline 
                                                 client={client}
@@ -721,10 +735,19 @@ const BoardView = ({ data, onUpdateTask, currentUser, onRefresh }: {
                                             <p><span className='font-medium'>Eje:</span> {pendiente.ejecutor}</p>
                                         </div>
                                         {categoria === 'Contenido' && pendiente.recordingEvent && (
-                                            <div className="flex flex-col items-center">
-                                                <CalendarIcon className="w-4 h-4"/>
-                                                <span>{format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}</span>
-                                            </div>
+                                            <ScheduleRecordingDialog
+                                                event={pendiente.recordingEvent}
+                                                pendienteId={pendiente.id}
+                                                clientName={pendiente.clienteName}
+                                                project={pendiente.pendientePrincipal}
+                                                assignedToName={pendiente.ejecutor}
+                                                onSave={onRefresh}
+                                            >
+                                                <div className="flex flex-col items-center cursor-pointer hover:bg-muted p-1 rounded-md">
+                                                    <CalendarIcon className="w-4 h-4"/>
+                                                    <span>{format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}</span>
+                                                </div>
+                                            </ScheduleRecordingDialog>
                                         )}
                                     </div>
                                 </Card>
@@ -1002,3 +1025,4 @@ export default function PendientesPage() {
 }
 
     
+

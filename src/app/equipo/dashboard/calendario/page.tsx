@@ -41,7 +41,7 @@ const CalendarSection = ({ title, events, team, eventType, onRefresh }: {
     title: string, events: RecordingEvent[], team: typeof teamMembers, 
     eventType: 'grabacion' | 'cita_venta', onRefresh: () => void
 }) => {
-    const [currentDate, setCurrentDate] = useState(new Date('2024-11-05'));
+    const [currentDate, setCurrentDate] = useState(new Date());
     const [memberFilter, setMemberFilter] = useState('Todos');
 
     const weekStartsOn = 1; // Monday
