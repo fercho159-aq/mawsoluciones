@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect, startTransition } from 'react';
@@ -370,15 +371,13 @@ const ClientDataDialog = ({ pendientes, onSave, onRefresh, children }: { pendien
     const firstPendiente = pendientes[0];
 
     useEffect(() => {
-        if (open) {
-            setPubsMes(firstPendiente?.publicacionesAlMes ?? '');
-            setPubsSemana(firstPendiente?.publicacionesALaSemana ?? '');
+        if (open && firstPendiente) {
+            setPubsMes(firstPendiente.publicacionesAlMes ?? '');
+            setPubsSemana(firstPendiente.publicacionesALaSemana ?? '');
         }
     }, [open, firstPendiente]);
 
     const handleSave = async () => {
-        // We assume all pendientes for a client should have the same publication counts.
-        // We'll update all of them.
         const dataToSave = {
             publicacionesAlMes: pubsMes,
             publicacionesALaSemana: pubsSemana,
@@ -636,7 +635,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                             />
                                         ) : (
                                             <div className="flex justify-between items-center">
-                                                <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground pl-4 h-8" onClick={()={() => setAddingToClientId(client.id)}>
+                                                <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground pl-4 h-8" onClick={() => setAddingToClientId(client.id)}>
                                                     <Plus className="w-4 h-4 mr-2" />
                                                     Añadir pendiente
                                                 </Button>
