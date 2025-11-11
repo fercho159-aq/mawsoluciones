@@ -110,28 +110,27 @@ const generatePeriodOptions = () => {
 
     for (let i = -2; i <= 2; i++) {
         const month = addMonths(today, i);
-        const year = format(month, 'yyyy');
-        const monthName = format(month, 'MMMM', { locale: es });
-        const endOfMonthDate = endOfMonth(month);
-
+        
         // Mensual del 1 al fin de mes
-        options.push(`1 al ${format(endOfMonthDate, 'd')} de ${monthName} de ${year}`);
+        const startOfMonthDate = startOfMonth(month);
+        const endOfMonthDate = endOfMonth(month);
+        options.push(`1 de ${format(startOfMonthDate, 'MMMM', { locale: es })} al ${format(endOfMonthDate, 'd')} de ${format(endOfMonthDate, 'MMMM yyyy', { locale: es })}`);
 
         // Mensual del 15 al 15
         const startMidMonth = setDate(month, 15);
         const endMidMonth = addMonths(startMidMonth, 1);
-        options.push(`15 de ${format(startMidMonth, 'MMMM', { locale: es })} al 15 de ${format(endMidMonth, 'MMMM', { locale: es })} de ${format(endMidMonth, 'yyyy')}`);
+        options.push(`15 de ${format(startMidMonth, 'MMMM', { locale: es })} al 15 de ${format(endMidMonth, 'MMMM yyyy', { locale: es })}`);
     }
 
     return [...new Set(options)].sort((a, b) => {
         try {
             const parseDate = (periodString: string): Date => {
-                const parts = periodString.toLowerCase().split(' ');
+                 const parts = periodString.toLowerCase().split(' ');
                 const day = parseInt(parts[0]);
                 const monthName = parts[2];
-                const year = parseInt(parts[parts.length - 1]);
+                const yearIndex = parts.findIndex(p => !isNaN(parseInt(p)) && p.length === 4);
+                const year = parseInt(parts[yearIndex]);
                 const monthIndex = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'].indexOf(monthName);
-                if (monthIndex === -1) return new Date(0);
                 return new Date(year, monthIndex, day);
             };
             
@@ -148,7 +147,7 @@ const generatePeriodOptions = () => {
 const generateFechaCobroOptions = () => {
     const today = new Date();
     const options: string[] = [];
-    for (let i = 0; i < 3; i++) {
+    for (let i = -1; i <= 3; i++) { // From last month to next 3 months
         const month = addMonths(today, i);
         const year = format(month, 'yyyy');
         const monthName = format(month, 'MMMM', {locale: es});
@@ -1181,5 +1180,6 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
 
 
