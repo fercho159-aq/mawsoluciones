@@ -107,56 +107,56 @@ const generatePeriodOptions = () => {
     const today = new Date();
     const options: string[] = [];
 
-    // Generate for the last 2 and next 2 months
     for (let i = -2; i <= 2; i++) {
         const month = addMonths(today, i);
         const startOfMonthDate = startOfMonth(month);
         const endOfMonthDate = endOfMonth(month);
-        
-        const yearFormat = 'yyyy';
-        const monthFormat = 'MMMM';
-        const dayMonthFormat = `d 'de' MMMM`;
-        const dayMonthYearFormat = `d 'de' MMMM 'de' yyyy`;
 
-        const startMonthStr = format(startOfMonthDate, monthFormat, { locale: es });
-        const startYearStr = format(startOfMonthDate, yearFormat);
-        const endMonthStr = format(endOfMonthDate, monthFormat, { locale: es });
+        const year = format(startOfMonthDate, "yyyy");
+        const monthName = format(startOfMonthDate, "MMMM", { locale: es });
+        const endDay = format(endOfMonthDate, "d");
 
-        // Mes completo
-        options.push(`1 de ${startMonthStr} de ${startYearStr} al ${format(endOfMonthDate, dayMonthYearFormat, { locale: es })}`);
-        
-        // Quincena 1-15
-        options.push(`1 de ${startMonthStr} de ${startYearStr} al 15 de ${startMonthStr} de ${startYearStr}`);
-        
-        // Quincena 16-fin de mes
-        options.push(`16 de ${startMonthStr} de ${startYearStr} al ${format(endOfMonthDate, dayMonthYearFormat, { locale: es })}`);
+        options.push(`1 al 15 de ${monthName} de ${year}`);
+        options.push(`16 al ${endDay} de ${monthName} de ${year}`);
     }
 
-    const uniqueOptions = [...new Set(options)];
-    
-    uniqueOptions.sort((a, b) => {
+    return [...new Set(options)].sort((a, b) => {
         try {
-            const datePartA = a.split(' al ')[0];
-            const datePartB = b.split(' al ')[0];
-
-            const parseDate = (part: string) => {
-                return parse(part, "d 'de' MMMM 'de' yyyy", new Date(), { locale: es });
-            };
+            const datePartA = a.split(' al ')[0].trim();
+            const datePartB = b.split(' al ')[0].trim();
             
-            const dateA = parseDate(datePartA);
-            const dateB = parseDate(datePartB);
+            const parseDate = (part: string) => parse(part, "d 'de' MMMM 'de' yyyy", new Date(), { locale: es });
+            
+            const dateA = parseDate(`1 de ${a.split(' de ')[1]} de ${a.split(' de ')[2]}`);
+            const dateB = parseDate(`1 de ${b.split(' de ')[1]} de ${b.split(' de ')[2]}`);
+            
+            if (dateA.getTime() !== dateB.getTime()) {
+                return dateA.getTime() - dateB.getTime();
+            }
 
-            return dateA.getTime() - dateB.getTime();
+            const dayA = parseInt(datePartA);
+            const dayB = parseInt(datePartB);
+
+            return dayA - dayB;
         } catch (e) {
-            console.error("Error parsing date for sort", e);
             return 0;
         }
     });
-    
-    return uniqueOptions;
 };
 
-
+const generateFechaCobroOptions = () => {
+    const today = new Date();
+    const options: string[] = [];
+    for (let i = 0; i < 3; i++) {
+        const month = addMonths(today, i);
+        const year = format(month, 'yyyy');
+        const monthName = format(month, 'MMMM', {locale: es});
+        const endOfMonthDate = endOfMonth(month);
+        options.push(`15 de ${monthName} de ${year}`);
+        options.push(`${format(endOfMonthDate, 'd')} de ${monthName} de ${year}`);
+    }
+    return options;
+};
 
 const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: { 
     clients?: (Client & { financialProfile: ClientFinancialProfile | null; }) [],
@@ -173,10 +173,11 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
     const [monto, setMonto] = useState('');
     const [tipo, setTipo] = useState<CategoriaIngreso>('Iguala Mensual');
     const [periodo, setPeriodo] = useState('');
-    const [fechaCobro, setFechaCobro] = useState<Date | undefined>();
+    const [fechaCobro, setFechaCobro] = useState<string | undefined>();
     const [conIva, setConIva] = useState(false);
     const [periodoManual, setPeriodoManual] = useState('');
     const periodOptions = useMemo(() => generatePeriodOptions(), [open]);
+    const fechaCobroOptions = useMemo(() => generateFechaCobroOptions(), [open]);
 
     useEffect(() => {
         if (open) {
@@ -184,7 +185,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                 setMonto(cpc.monto.toString());
                 setTipo(cpc.tipo as CategoriaIngreso);
                 setSelectedClientId(cpc.clienteId.toString());
-                setFechaCobro(cpc.fecha_cobro ? new Date(cpc.fecha_cobro) : undefined);
+                setFechaCobro(cpc.fecha_cobro || undefined);
                 setConIva(cpc.conIva ?? false);
                  if (periodOptions.includes(cpc.periodo)) {
                     setPeriodo(cpc.periodo);
@@ -333,30 +334,18 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                             <Input value={periodoManual} onChange={e => setPeriodoManual(e.target.value)} placeholder="Ej. Semana 40, Proyecto X..." />
                         </div>
                      )}
-                      <div className="space-y-2">
+                     <div className="space-y-2">
                         <Label>Fecha de Cobro</Label>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                variant={"outline"}
-                                className={cn(
-                                    "w-full justify-start text-left font-normal",
-                                    !fechaCobro && "text-muted-foreground"
-                                )}
-                                >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {fechaCobro ? format(fechaCobro, "PPP", { locale: es }) : <span>Selecciona una fecha</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                                <Calendar
-                                mode="single"
-                                selected={fechaCobro}
-                                onSelect={setFechaCobro}
-                                initialFocus
-                                />
-                            </PopoverContent>
-                        </Popover>
+                        <Select value={fechaCobro} onValueChange={setFechaCobro}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Selecciona una fecha de cobro" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {fechaCobroOptions.map(option => (
+                                    <SelectItem key={option} value={option}>{option}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                     <div className="flex items-center space-x-2">
                         <Checkbox id="conIva" checked={conIva} onCheckedChange={c => setConIva(Boolean(c))} />
@@ -1132,4 +1121,3 @@ export default function FinanzasPage() {
         </div>
     );
 }
-
