@@ -1,6 +1,6 @@
 
 
-export type Role = 'admin' | 'contabilidad' | 'ventas' | 'team_member' | 'julio' | 'alma' | 'fernando' | 'luis' | 'fany' | 'carlos' | 'paola' | 'cristian' | 'daniel' | 'alexis' | 'bere' | 'kari' | 'aldair' | 'pedro';
+export type Role = 'admin' | 'contabilidad' | 'ventas' | 'team_member' | 'julio' | 'alma' | 'fernando' | 'luis' | 'fany' | 'carlos' | 'paola' | 'cristhian' | 'daniel' | 'alexis' | 'bere' | 'kari' | 'aldair' | 'pedro';
 
 export type TeamMember = {
     id: string;
@@ -177,12 +177,12 @@ export const teamMembers: TeamMember[] = [
         progressConfig: {}
     },
     { 
-        id: 'cristian-01', 
-        name: 'Cristian', 
-        username: 'cristian', 
-        password: 'cristian2025', 
-        role: 'cristian', 
-        email: 'cristian@agencia.com',
+        id: 'cristhian-01', 
+        name: 'Cristhian', 
+        username: 'cristhian', 
+        password: 'cristhian2025', 
+        role: 'cristhian', 
+        email: 'cristhian@agencia.com',
         color: '#10B981', // emerald-500
         accessSections: { nosotros: true, introduccion: true, pendientes: true, accesos: true, calendario: true, miProgreso: true, clientes: false, configuracion: true },
         permissions: {

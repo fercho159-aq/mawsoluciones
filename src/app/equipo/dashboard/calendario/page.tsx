@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -34,7 +35,7 @@ const equipmentCategoryIcons = {
 };
 
 const salesTeam = teamMembers.filter(member => ['julio', 'alma', 'fernando'].includes(member.role));
-const productionTeam = teamMembers.filter(member => ['luis', 'fany', 'carlos', 'paola', 'cristian', 'daniel', 'alexis'].includes(member.role));
+const productionTeam = teamMembers.filter(member => ['luis', 'fany', 'carlos', 'paola', 'cristhian', 'daniel', 'alexis'].includes(member.role));
 
 const CalendarSection = ({ title, events, team, eventType, onRefresh }: { 
     title: string, events: RecordingEvent[], team: typeof teamMembers, 

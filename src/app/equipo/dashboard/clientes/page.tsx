@@ -32,7 +32,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import WhatsappIcon from '@/components/icons/whatsapp-icon';
 
 
-const adsTeam: TeamMember[] = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel'].includes(m.name));
+const adsTeam: TeamMember[] = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristhian', 'Daniel'].includes(m.name));
 const webTeam: TeamMember[] = teamMembers.filter(m => ['Julio', 'Fernando', 'Alexis'].includes(m.name));
 
 const contenidoEncargados: TeamMember[] = teamMembers.filter(m => ['Luis', 'Carlos', 'Fany'].includes(m.name));
@@ -40,7 +40,7 @@ const contenidoEncargados: TeamMember[] = teamMembers.filter(m => ['Luis', 'Carl
 const ejecutoresPorEncargado: Record<string, string[]> = {
     'Luis': ['Luis', 'Paola', 'Kari', 'Alexis'],
     'Carlos': ['Carlos', 'Pedro'],
-    'Fany': ['Fany', 'Daniel', 'Cristian', 'Aldair']
+    'Fany': ['Fany', 'Daniel', 'Cristhian', 'Aldair']
 };
 
 export const ClientFormDialog = ({ client, children, isEditing, onSave, open, onOpenChange }: { client?: Client, children: React.ReactNode, isEditing: boolean, onSave: () => void, open: boolean, onOpenChange: (open: boolean) => void }) => {

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -28,7 +29,7 @@ const mockEquipment = [
     { id: 'eq6', name: 'Teleprompter', category: 'soporte' as const, available: true }
 ];
 
-const productionTeam = teamMembers.filter(member => ['luis', 'fany', 'carlos', 'paola', 'cristian', 'daniel', 'alexis'].includes(member.role));
+const productionTeam = teamMembers.filter(member => ['luis', 'fany', 'carlos', 'paola', 'cristhian', 'daniel', 'alexis'].includes(member.role));
 
 const equipmentCategoryIcons = {
     audio: <Mic className="w-4 h-4" />,

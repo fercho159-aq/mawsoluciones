@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect, startTransition } from 'react';
@@ -143,13 +144,13 @@ const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<Omit<NewProspe
     )
 }
 
-const adsTeam: Colaborador[] = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristian', 'Daniel'].includes(m.name));
+const adsTeam: Colaborador[] = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristhian', 'Daniel'].includes(m.name));
 const webTeam: Colaborador[] = teamMembers.filter(m => ['Julio', 'Fernando', 'Alexis'].includes(m.name));
 const contenidoEncargados: Colaborador[] = teamMembers.filter(m => ['Luis', 'Carlos', 'Fany'].includes(m.name));
 const ejecutoresPorEncargado: Record<string, string[]> = {
     'Luis': ['Luis', 'Paola', 'Kari', 'Alexis'],
     'Carlos': ['Carlos', 'Pedro'],
-    'Fany': ['Fany', 'Daniel', 'Cristian', 'Aldair']
+    'Fany': ['Fany', 'Daniel', 'Cristhian', 'Aldair']
 };
 
 const ConvertLeadDialog = ({ prospect, onSave, children }: { prospect: Prospect | null, onSave: () => void, children: React.ReactNode }) => {
@@ -216,7 +217,7 @@ const ConvertLeadDialog = ({ prospect, onSave, children }: { prospect: Prospect 
             return;
         }
 
-        const clientData: NewClientData = {
+        const clientData = {
             name,
             representativeName,
             whatsapp,
