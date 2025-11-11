@@ -139,7 +139,9 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
     const handleSave = async () => {
         let targetClient: {id: number, name: string} | undefined;
 
-        if (isEditing && cpc) {
+        if (client) {
+            targetClient = { id: client.id, name: client.name };
+        } else if (isEditing && cpc) {
             targetClient = { id: cpc.clienteId, name: cpc.clienteName };
         } else if (selectedClientId) {
             const foundClient = clients?.find(c => c.id.toString() === selectedClientId);
@@ -169,7 +171,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                     clienteName: targetClient.name,
                     ...data,
                 });
-                toast({ title: "Éxito", description: "Cuenta por cobrar y movimiento de ingreso creados." });
+                toast({ title: "Éxito", description: "Cuenta por cobrar creada." });
             }
             startTransition(() => {
                 onSave();
@@ -248,7 +250,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                             <AlertDialogContent onClick={(e) => e.stopPropagation()}>
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                                    <AlertDialogDescription>Esta acción eliminará permanentemente la cuenta por cobrar y su movimiento asociado.</AlertDialogDescription>
+                                    <AlertDialogDescription>Esta acción eliminará permanentemente la cuenta por cobrar.</AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
@@ -884,6 +886,3 @@ export default function FinanzasPage() {
         </div>
     );
 }
-
-
-
