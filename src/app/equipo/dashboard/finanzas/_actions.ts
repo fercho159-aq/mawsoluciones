@@ -4,7 +4,7 @@
 
 import { db } from "@/lib/db";
 import { cuentasPorCobrar, movimientosDiarios, type NewCuentaPorCobrar, type CuentaPorCobrar, type MovimientoDiario, type NewMovimientoDiario } from "@/lib/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function getCuentasPorCobrar() {
@@ -80,17 +80,21 @@ export async function updateCpc(id: number, data: Partial<Omit<NewCuentaPorCobra
 
 export async function registrarPagoCpc(cpcId: number, cuentaDestino: string, detalleCuenta: string | null) {
      try {
-        const movimiento = await db.query.movimientosDiarios.findFirst({ where: eq(movimientosDiarios.cpcId, cpcId) });
+        // First, find the corresponding pending movement.
+        const movimiento = await db.query.movimientosDiarios.findFirst({
+            where: and(eq(movimientosDiarios.cpcId, cpcId), eq(movimientosDiarios.cuenta, 'Pendiente'))
+        });
 
         if (!movimiento) {
-             // If no movement is found, it's an inconsistency, but we should still mark the debt as paid by deleting it.
+             // If no pending movement is found, it might have been already paid or there's an inconsistency.
+             // We still try to delete the account receivable.
              await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, cpcId));
              revalidatePath("/equipo/dashboard/finanzas");
-             console.warn(`CPC record ${cpcId} deleted, but no corresponding movement was found to update.`);
+             console.warn(`CPC record ${cpcId} deleted, but no corresponding PENDING movement was found to update.`);
              return;
         }
 
-        // Update the movement from 'Pendiente' to a real account
+        // Update the found movement from 'Pendiente' to a real account
         await db.update(movimientosDiarios)
             .set({ 
                 cuenta: cuentaDestino,
@@ -98,9 +102,9 @@ export async function registrarPagoCpc(cpcId: number, cuentaDestino: string, det
                 descripcion: movimiento.descripcion.replace(' (pendiente)', '') || 'Ingreso registrado',
                 fecha: new Date(),
             })
-            .where(eq(movimientosDiarios.cpcId, cpcId));
+            .where(eq(movimientosDiarios.id, movimiento.id)); // Use the specific movement ID
 
-        // Delete the account receivable record
+        // Finally, delete the account receivable record
         await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, cpcId));
             
         revalidatePath("/equipo/dashboard/finanzas");
