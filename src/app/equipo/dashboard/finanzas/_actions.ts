@@ -80,11 +80,13 @@ export async function updateCpc(id: number, data: Partial<Omit<NewCuentaPorCobra
 
 export async function registrarPagoCpc(cpcId: number, cuentaDestino: string, detalleCuenta: string | null) {
      try {
+        // Find the specific pending movement associated with this cpcId
         const movimiento = await db.query.movimientosDiarios.findFirst({
             where: and(eq(movimientosDiarios.cpcId, cpcId), eq(movimientosDiarios.cuenta, 'Pendiente'))
         });
         
         if (movimiento) {
+            // Update the found movement
             await db.update(movimientosDiarios)
                 .set({ 
                     cuenta: cuentaDestino,
@@ -92,9 +94,14 @@ export async function registrarPagoCpc(cpcId: number, cuentaDestino: string, det
                     descripcion: movimiento.descripcion.replace(' (pendiente)', '') || 'Ingreso registrado',
                 })
                 .where(eq(movimientosDiarios.id, movimiento.id));
-        }
 
-        await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, cpcId));
+            // Only after successful update, delete the cpc
+            await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, cpcId));
+        } else {
+             // If no pending movement is found, it might have been already processed.
+             // We can just delete the CPC to clean up.
+             await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, cpcId));
+        }
             
         revalidatePath("/equipo/dashboard/finanzas");
     } catch (error: any) {
@@ -146,7 +153,3 @@ export async function deleteMovimiento(id: number) {
         throw new Error(error.message || "Could not delete movimiento");
     }
 }
-
-
-
-
