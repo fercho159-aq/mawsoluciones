@@ -340,7 +340,8 @@ export default function VentasPage() {
     const fetchProspects = async () => {
         setIsLoading(true);
         const prospectsData = await getProspects();
-        setProspects(prospectsData as Prospect[]);
+        const sortedProspects = (prospectsData as Prospect[]).sort((a, b) => (a.name || a.company || '').localeCompare(b.name || b.company || ''));
+        setProspects(sortedProspects);
         setIsLoading(false);
     }
     

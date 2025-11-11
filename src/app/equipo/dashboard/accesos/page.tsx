@@ -30,7 +30,7 @@ const mockAccessData: AccountAccess[] = [
   { platform: "Google Ads", client: "Clínica Dental Sonrisa", email: "ads.sonrisa@cliente.com", password: "SonrisaDental!Ads" },
   { platform: "Facebook Ads", client: "NIU Coliving", email: "fb.niu@cliente.com", password: "NiuLivingFBPass" },
   { platform: "TikTok Ads", client: "Moda Hoy", email: "tiktok.modahoy@cliente.com", password: "ModaHoyTT2024" },
-];
+].sort((a, b) => a.client.localeCompare(b.client));
 
 export default function AccesosPage() {
   const [searchFilter, setSearchFilter] = useState('');

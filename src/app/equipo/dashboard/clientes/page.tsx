@@ -262,7 +262,8 @@ export default function ClientesPage() {
         setIsLoading(true);
         try {
             const clientsData = await fetchClientsDB();
-            setClients(clientsData as Client[]);
+            const sortedClients = (clientsData as Client[]).sort((a, b) => a.name.localeCompare(b.name));
+            setClients(sortedClients);
         } catch (error) {
             toast({
                 title: "Error al cargar clientes",

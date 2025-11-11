@@ -328,7 +328,7 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
             }
         });
 
-        let clientList = Array.from(debtMap.values());
+        let clientList = Array.from(debtMap.values()).sort((a,b) => a.client.name.localeCompare(b.client.name));
 
         if (clientFilter !== 'Todos') {
             clientList = clientList.filter(item => item.client.name === clientFilter);
@@ -817,7 +817,7 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
         
         const monthlySummary = monthlyFilteredMovements.reduce((acc, mov) => {
             const cuenta = mov.cuenta as keyof typeof initialBreakdown;
-            if (mov.tipo === 'Ingreso' && cuenta !== 'Pendiente') {
+            if (mov.tipo === 'Ingreso') {
                 acc.totalIngresos += mov.monto;
                 if(acc.ingresosPorCuenta[cuenta] !== undefined) {
                     acc.ingresosPorCuenta[cuenta] += mov.monto;
@@ -932,7 +932,7 @@ export default function FinanzasPage() {
                 getCuentasPorCobrar(),
                 getMovimientos()
             ]);
-            setClients(clientsData as (Client & { financialProfile: ClientFinancialProfile | null; })[]);
+            setClients((clientsData as (Client & { financialProfile: ClientFinancialProfile | null; })[]).sort((a, b) => a.name.localeCompare(b.name)));
             setCuentasPorCobrar(cpcData as CuentaPorCobrar[]);
             setMovimientos(movimientosData as MovimientoDiario[]);
         } catch (error) {

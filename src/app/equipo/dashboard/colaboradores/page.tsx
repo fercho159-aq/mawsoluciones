@@ -149,15 +149,17 @@ const ColaboradorFormDialog = ({ colaborador, onSave }: { colaborador?: Colabora
 
 export default function ColaboradoresPage() {
     const { user, loading } = useAuth();
-    // Leer directamente desde el archivo estático
-    const [colaboradores, setColaboradores] = useState<Colaborador[]>(teamMembers);
+    // Leer directamente desde el archivo estático y ordenarlo
+    const [colaboradores, setColaboradores] = useState<Colaborador[]>(() => 
+        [...teamMembers].sort((a, b) => a.name.localeCompare(b.name))
+    );
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
 
     // Simular fetch para mantener consistencia, aunque los datos son locales
     const fetchColaboradores = () => {
         setIsLoading(true);
-        setColaboradores(teamMembers);
+        setColaboradores([...teamMembers].sort((a, b) => a.name.localeCompare(b.name)));
         setIsLoading(false);
     };
 

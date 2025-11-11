@@ -498,7 +498,8 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
     }
 
     const groupedData = useMemo(() => {
-        return data.reduce((acc, pendiente) => {
+        const sortedData = [...data].sort((a,b)=> a.clienteName.localeCompare(b.clienteName));
+        return sortedData.reduce((acc, pendiente) => {
             (acc[pendiente.clienteName] = acc[pendiente.clienteName] || []).push(pendiente);
             return acc;
         }, {} as Record<string, PendienteWithRelations[]>);
