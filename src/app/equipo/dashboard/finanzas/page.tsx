@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Info, Trash2, Plus } from 'lucide-react';
+import { ArrowUpDown, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Info, Trash2, Plus, MoreHorizontal, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -31,6 +31,68 @@ import { getCuentasPorCobrar, getMovimientos, addCpc, addMovimiento, updateCpc, 
 import { getClients } from '../clientes/_actions';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+
+// Extend the window type for jspdf-autotable
+declare global {
+  interface Window {
+    jsPDF: typeof jsPDF;
+  }
+}
+
+// PDF Generation Utility
+const generatePdf = (client: Client, debts: CuentaPorCobrar[], type: 'recibo' | 'prefactura') => {
+    const doc = new jsPDF();
+    const totalDebt = debts.reduce((sum, debt) => sum + debt.monto, 0);
+
+    // Header
+    doc.setFontSize(20);
+    doc.text("MAW Soluciones", 14, 22);
+    doc.setFontSize(12);
+    doc.text(type === 'recibo' ? 'Recibo' : 'Prefactura', 150, 22);
+    
+    doc.setFontSize(10);
+    doc.text(`Fecha: ${format(new Date(), 'dd/MM/yyyy')}`, 150, 28);
+    doc.text(`Cliente: ${client.name}`, 14, 40);
+    doc.text(`Contacto: ${client.representativeName}`, 14, 46);
+
+    // Table
+    const tableColumn = ["Periodo", "Servicio", "Monto"];
+    const tableRows = debts.map(debt => [
+        debt.periodo,
+        debt.tipo,
+        debt.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })
+    ]);
+
+    (doc as any).autoTable({
+        startY: 55,
+        head: [tableColumn],
+        body: tableRows,
+    });
+    
+    const finalY = (doc as any).lastAutoTable.finalY;
+
+    // Totals
+    if (type === 'prefactura') {
+        const iva = totalDebt * 0.16;
+        const finalTotal = totalDebt + iva;
+        doc.setFontSize(10);
+        doc.text(`Subtotal: ${totalDebt.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}`, 140, finalY + 10);
+        doc.text(`IVA (16%): ${iva.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}`, 140, finalY + 16);
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Total: ${finalTotal.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}`, 140, finalY + 24);
+    } else {
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Total: ${totalDebt.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}`, 140, finalY + 10);
+    }
+    
+    // Download
+    doc.save(`${type}_${client.name.replace(/ /g, '_')}_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+};
 
 
 type CategoriaIngreso = "Proyecto" | "Iguala Mensual" | "Renovaciones" | "Otros";
@@ -279,6 +341,7 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
                                     <ArrowUpDown className="w-4 h-4" />
                                 </div>
                             </TableHead>
+                            <TableHead className="text-right">Acciones</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -312,6 +375,27 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
                                     </TableCell>
                                     <TableCell className={cn("font-bold", totalDebt > 0 ? 'text-destructive' : 'text-green-500')}>
                                         {totalDebt.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        {debts.length > 0 && (
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon">
+                                                        <MoreHorizontal className="w-4 h-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent>
+                                                    <DropdownMenuItem onClick={() => generatePdf(client, debts, 'recibo')}>
+                                                        <Download className="w-4 h-4 mr-2" />
+                                                        Descargar Recibo
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => generatePdf(client, debts, 'prefactura')}>
+                                                        <Download className="w-4 h-4 mr-2" />
+                                                        Descargar Prefactura
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             ))}
