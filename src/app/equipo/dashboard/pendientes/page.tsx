@@ -403,15 +403,17 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                 >
                                     <TableRow className="h-12 p-0 cursor-pointer">
                                         {index === 0 && (
-                                            <TableCell 
-                                                rowSpan={pendientes.length} 
-                                                className="align-top text-center font-medium p-2 border-r"
-                                            >
-                                                <div className='flex flex-col h-full justify-between'>
-                                                <span>{clienteName}</span>
-                                                <ClientProgress pendientes={pendientes} />
-                                                </div>
-                                            </TableCell>
+                                            <>
+                                                <TableCell 
+                                                    rowSpan={pendientes.length} 
+                                                    className="align-top text-center font-medium p-2 border-r"
+                                                >
+                                                    <div className='flex flex-col h-full justify-between'>
+                                                    <span>{clienteName}</span>
+                                                    <ClientProgress pendientes={pendientes} />
+                                                    </div>
+                                                </TableCell>
+                                            </>
                                         )}
                                         <TableCell className="p-2 align-middle" onClick={(e) => e.stopPropagation()}>
                                             <Checkbox 
@@ -423,8 +425,12 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                         <TableCell className={cn("p-2 align-middle", pendiente.completed && "line-through text-muted-foreground")}>
                                             <p className="text-sm">{pendiente.pendientePrincipal}</p>
                                         </TableCell>
-                                        {isContenido && <TableCell className="p-2 align-middle text-center">{pendiente.publicacionesAlMes || '-'}</TableCell>}
-                                        {isContenido && <TableCell className="p-2 align-middle text-center">{pendiente.publicacionesALaSemana || '-'}</TableCell>}
+                                        {isContenido && index === 0 && (
+                                            <>
+                                                <TableCell rowSpan={pendientes.length} className="p-2 align-middle text-center border-l">{pendientes[0].publicacionesAlMes || '-'}</TableCell>
+                                                <TableCell rowSpan={pendientes.length} className="p-2 align-middle text-center border-l">{pendientes[0].publicacionesALaSemana || '-'}</TableCell>
+                                            </>
+                                        )}
                                         <TableCell className="p-2 align-middle text-xs">{pendiente.encargado}</TableCell>
                                         <TableCell className="p-2 align-middle text-xs">{pendiente.ejecutor}</TableCell>
                                         <TableCell className="p-2 align-middle">
@@ -799,4 +805,5 @@ export default function PendientesPage() {
     </div>
   );
 }
+
 
