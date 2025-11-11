@@ -9,7 +9,9 @@ import { revalidatePath } from "next/cache";
 
 export async function getCuentasPorCobrar() {
   try {
-    const allCpc = await db.query.cuentasPorCobrar.findMany();
+    const allCpc = await db.query.cuentasPorCobrar.findMany({
+        orderBy: [desc(cuentasPorCobrar.id)],
+    });
     return allCpc;
   } catch (error) {
     console.error("Error fetching cpc:", error);
@@ -36,18 +38,6 @@ export async function addCpc(data: Omit<NewCuentaPorCobrar, 'id'>): Promise<{cpc
         if (!newCpc) {
             throw new Error("Failed to create the cpc record.");
         }
-
-        // Create a corresponding movement with a 'Pendiente' status
-        await db.insert(movimientosDiarios).values({
-            fecha: new Date(),
-            tipo: 'Ingreso',
-            descripcion: `Ingreso (pendiente) de ${data.clienteName} por ${data.tipo}`,
-            monto: data.monto,
-            cuenta: 'Pendiente', // This marks it as an unpaid receivable
-            categoria: data.tipo,
-            cpcId: newCpc.id, 
-        });
-
         revalidatePath("/equipo/dashboard/finanzas");
         return { cpc: newCpc };
 
@@ -60,17 +50,7 @@ export async function addCpc(data: Omit<NewCuentaPorCobrar, 'id'>): Promise<{cpc
 
 export async function updateCpc(id: number, data: Partial<Omit<NewCuentaPorCobrar, 'id' | 'clienteId' | 'clienteName'>>) {
     try {
-        const [updatedCpc] = await db.update(cuentasPorCobrar).set(data).where(eq(cuentasPorCobrar.id, id)).returning();
-        
-        // Also update the corresponding pending movement
-        if (updatedCpc) {
-            await db.update(movimientosDiarios).set({
-                monto: data.monto,
-                descripcion: `Ingreso (pendiente) de ${updatedCpc.clienteName} por ${data.tipo || updatedCpc.tipo}`,
-                categoria: data.tipo,
-            }).where(eq(movimientosDiarios.cpcId, id));
-        }
-
+        await db.update(cuentasPorCobrar).set(data).where(eq(cuentasPorCobrar.id, id)).returning();
         revalidatePath("/equipo/dashboard/finanzas");
     } catch (error: any) {
         console.error("Error updating cpc:", error);
@@ -80,28 +60,29 @@ export async function updateCpc(id: number, data: Partial<Omit<NewCuentaPorCobra
 
 export async function registrarPagoCpc(cpcId: number, cuentaDestino: string, detalleCuenta: string | null) {
      try {
-        // Find the specific pending movement associated with this cpcId
-        const movimiento = await db.query.movimientosDiarios.findFirst({
-            where: and(eq(movimientosDiarios.cpcId, cpcId), eq(movimientosDiarios.cuenta, 'Pendiente'))
+        // 1. Get the details from the cpc record
+        const cpcToPay = await db.query.cuentasPorCobrar.findFirst({
+            where: eq(cuentasPorCobrar.id, cpcId),
         });
         
-        if (movimiento) {
-            // Update the found movement
-            await db.update(movimientosDiarios)
-                .set({ 
-                    cuenta: cuentaDestino,
-                    detalleCuenta: detalleCuenta,
-                    descripcion: movimiento.descripcion.replace(' (pendiente)', '') || 'Ingreso registrado',
-                })
-                .where(eq(movimientosDiarios.id, movimiento.id));
-
-            // Only after successful update, delete the cpc
-            await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, cpcId));
-        } else {
-             // If no pending movement is found, it might have been already processed.
-             // We can just delete the CPC to clean up.
-             await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, cpcId));
+        if (!cpcToPay) {
+            throw new Error("La cuenta por cobrar que intentas pagar ya no existe.");
         }
+
+        // 2. Create a new movement in movimientosDiarios, like a manual income
+        await db.insert(movimientosDiarios).values({
+            fecha: new Date(), // Use current date for the payment
+            tipo: 'Ingreso',
+            descripcion: `Pago de ${cpcToPay.clienteName} - ${cpcToPay.tipo} (${cpcToPay.periodo})`,
+            monto: cpcToPay.monto,
+            cuenta: cuentaDestino,
+            detalleCuenta: detalleCuenta,
+            categoria: cpcToPay.tipo,
+            cpcId: cpcToPay.id, // Keep the reference
+        });
+
+        // 3. Delete the cpc record now that it's paid
+        await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, cpcId));
             
         revalidatePath("/equipo/dashboard/finanzas");
     } catch (error: any) {
@@ -113,8 +94,7 @@ export async function registrarPagoCpc(cpcId: number, cuentaDestino: string, det
 
 export async function deleteCpc(id: number) {
     try {
-        // When deleting a CPC, we also delete the associated pending movement
-        await db.delete(movimientosDiarios).where(eq(movimientosDiarios.cpcId, id));
+        // Just delete the cpc, no related movement to delete anymore from this action.
         await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, id));
         revalidatePath("/equipo/dashboard/finanzas");
     } catch (error: any) {
