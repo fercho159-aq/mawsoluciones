@@ -30,12 +30,14 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { teamMembers } from '@/lib/team-data';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ScheduleRecordingDialog } from '@/components/schedule-recording-dialog';
 import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
 import { TikTokIcon } from '@/components/icons/tiktok-icon';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 
 
 const statusColors: Record<string, string> = {
@@ -517,6 +519,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                     <TableRow>
                         <TableHead className="w-[200px] min-w-[200px]">Cliente</TableHead>
                         <TableHead>Pendiente</TableHead>
+                         {(isContenido || isAds) && <TableHead className="w-[150px] min-w-[150px]">Fecha de Corte</TableHead>}
                          {isContenido && <TableHead className="w-[150px] min-w-[150px]">Pubs. al Mes</TableHead>}
                         {isContenido && <TableHead className="w-[150px] min-w-[150px]">Pubs. a la Semana</TableHead>}
                         {isAds && <TableHead className="w-[100px] min-w-[100px] text-center"><div className='flex flex-col items-center'><Facebook className="w-5 h-5 mx-auto text-blue-600" /><span>Facebook</span></div></TableHead>}
@@ -569,6 +572,26 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                             </PendienteDialog>
                                         </div>
                                     </TableCell>
+                                    {(isContenido || isAds) && index === 0 && (
+                                        <TableCell rowSpan={pendientes.length  + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">
+                                             <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <Button variant="outline" className="w-full justify-start text-left font-normal h-auto py-1 px-2 text-xs">
+                                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                                        {pendiente.fechaCorte ? format(parseISO(pendiente.fechaCorte as unknown as string), "d 'de' MMMM", { locale: es }) : <span>Sin fecha</span>}
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-auto p-0">
+                                                    <Calendar
+                                                        mode="single"
+                                                        selected={pendiente.fechaCorte ? parseISO(pendiente.fechaCorte as unknown as string) : undefined}
+                                                        onSelect={(date) => onUpdateTask(pendiente, { fechaCorte: date })}
+                                                        initialFocus
+                                                    />
+                                                </PopoverContent>
+                                            </Popover>
+                                        </TableCell>
+                                    )}
                                     {isContenido && index === 0 && (
                                         <>
                                             <TableCell rowSpan={pendientes.length  + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">{pendientes[0].publicacionesAlMes || '-'}</TableCell>
@@ -668,7 +691,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                             ))}
                              {currentUser?.permissions?.pendientes?.reasignarResponsables && (
                                 <TableRow>
-                                    <TableCell colSpan={isAds ? 5 : 1} className="p-0 h-full">
+                                    <TableCell colSpan={isAds ? 5 : isContenido ? 2 : 1} className="p-0 h-full">
                                         {addingToClientId === client.id ? (
                                             <AddPendienteInline 
                                                 client={client}
