@@ -15,14 +15,14 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Info, Trash2, Plus, MoreHorizontal, Download, FileWarning } from 'lucide-react';
+import { ArrowUpDown, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Info, Trash2, Plus, MoreHorizontal, Download, FileWarning, Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, subMonths, setDate, addMonths } from 'date-fns';
+import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, subMonths, setDate, addMonths, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useAuth } from '@/lib/auth-provider';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -34,6 +34,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 
 // Extend the window type for jspdf-autotable
 declare global {
@@ -105,25 +107,26 @@ const generatePeriodOptions = () => {
     const formatRange = (start: Date, end: Date) => 
         `${format(start, 'd \'de\' MMMM', { locale: es })} al ${format(end, 'd \'de\' MMMM', { locale: es })}`;
 
-    // Generate monthly and bi-weekly periods for the last 2 months, current month, and next 2 months
-    for (let i = -2; i <= 2; i++) {
+    // Generate monthly and bi-weekly periods for the last 6 months, current month, and next 3 months
+    for (let i = -6; i <= 3; i++) {
         const month = addMonths(today, i);
         
         // Full month
         options.push(formatRange(startOfMonth(month), endOfMonth(month)));
         
         // Quincena 1 (e.g., 15th of prev month to 15th of current month)
-        options.push(formatRange(setDate(subMonths(month, 1), 15), setDate(month, 15)));
+        options.push(formatRange(setDate(subMonths(month, 1), 15), setDate(month, 14)));
     }
     
-    // Remove duplicates and sort them (optional, but good for UX)
-    return [...new Set(options)].sort((a, b) => {
-        // A simple sort, can be improved if strict chronological order is needed
-        const aDate = new Date(a.split(' al ')[0].replace(' de ', ', '));
-        const bDate = new Date(b.split(' al ')[0].replace(' de ', ', '));
+    // Remove duplicates and sort them
+    const uniqueOptions = [...new Set(options)];
+    uniqueOptions.sort((a, b) => {
+        const aDate = new Date(a.split(' al ')[0].replace(' de ', ' '));
+        const bDate = new Date(b.split(' al ')[0].replace(' de ', ' '));
         return aDate.getTime() - bDate.getTime();
     });
-}
+    return uniqueOptions;
+};
 
 const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: { 
     clients?: (Client & { financialProfile: ClientFinancialProfile | null; }) [],
@@ -140,6 +143,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
     const [monto, setMonto] = useState('');
     const [tipo, setTipo] = useState<CategoriaIngreso>('Iguala Mensual');
     const [periodo, setPeriodo] = useState('');
+    const [fechaCobro, setFechaCobro] = useState<Date | undefined>();
     const periodOptions = useMemo(() => generatePeriodOptions(), [open]);
 
     useEffect(() => {
@@ -149,16 +153,19 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                 setTipo(cpc.tipo as CategoriaIngreso);
                 setPeriodo(cpc.periodo);
                 setSelectedClientId(cpc.clienteId.toString());
+                setFechaCobro(cpc.fecha_cobro ? new Date(cpc.fecha_cobro) : undefined);
             } else if (client) { // Pre-fill client if adding from a specific row
                  setMonto('');
                  setTipo('Iguala Mensual');
                  setPeriodo(periodOptions[0]);
                  setSelectedClientId(client.id.toString());
+                 setFechaCobro(undefined);
             } else { // Reset for global "add"
                 setMonto('');
                  setTipo('Iguala Mensual');
                  setPeriodo(periodOptions[0]);
                  setSelectedClientId('');
+                 setFechaCobro(undefined);
             }
         }
     }, [open, client, cpc, isEditing, periodOptions]);
@@ -182,10 +189,11 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
             return;
         }
         
-        const data = {
+        const data: Partial<NewCuentaPorCobrar> = {
             monto: parseFloat(monto),
             tipo,
             periodo,
+            fecha_cobro: fechaCobro,
         };
 
         try {
@@ -197,7 +205,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                     clienteId: targetClient.id,
                     clienteName: targetClient.name,
                     ...data,
-                });
+                } as NewCuentaPorCobrar);
                 toast({ title: "Éxito", description: "Cuenta por cobrar creada." });
             }
             startTransition(() => {
@@ -273,6 +281,31 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                             <Input type="number" value={monto} onChange={e => setMonto(e.target.value)} placeholder="0.00" />
                         </div>
                      </div>
+                      <div className="space-y-2">
+                        <Label>Fecha de Cobro</Label>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                variant={"outline"}
+                                className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !fechaCobro && "text-muted-foreground"
+                                )}
+                                >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {fechaCobro ? format(fechaCobro, "PPP", { locale: es }) : <span>Selecciona una fecha</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                mode="single"
+                                selected={fechaCobro}
+                                onSelect={setFechaCobro}
+                                initialFocus
+                                />
+                            </PopoverContent>
+                        </Popover>
+                    </div>
                 </div>
                 <DialogFooter className="justify-between">
                      <div>
