@@ -715,6 +715,39 @@ const MovimientoFormDialog = ({ movimiento, onSave, children }: { movimiento: Mo
     )
 }
 
+const SummaryCard = ({ title, value, icon, breakdown, colorClass }: { title: string, value: number, icon: React.ReactNode, breakdown: Record<string, number>, colorClass: string }) => {
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Card className="cursor-pointer hover:bg-muted">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+                        {icon}
+                    </CardHeader>
+                    <CardContent>
+                        <div className={cn("text-2xl font-bold", colorClass)}>
+                            {value.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+                        </div>
+                    </CardContent>
+                </Card>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+                <DropdownMenuItem className="font-bold justify-between">
+                    <span>Cuenta</span>
+                    <span>Monto</span>
+                </DropdownMenuItem>
+                {Object.entries(breakdown).map(([cuenta, monto]) => (
+                     <DropdownMenuItem key={cuenta} className="justify-between">
+                        <span>{cuenta}</span>
+                        <span>{monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
+                    </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
+    )
+}
+
+
 const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { isAdmin: boolean, movimientos: MovimientoDiario[], onSave: () => void, cuentasPorCobrar: CuentaPorCobrar[] }) => {
     const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
 
@@ -731,19 +764,34 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
     const summary = useMemo(() => {
         const totalCpc = cuentasPorCobrar.reduce((sum, cpc) => sum + cpc.monto, 0);
 
+        const initialBreakdown = { "Cuenta Paola": 0, "Cuenta MAW": 0, "Cuenta Aldo": 0, "Efectivo": 0, "Pendiente": 0 };
+        
         const monthlySummary = monthlyFilteredMovements.reduce((acc, mov) => {
-             if (mov.tipo === 'Ingreso' && mov.cuenta !== 'Pendiente') {
+            if (mov.tipo === 'Ingreso' && mov.cuenta !== 'Pendiente') {
                 acc.totalIngresos += mov.monto;
+                if(acc.ingresosPorCuenta[mov.cuenta]) acc.ingresosPorCuenta[mov.cuenta] += mov.monto;
             } else if (mov.tipo === 'Gasto') {
                 acc.totalGastos += mov.monto;
+                if(acc.gastosPorCuenta[mov.cuenta]) acc.gastosPorCuenta[mov.cuenta] += mov.monto;
             }
             return acc;
-        }, { totalIngresos: 0, totalGastos: 0 });
+        }, { 
+            totalIngresos: 0, 
+            totalGastos: 0,
+            ingresosPorCuenta: {...initialBreakdown},
+            gastosPorCuenta: {...initialBreakdown}
+        });
+
+        const utilidadPorCuenta = Object.keys(initialBreakdown).reduce((acc, cuenta) => {
+            acc[cuenta] = monthlySummary.ingresosPorCuenta[cuenta] - monthlySummary.gastosPorCuenta[cuenta];
+            return acc;
+        }, {} as Record<string, number>);
 
         return {
             ...monthlySummary,
             totalCuentasPorCobrar: totalCpc,
-            balance: monthlySummary.totalIngresos - monthlySummary.totalGastos
+            balance: monthlySummary.totalIngresos - monthlySummary.totalGastos,
+            utilidadPorCuenta
         };
     }, [monthlyFilteredMovements, cuentasPorCobrar]);
     
@@ -766,18 +814,9 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Total por Cobrar</CardTitle><FileWarning className="h-4 w-4 text-orange-500" /></CardHeader>
                     <CardContent><div className="text-2xl font-bold text-orange-500">{summary.totalCuentasPorCobrar.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div></CardContent>
                 </Card>
-                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Ingresos del Mes</CardTitle><TrendingUp className="h-4 w-4 text-green-500" /></CardHeader>
-                    <CardContent><div className="text-2xl font-bold text-green-500">{summary.totalIngresos.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div></CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Gastos del Mes</CardTitle><TrendingDown className="h-4 w-4 text-destructive" /></CardHeader>
-                    <CardContent><div className="text-2xl font-bold text-destructive">{summary.totalGastos.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div></CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Utilidad Neta Mensual</CardTitle><DollarSign className="h-4 w-4 text-muted-foreground" /></CardHeader>
-                    <CardContent><div className={cn("text-2xl font-bold", summary.balance >= 0 ? 'text-blue-500' : 'text-destructive')}>{summary.balance.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div></CardContent>
-                </Card>
+                <SummaryCard title="Ingresos del Mes" value={summary.totalIngresos} icon={<TrendingUp className="h-4 w-4 text-green-500" />} breakdown={summary.ingresosPorCuenta} colorClass="text-green-500" />
+                <SummaryCard title="Gastos del Mes" value={summary.totalGastos} icon={<TrendingDown className="h-4 w-4 text-red-500" />} breakdown={summary.gastosPorCuenta} colorClass="text-red-500" />
+                <SummaryCard title="Utilidad Neta Mensual" value={summary.balance} icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} breakdown={summary.utilidadPorCuenta} colorClass={summary.balance >= 0 ? 'text-blue-500' : 'text-destructive'} />
             </div>
             <Card>
                 <CardHeader>
