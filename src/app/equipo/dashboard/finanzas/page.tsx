@@ -95,7 +95,7 @@ const generatePdf = (client: Client, debts: CuentaPorCobrar[], type: 'recibo' | 
 };
 
 
-type CategoriaIngreso = "Proyecto" | "Iguala Mensual" | "Renovaciones" | "Otros";
+type CategoriaIngreso = "Proyecto" | "Iguala Mensual" | "Renovaciones" | "Otros" | "Contenido" | "Ads" | "Web";
 type CategoriaGasto = "Publicidad" | "Sueldos" | "Comisiones" | "Impuestos" | "Personales" | "Otros" | "Renta";
 type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo" | "Efectivo" | "Pendiente";
 
@@ -251,6 +251,8 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                                 <SelectItem value="Iguala Mensual">Iguala Mensual</SelectItem>
                                 <SelectItem value="Proyecto">Proyecto</SelectItem>
                                 <SelectItem value="Web">Web</SelectItem>
+                                <SelectItem value="Contenido">Contenido</SelectItem>
+                                <SelectItem value="Ads">Ads</SelectItem>
                                 <SelectItem value="Renovaciones">Renovaciones</SelectItem>
                                 <SelectItem value="Otros">Otros</SelectItem>
                             </SelectContent>
@@ -306,6 +308,7 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
     
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
     const [clientFilter, setClientFilter] = useState('Todos');
+    const [typeFilter, setTypeFilter] = useState<CategoriaIngreso | 'Todos'>('Todos');
 
     const clientDebts = useMemo(() => {
         const debtMap = new Map<number, { client: Client; totalDebt: number; debts: CuentaPorCobrar[] }>();
@@ -315,6 +318,9 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
         });
 
         data.forEach(cpc => {
+            if (typeFilter !== 'Todos' && cpc.tipo !== typeFilter) {
+                return;
+            }
             const clientEntry = debtMap.get(cpc.clienteId);
             if (clientEntry) {
                 clientEntry.totalDebt += cpc.monto;
@@ -333,11 +339,13 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
         }
 
         return clientList;
-    }, [data, clients, sortOrder, clientFilter]);
+    }, [data, clients, sortOrder, clientFilter, typeFilter]);
 
     const toggleSort = () => {
         setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc');
     };
+    
+    const allServiceTypes = Array.from(new Set(data.map(d => d.tipo))) as CategoriaIngreso[];
     
     return (
         <Card>
@@ -346,9 +354,9 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
                     <CardTitle>Control de Pagos</CardTitle>
                     <CardDescription>Gestiona los pagos pendientes de tus clientes.</CardDescription>
                 </div>
-                 <div className="flex gap-2">
+                 <div className="flex flex-col sm:flex-row gap-2">
                     <Select value={clientFilter} onValueChange={setClientFilter}>
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-full sm:w-[180px]">
                             <SelectValue placeholder="Filtrar por cliente" />
                         </SelectTrigger>
                         <SelectContent>
@@ -356,9 +364,18 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
                             {clients.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
                         </SelectContent>
                     </Select>
+                     <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as any)}>
+                        <SelectTrigger className="w-full sm:w-[180px]">
+                            <SelectValue placeholder="Filtrar por Servicio" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Todos">Todos los Servicios</SelectItem>
+                            {allServiceTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
                      {isAdmin && (
                         <CpcFormDialog clients={clients} onSave={onRefresh} isEditing={false}>
-                            <Button><PlusCircle className="w-4 h-4 mr-2" /> Añadir Cuenta por Cobrar</Button>
+                            <Button className="w-full sm:w-auto"><PlusCircle className="w-4 h-4 mr-2" /> Añadir CxC</Button>
                         </CpcFormDialog>
                     )}
                  </div>
@@ -652,7 +669,7 @@ const MovimientoFormDialog = ({ movimiento, onSave, children }: { movimiento: Mo
     const isGasto = movimiento.tipo === 'Gasto';
     const categoriasDisponibles = isGasto ? 
         (["Publicidad", "Sueldos", "Comisiones", "Impuestos", "Personales", "Renta", "Otros"] as CategoriaGasto[]) :
-        (["Proyecto", "Iguala Mensual", "Renovaciones", "Otros"] as CategoriaIngreso[]);
+        (["Proyecto", "Iguala Mensual", "Renovaciones", "Otros", "Contenido", "Ads", "Web"] as CategoriaIngreso[]);
 
     useEffect(() => {
         if (open) {
