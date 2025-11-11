@@ -107,8 +107,8 @@ const generatePeriodOptions = () => {
     const today = new Date();
     const options: string[] = [];
 
-    // Generate for the last 6 and next 3 months
-    for (let i = -6; i <= 3; i++) {
+    // Generate for the last 2 and next 2 months
+    for (let i = -2; i <= 2; i++) {
         const month = addMonths(today, i);
         const startOfMonthDate = startOfMonth(month);
         const endOfMonthDate = endOfMonth(month);
@@ -128,11 +128,18 @@ const generatePeriodOptions = () => {
     uniqueOptions.sort((a, b) => {
         const parseDateFromPeriod = (period: string) => {
             const datePart = period.split(' al ')[0];
-            return parse(datePart, "d 'de' MMMM", new Date(), { locale: es });
+            // Handles "1 de MMMM"
+            const parsed = parse(datePart, "d 'de' MMMM", new Date(), { locale: es });
+            return parsed;
         };
-        const dateA = parseDateFromPeriod(a);
-        const dateB = parseDateFromPeriod(b);
-        return dateA.getTime() - dateB.getTime();
+        try {
+            const dateA = parseDateFromPeriod(a);
+            const dateB = parseDateFromPeriod(b);
+            return dateA.getTime() - dateB.getTime();
+        } catch (e) {
+            console.error("Error parsing date for sort", e);
+            return 0;
+        }
     });
     
     return uniqueOptions;
@@ -1114,3 +1121,4 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
