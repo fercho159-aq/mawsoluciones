@@ -436,14 +436,16 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                         <TableCell className="p-2 align-middle">
                                             <Badge className={cn("text-white w-full justify-center", statusColors[pendiente.status])}>{pendiente.status}</Badge>
                                         </TableCell>
-                                        <TableCell className="p-2 text-center align-middle">
-                                            {pendiente.recordingEvent ? (
-                                                <div className="flex flex-col h-auto text-xs font-semibold">
-                                                    <span>{format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}</span>
-                                                    <span className='text-xs text-muted-foreground'>{format(new Date(pendiente.recordingEvent.fullStart), 'HH:mm')}</span>
-                                                </div>
-                                            ) : <span className="text-xs text-muted-foreground">No agendado</span>}
-                                        </TableCell>
+                                        {index === 0 && (
+                                            <TableCell className="p-2 text-center align-middle" rowSpan={pendientes.length}>
+                                                {pendiente.recordingEvent ? (
+                                                    <div className="flex flex-col h-auto text-xs font-semibold">
+                                                        <span>{format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}</span>
+                                                        <span className='text-xs text-muted-foreground'>{format(new Date(pendiente.recordingEvent.fullStart), 'HH:mm')}</span>
+                                                    </div>
+                                                ) : <span className="text-xs text-muted-foreground">No agendado</span>}
+                                            </TableCell>
+                                        )}
                                     </TableRow>
                                 </PendienteDialog>
                             ))}
@@ -805,5 +807,6 @@ export default function PendientesPage() {
     </div>
   );
 }
+
 
 
