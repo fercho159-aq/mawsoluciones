@@ -578,13 +578,13 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                                 <PopoverTrigger asChild>
                                                     <Button variant="outline" className="w-full justify-start text-left font-normal h-auto py-1 px-2 text-xs">
                                                         <CalendarIcon className="mr-2 h-4 w-4" />
-                                                        {pendiente.fechaCorte ? format(parseISO(pendiente.fechaCorte as unknown as string), "d 'de' MMMM", { locale: es }) : <span>Sin fecha</span>}
+                                                        {pendiente.fechaCorte ? format(new Date(pendiente.fechaCorte), "d 'de' MMMM", { locale: es }) : <span>Sin fecha</span>}
                                                     </Button>
                                                 </PopoverTrigger>
                                                 <PopoverContent className="w-auto p-0">
                                                     <Calendar
                                                         mode="single"
-                                                        selected={pendiente.fechaCorte ? parseISO(pendiente.fechaCorte as unknown as string) : undefined}
+                                                        selected={pendiente.fechaCorte ? new Date(pendiente.fechaCorte) : undefined}
                                                         onSelect={(date) => onUpdateTask(pendiente, { fechaCorte: date })}
                                                         initialFocus
                                                     />
