@@ -290,8 +290,8 @@ const ClientProgress = ({ pendientes }: { pendientes: PendienteWithRelations[] }
 
 const ClientDataDialog = ({ pendientes, onSave, onRefresh, children }: { pendientes: PendienteWithRelations[], onSave: (id: number, data: Partial<PendienteMaw>) => void, onRefresh: () => void, children: React.ReactNode }) => {
     const [open, setOpen] = useState(false);
-    const [pubsMes, setPubsMes] = useState<number | string>('');
-    const [pubsSemana, setPubsSemana] = useState<number | string>('');
+    const [pubsMes, setPubsMes] = useState<string>('');
+    const [pubsSemana, setPubsSemana] = useState<string>('');
     
     const firstPendiente = pendientes[0];
 
@@ -306,8 +306,8 @@ const ClientDataDialog = ({ pendientes, onSave, onRefresh, children }: { pendien
         // We assume all pendientes for a client should have the same publication counts.
         // We'll update all of them.
         const dataToSave = {
-            publicacionesAlMes: pubsMes !== '' ? Number(pubsMes) : null,
-            publicacionesALaSemana: pubsSemana !== '' ? Number(pubsSemana) : null,
+            publicacionesAlMes: pubsMes,
+            publicacionesALaSemana: pubsSemana,
         };
 
         try {
@@ -332,11 +332,11 @@ const ClientDataDialog = ({ pendientes, onSave, onRefresh, children }: { pendien
                 <div className="grid gap-4 py-4">
                     <div className="space-y-2">
                         <Label>Publicaciones al Mes</Label>
-                        <Input type="number" value={pubsMes} onChange={(e) => setPubsMes(e.target.value)} />
+                        <Input value={pubsMes} onChange={(e) => setPubsMes(e.target.value)} />
                     </div>
                     <div className="space-y-2">
                         <Label>Publicaciones a la Semana</Label>
-                        <Input type="number" value={pubsSemana} onChange={(e) => setPubsSemana(e.target.value)} />
+                        <Input value={pubsSemana} onChange={(e) => setPubsSemana(e.target.value)} />
                     </div>
                      <div className="space-y-2">
                         <Label>Próxima Grabación</Label>
@@ -367,7 +367,6 @@ const ClientDataDialog = ({ pendientes, onSave, onRefresh, children }: { pendien
                     <Button onClick={handleSave}>Guardar</Button>
                 </DialogFooter>
             </DialogContent>
-        </Dialog>
     )
 }
 
@@ -869,6 +868,7 @@ export default function PendientesPage() {
     </div>
   );
 }
+
 
 
 
