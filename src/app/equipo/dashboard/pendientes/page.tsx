@@ -513,7 +513,6 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                 <TableHeader>
                     <TableRow>
                         <TableHead className="w-[200px] min-w-[200px]">Cliente</TableHead>
-                        <TableHead className="w-[40px]"></TableHead>
                         <TableHead>Pendiente</TableHead>
                          {isContenido && <TableHead className="w-[150px] min-w-[150px]">Pubs. al Mes</TableHead>}
                         {isContenido && <TableHead className="w-[150px] min-w-[150px]">Pubs. a la Semana</TableHead>}
@@ -535,36 +534,36 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                         return (
                         <React.Fragment key={clienteName}>
                             {pendientes.map((pendiente, index) => (
-                                <TableRow className="h-14 p-0" key={pendiente.id}>
+                                <TableRow key={pendiente.id}>
                                     {index === 0 && (
-                                        <>
-                                            <TableCell 
-                                                rowSpan={pendientes.length + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} 
-                                                className="align-top font-medium p-2 border-r"
-                                            >
-                                                <ClientDataDialog pendientes={pendientes} onSave={(id, data) => onUpdateTask(pendientes.find(p => p.id === id)!, data)} onRefresh={onRefresh}>
-                                                    <div className='flex flex-col h-full justify-between cursor-pointer hover:bg-muted p-2 rounded-md'>
-                                                        <span className="flex items-center gap-1">{clienteName} <Edit className="w-3 h-3 text-muted-foreground"/></span>
-                                                        <ClientProgress pendientes={pendientes} />
-                                                    </div>
-                                                </ClientDataDialog>
-                                            </TableCell>
-                                        </>
+                                        <TableCell 
+                                            rowSpan={pendientes.length + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} 
+                                            className="align-top font-medium p-2 border-r"
+                                        >
+                                            <ClientDataDialog pendientes={pendientes} onSave={(id, data) => onUpdateTask(pendientes.find(p => p.id === id)!, data)} onRefresh={onRefresh}>
+                                                <div className='flex flex-col h-full justify-between cursor-pointer hover:bg-muted p-2 rounded-md'>
+                                                    <span className="flex items-center gap-1">{clienteName} <Edit className="w-3 h-3 text-muted-foreground"/></span>
+                                                    <ClientProgress pendientes={pendientes} />
+                                                </div>
+                                            </ClientDataDialog>
+                                        </TableCell>
                                     )}
-                                    <TableCell className="p-2 align-middle">
-                                        <Checkbox 
-                                            id={`pendiente-${pendiente.id}`} 
-                                            checked={pendiente.completed}
-                                            onCheckedChange={() => handleTogglePendiente(pendiente)}
-                                        />
-                                    </TableCell>
-                                    <TableCell className={cn("p-0 align-middle text-sm", pendiente.completed && "line-through text-muted-foreground")}>
-                                       <PendienteDialog
-                                            key={pendiente.id}
-                                            pendiente={pendiente} 
-                                            onSave={(data) => onUpdateTask(pendiente, data)}
-                                            canReassign={canReassign}
-                                        />
+                                    <TableCell className={cn("p-2 align-middle text-sm", pendiente.completed && "line-through text-muted-foreground")}>
+                                        <div className="flex items-center gap-2">
+                                            <Checkbox 
+                                                id={`pendiente-${pendiente.id}`} 
+                                                checked={pendiente.completed}
+                                                onCheckedChange={() => handleTogglePendiente(pendiente)}
+                                            />
+                                            <PendienteDialog
+                                                key={pendiente.id}
+                                                pendiente={pendiente} 
+                                                onSave={(data) => onUpdateTask(pendiente, data)}
+                                                canReassign={canReassign}
+                                            >
+                                                <div className="cursor-pointer flex-1">{pendiente.pendientePrincipal}</div>
+                                            </PendienteDialog>
+                                        </div>
                                     </TableCell>
                                     {isContenido && index === 0 && (
                                         <>
@@ -635,7 +634,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                 </TableRow>
                             ))}
                              {currentUser?.permissions?.pendientes?.reasignarResponsables && (
-                                <TableRow className="h-12">
+                                <TableRow>
                                     <TableCell colSpan={isAds ? 5 : 1} className="p-0">
                                         {addingToClientId === client.id ? (
                                             <AddPendienteInline 
@@ -645,8 +644,8 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                                 onCancel={() => setAddingToClientId(null)}
                                             />
                                         ) : (
-                                            <div className="flex justify-between items-center h-full">
-                                                <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground pl-4" onClick={() => setAddingToClientId(client.id)}>
+                                            <div className="h-full">
+                                                <Button variant="ghost" size="sm" className="w-full h-full justify-start text-muted-foreground" onClick={() => setAddingToClientId(client.id)}>
                                                     <Plus className="w-4 h-4 mr-2" />
                                                     Añadir pendiente
                                                 </Button>
