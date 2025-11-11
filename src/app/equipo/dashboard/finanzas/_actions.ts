@@ -37,12 +37,13 @@ export async function addCpc(data: Omit<NewCuentaPorCobrar, 'id'>): Promise<{cpc
             throw new Error("Failed to create the cpc record.");
         }
 
+        // Create a corresponding movement with a 'Pendiente' status
         await db.insert(movimientosDiarios).values({
             fecha: new Date(),
             tipo: 'Ingreso',
             descripcion: `Ingreso (pendiente) de ${data.clienteName} por ${data.tipo}`,
             monto: data.monto,
-            cuenta: 'Pendiente',
+            cuenta: 'Pendiente', // This marks it as an unpaid receivable
             categoria: data.tipo,
             cpcId: newCpc.id, 
         });
@@ -61,6 +62,7 @@ export async function updateCpc(id: number, data: Partial<Omit<NewCuentaPorCobra
     try {
         const [updatedCpc] = await db.update(cuentasPorCobrar).set(data).where(eq(cuentasPorCobrar.id, id)).returning();
         
+        // Also update the corresponding pending movement
         if (updatedCpc) {
             await db.update(movimientosDiarios).set({
                 monto: data.monto,
@@ -88,6 +90,7 @@ export async function registrarPagoCpc(cpcId: number, cuentaDestino: string, det
              return;
         }
 
+        // Update the movement from 'Pendiente' to a real account
         await db.update(movimientosDiarios)
             .set({ 
                 cuenta: cuentaDestino,
@@ -97,6 +100,7 @@ export async function registrarPagoCpc(cpcId: number, cuentaDestino: string, det
             })
             .where(eq(movimientosDiarios.cpcId, cpcId));
 
+        // Delete the account receivable record
         await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, cpcId));
             
         revalidatePath("/equipo/dashboard/finanzas");
@@ -109,6 +113,7 @@ export async function registrarPagoCpc(cpcId: number, cuentaDestino: string, det
 
 export async function deleteCpc(id: number) {
     try {
+        // When deleting a CPC, we also delete the associated pending movement
         await db.delete(movimientosDiarios).where(eq(movimientosDiarios.cpcId, id));
         await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, id));
         revalidatePath("/equipo/dashboard/finanzas");
