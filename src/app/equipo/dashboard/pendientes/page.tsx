@@ -392,7 +392,9 @@ const ClientDataDialog = ({ pendientes, onSave, onRefresh, children }: { pendien
         }
     }
 
-    if (!firstPendiente) return null;
+    if (!firstPendiente) {
+        return null;
+    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -570,9 +572,9 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                             <TableCell rowSpan={pendientes.length  + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">{pendientes[0].publicacionesALaSemana || '-'}</TableCell>
                                         </>
                                     )}
-                                     {isAds && index === 0 && (
+                                     {isAds && (
                                         <>
-                                            <TableCell rowSpan={pendientes.length + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">
+                                            <TableCell className="p-2 align-middle text-center border-l">
                                                 <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
                                                     <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs">
                                                         <p><span className="font-semibold text-muted-foreground">Msj:</span> {pendiente.facebookAdsMessages || '-'}</p>
@@ -580,7 +582,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                                     </div>
                                                 </AdsMetricsDialog>
                                             </TableCell>
-                                            <TableCell rowSpan={pendientes.length + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">
+                                            <TableCell className="p-2 align-middle text-center border-l">
                                                 <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
                                                      <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs">
                                                         <p><span className="font-semibold text-muted-foreground">Msj:</span> {pendiente.tiktokAdsMessages || '-'}</p>
@@ -588,7 +590,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                                     </div>
                                                 </AdsMetricsDialog>
                                             </TableCell>
-                                            <TableCell rowSpan={pendientes.length + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">
+                                            <TableCell className="p-2 align-middle text-center border-l">
                                                 <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
                                                     <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs">
                                                         <p><span className="font-semibold text-muted-foreground">Msj:</span> {pendiente.googleAdsMessages || '-'}</p>
@@ -596,7 +598,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                                     </div>
                                                 </AdsMetricsDialog>
                                             </TableCell>
-                                            <TableCell rowSpan={pendientes.length + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">
+                                            <TableCell className="p-2 align-middle text-center border-l">
                                                 <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
                                                      <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs">
                                                         <p><span className="font-semibold text-muted-foreground">Msj:</span> {pendiente.linkedinAdsMessages || '-'}</p>
@@ -625,7 +627,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                             ))}
                              {currentUser?.permissions?.pendientes?.reasignarResponsables && (
                                 <TableRow>
-                                    <TableCell colSpan={3} className="p-0">
+                                    <TableCell colSpan={isAds ? 5 : 1} className="p-0">
                                         {addingToClientId === client.id ? (
                                             <AddPendienteInline 
                                                 client={client}
@@ -642,7 +644,6 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                             </div>
                                         )}
                                     </TableCell>
-                                    <TableCell colSpan={isAds ? 4 : 0}></TableCell>
                                     <TableCell colSpan={3}></TableCell>
                                 </TableRow>
                              )}
@@ -698,18 +699,24 @@ const BoardView = ({ data, onUpdateTask, currentUser, onRefresh }: {
                                 onSave={(data) => onUpdateTask(pendiente, data)}
                                 canReassign={canReassign}
                            >
-                                <Card className="p-3 bg-background cursor-pointer hover:bg-accent">
-                                    <p className="font-semibold text-sm mb-1">{pendiente.clienteName}</p>
+                                <Card className="p-3 bg-background cursor-pointer hover:bg-accent space-y-2">
+                                    <div className="flex justify-between items-start">
+                                        <p className="font-semibold text-sm">{pendiente.clienteName}</p>
+                                        <Badge variant="outline" className="text-xs">{pendiente.categoria}</Badge>
+                                    </div>
                                     <p className={cn("text-sm", pendiente.completed && "line-through text-muted-foreground")}>
                                         {pendiente.pendientePrincipal}
                                     </p>
                                     <div className="flex justify-between items-center mt-3 text-xs text-muted-foreground">
-                                        <span>{pendiente.ejecutor}</span>
+                                        <div className='space-y-1'>
+                                            <p><span className='font-medium'>Enc:</span> {pendiente.encargado}</p>
+                                            <p><span className='font-medium'>Eje:</span> {pendiente.ejecutor}</p>
+                                        </div>
                                         {pendiente.recordingEvent && (
-                                            <span className="flex items-center gap-1">
-                                                <CalendarIcon className="w-3 h-3"/>
-                                                {format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}
-                                            </span>
+                                            <div className="flex flex-col items-center">
+                                                <CalendarIcon className="w-4 h-4"/>
+                                                <span>{format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}</span>
+                                            </div>
                                         )}
                                     </div>
                                 </Card>
