@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Info, Trash2, Plus, MoreHorizontal, Download } from 'lucide-react';
+import { ArrowUpDown, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Info, Trash2, Plus, MoreHorizontal, Download, FileWarning } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -100,7 +100,7 @@ type CategoriaGasto = "Publicidad" | "Sueldos" | "Comisiones" | "Impuestos" | "P
 type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo" | "Efectivo" | "Pendiente";
 
 const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: { 
-    clients?: Client[],
+    clients?: (Client & { financialProfile: ClientFinancialProfile | null; }) [],
     client?: Client, 
     cpc?: CuentaPorCobrar | null, 
     onSave: () => void, 
@@ -729,7 +729,9 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
     }, [movimientos, selectedMonth]);
 
     const summary = useMemo(() => {
-        return monthlyFilteredMovements.reduce((acc, mov) => {
+        const totalCpc = cuentasPorCobrar.reduce((sum, cpc) => sum + cpc.monto, 0);
+
+        const monthlySummary = monthlyFilteredMovements.reduce((acc, mov) => {
              if (mov.tipo === 'Ingreso' && mov.cuenta !== 'Pendiente') {
                 acc.totalIngresos += mov.monto;
             } else if (mov.tipo === 'Gasto') {
@@ -737,10 +739,14 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
             }
             return acc;
         }, { totalIngresos: 0, totalGastos: 0 });
-    }, [monthlyFilteredMovements]);
-    
-    const balance = summary.totalIngresos - summary.totalGastos;
 
+        return {
+            ...monthlySummary,
+            totalCuentasPorCobrar: totalCpc,
+            balance: monthlySummary.totalIngresos - monthlySummary.totalGastos
+        };
+    }, [monthlyFilteredMovements, cuentasPorCobrar]);
+    
     return (
         <div className='space-y-4'>
             <div className="flex justify-between items-center">
@@ -755,7 +761,11 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
                     {isAdmin && <RegistrarGastoDialog onSave={onSave} />}
                 </div>
             </div>
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                 <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Total por Cobrar</CardTitle><FileWarning className="h-4 w-4 text-orange-500" /></CardHeader>
+                    <CardContent><div className="text-2xl font-bold text-orange-500">{summary.totalCuentasPorCobrar.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div></CardContent>
+                </Card>
                  <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Ingresos del Mes</CardTitle><TrendingUp className="h-4 w-4 text-green-500" /></CardHeader>
                     <CardContent><div className="text-2xl font-bold text-green-500">{summary.totalIngresos.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div></CardContent>
@@ -766,7 +776,7 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
                 </Card>
                  <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Utilidad Neta Mensual</CardTitle><DollarSign className="h-4 w-4 text-muted-foreground" /></CardHeader>
-                    <CardContent><div className={cn("text-2xl font-bold", balance >= 0 ? 'text-blue-500' : 'text-destructive')}>{balance.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div></CardContent>
+                    <CardContent><div className={cn("text-2xl font-bold", summary.balance >= 0 ? 'text-blue-500' : 'text-destructive')}>{summary.balance.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div></CardContent>
                 </Card>
             </div>
             <Card>
@@ -811,7 +821,7 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
 
 export default function FinanzasPage() {
     const { user } = useAuth();
-    const [clients, setClients] = useState<Client[]>([]);
+    const [clients, setClients] = useState<(Client & { financialProfile: ClientFinancialProfile | null; })[]>([]);
     const [movimientos, setMovimientos] = useState<MovimientoDiario[]>([]);
     const [cuentasPorCobrar, setCuentasPorCobrar] = useState<CuentaPorCobrar[]>([]);
     const [activeTab, setActiveTab] = useState("cuentas-por-cobrar");
@@ -828,7 +838,7 @@ export default function FinanzasPage() {
                 getCuentasPorCobrar(),
                 getMovimientos()
             ]);
-            setClients(clientsData as Client[]);
+            setClients(clientsData as (Client & { financialProfile: ClientFinancialProfile | null; })[]);
             setCuentasPorCobrar(cpcData as CuentaPorCobrar[]);
             setMovimientos(movimientosData as MovimientoDiario[]);
         } catch (error) {
