@@ -109,12 +109,16 @@ const generatePeriodOptions = () => {
 
     for (let i = -2; i <= 2; i++) {
         const month = addMonths(today, i);
-        const year = format(month, "yyyy");
-        const monthName = format(month, "MMMM", { locale: es });
-        const endDay = format(endOfMonth(month), "d");
+        
+        // Mensual del 1 al fin de mes
+        const startOfMonthDate = startOfMonth(month);
+        const endOfMonthDate = endOfMonth(month);
+        options.push(`1 al ${format(endOfMonthDate, 'd')} de ${format(month, 'MMMM yyyy', { locale: es })}`);
 
-        options.push(`1 al 15 de ${monthName} de ${year}`);
-        options.push(`16 al ${endDay} de ${monthName} de ${year}`);
+        // Mensual del 15 al 15
+        const startMidMonth = setDate(month, 15);
+        const endMidMonth = addDays(addMonths(startMidMonth, 1), -1);
+        options.push(`15 de ${format(startMidMonth, 'MMMM yyyy', { locale: es })} al 14 de ${format(endMidMonth, 'MMMM yyyy', { locale: es })}`);
     }
 
     return [...new Set(options)].sort((a, b) => {
@@ -123,7 +127,7 @@ const generatePeriodOptions = () => {
                 const parts = periodString.split(' ');
                 const day = parseInt(parts[0]);
                 const monthName = parts[3];
-                const year = parseInt(parts[5]);
+                const year = parseInt(parts[4]);
                 const monthIndex = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'].indexOf(monthName.toLowerCase());
                 return new Date(year, monthIndex, day);
             };
@@ -435,7 +439,7 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
             if (sortField === 'dueDate') {
                 const dateA = a.nextDueDate?.getTime() || Infinity;
                 const dateB = b.nextDueDate?.getTime() || Infinity;
-                return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+                return sortOrder === 'asc' ? dateA - dateB : dateB - a.nextDueDate?.getTime()!;
             }
             return a.client.name.localeCompare(b.client.name);
         });
