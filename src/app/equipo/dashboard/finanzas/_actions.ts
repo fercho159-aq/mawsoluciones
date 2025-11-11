@@ -7,6 +7,8 @@ import { cuentasPorCobrar, movimientosDiarios, type NewCuentaPorCobrar, type Cue
 import { eq, and, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
+const IVA_RATE = 0.16;
+
 export async function getCuentasPorCobrar() {
   try {
     const allCpc = await db.query.cuentasPorCobrar.findMany({
@@ -69,6 +71,8 @@ export async function registrarPagoCpc(cpcId: number, cuentaDestino: string, det
             throw new Error("La cuenta por cobrar que intentas pagar ya no existe.");
         }
 
+        const ivaAmount = cpcToPay.conIva ? cpcToPay.monto * IVA_RATE : null;
+
         // 2. Create a new movement in movimientosDiarios, like a manual income
         await db.insert(movimientosDiarios).values({
             fecha: new Date(), // Use current date for the payment
@@ -79,6 +83,8 @@ export async function registrarPagoCpc(cpcId: number, cuentaDestino: string, det
             detalleCuenta: detalleCuenta,
             categoria: cpcToPay.tipo,
             cpcId: cpcToPay.id, // Keep the reference
+            conIva: cpcToPay.conIva,
+            iva: ivaAmount,
         });
 
         // 3. Delete the cpc record now that it's paid
@@ -104,9 +110,13 @@ export async function deleteCpc(id: number) {
 }
 
 
-export async function addMovimiento(data: Omit<NewMovimientoDiario, 'id'>) {
+export async function addMovimiento(data: Omit<NewMovimientoDiario, 'id' | 'iva'> & { conIva?: boolean }) {
   try {
-    await db.insert(movimientosDiarios).values(data);
+    const ivaAmount = data.conIva ? data.monto * IVA_RATE : null;
+    await db.insert(movimientosDiarios).values({
+        ...data,
+        iva: ivaAmount,
+    });
     revalidatePath("/equipo/dashboard/finanzas");
   } catch (error: any) {
     console.error("Error adding movimiento:", error);
@@ -114,9 +124,18 @@ export async function addMovimiento(data: Omit<NewMovimientoDiario, 'id'>) {
   }
 }
 
-export async function updateMovimiento(id: number, data: Partial<Omit<NewMovimientoDiario, 'id'>>) {
+export async function updateMovimiento(id: number, data: Partial<Omit<NewMovimientoDiario, 'id' | 'iva'>> & { conIva?: boolean }) {
     try {
-        await db.update(movimientosDiarios).set(data).where(eq(movimientosDiarios.id, id));
+        const monto = data.monto;
+        let ivaAmount = null;
+        if(monto !== undefined && data.conIva !== undefined) {
+             ivaAmount = data.conIva ? monto * IVA_RATE : null;
+        }
+
+        await db.update(movimientosDiarios).set({
+            ...data,
+            ...(ivaAmount !== null && { iva: ivaAmount })
+        }).where(eq(movimientosDiarios.id, id));
         revalidatePath("/equipo/dashboard/finanzas");
     } catch (error: any) {
         console.error("Error updating movimiento:", error);

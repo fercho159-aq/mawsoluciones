@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Info, Trash2, Plus, MoreHorizontal, Download, FileWarning, Calendar as CalendarIcon } from 'lucide-react';
+import { ArrowUpDown, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Info, Trash2, Plus, MoreHorizontal, Download, FileWarning, Calendar as CalendarIcon, Percent } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -36,6 +36,8 @@ import 'jspdf-autotable';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
+import { Checkbox } from '@/components/ui/checkbox';
+
 
 // Extend the window type for jspdf-autotable
 declare global {
@@ -107,18 +109,12 @@ const generatePeriodOptions = () => {
     const formatRange = (start: Date, end: Date) => 
         `${format(start, 'd \'de\' MMMM', { locale: es })} al ${format(end, 'd \'de\' MMMM', { locale: es })}`;
 
-    // Generate monthly and bi-weekly periods for the last 6 months, current month, and next 3 months
     for (let i = -6; i <= 3; i++) {
         const month = addMonths(today, i);
-        
-        // Full month
         options.push(formatRange(startOfMonth(month), endOfMonth(month)));
-        
-        // Quincena 1 (e.g., 15th of prev month to 15th of current month)
         options.push(formatRange(setDate(subMonths(month, 1), 15), setDate(month, 14)));
     }
     
-    // Remove duplicates and sort them
     const uniqueOptions = [...new Set(options)];
     uniqueOptions.sort((a, b) => {
         const aDate = new Date(a.split(' al ')[0].replace(' de ', ' '));
@@ -144,6 +140,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
     const [tipo, setTipo] = useState<CategoriaIngreso>('Iguala Mensual');
     const [periodo, setPeriodo] = useState('');
     const [fechaCobro, setFechaCobro] = useState<Date | undefined>();
+    const [conIva, setConIva] = useState(false);
     const periodOptions = useMemo(() => generatePeriodOptions(), [open]);
 
     useEffect(() => {
@@ -154,18 +151,21 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                 setPeriodo(cpc.periodo);
                 setSelectedClientId(cpc.clienteId.toString());
                 setFechaCobro(cpc.fecha_cobro ? new Date(cpc.fecha_cobro) : undefined);
+                setConIva(cpc.conIva ?? false);
             } else if (client) { // Pre-fill client if adding from a specific row
                  setMonto('');
                  setTipo('Iguala Mensual');
                  setPeriodo(periodOptions[0]);
                  setSelectedClientId(client.id.toString());
                  setFechaCobro(undefined);
+                 setConIva(false);
             } else { // Reset for global "add"
                 setMonto('');
                  setTipo('Iguala Mensual');
                  setPeriodo(periodOptions[0]);
                  setSelectedClientId('');
                  setFechaCobro(undefined);
+                 setConIva(false);
             }
         }
     }, [open, client, cpc, isEditing, periodOptions]);
@@ -194,6 +194,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
             tipo,
             periodo,
             fecha_cobro: fechaCobro,
+            conIva,
         };
 
         try {
@@ -305,6 +306,10 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                                 />
                             </PopoverContent>
                         </Popover>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id="conIva" checked={conIva} onCheckedChange={c => setConIva(Boolean(c))} />
+                        <Label htmlFor="conIva" className="font-normal">Incluye IVA (16%)</Label>
                     </div>
                 </div>
                 <DialogFooter className="justify-between">
@@ -504,12 +509,13 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
     const [isManual, setIsManual] = useState(false);
     const [manualAmount, setManualAmount] = useState('');
     const [manualDesc, setManualDesc] = useState('');
+    const [manualConIva, setManualConIva] = useState(false);
     
     const selectedCpc = useMemo(() => cuentasPorCobrar.find(c => c.id.toString() === selectedCpcId), [selectedCpcId, cuentasPorCobrar]);
 
     const resetForm = () => {
         setSelectedCpcId(''); setCuentaDestino(''); setDetalleEfectivo('');
-        setManualAmount(''); setManualDesc(''); setIsManual(false);
+        setManualAmount(''); setManualDesc(''); setIsManual(false); setManualConIva(false);
     };
 
     useEffect(() => {
@@ -531,6 +537,7 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
                     cuenta: cuentaDestino,
                     detalleCuenta: detalleEfectivo || null,
                     categoria: 'Otros',
+                    conIva: manualConIva,
                 });
                 toast({ title: "Éxito", description: "Ingreso manual registrado."});
             } catch(e) {
@@ -576,6 +583,10 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
                     <div className="grid gap-4 py-4">
                         <Input value={manualDesc} onChange={e => setManualDesc(e.target.value)} placeholder="Descripción del ingreso" />
                         <Input type="number" value={manualAmount} onChange={e => setManualAmount(e.target.value)} placeholder="Monto (MXN)" />
+                        <div className="flex items-center space-x-2">
+                           <Checkbox id="manual-conIva" checked={manualConIva} onCheckedChange={c => setManualConIva(Boolean(c))} />
+                           <Label htmlFor="manual-conIva" className="font-normal">Incluye IVA (16%)</Label>
+                        </div>
                     </div>
                 ) : (
                     <div className="grid gap-4 py-4">
@@ -584,7 +595,12 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
                             <SelectContent>{cuentasPorCobrar.map(cpc => <SelectItem key={cpc.id} value={cpc.id.toString()}>{cpc.clienteName} - {cpc.periodo}</SelectItem>)}</SelectContent>
                         </Select>
                         {cuentasPorCobrar.length === 0 && <p className="text-sm text-muted-foreground">No hay cuentas por cobrar pendientes.</p>}
-                        {selectedCpc && <Card className="bg-muted p-4"><p><strong>Monto:</strong> {selectedCpc.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p></Card>}
+                        {selectedCpc && (
+                            <Card className="bg-muted p-4">
+                                <p><strong>Monto:</strong> {selectedCpc.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
+                                {selectedCpc.conIva && <p className='text-sm text-green-500 font-medium'>Este pago incluye IVA.</p>}
+                            </Card>
+                        )}
                     </div>
                 )}
                 <div className="grid gap-4">
@@ -618,12 +634,13 @@ const RegistrarGastoDialog = ({ onSave }: { onSave: () => void }) => {
     const [detalleEfectivo, setDetalleEfectivo] = useState('');
     const [categoria, setCategoria] = useState<CategoriaGasto | ''>('');
     const [nombreOtro, setNombreOtro] = useState('');
+    const [conIva, setConIva] = useState(false);
 
     const categoriasDisponibles: CategoriaGasto[] = ["Publicidad", "Sueldos", "Comisiones", "Impuestos", "Personales", "Renta", "Otros"];
 
     const resetForm = () => {
         setDescripcion(''); setMonto(''); setCuenta(''); setDetalleEfectivo('');
-        setCategoria(''); setNombreOtro('');
+        setCategoria(''); setNombreOtro(''); setConIva(false);
     };
 
     useEffect(() => {
@@ -646,6 +663,7 @@ const RegistrarGastoDialog = ({ onSave }: { onSave: () => void }) => {
                 detalleCuenta: cuenta === 'Efectivo' ? detalleEfectivo : null,
                 categoria,
                 nombreOtro: ['Personales', 'Otros'].includes(categoria) ? nombreOtro : null,
+                conIva,
             });
             toast({ title: "Éxito", description: "Gasto registrado." });
             onSave();
@@ -678,6 +696,10 @@ const RegistrarGastoDialog = ({ onSave }: { onSave: () => void }) => {
                         </SelectContent>
                     </Select>
                     {cuenta === 'Efectivo' && <Input value={detalleEfectivo} onChange={e => setDetalleEfectivo(e.target.value)} placeholder="Especifique (ej. Caja chica)"/>}
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id="gasto-conIva" checked={conIva} onCheckedChange={c => setConIva(Boolean(c))} />
+                        <Label htmlFor="gasto-conIva" className="font-normal">Incluye IVA (16%)</Label>
+                    </div>
                 </div>
                 <DialogFooter className='mt-4'>
                     <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
@@ -698,6 +720,7 @@ const MovimientoFormDialog = ({ movimiento, onSave, children }: { movimiento: Mo
     const [detalleEfectivo, setDetalleEfectivo] = useState('');
     const [categoria, setCategoria] = useState<CategoriaIngreso | CategoriaGasto | ''>('');
     const [nombreOtro, setNombreOtro] = useState('');
+    const [conIva, setConIva] = useState(false);
 
     const isGasto = movimiento.tipo === 'Gasto';
     const categoriasDisponibles = isGasto ? 
@@ -712,6 +735,7 @@ const MovimientoFormDialog = ({ movimiento, onSave, children }: { movimiento: Mo
             setDetalleEfectivo(movimiento.detalleCuenta || '');
             setCategoria(movimiento.categoria as any || '');
             setNombreOtro(movimiento.nombreOtro || '');
+            setConIva(movimiento.conIva ?? false);
         }
     }, [open, movimiento]);
 
@@ -729,6 +753,7 @@ const MovimientoFormDialog = ({ movimiento, onSave, children }: { movimiento: Mo
                 categoria,
                 detalleCuenta: cuenta === 'Efectivo' ? detalleEfectivo : null,
                 nombreOtro: ['Personales', 'Otros'].includes(categoria) ? nombreOtro : null,
+                conIva,
             });
             toast({ title: "Éxito", description: "Movimiento actualizado." });
             onSave();
@@ -772,6 +797,10 @@ const MovimientoFormDialog = ({ movimiento, onSave, children }: { movimiento: Mo
                         </SelectContent>
                     </Select>
                     {cuenta === 'Efectivo' && <Input value={detalleEfectivo} onChange={e => setDetalleEfectivo(e.target.value)} placeholder="Especifique (ej. Caja chica)"/>}
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id={`edit-conIva-${movimiento.id}`} checked={conIva} onCheckedChange={c => setConIva(Boolean(c))} />
+                        <Label htmlFor={`edit-conIva-${movimiento.id}`} className="font-normal">Incluye IVA (16%)</Label>
+                    </div>
                 </div>
                 <DialogFooter className="justify-between">
                     <AlertDialog>
@@ -852,19 +881,19 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
             const cuenta = mov.cuenta as keyof typeof initialBreakdown;
             if (mov.tipo === 'Ingreso') {
                 acc.totalIngresos += mov.monto;
-                if(acc.ingresosPorCuenta[cuenta] !== undefined) {
-                    acc.ingresosPorCuenta[cuenta] += mov.monto;
-                }
+                if(acc.ingresosPorCuenta[cuenta] !== undefined) acc.ingresosPorCuenta[cuenta] += mov.monto;
+                if(mov.iva) acc.ivaIngresos += mov.iva;
             } else if (mov.tipo === 'Gasto') {
                 acc.totalGastos += mov.monto;
-                if(acc.gastosPorCuenta[cuenta] !== undefined) {
-                     acc.gastosPorCuenta[cuenta] += mov.monto;
-                }
+                if(acc.gastosPorCuenta[cuenta] !== undefined) acc.gastosPorCuenta[cuenta] += mov.monto;
+                if(mov.iva) acc.ivaGastos += mov.iva;
             }
             return acc;
         }, { 
             totalIngresos: 0, 
             totalGastos: 0,
+            ivaIngresos: 0,
+            ivaGastos: 0,
             ingresosPorCuenta: {...initialBreakdown},
             gastosPorCuenta: {...initialBreakdown}
         });
@@ -897,13 +926,23 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
                     {isAdmin && <RegistrarGastoDialog onSave={onSave} />}
                 </div>
             </div>
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                  <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Total por Cobrar</CardTitle><FileWarning className="h-4 w-4 text-orange-500" /></CardHeader>
                     <CardContent><div className="text-2xl font-bold text-orange-500">{summary.totalCuentasPorCobrar.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div></CardContent>
                 </Card>
                 <SummaryCard title="Ingresos del Mes" value={summary.totalIngresos} icon={<TrendingUp className="h-4 w-4 text-green-500" />} breakdown={summary.ingresosPorCuenta} colorClass="text-green-500" />
                 <SummaryCard title="Gastos del Mes" value={summary.totalGastos} icon={<TrendingDown className="h-4 w-4 text-red-500" />} breakdown={summary.gastosPorCuenta} colorClass="text-red-500" />
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Impuestos (IVA)</CardTitle>
+                        <Percent className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-lg font-bold">{((summary.ivaIngresos || 0) - (summary.ivaGastos || 0)).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div>
+                        <p className="text-xs text-muted-foreground">IVA a favor/pagar en el periodo</p>
+                    </CardContent>
+                </Card>
                 <SummaryCard title="Utilidad Neta Mensual" value={summary.balance} icon={<DollarSign className="h-4 w-4 text-muted-foreground" />} breakdown={summary.utilidadPorCuenta} colorClass={summary.balance >= 0 ? 'text-blue-500' : 'text-destructive'} />
             </div>
             <Card>
@@ -922,7 +961,12 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
                                             <TableCell>{format(new Date(mov.fecha), 'dd MMM yyyy, HH:mm', { locale: es })}</TableCell>
                                             <TableCell><Badge variant={mov.tipo === 'Ingreso' ? 'default' : 'destructive'} className={cn(mov.tipo === 'Ingreso' && 'bg-green-500 hover:bg-green-500/80')}>{mov.tipo}</Badge></TableCell>
                                             <TableCell>{mov.descripcion}</TableCell>
-                                            <TableCell>{mov.categoria}{mov.nombreOtro ? ` (${mov.nombreOtro})` : ''}</TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-col">
+                                                    <span>{mov.categoria}{mov.nombreOtro ? ` (${mov.nombreOtro})` : ''}</span>
+                                                    {mov.conIva && <Badge variant="outline" className='w-fit mt-1 text-xs'>Con IVA</Badge>}
+                                                </div>
+                                            </TableCell>
                                             <TableCell>
                                                 <Badge variant={mov.cuenta === 'Pendiente' ? 'outline' : 'secondary'}>
                                                     {mov.cuenta}{mov.detalleCuenta ? ` (${mov.detalleCuenta})` : ''}

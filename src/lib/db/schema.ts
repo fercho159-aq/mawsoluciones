@@ -123,6 +123,7 @@ export const cuentasPorCobrar = pgTable('cuentas_por_cobrar', {
     monto: real('monto').notNull(),
     tipo: varchar('tipo', { length: 50 }).notNull(), // Ej: Iguala, Proyecto, Web
     fecha_cobro: timestamp('fecha_cobro'),
+    conIva: boolean('con_iva').default(false),
 });
 
 // Movimientos financieros diarios (ingresos y gastos)
@@ -137,6 +138,8 @@ export const movimientosDiarios = pgTable('movimientos_diarios', {
     categoria: varchar('categoria', { length: 100 }),
     nombreOtro: varchar('nombre_otro', { length: 255 }),
     cpcId: integer('cpc_id').references(() => cuentasPorCobrar.id, { onDelete: 'set null' }),
+    conIva: boolean('con_iva').default(false),
+    iva: real('iva'),
 });
 
 // Credenciales de acceso para plataformas de clientes
@@ -221,6 +224,7 @@ export type Colaborador = typeof colaboradores.$inferSelect;
 export type NewColaborador = typeof colaboradores.$inferInsert;
 export type Access = typeof accesses.$inferSelect;
 export type NewAccess = typeof accesses.$inferInsert;
+
 
 
 
