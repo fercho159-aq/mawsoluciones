@@ -106,23 +106,48 @@ type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo" | "Efectivo" | "Pend
 const generatePeriodOptions = () => {
     const today = new Date();
     const options: string[] = [];
-    const formatRange = (start: Date, end: Date) => 
-        `${format(start, 'd \'de\' MMMM', { locale: es })} al ${format(end, 'd \'de\' MMMM', { locale: es })}`;
-
+    
     for (let i = -6; i <= 3; i++) {
         const month = addMonths(today, i);
-        options.push(formatRange(startOfMonth(month), endOfMonth(month)));
-        options.push(formatRange(setDate(subMonths(month, 1), 15), setDate(month, 14)));
+        const startOfMonthDate = startOfMonth(month);
+        const endOfMonthDate = endOfMonth(month);
+
+        // Mes completo
+        options.push(`${format(startOfMonthDate, '1 \'de\' MMMM', { locale: es })} al ${format(endOfMonthDate, 'd \'de\' MMMM', { locale: es })}`);
+        
+        // Quincena 1-15
+        options.push(`${format(startOfMonthDate, '1 \'de\' MMMM', { locale: es })} al ${format(setDate(startOfMonthDate, 15), 'd \'de\' MMMM', { locale: es })}`);
+
+        // Quincena 16-fin de mes
+        options.push(`${format(setDate(startOfMonthDate, 16), 'd \'de\' MMMM', { locale: es })} al ${format(endOfMonthDate, 'd \'de\' MMMM', { locale: es })}`);
     }
-    
+
     const uniqueOptions = [...new Set(options)];
+    
     uniqueOptions.sort((a, b) => {
-        const aDate = new Date(a.split(' al ')[0].replace(' de ', ' '));
-        const bDate = new Date(b.split(' al ')[0].replace(' de ', ' '));
-        return aDate.getTime() - bDate.getTime();
+        const aDateParts = a.split(' al ')[0].replace(' de ', ' ').split(' ');
+        const bDateParts = b.split(' al ')[0].replace(' de ', ' ').split(' ');
+
+        const aMonth = es.localize?.month(es.monthNames.findIndex(m => m.toLowerCase() === aDateParts[2].toLowerCase()));
+        const bMonth = es.localize?.month(es.monthNames.findIndex(m => m.toLowerCase() === bDateParts[2].toLowerCase()));
+
+        const aFullDate = new Date(today.getFullYear(), aMonth, parseInt(aDateParts[0]));
+        const bFullDate = new Date(today.getFullYear(), bMonth, parseInt(bDateParts[0]));
+        
+        // Handle year change for sorting
+        if (aMonth > today.getMonth() && bMonth <= today.getMonth()) {
+           bFullDate.setFullYear(bFullDate.getFullYear() + 1);
+        }
+        if (bMonth > today.getMonth() && aMonth <= today.getMonth()) {
+            aFullDate.setFullYear(aFullDate.getFullYear() + 1);
+        }
+
+        return aFullDate.getTime() - bFullDate.getTime();
     });
+    
     return uniqueOptions;
 };
+
 
 const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: { 
     clients?: (Client & { financialProfile: ClientFinancialProfile | null; }) [],
@@ -155,14 +180,14 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
             } else if (client) { // Pre-fill client if adding from a specific row
                  setMonto('');
                  setTipo('Iguala Mensual');
-                 setPeriodo(periodOptions[0]);
+                 setPeriodo('');
                  setSelectedClientId(client.id.toString());
                  setFechaCobro(undefined);
                  setConIva(false);
             } else { // Reset for global "add"
                 setMonto('');
                  setTipo('Iguala Mensual');
-                 setPeriodo(periodOptions[0]);
+                 setPeriodo('');
                  setSelectedClientId('');
                  setFechaCobro(undefined);
                  setConIva(false);
