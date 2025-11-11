@@ -22,7 +22,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, subMonths, setDate } from 'date-fns';
+import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, subMonths, setDate, addMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useAuth } from '@/lib/auth-provider';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -101,16 +101,28 @@ type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo" | "Efectivo" | "Pend
 
 const generatePeriodOptions = () => {
     const today = new Date();
+    const options: string[] = [];
     const formatRange = (start: Date, end: Date) => 
         `${format(start, 'd \'de\' MMMM', { locale: es })} al ${format(end, 'd \'de\' MMMM', { locale: es })}`;
 
-    const currentMonthFull = formatRange(startOfMonth(today), endOfMonth(today));
-    const prevMonthFull = formatRange(startOfMonth(subMonths(today, 1)), endOfMonth(subMonths(today, 1)));
+    // Generate monthly and bi-weekly periods for the last 2 months, current month, and next 2 months
+    for (let i = -2; i <= 2; i++) {
+        const month = addMonths(today, i);
+        
+        // Full month
+        options.push(formatRange(startOfMonth(month), endOfMonth(month)));
+        
+        // Quincena 1 (e.g., 15th of prev month to 15th of current month)
+        options.push(formatRange(setDate(subMonths(month, 1), 15), setDate(month, 15)));
+    }
     
-    const currentQuincena = formatRange(setDate(subMonths(today, 1), 15), setDate(today, 15));
-    const prevQuincena = formatRange(setDate(subMonths(today, 2), 15), setDate(subMonths(today, 1), 15));
-    
-    return [currentQuincena, currentMonthFull, prevQuincena, prevMonthFull];
+    // Remove duplicates and sort them (optional, but good for UX)
+    return [...new Set(options)].sort((a, b) => {
+        // A simple sort, can be improved if strict chronological order is needed
+        const aDate = new Date(a.split(' al ')[0].replace(' de ', ', '));
+        const bDate = new Date(b.split(' al ')[0].replace(' de ', ', '));
+        return aDate.getTime() - bDate.getTime();
+    });
 }
 
 const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: { 
@@ -787,15 +799,16 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
         const initialBreakdown = { "Cuenta Paola": 0, "Cuenta MAW": 0, "Cuenta Aldo": 0, "Efectivo": 0, "Pendiente": 0 };
         
         const monthlySummary = monthlyFilteredMovements.reduce((acc, mov) => {
-            if (mov.tipo === 'Ingreso' && mov.cuenta !== 'Pendiente') {
+            const cuenta = mov.cuenta as keyof typeof initialBreakdown;
+            if (mov.tipo === 'Ingreso' && cuenta !== 'Pendiente') {
                 acc.totalIngresos += mov.monto;
-                if(acc.ingresosPorCuenta[mov.cuenta as keyof typeof acc.ingresosPorCuenta] !== undefined) {
-                    acc.ingresosPorCuenta[mov.cuenta as keyof typeof acc.ingresosPorCuenta] += mov.monto;
+                if(acc.ingresosPorCuenta[cuenta] !== undefined) {
+                    acc.ingresosPorCuenta[cuenta] += mov.monto;
                 }
             } else if (mov.tipo === 'Gasto') {
                 acc.totalGastos += mov.monto;
-                if(acc.gastosPorCuenta[mov.cuenta as keyof typeof acc.gastosPorCuenta] !== undefined) {
-                     acc.gastosPorCuenta[mov.cuenta as keyof typeof acc.gastosPorCuenta] += mov.monto;
+                if(acc.gastosPorCuenta[cuenta] !== undefined) {
+                     acc.gastosPorCuenta[cuenta] += mov.monto;
                 }
             }
             return acc;
@@ -960,4 +973,3 @@ export default function FinanzasPage() {
         </div>
     );
 }
-
