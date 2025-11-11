@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useMemo, useEffect, startTransition } from 'react';
@@ -517,10 +516,10 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                         <TableHead>Pendiente</TableHead>
                          {isContenido && <TableHead className="w-[150px] min-w-[150px]">Pubs. al Mes</TableHead>}
                         {isContenido && <TableHead className="w-[150px] min-w-[150px]">Pubs. a la Semana</TableHead>}
-                        {isAds && <TableHead className="w-[100px] min-w-[100px] text-center"><Facebook className="w-5 h-5 mx-auto text-blue-600" /></TableHead>}
-                        {isAds && <TableHead className="w-[100px] min-w-[100px] text-center"><TikTokIcon className="w-5 h-5 mx-auto" /></TableHead>}
-                        {isAds && <TableHead className="w-[100px] min-w-[100px] text-center"><Bot className="w-5 h-5 mx-auto text-green-500" /></TableHead>}
-                        {isAds && <TableHead className="w-[100px] min-w-[100px] text-center"><Linkedin className="w-5 h-5 mx-auto text-sky-700" /></TableHead>}
+                        {isAds && <TableHead className="w-[100px] min-w-[100px] text-center"><div className='flex flex-col items-center'><Facebook className="w-5 h-5 mx-auto text-blue-600" /><span>Facebook</span></div></TableHead>}
+                        {isAds && <TableHead className="w-[100px] min-w-[100px] text-center"><div className='flex flex-col items-center'><TikTokIcon className="w-5 h-5 mx-auto" /><span>TikTok</span></div></TableHead>}
+                        {isAds && <TableHead className="w-[100px] min-w-[100px] text-center"><div className='flex flex-col items-center'><Bot className="w-5 h-5 mx-auto text-green-500" /><span>Google</span></div></TableHead>}
+                        {isAds && <TableHead className="w-[100px] min-w-[100px] text-center"><div className='flex flex-col items-center'><Linkedin className="w-5 h-5 mx-auto text-sky-700" /><span>LinkedIn</span></div></TableHead>}
                         <TableHead className="w-[180px] min-w-[180px]">Encargado</TableHead>
                         <TableHead className="w-[180px] min-w-[180px]">Ejecutor</TableHead>
                         <TableHead className="w-[180px] min-w-[180px]">Status</TableHead>
@@ -577,32 +576,32 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                             <TableCell rowSpan={pendientes.length + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">
                                                 <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
                                                     <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs">
-                                                        <p><span className="font-semibold">Msj:</span> {pendiente.facebookAdsMessages || '-'}</p>
-                                                        <p><span className="font-semibold">Int:</span> {pendiente.facebookAdsInteraction || '-'}</p>
+                                                        <p><span className="font-semibold text-muted-foreground">Msj:</span> {pendiente.facebookAdsMessages || '-'}</p>
+                                                        <p><span className="font-semibold text-muted-foreground">Int:</span> {pendiente.facebookAdsInteraction || '-'}</p>
                                                     </div>
                                                 </AdsMetricsDialog>
                                             </TableCell>
                                             <TableCell rowSpan={pendientes.length + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">
                                                 <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
                                                      <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs">
-                                                        <p><span className="font-semibold">Msj:</span> {pendiente.tiktokAdsMessages || '-'}</p>
-                                                        <p><span className="font-semibold">Int:</span> {pendiente.tiktokAdsInteraction || '-'}</p>
+                                                        <p><span className="font-semibold text-muted-foreground">Msj:</span> {pendiente.tiktokAdsMessages || '-'}</p>
+                                                        <p><span className="font-semibold text-muted-foreground">Int:</span> {pendiente.tiktokAdsInteraction || '-'}</p>
                                                     </div>
                                                 </AdsMetricsDialog>
                                             </TableCell>
                                             <TableCell rowSpan={pendientes.length + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">
                                                 <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
                                                     <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs">
-                                                        <p><span className="font-semibold">Msj:</span> {pendiente.googleAdsMessages || '-'}</p>
-                                                        <p><span className="font-semibold">Int:</span> {pendiente.googleAdsInteraction || '-'}</p>
+                                                        <p><span className="font-semibold text-muted-foreground">Msj:</span> {pendiente.googleAdsMessages || '-'}</p>
+                                                        <p><span className="font-semibold text-muted-foreground">Int:</span> {pendiente.googleAdsInteraction || '-'}</p>
                                                     </div>
                                                 </AdsMetricsDialog>
                                             </TableCell>
                                             <TableCell rowSpan={pendientes.length + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">
                                                 <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
                                                      <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs">
-                                                        <p><span className="font-semibold">Msj:</span> {pendiente.linkedinAdsMessages || '-'}</p>
-                                                        <p><span className="font-semibold">Int:</span> {pendiente.linkedinAdsInteraction || '-'}</p>
+                                                        <p><span className="font-semibold text-muted-foreground">Msj:</span> {pendiente.linkedinAdsMessages || '-'}</p>
+                                                        <p><span className="font-semibold text-muted-foreground">Int:</span> {pendiente.linkedinAdsInteraction || '-'}</p>
                                                     </div>
                                                 </AdsMetricsDialog>
                                             </TableCell>
@@ -637,7 +636,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                             />
                                         ) : (
                                             <div className="flex justify-between items-center">
-                                                <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground pl-4 h-8" onClick={() => setAddingToClientId(client.id)}>
+                                                <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground pl-4 h-8" onClick={()={() => setAddingToClientId(client.id)}>
                                                     <Plus className="w-4 h-4 mr-2" />
                                                     Añadir pendiente
                                                 </Button>
@@ -988,4 +987,4 @@ export default function PendientesPage() {
   );
 }
 
-
+    
