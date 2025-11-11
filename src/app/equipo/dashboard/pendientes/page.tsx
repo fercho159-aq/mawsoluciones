@@ -20,12 +20,13 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/lib/auth-provider';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, CalendarIcon, Plus, ChevronRight, Lightbulb, Kanban, List, Edit, Facebook, Bot, Youtube, Linkedin, Forward } from 'lucide-react';
+import { PlusCircle, CalendarIcon, Plus, ChevronRight, Lightbulb, Kanban, List, Edit, Facebook, Bot, Youtube, Linkedin, Forward, Trash2, X, CheckCircle } from 'lucide-react';
 import type { PendienteMaw, Client, RecordingEvent, Colaborador } from '@/lib/db/schema';
-import { getPendientes, addPendiente, updatePendiente } from './_actions';
+import { getPendientes, addPendiente, updatePendiente, deletePendientes } from './_actions';
 import { getClients } from '../clientes/_actions';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { teamMembers } from '@/lib/team-data';
@@ -551,7 +552,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                         </TableCell>
                                     )}
                                     <TableCell className={cn("p-0 align-middle text-sm", pendiente.completed && "line-through text-muted-foreground")}>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center">
                                             <Checkbox 
                                                 id={`pendiente-${pendiente.id}`}
                                                 className='ml-2' 
@@ -752,7 +753,7 @@ const BoardView = ({ data, onUpdateTask, currentUser, onRefresh }: {
                                             <p><span className='font-medium'>Enc:</span> {pendiente.encargado}</p>
                                             <p><span className='font-medium'>Eje:</span> {pendiente.ejecutor}</p>
                                         </div>
-                                        {categoria === 'Contenido' && pendiente.recordingEvent && (
+                                        {pendiente.categoria === 'Contenido' && pendiente.recordingEvent && (
                                             <ScheduleRecordingDialog
                                                 event={pendiente.recordingEvent}
                                                 pendienteId={pendiente.id}
@@ -793,6 +794,7 @@ export default function PendientesPage() {
     const [ejecutorFilter, setEjecutorFilter] = useState('Todos');
     const [searchFilter, setSearchFilter] = useState('');
     const [viewMode, setViewMode] = useState<'table' | 'board'>('table');
+    const [selectedCompleted, setSelectedCompleted] = useState<number[]>([]);
 
     const [activeTab, setActiveTab] = useState('contenido');
     const { toast } = useToast();
@@ -860,188 +862,274 @@ export default function PendientesPage() {
     }, [encargadoFilter, ejecutorFilter, searchFilter, pendientes]);
 
     const tasksPerCategory = useMemo(() => {
+        const activePendientes = filteredData.filter(d => !d.completed);
         return {
-            contenido: filteredData.some(d => d.categoria.toLowerCase() === 'contenido'),
-            ads: filteredData.some(d => d.categoria.toLowerCase() === 'ads'),
-            web: filteredData.some(d => d.categoria.toLowerCase() === 'web'),
+            contenido: activePendientes.some(d => d.categoria.toLowerCase() === 'contenido'),
+            ads: activePendientes.some(d => d.categoria.toLowerCase() === 'ads'),
+            web: activePendientes.some(d => d.categoria.toLowerCase() === 'web'),
         };
     }, [filteredData]);
     
-    const canAddPendiente = user?.role === 'admin' || user?.permissions?.pendientes?.reasignarResponsables;
+    const canManage = user?.role === 'admin' || user?.permissions?.pendientes?.reasignarResponsables;
 
-  if (isLoading) {
-    return (
-        <div className="flex items-center justify-center min-h-[50vh]">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
-        </div>
-    )
-  }
+    const handleBulkDelete = async () => {
+        if (selectedCompleted.length === 0) return;
+        try {
+            await deletePendientes(selectedCompleted);
+            toast({ title: 'Éxito', description: `${selectedCompleted.length} pendiente(s) eliminado(s) permanentemente.` });
+            setSelectedCompleted([]);
+            fetchData();
+        } catch (e: any) {
+            toast({ title: 'Error', description: `No se pudo completar la acción: ${e.message}`, variant: 'destructive' });
+        }
+    };
 
-  if (!user) {
-    return <div>Cargando...</div>
-  }
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[50vh]">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
+            </div>
+        )
+    }
+
+    if (!user) {
+        return <div>Cargando...</div>
+    }
   
-  const getFilteredDataForTab = (categoria: string) => {
-      return filteredData.filter(d => d.categoria.toLowerCase() === categoria.toLowerCase());
-  }
-
-  return (
-    <div>
-        <div className='flex justify-between items-center mb-8'>
-            <h1 className="text-3xl font-bold font-headline">Pendientes de Equipo</h1>
-             {canAddPendiente && (
-                <AddPendienteDialog clients={clients} onAdd={addPendiente}>
-                    <Button><PlusCircle className="w-4 h-4 mr-2" /> Añadir Pendiente Manual</Button>
-                </AddPendienteDialog>
-            )}
-        </div>
-        
-        <Card className="mb-4">
-            <CardContent className="p-4 flex flex-col md:flex-row gap-4">
-                <Input 
-                    placeholder="Buscar por cliente o pendiente..."
-                    value={searchFilter}
-                    onChange={(e) => setSearchFilter(e.target.value)}
-                    className="max-w-xs"
-                />
-                <Select value={encargadoFilter} onValueChange={setEncargadoFilter}>
-                    <SelectTrigger className="w-full md:w-[180px]">
-                        <SelectValue placeholder="Filtrar por Encargado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="Todos">Todos los Encargados</SelectItem>
-                        {encargados.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
-                    </SelectContent>
-                </Select>
-                 <Select value={ejecutorFilter} onValueChange={setEjecutorFilter}>
-                    <SelectTrigger className="w-full md:w-[180px]">
-                        <SelectValue placeholder="Filtrar por Ejecutor" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="Todos">Todos los Ejecutores</SelectItem>
-                        {ejecutores.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
-                    </SelectContent>
-                </Select>
-                <div className="flex items-center gap-2 ml-auto">
-                    <Button variant={viewMode === 'table' ? 'secondary' : 'ghost'} size="icon" onClick={() => setViewMode('table')}><List className="w-5 h-5"/></Button>
-                    <Button variant={viewMode === 'board' ? 'secondary' : 'ghost'} size="icon" onClick={() => setViewMode('board')}><Kanban className="w-5 h-5"/></Button>
-                </div>
-            </CardContent>
-        </Card>
-
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-            <span>Filtros:</span>
-            <span className="font-semibold text-foreground">{searchFilter || 'Todos'}</span>
-            <ChevronRight className="w-4 h-4" />
-            <span className="font-semibold text-foreground">{encargadoFilter}</span>
-            <ChevronRight className="w-4 h-4" />
-            <span className="font-semibold text-foreground">{ejecutorFilter}</span>
-        </div>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="contenido" className="flex items-center gap-2">
-                    {tasksPerCategory.contenido && (
-                        <motion.div
-                            animate={{ opacity: [0.5, 1, 0.5] }}
-                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                        >
-                            <Lightbulb className="w-4 h-4 text-primary" />
-                        </motion.div>
-                    )}
-                    Pendientes Contenido
-                </TabsTrigger>
-                <TabsTrigger value="ads" className="flex items-center gap-2">
-                    {tasksPerCategory.ads && (
-                       <motion.div
-                            animate={{ opacity: [0.5, 1, 0.5] }}
-                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                        >
-                            <Lightbulb className="w-4 h-4 text-primary" />
-                        </motion.div>
-                    )}
-                    Pendientes Ads
-                </TabsTrigger>
-                <TabsTrigger value="web" className="flex items-center gap-2">
-                    {tasksPerCategory.web && (
-                        <motion.div
-                            animate={{ opacity: [0.5, 1, 0.5] }}
-                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                        >
-                            <Lightbulb className="w-4 h-4 text-primary" />
-                        </motion.div>
-                    )}
-                    Pendientes Web
-                </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="contenido">
-               {viewMode === 'table' ? (
-                    <PendientesTable 
-                        data={getFilteredDataForTab('contenido')} 
-                        onUpdateTask={handleUpdateTask} 
-                        currentUser={user} 
-                        onRefresh={fetchData}
-                        onUpdatePendienteText={handleUpdatePendienteText}
-                        clients={clients}
-                        categoria="Contenido"
-                    />
-               ) : (
-                    <BoardView 
-                        data={getFilteredDataForTab('contenido')}
-                        onUpdateTask={handleUpdateTask}
-                        currentUser={user}
-                        onRefresh={fetchData}
-                    />
-               )}
-            </TabsContent>
-
-            <TabsContent value="ads">
-                {viewMode === 'table' ? (
-                    <PendientesTable 
-                        data={getFilteredDataForTab('ads')} 
-                        onUpdateTask={handleUpdateTask} 
-                        currentUser={user} 
-                        onRefresh={fetchData}
-                        onUpdatePendienteText={handleUpdatePendienteText}
-                        clients={clients}
-                        categoria="Ads"
-                    />
-                ) : (
-                     <BoardView 
-                        data={getFilteredDataForTab('ads')}
-                        onUpdateTask={handleUpdateTask}
-                        currentUser={user}
-                        onRefresh={fetchData}
-                    />
-                )}
-            </TabsContent>
-            
-            <TabsContent value="web">
-                 {viewMode === 'table' ? (
-                    <PendientesTable 
-                        data={getFilteredDataForTab('web')} 
-                        onUpdateTask={handleUpdateTask} 
-                        currentUser={user} 
-                        onRefresh={fetchData}
-                        onUpdatePendienteText={handleUpdatePendienteText}
-                        clients={clients}
-                        categoria="Web"
-                    />
-                 ) : (
-                     <BoardView 
-                        data={getFilteredDataForTab('web')}
-                        onUpdateTask={handleUpdateTask}
-                        currentUser={user}
-                        onRefresh={fetchData}
-                    />
-                 )}
-            </TabsContent>
-        </Tabs>
-    </div>
-  );
-}
-
+    const getFilteredDataForTab = (categoria: string, completed: boolean) => {
+        return filteredData.filter(d => d.categoria.toLowerCase() === categoria.toLowerCase() && d.completed === completed);
+    }
     
+    const allCompleted = filteredData.filter(d => d.completed);
 
+    return (
+        <div>
+            <div className='flex justify-between items-center mb-8'>
+                <h1 className="text-3xl font-bold font-headline">Pendientes de Equipo</h1>
+                 {canManage && (
+                    <AddPendienteDialog clients={clients} onAdd={addPendiente}>
+                        <Button><PlusCircle className="w-4 h-4 mr-2" /> Añadir Pendiente Manual</Button>
+                    </AddPendienteDialog>
+                )}
+            </div>
+            
+            <Card className="mb-4">
+                <CardContent className="p-4 flex flex-col md:flex-row gap-4">
+                    <Input 
+                        placeholder="Buscar por cliente o pendiente..."
+                        value={searchFilter}
+                        onChange={(e) => setSearchFilter(e.target.value)}
+                        className="max-w-xs"
+                    />
+                    <Select value={encargadoFilter} onValueChange={setEncargadoFilter}>
+                        <SelectTrigger className="w-full md:w-[180px]">
+                            <SelectValue placeholder="Filtrar por Encargado" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Todos">Todos los Encargados</SelectItem>
+                            {encargados.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                     <Select value={ejecutorFilter} onValueChange={setEjecutorFilter}>
+                        <SelectTrigger className="w-full md:w-[180px]">
+                            <SelectValue placeholder="Filtrar por Ejecutor" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Todos">Todos los Ejecutores</SelectItem>
+                            {ejecutores.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                    <div className="flex items-center gap-2 ml-auto">
+                        <Button variant={viewMode === 'table' ? 'secondary' : 'ghost'} size="icon" onClick={() => setViewMode('table')}><List className="w-5 h-5"/></Button>
+                        <Button variant={viewMode === 'board' ? 'secondary' : 'ghost'} size="icon" onClick={() => setViewMode('board')}><Kanban className="w-5 h-5"/></Button>
+                    </div>
+                </CardContent>
+            </Card>
 
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                <span>Filtros:</span>
+                <span className="font-semibold text-foreground">{searchFilter || 'Todos'}</span>
+                <ChevronRight className="w-4 h-4" />
+                <span className="font-semibold text-foreground">{encargadoFilter}</span>
+                <ChevronRight className="w-4 h-4" />
+                <span className="font-semibold text-foreground">{ejecutorFilter}</span>
+            </div>
+
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className={cn("grid w-full", canManage ? "grid-cols-4" : "grid-cols-3")}>
+                    <TabsTrigger value="contenido" className="flex items-center gap-2">
+                        {tasksPerCategory.contenido && (
+                            <motion.div
+                                animate={{ opacity: [0.5, 1, 0.5] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                            >
+                                <Lightbulb className="w-4 h-4 text-primary" />
+                            </motion.div>
+                        )}
+                        Contenido
+                    </TabsTrigger>
+                    <TabsTrigger value="ads" className="flex items-center gap-2">
+                        {tasksPerCategory.ads && (
+                           <motion.div
+                                animate={{ opacity: [0.5, 1, 0.5] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                            >
+                                <Lightbulb className="w-4 h-4 text-primary" />
+                            </motion.div>
+                        )}
+                        Ads
+                    </TabsTrigger>
+                    <TabsTrigger value="web" className="flex items-center gap-2">
+                        {tasksPerCategory.web && (
+                            <motion.div
+                                animate={{ opacity: [0.5, 1, 0.5] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                            >
+                                <Lightbulb className="w-4 h-4 text-primary" />
+                            </motion.div>
+                        )}
+                        Web
+                    </TabsTrigger>
+                    {canManage && (
+                         <TabsTrigger value="completados" className="flex items-center gap-2">
+                           <CheckCircle className="w-4 h-4" />
+                           Completados
+                        </TabsTrigger>
+                    )}
+                </TabsList>
+                
+                <TabsContent value="contenido">
+                   {viewMode === 'table' ? (
+                        <PendientesTable 
+                            data={getFilteredDataForTab('contenido', false)} 
+                            onUpdateTask={handleUpdateTask} 
+                            currentUser={user} 
+                            onRefresh={fetchData}
+                            onUpdatePendienteText={handleUpdatePendienteText}
+                            clients={clients}
+                            categoria="Contenido"
+                        />
+                   ) : (
+                        <BoardView 
+                            data={getFilteredDataForTab('contenido', false)}
+                            onUpdateTask={handleUpdateTask}
+                            currentUser={user}
+                            onRefresh={fetchData}
+                        />
+                   )}
+                </TabsContent>
+
+                <TabsContent value="ads">
+                    {viewMode === 'table' ? (
+                        <PendientesTable 
+                            data={getFilteredDataForTab('ads', false)} 
+                            onUpdateTask={handleUpdateTask} 
+                            currentUser={user} 
+                            onRefresh={fetchData}
+                            onUpdatePendienteText={handleUpdatePendienteText}
+                            clients={clients}
+                            categoria="Ads"
+                        />
+                    ) : (
+                         <BoardView 
+                            data={getFilteredDataForTab('ads', false)}
+                            onUpdateTask={handleUpdateTask}
+                            currentUser={user}
+                            onRefresh={fetchData}
+                        />
+                    )}
+                </TabsContent>
+                
+                <TabsContent value="web">
+                     {viewMode === 'table' ? (
+                        <PendientesTable 
+                            data={getFilteredDataForTab('web', false)} 
+                            onUpdateTask={handleUpdateTask} 
+                            currentUser={user} 
+                            onRefresh={fetchData}
+                            onUpdatePendienteText={handleUpdatePendienteText}
+                            clients={clients}
+                            categoria="Web"
+                        />
+                     ) : (
+                         <BoardView 
+                            data={getFilteredDataForTab('web', false)}
+                            onUpdateTask={handleUpdateTask}
+                            currentUser={user}
+                            onRefresh={fetchData}
+                        />
+                     )}
+                </TabsContent>
+                
+                {canManage && (
+                    <TabsContent value="completados">
+                       <Card className="mt-4">
+                            <CardHeader>
+                                <CardTitle>Pendientes Completados</CardTitle>
+                                <CardDescription>Aquí puedes revisar las tareas finalizadas y eliminarlas si es necesario.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                {selectedCompleted.length > 0 && (
+                                     <div className="flex items-center gap-4 bg-muted p-2 rounded-md my-4">
+                                        <span className="text-sm font-medium">{selectedCompleted.length} seleccionado(s)</span>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="destructive" size="sm"><Trash2 className="w-4 h-4 mr-2"/>Eliminar</Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                                    <AlertDialogDescription>Esta acción es irreversible y eliminará permanentemente los pendientes seleccionados.</AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={handleBulkDelete}>Confirmar</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                        <Button variant="ghost" size="icon" onClick={() => setSelectedCompleted([])}><X className="w-4 h-4" /></Button>
+                                    </div>
+                                )}
+                                <div className="border rounded-lg">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="w-[50px]">
+                                                    <Checkbox
+                                                        checked={selectedCompleted.length > 0 && selectedCompleted.length === allCompleted.length}
+                                                        onCheckedChange={(checked) => setSelectedCompleted(checked ? allCompleted.map(p => p.id) : [])}
+                                                    />
+                                                </TableHead>
+                                                <TableHead>Cliente</TableHead>
+                                                <TableHead>Pendiente</TableHead>
+                                                <TableHead>Categoría</TableHead>
+                                                <TableHead>Ejecutor</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {allCompleted.map(p => (
+                                                <TableRow key={p.id}>
+                                                    <TableCell>
+                                                         <Checkbox
+                                                            checked={selectedCompleted.includes(p.id)}
+                                                            onCheckedChange={(checked) => setSelectedCompleted(prev => checked ? [...prev, p.id] : prev.filter(id => id !== p.id))}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>{p.clienteName}</TableCell>
+                                                    <TableCell className="line-through text-muted-foreground">{p.pendientePrincipal}</TableCell>
+                                                    <TableCell><Badge variant="secondary">{p.categoria}</Badge></TableCell>
+                                                    <TableCell>{p.ejecutor}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                    {allCompleted.length === 0 && <div className="text-center p-8 text-muted-foreground">No hay pendientes completados.</div>}
+                                </div>
+                            </CardContent>
+                       </Card>
+                    </TabsContent>
+                )}
+            </Tabs>
+        </div>
+    );
+}

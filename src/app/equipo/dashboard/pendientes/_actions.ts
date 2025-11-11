@@ -3,7 +3,7 @@
 
 import { db } from "@/lib/db";
 import { pendientes_maw, recordingEvents, NewRecordingEvent, PendienteMaw } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function getPendientes() {
@@ -39,6 +39,19 @@ export async function updatePendiente(id: number, data: Partial<NewPendienteData
     } catch (error) {
         console.error("Error updating pendiente:", error);
         throw new Error("Could not update pendiente");
+    }
+}
+
+export async function deletePendientes(ids: number[]) {
+    try {
+        // First delete associated recording events to avoid foreign key constraint violations
+        await db.delete(recordingEvents).where(inArray(recordingEvents.pendienteId, ids));
+        // Then delete the pendientes
+        await db.delete(pendientes_maw).where(inArray(pendientes_maw.id, ids));
+        revalidatePath("/equipo/dashboard/pendientes");
+    } catch (error) {
+        console.error("Error deleting pendientes:", error);
+        throw new Error("No se pudo eliminar los pendientes. Verifica si tienen eventos de grabación asociados.");
     }
 }
 
