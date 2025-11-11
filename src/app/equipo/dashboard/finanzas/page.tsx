@@ -126,15 +126,18 @@ const generatePeriodOptions = () => {
     const uniqueOptions = [...new Set(options)];
     
     uniqueOptions.sort((a, b) => {
-        const parseDateFromPeriod = (period: string) => {
-            const datePart = period.split(' al ')[0];
-            // Handles "1 de MMMM"
-            const parsed = parse(datePart, "d 'de' MMMM", new Date(), { locale: es });
-            return parsed;
-        };
         try {
-            const dateA = parseDateFromPeriod(a);
-            const dateB = parseDateFromPeriod(b);
+            const datePartA = a.split(' al ')[0];
+            const datePartB = b.split(' al ')[0];
+
+            const parseDate = (part: string) => {
+                const cleanPart = part.replace(' de', '');
+                return parse(cleanPart, "d MMMM", new Date(), { locale: es });
+            };
+            
+            const dateA = parseDate(datePartA);
+            const dateB = parseDate(datePartB);
+
             return dateA.getTime() - dateB.getTime();
         } catch (e) {
             console.error("Error parsing date for sort", e);
