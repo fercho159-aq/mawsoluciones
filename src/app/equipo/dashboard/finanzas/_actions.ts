@@ -157,3 +157,4 @@ export async function deleteMovimiento(id: number) {
         throw new Error(error.message || "Could not delete movimiento");
     }
 }
+

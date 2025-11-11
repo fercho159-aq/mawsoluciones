@@ -203,3 +203,4 @@ export type NewColaborador = typeof colaboradores.$inferInsert;
 export type Access = typeof accesses.$inferSelect;
 export type NewAccess = typeof accesses.$inferInsert;
 
+
