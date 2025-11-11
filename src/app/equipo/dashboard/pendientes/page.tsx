@@ -470,12 +470,12 @@ const BoardView = ({ data, onUpdateTask, currentUser, onRefresh }: {
     onRefresh: () => void;
 }) => {
     const statuses = Object.keys(statusColors);
-    const canReassign = currentUser?.role === 'admin' || currentUser?.permissions?.pendientes?.reasignarResponsables;
+    const canMovePendientes = currentUser?.permissions?.pendientes?.moverPendientes;
 
     const onDragEnd = (result: DropResult) => {
         const { destination, source, draggableId } = result;
 
-        if (!destination) {
+        if (!canMovePendientes || !destination) {
             return;
         }
 
@@ -505,7 +505,7 @@ const BoardView = ({ data, onUpdateTask, currentUser, onRefresh }: {
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 overflow-x-auto pb-4">
             {statuses.map(status => (
-                <Droppable key={status} droppableId={status}>
+                <Droppable key={status} droppableId={status} isDropDisabled={!canMovePendientes}>
                     {(provided, snapshot) => (
                         <div
                             ref={provided.innerRef}
@@ -524,7 +524,7 @@ const BoardView = ({ data, onUpdateTask, currentUser, onRefresh }: {
                             </div>
                             <div className="p-2 space-y-3 flex-grow overflow-y-auto min-h-[200px]">
                                 {groupedByStatus[status].map((pendiente, index) => (
-                                    <Draggable key={pendiente.id} draggableId={pendiente.id.toString()} index={index}>
+                                    <Draggable key={pendiente.id} draggableId={pendiente.id.toString()} index={index} isDragDisabled={!canMovePendientes}>
                                         {(provided, snapshot) => (
                                             <div
                                                 ref={provided.innerRef}
@@ -540,7 +540,7 @@ const BoardView = ({ data, onUpdateTask, currentUser, onRefresh }: {
                                                     pendiente={pendiente}
                                                     onSave={(data) => onUpdateTask(pendiente, data)}
                                                     onRefresh={onRefresh}
-                                                    canReassign={canReassign}
+                                                    canReassign={canMovePendientes}
                                                 >
                                                     <Card className="p-3 bg-background cursor-pointer hover:bg-accent">
                                                         <p className="font-semibold text-sm mb-1">{pendiente.clienteName}</p>
@@ -600,7 +600,7 @@ export default function PendientesPage() {
                 getClients()
             ]);
             setPendientes(pendientesData as PendienteWithRelations[]);
-            setClients(clientsData);
+            setClients(clientsData as Client[]);
         } catch (error) {
             console.error("Failed to fetch data:", error);
             toast({
