@@ -728,7 +728,7 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
 
     const summary = useMemo(() => {
         return monthlyFilteredMovements.reduce((acc, mov) => {
-             if (mov.tipo === 'Ingreso') {
+             if (mov.tipo === 'Ingreso' && mov.cuenta !== 'Pendiente') {
                 acc.totalIngresos += mov.monto;
             } else if (mov.tipo === 'Gasto') {
                 acc.totalGastos += mov.monto;
@@ -884,4 +884,5 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
 
