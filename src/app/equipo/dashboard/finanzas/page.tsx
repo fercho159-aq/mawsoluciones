@@ -37,6 +37,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 
 // Extend the window type for jspdf-autotable
@@ -109,16 +110,16 @@ const generatePeriodOptions = () => {
 
     for (let i = -2; i <= 2; i++) {
         const month = addMonths(today, i);
-        
-        // Mensual del 1 al fin de mes
-        const startOfMonthDate = startOfMonth(month);
+        const monthName = format(month, 'MMMM yyyy', { locale: es });
         const endOfMonthDate = endOfMonth(month);
-        options.push(`1 al ${format(endOfMonthDate, 'd')} de ${format(month, 'MMMM yyyy', { locale: es })}`);
+
+        // Mensual del 1 al fin de mes
+        options.push(`1 al ${format(endOfMonthDate, 'd')} de ${monthName}`);
 
         // Mensual del 15 al 15
         const startMidMonth = setDate(month, 15);
-        const endMidMonth = addDays(addMonths(startMidMonth, 1), -1);
-        options.push(`15 de ${format(startMidMonth, 'MMMM yyyy', { locale: es })} al 14 de ${format(endMidMonth, 'MMMM yyyy', { locale: es })}`);
+        const endMidMonth = addMonths(startMidMonth, 1);
+        options.push(`15 de ${format(startMidMonth, 'MMMM yyyy', { locale: es })} al 15 de ${format(endMidMonth, 'MMMM yyyy', { locale: es })}`);
     }
 
     return [...new Set(options)].sort((a, b) => {
@@ -126,8 +127,8 @@ const generatePeriodOptions = () => {
             const parseDate = (periodString: string): Date => {
                 const parts = periodString.split(' ');
                 const day = parseInt(parts[0]);
-                const monthName = parts[3];
-                const year = parseInt(parts[4]);
+                const monthName = parts[2];
+                const year = parseInt(parts[3]);
                 const monthIndex = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'].indexOf(monthName.toLowerCase());
                 return new Date(year, monthIndex, day);
             };
@@ -137,7 +138,6 @@ const generatePeriodOptions = () => {
             
             return dateA.getTime() - dateB.getTime();
         } catch (e) {
-            console.error("Error parsing date for sorting:", e);
             return 0;
         }
     });
@@ -976,13 +976,15 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
         
         const monthlySummary = monthlyFilteredMovements.reduce((acc, mov) => {
             const cuenta = mov.cuenta as keyof typeof initialBreakdown;
+            const totalAmount = mov.monto + (mov.iva || 0);
+
             if (mov.tipo === 'Ingreso') {
-                acc.totalIngresos += mov.monto;
-                if(acc.ingresosPorCuenta[cuenta] !== undefined) acc.ingresosPorCuenta[cuenta] += mov.monto;
+                acc.totalIngresos += totalAmount;
+                if(acc.ingresosPorCuenta[cuenta] !== undefined) acc.ingresosPorCuenta[cuenta] += totalAmount;
                 if(mov.iva) acc.ivaIngresos += mov.iva;
             } else if (mov.tipo === 'Gasto') {
-                acc.totalGastos += mov.monto;
-                if(acc.gastosPorCuenta[cuenta] !== undefined) acc.gastosPorCuenta[cuenta] += mov.monto;
+                acc.totalGastos += totalAmount;
+                if(acc.gastosPorCuenta[cuenta] !== undefined) acc.gastosPorCuenta[cuenta] += totalAmount;
                 if(mov.iva) acc.ivaGastos += mov.iva;
             }
             return acc;
@@ -1049,6 +1051,7 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
                 </CardHeader>
                 <CardContent>
                     <div className="border rounded-lg">
+                        <TooltipProvider>
                         <Table>
                             <TableHeader><TableRow><TableHead>Fecha</TableHead><TableHead>Tipo</TableHead><TableHead>Descripción</TableHead><TableHead>Categoría / Detalle</TableHead><TableHead>Cuenta</TableHead><TableHead className="text-right">Monto</TableHead></TableRow></TableHeader>
                             <TableBody>
@@ -1069,12 +1072,27 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
                                                     {mov.cuenta}{mov.detalleCuenta ? ` (${mov.detalleCuenta})` : ''}
                                                 </Badge>
                                             </TableCell>
-                                            <TableCell className={cn("text-right font-bold", mov.tipo === 'Ingreso' ? 'text-green-500' : 'text-destructive')}>{mov.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                            <TableCell className={cn("text-right font-bold", mov.tipo === 'Ingreso' ? 'text-green-500' : 'text-destructive')}>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <span>
+                                                            {(mov.monto + (mov.iva || 0)).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+                                                        </span>
+                                                    </TooltipTrigger>
+                                                    {mov.conIva && mov.iva && (
+                                                        <TooltipContent>
+                                                            <p>Subtotal: {mov.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
+                                                            <p>IVA (16%): {mov.iva.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
+                                                        </TooltipContent>
+                                                    )}
+                                                </Tooltip>
+                                            </TableCell>
                                         </TableRow>
                                     </MovimientoFormDialog>
                                 ))}
                             </TableBody>
                         </Table>
+                        </TooltipProvider>
                          {monthlyFilteredMovements.length === 0 && (
                             <div className="text-center p-8 text-muted-foreground">
                                 No hay movimientos en este mes.
