@@ -576,33 +576,33 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                         <>
                                             <TableCell rowSpan={pendientes.length + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">
                                                 <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
-                                                    <div className="cursor-pointer hover:bg-muted p-1 rounded-md">
-                                                        <p className="font-bold text-sm">{pendiente.facebookAdsMessages || '-'}</p>
-                                                        <p className="text-xs text-muted-foreground">{pendiente.facebookAdsInteraction || '-'}</p>
+                                                    <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs">
+                                                        <p><span className="font-semibold">Msj:</span> {pendiente.facebookAdsMessages || '-'}</p>
+                                                        <p><span className="font-semibold">Int:</span> {pendiente.facebookAdsInteraction || '-'}</p>
                                                     </div>
                                                 </AdsMetricsDialog>
                                             </TableCell>
                                             <TableCell rowSpan={pendientes.length + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">
                                                 <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
-                                                     <div className="cursor-pointer hover:bg-muted p-1 rounded-md">
-                                                        <p className="font-bold text-sm">{pendiente.tiktokAdsMessages || '-'}</p>
-                                                        <p className="text-xs text-muted-foreground">{pendiente.tiktokAdsInteraction || '-'}</p>
+                                                     <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs">
+                                                        <p><span className="font-semibold">Msj:</span> {pendiente.tiktokAdsMessages || '-'}</p>
+                                                        <p><span className="font-semibold">Int:</span> {pendiente.tiktokAdsInteraction || '-'}</p>
                                                     </div>
                                                 </AdsMetricsDialog>
                                             </TableCell>
                                             <TableCell rowSpan={pendientes.length + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">
                                                 <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
-                                                    <div className="cursor-pointer hover:bg-muted p-1 rounded-md">
-                                                        <p className="font-bold text-sm">{pendiente.googleAdsMessages || '-'}</p>
-                                                        <p className="text-xs text-muted-foreground">{pendiente.googleAdsInteraction || '-'}</p>
+                                                    <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs">
+                                                        <p><span className="font-semibold">Msj:</span> {pendiente.googleAdsMessages || '-'}</p>
+                                                        <p><span className="font-semibold">Int:</span> {pendiente.googleAdsInteraction || '-'}</p>
                                                     </div>
                                                 </AdsMetricsDialog>
                                             </TableCell>
                                             <TableCell rowSpan={pendientes.length + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">
                                                 <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
-                                                     <div className="cursor-pointer hover:bg-muted p-1 rounded-md">
-                                                        <p className="font-bold text-sm">{pendiente.linkedinAdsMessages || '-'}</p>
-                                                        <p className="text-xs text-muted-foreground">{pendiente.linkedinAdsInteraction || '-'}</p>
+                                                     <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs">
+                                                        <p><span className="font-semibold">Msj:</span> {pendiente.linkedinAdsMessages || '-'}</p>
+                                                        <p><span className="font-semibold">Int:</span> {pendiente.linkedinAdsInteraction || '-'}</p>
                                                     </div>
                                                 </AdsMetricsDialog>
                                             </TableCell>
@@ -987,4 +987,5 @@ export default function PendientesPage() {
     </div>
   );
 }
+
 
