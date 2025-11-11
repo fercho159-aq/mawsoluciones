@@ -34,6 +34,7 @@ import { es } from 'date-fns/locale';
 import { ScheduleRecordingDialog } from '@/components/schedule-recording-dialog';
 import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 
 const statusColors: Record<string, string> = {
   "Pendiente del cliente": "bg-orange-500",
@@ -462,15 +463,32 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
     );
 };
 
-const BoardView = ({ data, onUpdateTask, currentUser, onRefresh, onUpdatePendienteText }: {
+const BoardView = ({ data, onUpdateTask, currentUser, onRefresh }: {
     data: PendienteWithRelations[];
     onUpdateTask: (task: PendienteWithRelations, data: Partial<PendienteMaw>) => void;
     currentUser: any;
     onRefresh: () => void;
-    onUpdatePendienteText: (id: number, text: string) => void;
 }) => {
     const statuses = Object.keys(statusColors);
-     const canReassign = currentUser?.role === 'admin' || currentUser?.permissions?.pendientes?.reasignarResponsables;
+    const canReassign = currentUser?.role === 'admin' || currentUser?.permissions?.pendientes?.reasignarResponsables;
+
+    const onDragEnd = (result: DropResult) => {
+        const { destination, source, draggableId } = result;
+
+        if (!destination) {
+            return;
+        }
+
+        if (destination.droppableId === source.droppableId && destination.index === source.index) {
+            return;
+        }
+
+        const task = data.find(p => p.id.toString() === draggableId);
+        if (task && task.status !== destination.droppableId) {
+            onUpdateTask(task, { status: destination.droppableId });
+        }
+    };
+    
     const groupedByStatus = useMemo(() => {
         const initialGroups: Record<string, PendienteWithRelations[]> = {};
         statuses.forEach(status => initialGroups[status] = []);
@@ -482,52 +500,81 @@ const BoardView = ({ data, onUpdateTask, currentUser, onRefresh, onUpdatePendien
         }, initialGroups);
     }, [data, statuses]);
 
+
     return (
+      <DragDropContext onDragEnd={onDragEnd}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 overflow-x-auto pb-4">
             {statuses.map(status => (
-                <div key={status} className="bg-card rounded-lg flex flex-col min-w-[300px]">
-                    <div className="p-4 border-b">
-                        <h3 className="font-semibold flex items-center gap-2">
-                           <span className={cn("w-3 h-3 rounded-full", statusColors[status])}></span>
-                           {status}
-                           <Badge variant="secondary" className="ml-2">{groupedByStatus[status].length}</Badge>
-                        </h3>
-                    </div>
-                    <div className="p-2 space-y-3 flex-grow overflow-y-auto">
-                        {groupedByStatus[status].map(pendiente => (
-                            <PendienteDialog
-                                key={pendiente.id}
-                                pendiente={pendiente}
-                                onSave={(data) => onUpdateTask(pendiente, data)}
-                                onRefresh={onRefresh}
-                                canReassign={canReassign}
-                            >
-                                <Card className="p-3 bg-background/50 cursor-pointer hover:bg-accent">
-                                    <p className="font-semibold text-sm mb-1">{pendiente.clienteName}</p>
-                                    <p className={cn("text-sm", pendiente.completed && "line-through text-muted-foreground")}>
-                                        {pendiente.pendientePrincipal}
-                                    </p>
-                                    <div className="flex justify-between items-center mt-3 text-xs text-muted-foreground">
-                                        <span>{pendiente.ejecutor}</span>
-                                        {pendiente.recordingEvent && (
-                                            <span className="flex items-center gap-1">
-                                                <CalendarIcon className="w-3 h-3"/>
-                                                {format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}
-                                            </span>
-                                        )}
-                                    </div>
-                                </Card>
-                            </PendienteDialog>
-                        ))}
-                         {groupedByStatus[status].length === 0 && (
-                            <div className="text-center py-8 text-xs text-muted-foreground">
-                                No hay pendientes en este estado.
+                <Droppable key={status} droppableId={status}>
+                    {(provided, snapshot) => (
+                        <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            className={cn(
+                                "bg-card/50 rounded-lg flex flex-col min-w-[300px]",
+                                snapshot.isDraggingOver && "bg-accent"
+                            )}
+                        >
+                            <div className="p-4 border-b">
+                                <h3 className="font-semibold flex items-center gap-2">
+                                   <span className={cn("w-3 h-3 rounded-full", statusColors[status])}></span>
+                                   {status}
+                                   <Badge variant="secondary" className="ml-2">{groupedByStatus[status].length}</Badge>
+                                </h3>
                             </div>
-                         )}
-                    </div>
-                </div>
+                            <div className="p-2 space-y-3 flex-grow overflow-y-auto min-h-[200px]">
+                                {groupedByStatus[status].map((pendiente, index) => (
+                                    <Draggable key={pendiente.id} draggableId={pendiente.id.toString()} index={index}>
+                                        {(provided, snapshot) => (
+                                            <div
+                                                ref={provided.innerRef}
+                                                {...provided.draggableProps}
+                                                {...provided.dragHandleProps}
+                                                style={{
+                                                  ...provided.draggableProps.style,
+                                                  boxShadow: snapshot.isDragging ? '0 4px 8px rgba(0,0,0,0.2)' : 'none',
+                                                }}
+                                            >
+                                                <PendienteDialog
+                                                    key={pendiente.id}
+                                                    pendiente={pendiente}
+                                                    onSave={(data) => onUpdateTask(pendiente, data)}
+                                                    onRefresh={onRefresh}
+                                                    canReassign={canReassign}
+                                                >
+                                                    <Card className="p-3 bg-background cursor-pointer hover:bg-accent">
+                                                        <p className="font-semibold text-sm mb-1">{pendiente.clienteName}</p>
+                                                        <p className={cn("text-sm", pendiente.completed && "line-through text-muted-foreground")}>
+                                                            {pendiente.pendientePrincipal}
+                                                        </p>
+                                                        <div className="flex justify-between items-center mt-3 text-xs text-muted-foreground">
+                                                            <span>{pendiente.ejecutor}</span>
+                                                            {pendiente.recordingEvent && (
+                                                                <span className="flex items-center gap-1">
+                                                                    <CalendarIcon className="w-3 h-3"/>
+                                                                    {format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </Card>
+                                                </PendienteDialog>
+                                            </div>
+                                        )}
+                                    </Draggable>
+                                ))}
+                                {provided.placeholder}
+                                 {groupedByStatus[status].length === 0 && (
+                                    <div className="text-center py-8 text-xs text-muted-foreground">
+                                        No hay pendientes en este estado.
+                                    </div>
+                                 )}
+                            </div>
+                        </div>
+                    )}
+                </Droppable>
             ))}
         </div>
+      </DragDropContext>
     );
 };
 
@@ -740,7 +787,6 @@ export default function PendientesPage() {
                         onUpdateTask={handleUpdateTask}
                         currentUser={user}
                         onRefresh={fetchData}
-                        onUpdatePendienteText={handleUpdatePendienteText}
                     />
                )}
             </TabsContent>
@@ -762,7 +808,6 @@ export default function PendientesPage() {
                         onUpdateTask={handleUpdateTask}
                         currentUser={user}
                         onRefresh={fetchData}
-                        onUpdatePendienteText={handleUpdatePendienteText}
                     />
                 )}
             </TabsContent>
@@ -784,7 +829,6 @@ export default function PendientesPage() {
                         onUpdateTask={handleUpdateTask}
                         currentUser={user}
                         onRefresh={fetchData}
-                        onUpdatePendienteText={handleUpdatePendienteText}
                     />
                  )}
             </TabsContent>
