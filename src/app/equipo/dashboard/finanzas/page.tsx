@@ -453,15 +453,20 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
                 toast({ title: "Error", description: "No se pudo registrar el ingreso manual.", variant: "destructive" });
             }
         } else {
-            if (!selectedCpc || !cuentaDestino) {
+            if (!selectedCpcId || !cuentaDestino) {
                 toast({ title: "Error", description: "Selecciona una cuenta por cobrar y una cuenta de destino.", variant: "destructive" });
                 return;
             }
+            const cpcToPay = cuentasPorCobrar.find(c => c.id.toString() === selectedCpcId);
+            if (!cpcToPay) {
+                toast({ title: "Error", description: "Cuenta por cobrar no encontrada.", variant: "destructive" });
+                return;
+            }
             try {
-                await registrarPagoCpc(selectedCpc.id, cuentaDestino as Cuenta, detalleEfectivo || null);
-                toast({ title: "Éxito", description: `Pago de ${selectedCpc.clienteName} registrado.` });
-            } catch (error) {
-                toast({ title: "Error", description: "No se pudo registrar el pago.", variant: "destructive" });
+                await registrarPagoCpc(cpcToPay.id, cuentaDestino as Cuenta, detalleEfectivo || null);
+                toast({ title: "Éxito", description: `Pago de ${cpcToPay.clienteName} registrado.` });
+            } catch (error: any) {
+                toast({ title: "Error", description: `No se pudo registrar el pago: ${error.message}`, variant: "destructive" });
                 return;
             }
         }
@@ -512,7 +517,7 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
                 </div>
                 <DialogFooter className='mt-4'>
                     <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                    <Button onClick={handleSave} disabled={isManual ? (!manualAmount || !manualDesc || !cuentaDestino) : (!selectedCpc || !cuentaDestino)}>Registrar</Button>
+                    <Button onClick={handleSave} disabled={isManual ? (!manualAmount || !manualDesc || !cuentaDestino) : (!selectedCpcId || !cuentaDestino)}>Registrar</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
