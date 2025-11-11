@@ -112,15 +112,24 @@ const generatePeriodOptions = () => {
         const month = addMonths(today, i);
         const startOfMonthDate = startOfMonth(month);
         const endOfMonthDate = endOfMonth(month);
+        
+        const yearFormat = 'yyyy';
+        const monthFormat = 'MMMM';
+        const dayMonthFormat = `d 'de' MMMM`;
+        const dayMonthYearFormat = `d 'de' MMMM 'de' yyyy`;
+
+        const startMonthStr = format(startOfMonthDate, monthFormat, { locale: es });
+        const startYearStr = format(startOfMonthDate, yearFormat);
+        const endMonthStr = format(endOfMonthDate, monthFormat, { locale: es });
 
         // Mes completo
-        options.push(`1 de ${format(startOfMonthDate, 'MMMM', { locale: es })} al ${format(endOfMonthDate, 'd \'de\' MMMM', { locale: es })}`);
+        options.push(`1 de ${startMonthStr} de ${startYearStr} al ${format(endOfMonthDate, dayMonthYearFormat, { locale: es })}`);
         
         // Quincena 1-15
-        options.push(`1 de ${format(startOfMonthDate, 'MMMM', { locale: es })} al 15 de ${format(startOfMonthDate, 'MMMM', { locale: es })}`);
+        options.push(`1 de ${startMonthStr} de ${startYearStr} al 15 de ${startMonthStr} de ${startYearStr}`);
         
         // Quincena 16-fin de mes
-        options.push(`16 de ${format(startOfMonthDate, 'MMMM', { locale: es })} al ${format(endOfMonthDate, 'd \'de\' MMMM', { locale: es })}`);
+        options.push(`16 de ${startMonthStr} de ${startYearStr} al ${format(endOfMonthDate, dayMonthYearFormat, { locale: es })}`);
     }
 
     const uniqueOptions = [...new Set(options)];
@@ -131,8 +140,7 @@ const generatePeriodOptions = () => {
             const datePartB = b.split(' al ')[0];
 
             const parseDate = (part: string) => {
-                const cleanPart = part.replace(' de', '');
-                return parse(cleanPart, "d MMMM", new Date(), { locale: es });
+                return parse(part, "d 'de' MMMM 'de' yyyy", new Date(), { locale: es });
             };
             
             const dateA = parseDate(datePartA);
