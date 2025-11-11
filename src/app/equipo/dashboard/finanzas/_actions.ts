@@ -80,31 +80,20 @@ export async function updateCpc(id: number, data: Partial<Omit<NewCuentaPorCobra
 
 export async function registrarPagoCpc(cpcId: number, cuentaDestino: string, detalleCuenta: string | null) {
      try {
-        // First, find the corresponding pending movement.
         const movimiento = await db.query.movimientosDiarios.findFirst({
             where: and(eq(movimientosDiarios.cpcId, cpcId), eq(movimientosDiarios.cuenta, 'Pendiente'))
         });
-
-        if (!movimiento) {
-             // If no pending movement is found, it might have been already paid or there's an inconsistency.
-             // We still try to delete the account receivable.
-             await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, cpcId));
-             revalidatePath("/equipo/dashboard/finanzas");
-             console.warn(`CPC record ${cpcId} deleted, but no corresponding PENDING movement was found to update.`);
-             return;
+        
+        if (movimiento) {
+            await db.update(movimientosDiarios)
+                .set({ 
+                    cuenta: cuentaDestino,
+                    detalleCuenta: detalleCuenta,
+                    descripcion: movimiento.descripcion.replace(' (pendiente)', '') || 'Ingreso registrado',
+                })
+                .where(eq(movimientosDiarios.id, movimiento.id));
         }
 
-        // Update the found movement from 'Pendiente' to a real account
-        await db.update(movimientosDiarios)
-            .set({ 
-                cuenta: cuentaDestino,
-                detalleCuenta: detalleCuenta,
-                descripcion: movimiento.descripcion.replace(' (pendiente)', '') || 'Ingreso registrado',
-                // We DO NOT update the date, so it stays in the original month
-            })
-            .where(eq(movimientosDiarios.id, movimiento.id)); // Use the specific movement ID
-
-        // Finally, delete the account receivable record
         await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, cpcId));
             
         revalidatePath("/equipo/dashboard/finanzas");
@@ -157,6 +146,7 @@ export async function deleteMovimiento(id: number) {
         throw new Error(error.message || "Could not delete movimiento");
     }
 }
+
 
 
 
