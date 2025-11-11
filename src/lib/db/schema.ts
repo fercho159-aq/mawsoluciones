@@ -76,6 +76,8 @@ export const pendientes_maw = pgTable('pendientes_maw', {
     status: varchar('status', { length: 50 }).notNull().default('Trabajando'),
     completed: boolean('completed').default(false).notNull(),
     createdAt: timestamp('created_at').defaultNow(),
+    publicacionesAlMes: integer('publicaciones_al_mes'),
+    publicacionesALaSemana: integer('publicaciones_a_la_semana'),
 });
 
 // Eventos de grabación asociados a un pendiente
@@ -200,3 +202,4 @@ export type Colaborador = typeof colaboradores.$inferSelect;
 export type NewColaborador = typeof colaboradores.$inferInsert;
 export type Access = typeof accesses.$inferSelect;
 export type NewAccess = typeof accesses.$inferInsert;
+

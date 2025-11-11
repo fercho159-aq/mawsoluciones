@@ -323,6 +323,8 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
     const [addingToClientId, setAddingToClientId] = useState<number | null>(null);
     
     const canReassign = currentUser?.role === 'admin' || currentUser?.permissions?.pendientes?.reasignarResponsables;
+    const isContenido = categoria === 'Contenido';
+
 
     const handleTogglePendiente = async (pendiente: PendienteWithRelations) => {
         try {
@@ -376,6 +378,8 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                         <TableHead className="w-[200px]">Cliente</TableHead>
                         <TableHead className="w-[40px]"></TableHead>
                         <TableHead>Pendiente</TableHead>
+                         {isContenido && <TableHead className="w-[150px]">Pubs. al Mes</TableHead>}
+                        {isContenido && <TableHead className="w-[150px]">Pubs. a la Semana</TableHead>}
                         <TableHead className="w-[180px]">Encargado</TableHead>
                         <TableHead className="w-[180px]">Ejecutor</TableHead>
                         <TableHead className="w-[180px]">Status</TableHead>
@@ -419,6 +423,8 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                         <TableCell className={cn("p-2 align-middle", pendiente.completed && "line-through text-muted-foreground")}>
                                             <p className="text-sm">{pendiente.pendientePrincipal}</p>
                                         </TableCell>
+                                        {isContenido && <TableCell className="p-2 align-middle text-center">{pendiente.publicacionesAlMes || '-'}</TableCell>}
+                                        {isContenido && <TableCell className="p-2 align-middle text-center">{pendiente.publicacionesALaSemana || '-'}</TableCell>}
                                         <TableCell className="p-2 align-middle text-xs">{pendiente.encargado}</TableCell>
                                         <TableCell className="p-2 align-middle text-xs">{pendiente.ejecutor}</TableCell>
                                         <TableCell className="p-2 align-middle">
@@ -437,7 +443,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                             ))}
                              {currentUser?.permissions?.pendientes?.reasignarResponsables && (
                                 <TableRow>
-                                    <TableCell colSpan={7} className="p-0">
+                                    <TableCell colSpan={isContenido ? 9 : 7} className="p-0">
                                         {addingToClientId === client.id ? (
                                             <AddPendienteInline 
                                                 client={client}
@@ -793,3 +799,4 @@ export default function PendientesPage() {
     </div>
   );
 }
+
