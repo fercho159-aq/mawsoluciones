@@ -393,7 +393,7 @@ const ClientDataDialog = ({ pendientes, onSave, onRefresh, children }: { pendien
     }
 
     if (!firstPendiente) {
-        return null;
+        return <>{children}</>;
     }
 
     return (
@@ -535,7 +535,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                         return (
                         <React.Fragment key={clienteName}>
                             {pendientes.map((pendiente, index) => (
-                                <TableRow className="h-12 p-0" key={pendiente.id}>
+                                <TableRow className="h-14 p-0" key={pendiente.id}>
                                     {index === 0 && (
                                         <>
                                             <TableCell 
@@ -558,7 +558,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                             onCheckedChange={() => handleTogglePendiente(pendiente)}
                                         />
                                     </TableCell>
-                                    <TableCell className={cn("p-0 align-middle", pendiente.completed && "line-through text-muted-foreground")}>
+                                    <TableCell className={cn("p-0 align-middle text-sm", pendiente.completed && "line-through text-muted-foreground")}>
                                        <PendienteDialog
                                             key={pendiente.id}
                                             pendiente={pendiente} 
@@ -635,7 +635,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                 </TableRow>
                             ))}
                              {currentUser?.permissions?.pendientes?.reasignarResponsables && (
-                                <TableRow>
+                                <TableRow className="h-12">
                                     <TableCell colSpan={isAds ? 5 : 1} className="p-0">
                                         {addingToClientId === client.id ? (
                                             <AddPendienteInline 
@@ -645,8 +645,8 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                                 onCancel={() => setAddingToClientId(null)}
                                             />
                                         ) : (
-                                            <div className="flex justify-between items-center">
-                                                <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground pl-4 h-8" onClick={() => setAddingToClientId(client.id)}>
+                                            <div className="flex justify-between items-center h-full">
+                                                <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground pl-4" onClick={() => setAddingToClientId(client.id)}>
                                                     <Plus className="w-4 h-4 mr-2" />
                                                     Añadir pendiente
                                                 </Button>
@@ -721,7 +721,7 @@ const BoardView = ({ data, onUpdateTask, currentUser, onRefresh }: {
                                             <p><span className='font-medium'>Enc:</span> {pendiente.encargado}</p>
                                             <p><span className='font-medium'>Eje:</span> {pendiente.ejecutor}</p>
                                         </div>
-                                        {isContenido && pendiente.recordingEvent && (
+                                        {categoria === 'Contenido' && pendiente.recordingEvent && (
                                             <div className="flex flex-col items-center">
                                                 <CalendarIcon className="w-4 h-4"/>
                                                 <span>{format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}</span>
