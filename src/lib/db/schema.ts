@@ -78,6 +78,23 @@ export const pendientes_maw = pgTable('pendientes_maw', {
     createdAt: timestamp('created_at').defaultNow(),
     publicacionesAlMes: text('publicaciones_al_mes'),
     publicacionesALaSemana: text('publicaciones_a_la_semana'),
+
+    // Nuevas columnas para Ads
+    hasFacebookAds: boolean('has_facebook_ads').default(false),
+    facebookAdsMessages: text('facebook_ads_messages'),
+    facebookAdsInteraction: text('facebook_ads_interaction'),
+
+    hasTiktokAds: boolean('has_tiktok_ads').default(false),
+    tiktokAdsMessages: text('tiktok_ads_messages'),
+    tiktokAdsInteraction: text('tiktok_ads_interaction'),
+
+    hasGoogleAds: boolean('has_google_ads').default(false),
+    googleAdsMessages: text('google_ads_messages'),
+    googleAdsInteraction: text('google_ads_interaction'),
+
+    hasLinkedinAds: boolean('has_linkedin_ads').default(false),
+    linkedinAdsMessages: text('linkedin_ads_messages'),
+    linkedinAdsInteraction: text('linkedin_ads_interaction'),
 });
 
 // Eventos de grabación asociados a un pendiente
@@ -202,6 +219,7 @@ export type Colaborador = typeof colaboradores.$inferSelect;
 export type NewColaborador = typeof colaboradores.$inferInsert;
 export type Access = typeof accesses.$inferSelect;
 export type NewAccess = typeof accesses.$inferInsert;
+
 
 
 

@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/lib/auth-provider';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, CalendarIcon, Plus, ChevronRight, Lightbulb, Kanban, List, Edit } from 'lucide-react';
+import { PlusCircle, CalendarIcon, Plus, ChevronRight, Lightbulb, Kanban, List, Edit, Facebook, Bot, Youtube, Linkedin, Forward } from 'lucide-react';
 import type { PendienteMaw, Client, RecordingEvent, Colaborador } from '@/lib/db/schema';
 import { getPendientes, addPendiente, updatePendiente } from './_actions';
 import { getClients } from '../clientes/_actions';
@@ -34,6 +34,7 @@ import { es } from 'date-fns/locale';
 import { ScheduleRecordingDialog } from '@/components/schedule-recording-dialog';
 import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
+import { TikTokIcon } from '@/components/icons/tiktok-icon';
 
 
 const statusColors: Record<string, string> = {
@@ -233,6 +234,80 @@ const PendienteDialog = ({ pendiente, onSave, canReassign }: { pendiente: Pendie
     )
 }
 
+const AdsMetricsDialog = ({ pendiente, onSave, children }: { pendiente: PendienteWithRelations, onSave: (data: Partial<PendienteMaw>) => void, children: React.ReactNode }) => {
+    const [open, setOpen] = useState(false);
+    const [metrics, setMetrics] = useState<Partial<PendienteMaw>>({});
+
+    useEffect(() => {
+        if (open) {
+            setMetrics({
+                hasFacebookAds: pendiente.hasFacebookAds, facebookAdsMessages: pendiente.facebookAdsMessages || '', facebookAdsInteraction: pendiente.facebookAdsInteraction || '',
+                hasTiktokAds: pendiente.hasTiktokAds, tiktokAdsMessages: pendiente.tiktokAdsMessages || '', tiktokAdsInteraction: pendiente.tiktokAdsInteraction || '',
+                hasGoogleAds: pendiente.hasGoogleAds, googleAdsMessages: pendiente.googleAdsMessages || '', googleAdsInteraction: pendiente.googleAdsInteraction || '',
+                hasLinkedinAds: pendiente.hasLinkedinAds, linkedinAdsMessages: pendiente.linkedinAdsMessages || '', linkedinAdsInteraction: pendiente.linkedinAdsInteraction || '',
+            });
+        }
+    }, [open, pendiente]);
+
+    const handleSave = () => {
+        onSave(metrics);
+        setOpen(false);
+    }
+    
+    const platforms: (keyof PendienteMaw)[] = ['Facebook', 'Tiktok', 'Google', 'Linkedin'];
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>{children}</DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Métricas de Ads para {pendiente.clienteName}</DialogTitle>
+                    <DialogDescription>Actualiza los datos de las campañas publicitarias.</DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-6 py-4 max-h-[60vh] overflow-y-auto px-1">
+                    {platforms.map(platform => {
+                        const platformLower = platform.toLowerCase();
+                        return (
+                            <div key={platform} className="space-y-4 p-4 border rounded-lg">
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id={`has-${platformLower}`}
+                                        checked={metrics[`has${platform}Ads` as keyof typeof metrics]}
+                                        onCheckedChange={(checked) => setMetrics(prev => ({...prev, [`has${platform}Ads`]: checked}))}
+                                    />
+                                    <Label htmlFor={`has-${platformLower}`} className="text-lg font-semibold flex items-center gap-2">
+                                        {platform === 'Facebook' && <Facebook className='w-5 h-5'/>}
+                                        {platform === 'Tiktok' && <TikTokIcon className='w-5 h-5'/>}
+                                        {platform === 'Google' && <Bot className='w-5 h-5'/>}
+                                        {platform === 'Linkedin' && <Linkedin className='w-5 h-5'/>}
+                                        ¿Tiene en {platform}?
+                                    </Label>
+                                </div>
+                                {metrics[`has${platform}Ads` as keyof typeof metrics] && (
+                                    <div className="grid grid-cols-2 gap-4 pl-6">
+                                        <div className="space-y-2">
+                                            <Label htmlFor={`${platformLower}-messages`}>Mensajes</Label>
+                                            <Input id={`${platformLower}-messages`} value={metrics[`${platformLower}AdsMessages` as keyof typeof metrics] as string} onChange={e => setMetrics(prev => ({...prev, [`${platformLower}AdsMessages`]: e.target.value}))} />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor={`${platformLower}-interaction`}>Interacción</Label>
+                                            <Input id={`${platformLower}-interaction`} value={metrics[`${platformLower}AdsInteraction` as keyof typeof metrics] as string} onChange={e => setMetrics(prev => ({...prev, [`${platformLower}AdsInteraction`]: e.target.value}))} />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    })}
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                    <Button onClick={handleSave}>Guardar Métricas</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
 const AddPendienteInline = ({ client, categoria, onAdd, onCancel }: { client: Client, categoria: string, onAdd: (pendienteText: string) => void, onCancel: () => void }) => {
     const [text, setText] = useState('');
 
@@ -385,6 +460,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
     
     const canReassign = currentUser?.role === 'admin' || currentUser?.permissions?.pendientes?.reasignarResponsables;
     const isContenido = categoria === 'Contenido';
+    const isAds = categoria === 'Ads';
 
 
     const handleTogglePendiente = async (pendiente: PendienteWithRelations) => {
@@ -441,6 +517,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                         <TableHead>Pendiente</TableHead>
                          {isContenido && <TableHead className="w-[150px]">Pubs. al Mes</TableHead>}
                         {isContenido && <TableHead className="w-[150px]">Pubs. a la Semana</TableHead>}
+                        {isAds && <TableHead className="w-[180px]">Métricas Ads</TableHead>}
                         <TableHead className="w-[180px]">Encargado</TableHead>
                         <TableHead className="w-[180px]">Ejecutor</TableHead>
                         <TableHead className="w-[180px]">Status</TableHead>
@@ -492,6 +569,20 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                             <TableCell rowSpan={pendientes.length} className="p-2 align-middle text-center border-l">{pendientes[0].publicacionesALaSemana || '-'}</TableCell>
                                         </>
                                     )}
+                                     {isAds && index === 0 && (
+                                        <TableCell rowSpan={pendientes.length} className="p-2 align-middle text-center border-l">
+                                            <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
+                                                <Button variant="ghost" className="h-auto p-1">
+                                                    <div className="flex gap-2">
+                                                        <Facebook className={cn("w-5 h-5", pendiente.hasFacebookAds ? "text-blue-600" : "text-muted-foreground")} />
+                                                        <TikTokIcon className={cn("w-5 h-5", pendiente.hasTiktokAds ? "text-white" : "text-muted-foreground")} />
+                                                        <Bot className={cn("w-5 h-5", pendiente.hasGoogleAds ? "text-green-500" : "text-muted-foreground")} />
+                                                        <Linkedin className={cn("w-5 h-5", pendiente.hasLinkedinAds ? "text-sky-700" : "text-muted-foreground")} />
+                                                    </div>
+                                                </Button>
+                                            </AdsMetricsDialog>
+                                        </TableCell>
+                                    )}
                                     <TableCell className="p-2 align-middle text-xs">{pendiente.encargado}</TableCell>
                                     <TableCell className="p-2 align-middle text-xs">{pendiente.ejecutor}</TableCell>
                                     <TableCell className="p-2 align-middle">
@@ -511,7 +602,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                             ))}
                              {currentUser?.permissions?.pendientes?.reasignarResponsables && (
                                 <TableRow>
-                                    <TableCell colSpan={isContenido ? 9 : 7} className="p-0">
+                                    <TableCell colSpan={isContenido ? 9 : isAds ? 8 : 7} className="p-0">
                                         {addingToClientId === client.id ? (
                                             <AddPendienteInline 
                                                 client={client}
@@ -869,10 +960,3 @@ export default function PendientesPage() {
     </div>
   );
 }
-
-
-
-
-
-
-
