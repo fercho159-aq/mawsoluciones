@@ -4,7 +4,7 @@
 
 import { db } from "@/lib/db";
 import { cuentasPorCobrar, movimientosDiarios, type NewCuentaPorCobrar, type CuentaPorCobrar, type MovimientoDiario, type NewMovimientoDiario } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function getCuentasPorCobrar() {
@@ -100,7 +100,7 @@ export async function registrarPagoCpc(cpcId: number, cuentaDestino: string, det
                 cuenta: cuentaDestino,
                 detalleCuenta: detalleCuenta,
                 descripcion: movimiento.descripcion.replace(' (pendiente)', '') || 'Ingreso registrado',
-                fecha: new Date(),
+                // We DO NOT update the date, so it stays in the original month
             })
             .where(eq(movimientosDiarios.id, movimiento.id)); // Use the specific movement ID
 
