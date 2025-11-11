@@ -460,12 +460,14 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                         <>
                                             <TableCell 
                                                 rowSpan={pendientes.length} 
-                                                className="align-top text-center font-medium p-2 border-r"
+                                                className="align-top font-medium p-2 border-r"
                                             >
-                                                <div className='flex flex-col h-full justify-between'>
-                                                    <span>{clienteName}</span>
-                                                    <ClientProgress pendientes={pendientes} />
-                                                </div>
+                                                <ClientDataDialog pendientes={pendientes} onSave={(id, data) => onUpdateTask(pendientes.find(p => p.id === id)!, data)} onRefresh={onRefresh}>
+                                                    <div className='flex flex-col h-full justify-between cursor-pointer hover:bg-muted p-2 rounded-md'>
+                                                        <span className="flex items-center gap-1">{clienteName} <Edit className="w-3 h-3 text-muted-foreground"/></span>
+                                                        <ClientProgress pendientes={pendientes} />
+                                                    </div>
+                                                </ClientDataDialog>
                                             </TableCell>
                                         </>
                                     )}
@@ -523,13 +525,6 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                                     <Plus className="w-4 h-4 mr-2" />
                                                     Añadir pendiente
                                                 </Button>
-                                                {isContenido && (
-                                                    <ClientDataDialog pendientes={pendientes} onSave={(id, data) => onUpdateTask(pendientes.find(p => p.id === id)!, data)} onRefresh={onRefresh}>
-                                                        <Button variant="ghost" size="icon" className="mr-2 h-7 w-7 text-muted-foreground">
-                                                            <Edit className="w-4 h-4" />
-                                                        </Button>
-                                                    </ClientDataDialog>
-                                                )}
                                             </div>
                                         )}
                                     </TableCell>
@@ -551,6 +546,7 @@ const BoardView = ({ data, onUpdateTask, currentUser, onRefresh }: {
     onRefresh: () => void;
 }) => {
     const statuses = Object.keys(statusColors);
+    const canReassign = currentUser?.role === 'admin' || currentUser?.permissions?.pendientes?.reasignarResponsables;
     
     const groupedByStatus = useMemo(() => {
         const initialGroups: Record<string, PendienteWithRelations[]> = {};
@@ -580,34 +576,28 @@ const BoardView = ({ data, onUpdateTask, currentUser, onRefresh }: {
                     </div>
                     <div className="p-2 space-y-3 flex-grow overflow-y-auto min-h-[200px]">
                         {groupedByStatus[status].map((pendiente) => (
-                            <Dialog key={pendiente.id}>
-                                <DialogTrigger asChild>
-                                     <Card className="p-3 bg-background cursor-pointer hover:bg-accent">
-                                        <p className="font-semibold text-sm mb-1">{pendiente.clienteName}</p>
-                                        <p className={cn("text-sm", pendiente.completed && "line-through text-muted-foreground")}>
-                                            {pendiente.pendientePrincipal}
-                                        </p>
-                                        <div className="flex justify-between items-center mt-3 text-xs text-muted-foreground">
-                                            <span>{pendiente.ejecutor}</span>
-                                            {pendiente.recordingEvent && (
-                                                <span className="flex items-center gap-1">
-                                                    <CalendarIcon className="w-3 h-3"/>
-                                                    {format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </Card>
-                                </DialogTrigger>
-                               <DialogContent>
-                                    {/* Simplified Dialog Content for Board View */}
-                                    <DialogHeader>
-                                        <DialogTitle>Editar Pendiente</DialogTitle>
-                                        <DialogDescription>{pendiente.clienteName}</DialogDescription>
-                                    </DialogHeader>
-                                    {/* Form fields would be here, but we re-use the full dialog logic via components, this is a placeholder */}
-                                    <p>{pendiente.pendientePrincipal}</p>
-                               </DialogContent>
-                            </Dialog>
+                           <PendienteDialog
+                                key={pendiente.id}
+                                pendiente={pendiente}
+                                onSave={(data) => onUpdateTask(pendiente, data)}
+                                canReassign={canReassign}
+                           >
+                                <Card className="p-3 bg-background cursor-pointer hover:bg-accent">
+                                    <p className="font-semibold text-sm mb-1">{pendiente.clienteName}</p>
+                                    <p className={cn("text-sm", pendiente.completed && "line-through text-muted-foreground")}>
+                                        {pendiente.pendientePrincipal}
+                                    </p>
+                                    <div className="flex justify-between items-center mt-3 text-xs text-muted-foreground">
+                                        <span>{pendiente.ejecutor}</span>
+                                        {pendiente.recordingEvent && (
+                                            <span className="flex items-center gap-1">
+                                                <CalendarIcon className="w-3 h-3"/>
+                                                {format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}
+                                            </span>
+                                        )}
+                                    </div>
+                                </Card>
+                            </PendienteDialog>
                         ))}
                          {groupedByStatus[status].length === 0 && (
                             <div className="text-center py-8 text-xs text-muted-foreground">
@@ -879,6 +869,7 @@ export default function PendientesPage() {
     </div>
   );
 }
+
 
 
 
