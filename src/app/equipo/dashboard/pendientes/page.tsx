@@ -611,7 +611,16 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                     <TableCell className="p-2 align-middle text-xs">{pendiente.encargado}</TableCell>
                                     <TableCell className="p-2 align-middle text-xs">{pendiente.ejecutor}</TableCell>
                                     <TableCell className="p-2 align-middle">
-                                        <Badge className={cn("text-white w-full justify-center", statusColors[pendiente.status])}>{pendiente.status}</Badge>
+                                        <Select value={pendiente.status} onValueChange={(newStatus) => onUpdateTask(pendiente, { status: newStatus })}>
+                                            <SelectTrigger className={cn("text-white w-full justify-center text-xs h-8 border-0", statusColors[pendiente.status])}>
+                                                <SelectValue>{pendiente.status}</SelectValue>
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {Object.keys(statusColors).map(s => (
+                                                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </TableCell>
                                     {isContenido && index === 0 && (
                                         <TableCell className="p-2 text-center align-middle" rowSpan={pendientes.length  + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)}>
@@ -712,7 +721,7 @@ const BoardView = ({ data, onUpdateTask, currentUser, onRefresh }: {
                                             <p><span className='font-medium'>Enc:</span> {pendiente.encargado}</p>
                                             <p><span className='font-medium'>Eje:</span> {pendiente.ejecutor}</p>
                                         </div>
-                                        {pendiente.recordingEvent && (
+                                        {isContenido && pendiente.recordingEvent && (
                                             <div className="flex flex-col items-center">
                                                 <CalendarIcon className="w-4 h-4"/>
                                                 <span>{format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}</span>
