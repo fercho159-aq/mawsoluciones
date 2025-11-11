@@ -110,26 +110,28 @@ const generatePeriodOptions = () => {
 
     for (let i = -2; i <= 2; i++) {
         const month = addMonths(today, i);
-        const monthName = format(month, 'MMMM yyyy', { locale: es });
+        const year = format(month, 'yyyy');
+        const monthName = format(month, 'MMMM', { locale: es });
         const endOfMonthDate = endOfMonth(month);
 
         // Mensual del 1 al fin de mes
-        options.push(`1 al ${format(endOfMonthDate, 'd')} de ${monthName}`);
+        options.push(`1 al ${format(endOfMonthDate, 'd')} de ${monthName} de ${year}`);
 
         // Mensual del 15 al 15
         const startMidMonth = setDate(month, 15);
         const endMidMonth = addMonths(startMidMonth, 1);
-        options.push(`15 de ${format(startMidMonth, 'MMMM yyyy', { locale: es })} al 15 de ${format(endMidMonth, 'MMMM yyyy', { locale: es })}`);
+        options.push(`15 de ${format(startMidMonth, 'MMMM', { locale: es })} al 15 de ${format(endMidMonth, 'MMMM', { locale: es })} de ${format(endMidMonth, 'yyyy')}`);
     }
 
     return [...new Set(options)].sort((a, b) => {
         try {
             const parseDate = (periodString: string): Date => {
-                const parts = periodString.split(' ');
+                const parts = periodString.toLowerCase().split(' ');
                 const day = parseInt(parts[0]);
                 const monthName = parts[2];
-                const year = parseInt(parts[3]);
-                const monthIndex = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'].indexOf(monthName.toLowerCase());
+                const year = parseInt(parts[parts.length - 1]);
+                const monthIndex = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'].indexOf(monthName);
+                if (monthIndex === -1) return new Date(0);
                 return new Date(year, monthIndex, day);
             };
             
@@ -400,12 +402,14 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
             if (!dateString) return null;
             try {
                 // Example format: "15 de noviembre de 2024"
-                const parts = dateString.split(' de ');
+                const parts = dateString.toLowerCase().split(' de ');
                 if (parts.length < 3) return null;
                 const day = parts[0];
                 const month = parts[1];
                 const year = parts[2];
-                return parse(`${day} ${month} ${year}`, 'd MMMM yyyy', new Date(), { locale: es });
+                const monthIndex = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'].indexOf(month);
+
+                return parse(`${day} ${monthIndex + 1} ${year}`, 'd M yyyy', new Date());
             } catch {
                 return null;
             }
@@ -1073,19 +1077,14 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className={cn("text-right font-bold", mov.tipo === 'Ingreso' ? 'text-green-500' : 'text-destructive')}>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <span>
-                                                            {(mov.monto + (mov.iva || 0)).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
-                                                        </span>
-                                                    </TooltipTrigger>
+                                                <div>
+                                                    {(mov.monto + (mov.iva || 0)).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
                                                     {mov.conIva && mov.iva && (
-                                                        <TooltipContent>
-                                                            <p>Subtotal: {mov.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
-                                                            <p>IVA (16%): {mov.iva.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
-                                                        </TooltipContent>
+                                                        <div className="text-xs font-normal text-muted-foreground">
+                                                            (Sub: {mov.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })} + IVA: {mov.iva.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })})
+                                                        </div>
                                                     )}
-                                                </Tooltip>
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     </MovimientoFormDialog>
@@ -1182,4 +1181,5 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
 
