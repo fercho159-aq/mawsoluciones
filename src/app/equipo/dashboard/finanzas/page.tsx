@@ -100,10 +100,6 @@ const generatePdf = (client: Client, debts: CuentaPorCobrar[], type: 'recibo' | 
 };
 
 
-type CategoriaIngreso = "Proyecto" | "Iguala Mensual" | "Renovaciones" | "Otros" | "Contenido" | "Ads" | "Web";
-type CategoriaGasto = "Publicidad" | "Sueldos" | "Comisiones" | "Impuestos" | "Personales" | "Otros" | "Renta";
-type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo" | "Efectivo" | "Pendiente";
-
 const generatePeriodOptions = () => {
     const today = new Date();
     const options: string[] = [];
@@ -118,8 +114,8 @@ const generatePeriodOptions = () => {
 
         // Mensual del 15 al 15
         const startMidMonth = setDate(month, 15);
-        const endMidMonth = addMonths(startMidMonth, 1);
-        options.push(`15 de ${format(startMidMonth, 'MMMM', { locale: es })} al 15 de ${format(endMidMonth, 'MMMM yyyy', { locale: es })}`);
+        const endMidMonth = addDays(addMonths(startMidMonth, 1), -1);
+        options.push(`15 de ${format(startMidMonth, 'MMMM', { locale: es })} al 15 de ${format(addMonths(startMidMonth, 1), 'MMMM yyyy', { locale: es })}`);
     }
 
     return [...new Set(options)].sort((a, b) => {
@@ -147,7 +143,7 @@ const generatePeriodOptions = () => {
 const generateFechaCobroOptions = () => {
     const today = new Date();
     const options: string[] = [];
-    for (let i = -1; i <= 3; i++) { // From last month to next 3 months
+    for (let i = -2; i <= 3; i++) { // From last 2 months to next 3 months
         const month = addMonths(today, i);
         const year = format(month, 'yyyy');
         const monthName = format(month, 'MMMM', {locale: es});
@@ -347,10 +343,12 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                             </SelectContent>
                         </Select>
                     </div>
-                    <div className="flex items-center space-x-2">
-                        <Checkbox id="conIva" checked={conIva} onCheckedChange={c => setConIva(Boolean(c))} />
-                        <Label htmlFor="conIva" className="font-normal">Incluye IVA (16%)</Label>
-                    </div>
+                    {isEditing && (
+                        <div className="flex items-center space-x-2">
+                            <Checkbox id="conIva" checked={conIva} onCheckedChange={c => setConIva(Boolean(c))} />
+                            <Label htmlFor="conIva" className="font-normal">Incluye IVA (16%)</Label>
+                        </div>
+                    )}
                 </div>
                 <DialogFooter className="justify-between">
                      <div>
@@ -1180,6 +1178,4 @@ export default function FinanzasPage() {
         </div>
     );
 }
-
-
 
