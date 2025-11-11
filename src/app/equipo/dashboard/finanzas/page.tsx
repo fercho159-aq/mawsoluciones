@@ -22,7 +22,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, subMonths, setDate, addMonths, addDays } from 'date-fns';
+import { format, startOfMonth, endOfMonth, isWithinInterval, parse, parseISO, subMonths, setDate, addMonths, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useAuth } from '@/lib/auth-provider';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -124,25 +124,29 @@ const generatePeriodOptions = () => {
 
     const uniqueOptions = [...new Set(options)];
     
+    // Helper function to parse a date string like "1 de Enero" to a Date object.
+    const parseDate = (dateStr: string): Date => {
+        return parse(dateStr, "d 'de' MMMM", new Date(), { locale: es });
+    };
+    
     uniqueOptions.sort((a, b) => {
-        const aDateParts = a.split(' al ')[0].replace(' de ', ' ').split(' ');
-        const bDateParts = b.split(' al ')[0].replace(' de ', ' ').split(' ');
+        const aStartDateStr = a.split(' al ')[0];
+        const bStartDateStr = b.split(' al ')[0];
 
-        const aMonth = es.localize?.month(es.monthNames.findIndex(m => m.toLowerCase() === aDateParts[2].toLowerCase()));
-        const bMonth = es.localize?.month(es.monthNames.findIndex(m => m.toLowerCase() === bDateParts[2].toLowerCase()));
+        const aDate = parseDate(aStartDateStr);
+        const bDate = parseDate(bStartDateStr);
 
-        const aFullDate = new Date(today.getFullYear(), aMonth, parseInt(aDateParts[0]));
-        const bFullDate = new Date(today.getFullYear(), bMonth, parseInt(bDateParts[0]));
-        
-        // Handle year change for sorting
-        if (aMonth > today.getMonth() && bMonth <= today.getMonth()) {
-           bFullDate.setFullYear(bFullDate.getFullYear() + 1);
+        // Adjust year for proper sorting across year boundaries
+        if (aDate.getMonth() > today.getMonth() && bDate.getMonth() <= today.getMonth()) {
+           bDate.setFullYear(today.getFullYear() + 1);
+        } else if (bDate.getMonth() > today.getMonth() && aDate.getMonth() <= today.getMonth()) {
+           aDate.setFullYear(today.getFullYear() + 1);
+        } else {
+           aDate.setFullYear(today.getFullYear());
+           bDate.setFullYear(today.getFullYear());
         }
-        if (bMonth > today.getMonth() && aMonth <= today.getMonth()) {
-            aFullDate.setFullYear(aFullDate.getFullYear() + 1);
-        }
 
-        return aFullDate.getTime() - bFullDate.getTime();
+        return aDate.getTime() - bDate.getTime();
     });
     
     return uniqueOptions;
@@ -1092,3 +1096,4 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
