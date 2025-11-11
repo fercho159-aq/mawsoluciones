@@ -769,10 +769,14 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
         const monthlySummary = monthlyFilteredMovements.reduce((acc, mov) => {
             if (mov.tipo === 'Ingreso' && mov.cuenta !== 'Pendiente') {
                 acc.totalIngresos += mov.monto;
-                if(acc.ingresosPorCuenta[mov.cuenta]) acc.ingresosPorCuenta[mov.cuenta] += mov.monto;
+                if(acc.ingresosPorCuenta[mov.cuenta as keyof typeof acc.ingresosPorCuenta] !== undefined) {
+                    acc.ingresosPorCuenta[mov.cuenta as keyof typeof acc.ingresosPorCuenta] += mov.monto;
+                }
             } else if (mov.tipo === 'Gasto') {
                 acc.totalGastos += mov.monto;
-                if(acc.gastosPorCuenta[mov.cuenta]) acc.gastosPorCuenta[mov.cuenta] += mov.monto;
+                if(acc.gastosPorCuenta[mov.cuenta as keyof typeof acc.gastosPorCuenta] !== undefined) {
+                     acc.gastosPorCuenta[mov.cuenta as keyof typeof acc.gastosPorCuenta] += mov.monto;
+                }
             }
             return acc;
         }, { 
@@ -781,11 +785,12 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
             ingresosPorCuenta: {...initialBreakdown},
             gastosPorCuenta: {...initialBreakdown}
         });
-
+        
         const utilidadPorCuenta = Object.keys(initialBreakdown).reduce((acc, cuenta) => {
-            acc[cuenta] = monthlySummary.ingresosPorCuenta[cuenta] - monthlySummary.gastosPorCuenta[cuenta];
+            const key = cuenta as keyof typeof initialBreakdown;
+            acc[key] = monthlySummary.ingresosPorCuenta[key] - monthlySummary.gastosPorCuenta[key];
             return acc;
-        }, {} as Record<string, number>);
+        }, {...initialBreakdown});
 
         return {
             ...monthlySummary,
@@ -935,3 +940,4 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
