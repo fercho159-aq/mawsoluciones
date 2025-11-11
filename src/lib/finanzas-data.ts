@@ -1,7 +1,8 @@
 
+
 export type Periodo = string;
 export type MovimientoTipo = "Ingreso" | "Gasto";
-export type CategoriaIngreso = "Proyecto" | "Iguala Mensual" | "Renovaciones" | "Otros";
+export type CategoriaIngreso = "Proyecto" | "Iguala Mensual" | "Renovaciones" | "Otros" | "Contenido" | "Ads" | "Web";
 export type CategoriaGasto = "Publicidad" | "Sueldos" | "Comisiones" | "Impuestos" | "Personales" | "Otros" | "Renta";
 export type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo" | "Efectivo";
 
@@ -15,6 +16,7 @@ export interface CuentasPorCobrar {
   periodo: Periodo;
   monto: number;
   tipo: CategoriaIngreso;
+  concepto?: string;
 }
 
 export interface MovimientoDiario {

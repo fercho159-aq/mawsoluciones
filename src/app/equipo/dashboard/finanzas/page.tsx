@@ -168,6 +168,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
     const [selectedClientId, setSelectedClientId] = useState<string>('');
     const [monto, setMonto] = useState('');
     const [tipo, setTipo] = useState<CategoriaIngreso>('Iguala Mensual');
+    const [concepto, setConcepto] = useState('');
     const [periodo, setPeriodo] = useState('');
     const [fechaCobro, setFechaCobro] = useState<string | undefined>();
     const [conIva, setConIva] = useState(false);
@@ -181,6 +182,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                 setMonto(cpc.monto.toString());
                 setTipo(cpc.tipo as CategoriaIngreso);
                 setSelectedClientId(cpc.clienteId.toString());
+                setConcepto(cpc.concepto || '');
                 setFechaCobro(cpc.fecha_cobro || undefined);
                 setConIva(cpc.conIva ?? false);
                  if (periodOptions.includes(cpc.periodo)) {
@@ -193,6 +195,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
             } else if (client) { // Pre-fill client if adding from a specific row
                  setMonto('');
                  setTipo('Iguala Mensual');
+                 setConcepto('');
                  setPeriodo('');
                  setSelectedClientId(client.id.toString());
                  setFechaCobro(undefined);
@@ -201,6 +204,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
             } else { // Reset for global "add"
                 setMonto('');
                  setTipo('Iguala Mensual');
+                 setConcepto('');
                  setPeriodo('');
                  setSelectedClientId('');
                  setFechaCobro(undefined);
@@ -234,6 +238,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
             monto: parseFloat(monto),
             tipo,
             periodo: finalPeriodo,
+            concepto: concepto || null,
             fecha_cobro: fechaCobro,
             conIva,
         };
@@ -293,6 +298,10 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                             </Select>
                         </div>
                     )}
+                    <div className="space-y-2">
+                        <Label>Concepto</Label>
+                        <Input value={concepto} onChange={e => setConcepto(e.target.value)} placeholder="Ej. Iguala de Marketing, Proyecto Web..." />
+                    </div>
                     <div className="space-y-2">
                         <Label>Tipo de Servicio</Label>
                         <Select value={tipo} onValueChange={(v) => setTipo(v as CategoriaIngreso)}>
@@ -522,9 +531,12 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
                                             {debts.length > 0 ? debts.map(d => (
                                                 <CpcFormDialog key={d.id} cpc={d} onSave={onRefresh} isEditing={true}>
                                                     <div className='text-xs flex items-center gap-2 cursor-pointer p-1 rounded-md hover:bg-muted w-full'>
-                                                        <Badge variant="secondary" className='font-normal'>{d.periodo}</Badge>
+                                                        <div className='flex flex-col'>
+                                                            <span className='font-bold'>{d.concepto || d.tipo}</span>
+                                                            <Badge variant="secondary" className='font-normal w-fit'>{d.periodo}</Badge>
+                                                            <span className='text-muted-foreground hidden sm:inline'>({d.fecha_cobro})</span>
+                                                        </div>
                                                         <span>{d.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
-                                                        {d.fecha_cobro && <span className='text-muted-foreground hidden sm:inline'>({d.fecha_cobro})</span>}
                                                     </div>
                                                 </CpcFormDialog>
                                             )) : (
@@ -1183,4 +1195,5 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
 

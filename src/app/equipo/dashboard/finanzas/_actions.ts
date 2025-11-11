@@ -1,5 +1,6 @@
 
 
+
 "use server";
 
 import { db } from "@/lib/db";
@@ -77,7 +78,7 @@ export async function registrarPagoCpc(cpcId: number, cuentaDestino: string, det
         await db.insert(movimientosDiarios).values({
             fecha: new Date(), // Use current date for the payment
             tipo: 'Ingreso',
-            descripcion: `Pago de ${cpcToPay.clienteName} - ${cpcToPay.tipo} (${cpcToPay.periodo})`,
+            descripcion: cpcToPay.concepto || `Pago de ${cpcToPay.clienteName} - ${cpcToPay.tipo} (${cpcToPay.periodo})`,
             monto: cpcToPay.monto,
             cuenta: cuentaDestino,
             detalleCuenta: detalleCuenta,

@@ -124,6 +124,7 @@ export const cuentasPorCobrar = pgTable('cuentas_por_cobrar', {
     tipo: varchar('tipo', { length: 50 }).notNull(), // Ej: Iguala, Proyecto, Web
     fecha_cobro: text('fecha_cobro'),
     conIva: boolean('con_iva').default(false),
+    concepto: text('concepto'),
 });
 
 // Movimientos financieros diarios (ingresos y gastos)
@@ -224,6 +225,7 @@ export type Colaborador = typeof colaboradores.$inferSelect;
 export type NewColaborador = typeof colaboradores.$inferInsert;
 export type Access = typeof accesses.$inferSelect;
 export type NewAccess = typeof accesses.$inferInsert;
+
 
 
 
