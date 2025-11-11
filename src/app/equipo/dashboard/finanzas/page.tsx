@@ -126,25 +126,37 @@ const generatePeriodOptions = () => {
     
     // Helper function to parse a date string like "1 de Enero" to a Date object.
     const parseDate = (dateStr: string): Date => {
-        return parse(dateStr, "d 'de' MMMM", new Date(), { locale: es });
+      const spanishMonths: { [key: string]: number } = {
+          'enero': 0, 'febrero': 1, 'marzo': 2, 'abril': 3, 'mayo': 4, 'junio': 5,
+          'julio': 6, 'agosto': 7, 'septiembre': 8, 'octubre': 9, 'noviembre': 10, 'diciembre': 11
+      };
+      const parts = dateStr.toLowerCase().split(' de ');
+      const day = parseInt(parts[0]);
+      const month = spanishMonths[parts[1]];
+      
+      if (isNaN(day) || month === undefined) {
+        return new Date(); // Fallback
+      }
+      
+      let year = today.getFullYear();
+      const tempDate = new Date(year, month, day);
+
+      // Handle year wrap-around for sorting across years
+      if (i > 0 && month < today.getMonth()) {
+          year += 1;
+      } else if (i < 0 && month > today.getMonth()) {
+          year -= 1;
+      }
+      
+      return new Date(year, month, day);
     };
     
     uniqueOptions.sort((a, b) => {
         const aStartDateStr = a.split(' al ')[0];
         const bStartDateStr = b.split(' al ')[0];
 
-        const aDate = parseDate(aStartDateStr);
-        const bDate = parseDate(bStartDateStr);
-
-        // Adjust year for proper sorting across year boundaries
-        if (aDate.getMonth() > today.getMonth() && bDate.getMonth() <= today.getMonth()) {
-           bDate.setFullYear(today.getFullYear() + 1);
-        } else if (bDate.getMonth() > today.getMonth() && aDate.getMonth() <= today.getMonth()) {
-           aDate.setFullYear(today.getFullYear() + 1);
-        } else {
-           aDate.setFullYear(today.getFullYear());
-           bDate.setFullYear(today.getFullYear());
-        }
+        const aDate = parse(aStartDateStr, "d 'de' MMMM", new Date(), { locale: es });
+        const bDate = parse(bStartDateStr, "d 'de' MMMM", new Date(), { locale: es });
 
         return aDate.getTime() - bDate.getTime();
     });
@@ -539,17 +551,25 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
     const [manualAmount, setManualAmount] = useState('');
     const [manualDesc, setManualDesc] = useState('');
     const [manualConIva, setManualConIva] = useState(false);
+    const [cpcConIva, setCpcConIva] = useState(false);
     
     const selectedCpc = useMemo(() => cuentasPorCobrar.find(c => c.id.toString() === selectedCpcId), [selectedCpcId, cuentasPorCobrar]);
 
     const resetForm = () => {
         setSelectedCpcId(''); setCuentaDestino(''); setDetalleEfectivo('');
         setManualAmount(''); setManualDesc(''); setIsManual(false); setManualConIva(false);
+        setCpcConIva(false);
     };
 
     useEffect(() => {
         if(open) resetForm();
     }, [open]);
+
+    useEffect(() => {
+        if (selectedCpc) {
+            setCpcConIva(selectedCpc.conIva ?? false);
+        }
+    }, [selectedCpc]);
     
     const handleSave = async () => {
         if (isManual) {
@@ -581,6 +601,9 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
             if (!cpcToPay) {
                 toast({ title: "Error", description: "Cuenta por cobrar no encontrada.", variant: "destructive" });
                 return;
+            }
+             if (cpcToPay.conIva !== cpcConIva) {
+                await updateCpc(cpcToPay.id, { conIva: cpcConIva });
             }
             try {
                 await registrarPagoCpc(cpcToPay.id, cuentaDestino as Cuenta, detalleEfectivo || null);
@@ -625,9 +648,12 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
                         </Select>
                         {cuentasPorCobrar.length === 0 && <p className="text-sm text-muted-foreground">No hay cuentas por cobrar pendientes.</p>}
                         {selectedCpc && (
-                            <Card className="bg-muted p-4">
+                            <Card className="bg-muted p-4 space-y-2">
                                 <p><strong>Monto:</strong> {selectedCpc.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
-                                {selectedCpc.conIva && <p className='text-sm text-green-500 font-medium'>Este pago incluye IVA.</p>}
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox id="cxc-conIva" checked={cpcConIva} onCheckedChange={c => setCpcConIva(Boolean(c))} />
+                                    <Label htmlFor="cxc-conIva" className="font-normal">Incluye IVA (16%)</Label>
+                                </div>
                             </Card>
                         )}
                     </div>
@@ -1096,4 +1122,3 @@ export default function FinanzasPage() {
         </div>
     );
 }
-
