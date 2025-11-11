@@ -22,7 +22,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO } from 'date-fns';
+import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, subMonths, setDate } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useAuth } from '@/lib/auth-provider';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -99,6 +99,20 @@ type CategoriaIngreso = "Proyecto" | "Iguala Mensual" | "Renovaciones" | "Otros"
 type CategoriaGasto = "Publicidad" | "Sueldos" | "Comisiones" | "Impuestos" | "Personales" | "Otros" | "Renta";
 type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo" | "Efectivo" | "Pendiente";
 
+const generatePeriodOptions = () => {
+    const today = new Date();
+    const formatRange = (start: Date, end: Date) => 
+        `${format(start, 'd \'de\' MMMM', { locale: es })} al ${format(end, 'd \'de\' MMMM', { locale: es })}`;
+
+    const currentMonthFull = formatRange(startOfMonth(today), endOfMonth(today));
+    const prevMonthFull = formatRange(startOfMonth(subMonths(today, 1)), endOfMonth(subMonths(today, 1)));
+    
+    const currentQuincena = formatRange(setDate(subMonths(today, 1), 15), setDate(today, 15));
+    const prevQuincena = formatRange(setDate(subMonths(today, 2), 15), setDate(subMonths(today, 1), 15));
+    
+    return [currentQuincena, currentMonthFull, prevQuincena, prevMonthFull];
+}
+
 const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: { 
     clients?: (Client & { financialProfile: ClientFinancialProfile | null; }) [],
     client?: Client, 
@@ -114,6 +128,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
     const [monto, setMonto] = useState('');
     const [tipo, setTipo] = useState<CategoriaIngreso>('Iguala Mensual');
     const [periodo, setPeriodo] = useState('');
+    const periodOptions = useMemo(() => generatePeriodOptions(), [open]);
 
     useEffect(() => {
         if (open) {
@@ -125,16 +140,16 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
             } else if (client) { // Pre-fill client if adding from a specific row
                  setMonto('');
                  setTipo('Iguala Mensual');
-                 setPeriodo(format(new Date(), 'MMMM yyyy', { locale: es }));
+                 setPeriodo(periodOptions[0]);
                  setSelectedClientId(client.id.toString());
             } else { // Reset for global "add"
                 setMonto('');
                  setTipo('Iguala Mensual');
-                 setPeriodo(format(new Date(), 'MMMM yyyy', { locale: es }));
+                 setPeriodo(periodOptions[0]);
                  setSelectedClientId('');
             }
         }
-    }, [open, client, cpc, isEditing]);
+    }, [open, client, cpc, isEditing, periodOptions]);
 
     const handleSave = async () => {
         let targetClient: {id: number, name: string} | undefined;
@@ -232,7 +247,12 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                      <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                            <Label>Periodo</Label>
-                           <Input value={periodo} onChange={e => setPeriodo(e.target.value)} placeholder="Ej. Noviembre 2024" />
+                            <Select value={periodo} onValueChange={setPeriodo}>
+                                <SelectTrigger><SelectValue placeholder="Seleccionar periodo..."/></SelectTrigger>
+                                <SelectContent>
+                                    {periodOptions.map(option => <SelectItem key={option} value={option}>{option}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div className="space-y-2">
                             <Label>Monto (MXN)</Label>
