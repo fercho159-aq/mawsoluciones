@@ -512,6 +512,18 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
             </div>
         );
     }
+    
+    const activePlatforms = useMemo(() => {
+        const platforms = new Set<string>();
+        data.forEach(p => {
+            if (p.hasFacebookAds) platforms.add('Facebook');
+            if (p.hasTiktokAds) platforms.add('TikTok');
+            if (p.hasGoogleAds) platforms.add('Google');
+            if (p.hasLinkedinAds) platforms.add('LinkedIn');
+        });
+        return Array.from(platforms);
+    }, [data]);
+
 
     return (
         <div className="border rounded-lg mt-4 overflow-x-auto">
@@ -523,10 +535,10 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                          {(isContenido || isAds) && <TableHead className="w-[150px] min-w-[150px]">Fecha de Corte</TableHead>}
                          {isContenido && <TableHead className="w-[150px] min-w-[150px]">Pubs. al Mes</TableHead>}
                         {isContenido && <TableHead className="w-[150px] min-w-[150px]">Pubs. a la Semana</TableHead>}
-                        {isAds && <TableHead className="w-[100px] min-w-[100px] text-center"><div className='flex flex-col items-center'><Facebook className="w-5 h-5 mx-auto text-blue-600" /><span>Facebook</span></div></TableHead>}
-                        {isAds && <TableHead className="w-[100px] min-w-[100px] text-center"><div className='flex flex-col items-center'><TikTokIcon className="w-5 h-5 mx-auto" /><span>TikTok</span></div></TableHead>}
-                        {isAds && <TableHead className="w-[100px] min-w-[100px] text-center"><div className='flex flex-col items-center'><Bot className="w-5 h-5 mx-auto text-green-500" /><span>Google</span></div></TableHead>}
-                        {isAds && <TableHead className="w-[100px] min-w-[100px] text-center"><div className='flex flex-col items-center'><Linkedin className="w-5 h-5 mx-auto text-sky-700" /><span>LinkedIn</span></div></TableHead>}
+                        {isAds && activePlatforms.includes('Facebook') && <TableHead className="w-[100px] min-w-[100px] text-center"><div className='flex flex-col items-center'><Facebook className="w-5 h-5 mx-auto text-blue-600" /><span>Facebook</span></div></TableHead>}
+                        {isAds && activePlatforms.includes('TikTok') && <TableHead className="w-[100px] min-w-[100px] text-center"><div className='flex flex-col items-center'><TikTokIcon className="w-5 h-5 mx-auto" /><span>TikTok</span></div></TableHead>}
+                        {isAds && activePlatforms.includes('Google') && <TableHead className="w-[100px] min-w-[100px] text-center"><div className='flex flex-col items-center'><Bot className="w-5 h-5 mx-auto text-green-500" /><span>Google</span></div></TableHead>}
+                        {isAds && activePlatforms.includes('LinkedIn') && <TableHead className="w-[100px] min-w-[100px] text-center"><div className='flex flex-col items-center'><Linkedin className="w-5 h-5 mx-auto text-sky-700" /><span>LinkedIn</span></div></TableHead>}
                         <TableHead className="w-[180px] min-w-[180px]">Encargado</TableHead>
                         <TableHead className="w-[180px] min-w-[180px]">Ejecutor</TableHead>
                         <TableHead className="w-[180px] min-w-[180px]">Status</TableHead>
@@ -601,38 +613,54 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                     )}
                                      {isAds && (
                                         <>
-                                            <TableCell className="p-2 align-middle text-center border-l">
-                                                <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
-                                                    <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs">
-                                                        <p><span className="font-semibold text-muted-foreground">Msj:</span> {pendiente.facebookAdsMessages || '-'}</p>
-                                                        <p><span className="font-semibold text-muted-foreground">Int:</span> {pendiente.facebookAdsInteraction || '-'}</p>
-                                                    </div>
-                                                </AdsMetricsDialog>
-                                            </TableCell>
-                                            <TableCell className="p-2 align-middle text-center border-l">
-                                                <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
-                                                     <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs">
-                                                        <p><span className="font-semibold text-muted-foreground">Msj:</span> {pendiente.tiktokAdsMessages || '-'}</p>
-                                                        <p><span className="font-semibold text-muted-foreground">Int:</span> {pendiente.tiktokAdsInteraction || '-'}</p>
-                                                    </div>
-                                                </AdsMetricsDialog>
-                                            </TableCell>
-                                            <TableCell className="p-2 align-middle text-center border-l">
-                                                <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
-                                                    <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs">
-                                                        <p><span className="font-semibold text-muted-foreground">Msj:</span> {pendiente.googleAdsMessages || '-'}</p>
-                                                        <p><span className="font-semibold text-muted-foreground">Int:</span> {pendiente.googleAdsInteraction || '-'}</p>
-                                                    </div>
-                                                </AdsMetricsDialog>
-                                            </TableCell>
-                                            <TableCell className="p-2 align-middle text-center border-l">
-                                                <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
-                                                     <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs">
-                                                        <p><span className="font-semibold text-muted-foreground">Msj:</span> {pendiente.linkedinAdsMessages || '-'}</p>
-                                                        <p><span className="font-semibold text-muted-foreground">Int:</span> {pendiente.linkedinAdsInteraction || '-'}</p>
-                                                    </div>
-                                                </AdsMetricsDialog>
-                                            </TableCell>
+                                            {activePlatforms.includes('Facebook') && 
+                                                <TableCell className="p-2 align-middle text-center border-l">
+                                                    <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
+                                                        <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs">
+                                                            {pendiente.hasFacebookAds ? <>
+                                                                <p><span className="font-semibold text-muted-foreground">Msj:</span> {pendiente.facebookAdsMessages || '-'}</p>
+                                                                <p><span className="font-semibold text-muted-foreground">Int:</span> {pendiente.facebookAdsInteraction || '-'}</p>
+                                                            </> : <span className='text-muted-foreground'>-</span>}
+                                                        </div>
+                                                    </AdsMetricsDialog>
+                                                </TableCell>
+                                            }
+                                            {activePlatforms.includes('TikTok') && 
+                                                <TableCell className="p-2 align-middle text-center border-l">
+                                                    <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
+                                                        <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs">
+                                                            {pendiente.hasTiktokAds ? <>
+                                                                <p><span className="font-semibold text-muted-foreground">Msj:</span> {pendiente.tiktokAdsMessages || '-'}</p>
+                                                                <p><span className="font-semibold text-muted-foreground">Int:</span> {pendiente.tiktokAdsInteraction || '-'}</p>
+                                                            </> : <span className='text-muted-foreground'>-</span>}
+                                                        </div>
+                                                    </AdsMetricsDialog>
+                                                </TableCell>
+                                            }
+                                            {activePlatforms.includes('Google') && 
+                                                <TableCell className="p-2 align-middle text-center border-l">
+                                                    <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
+                                                        <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs">
+                                                            {pendiente.hasGoogleAds ? <>
+                                                                <p><span className="font-semibold text-muted-foreground">Msj:</span> {pendiente.googleAdsMessages || '-'}</p>
+                                                                <p><span className="font-semibold text-muted-foreground">Int:</span> {pendiente.googleAdsInteraction || '-'}</p>
+                                                            </> : <span className='text-muted-foreground'>-</span>}
+                                                        </div>
+                                                    </AdsMetricsDialog>
+                                                </TableCell>
+                                            }
+                                            {activePlatforms.includes('LinkedIn') && 
+                                                <TableCell className="p-2 align-middle text-center border-l">
+                                                    <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
+                                                        <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs">
+                                                            {pendiente.hasLinkedinAds ? <>
+                                                                <p><span className="font-semibold text-muted-foreground">Msj:</span> {pendiente.linkedinAdsMessages || '-'}</p>
+                                                                <p><span className="font-semibold text-muted-foreground">Int:</span> {pendiente.linkedinAdsInteraction || '-'}</p>
+                                                            </> : <span className='text-muted-foreground'>-</span>}
+                                                        </div>
+                                                    </AdsMetricsDialog>
+                                                </TableCell>
+                                            }
                                         </>
                                     )}
                                     <TableCell className="p-2 align-middle text-xs">
@@ -692,7 +720,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                             ))}
                              {currentUser?.permissions?.pendientes?.reasignarResponsables && (
                                 <TableRow>
-                                    <TableCell colSpan={isAds ? 5 : isContenido ? 2 : 1} className="p-0 h-full">
+                                    <TableCell colSpan={isAds ? activePlatforms.length + 1 : (isContenido ? 3 : 1)} className="p-0 h-full">
                                         {addingToClientId === client.id ? (
                                             <AddPendienteInline 
                                                 client={client}
@@ -709,7 +737,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                                             </div>
                                         )}
                                     </TableCell>
-                                    <TableCell colSpan={3}></TableCell>
+                                    <TableCell colSpan={isContenido ? 4 : 3}></TableCell>
                                 </TableRow>
                              )}
                         </React.Fragment>
@@ -920,11 +948,8 @@ export default function PendientesPage() {
         return <div>Cargando...</div>
     }
   
-    const getFilteredDataForTab = (categoria: string, showCompleted: boolean) => {
-        return filteredData.filter(d => 
-            d.categoria.toLowerCase() === categoria.toLowerCase() && 
-            (showCompleted ? d.completed : true)
-        );
+    const getFilteredDataForTab = (categoria: string) => {
+        return filteredData.filter(d => d.categoria.toLowerCase() === categoria.toLowerCase() && !d.completed);
     }
     
     const allCompleted = filteredData.filter(d => d.completed);
@@ -1028,7 +1053,7 @@ export default function PendientesPage() {
                 <TabsContent value="contenido">
                    {viewMode === 'table' ? (
                         <PendientesTable 
-                            data={getFilteredDataForTab('contenido', false)} 
+                            data={getFilteredDataForTab('contenido')} 
                             onUpdateTask={handleUpdateTask} 
                             currentUser={user} 
                             onRefresh={fetchData}
@@ -1038,7 +1063,7 @@ export default function PendientesPage() {
                         />
                    ) : (
                         <BoardView 
-                            data={getFilteredDataForTab('contenido', false)}
+                            data={getFilteredDataForTab('contenido')}
                             onUpdateTask={handleUpdateTask}
                             currentUser={user}
                             onRefresh={fetchData}
@@ -1049,7 +1074,7 @@ export default function PendientesPage() {
                 <TabsContent value="ads">
                     {viewMode === 'table' ? (
                         <PendientesTable 
-                            data={getFilteredDataForTab('ads', false)} 
+                            data={getFilteredDataForTab('ads')} 
                             onUpdateTask={handleUpdateTask} 
                             currentUser={user} 
                             onRefresh={fetchData}
@@ -1059,7 +1084,7 @@ export default function PendientesPage() {
                         />
                     ) : (
                          <BoardView 
-                            data={getFilteredDataForTab('ads', false)}
+                            data={getFilteredDataForTab('ads')}
                             onUpdateTask={handleUpdateTask}
                             currentUser={user}
                             onRefresh={fetchData}
@@ -1070,7 +1095,7 @@ export default function PendientesPage() {
                 <TabsContent value="web">
                      {viewMode === 'table' ? (
                         <PendientesTable 
-                            data={getFilteredDataForTab('web', false)} 
+                            data={getFilteredDataForTab('web')} 
                             onUpdateTask={handleUpdateTask} 
                             currentUser={user} 
                             onRefresh={fetchData}
@@ -1080,7 +1105,7 @@ export default function PendientesPage() {
                         />
                      ) : (
                          <BoardView 
-                            data={getFilteredDataForTab('web', false)}
+                            data={getFilteredDataForTab('web')}
                             onUpdateTask={handleUpdateTask}
                             currentUser={user}
                             onRefresh={fetchData}
