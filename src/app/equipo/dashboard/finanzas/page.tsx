@@ -114,8 +114,8 @@ const generatePeriodOptions = () => {
 
         // Mensual del 15 al 15
         const startMidMonth = setDate(month, 15);
-        const endMidMonth = addDays(addMonths(startMidMonth, 1), -1);
-        options.push(`15 de ${format(startMidMonth, 'MMMM', { locale: es })} al 15 de ${format(addMonths(startMidMonth, 1), 'MMMM yyyy', { locale: es })}`);
+        const endMidMonth = addMonths(startMidMonth, 1);
+        options.push(`15 de ${format(startMidMonth, 'MMMM', { locale: es })} al 15 de ${format(endMidMonth, 'MMMM yyyy', { locale: es })}`);
     }
 
     return [...new Set(options)].sort((a, b) => {
@@ -382,7 +382,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
 
 const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: CuentaPorCobrar[], clients: Client[], onRefresh: () => void, isAdmin: boolean }) => {
     
-    type SortField = 'totalDebt' | 'dueDate';
+    type SortField = 'totalDebt' | 'nextDueDate';
     const [sortField, setSortField] = useState<SortField>('totalDebt');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [clientFilter, setClientFilter] = useState('Todos');
@@ -437,7 +437,7 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
             if (sortField === 'totalDebt') {
                 return sortOrder === 'desc' ? b.totalDebt - a.totalDebt : a.totalDebt - b.totalDebt;
             }
-            if (sortField === 'dueDate') {
+            if (sortField === 'nextDueDate') {
                 const dateA = a.nextDueDate?.getTime() || Infinity;
                 const dateB = b.nextDueDate?.getTime() || Infinity;
                 return sortOrder === 'asc' ? dateA - dateB : dateB - a.nextDueDate?.getTime()!;
@@ -453,7 +453,7 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
             setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc');
         } else {
             setSortField(field);
-            setSortOrder(field === 'dueDate' ? 'asc' : 'desc');
+            setSortOrder(field === 'nextDueDate' ? 'asc' : 'desc');
         }
     };
     
@@ -498,7 +498,7 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
                         <TableHeader><TableRow>
                             <TableHead>Cliente</TableHead>
                             <TableHead>Detalle de Deuda</TableHead>
-                            <TableHead className="cursor-pointer" onClick={() => toggleSort('dueDate')}>
+                            <TableHead className="cursor-pointer" onClick={() => toggleSort('nextDueDate')}>
                                 <div className="flex items-center gap-1">
                                     Fecha de Cobro
                                     <ArrowUpDown className="w-4 h-4" />
@@ -598,6 +598,11 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
     
     const selectedCpc = useMemo(() => cuentasPorCobrar.find(c => c.id.toString() === selectedCpcId), [selectedCpcId, cuentasPorCobrar]);
 
+    const sortedCuentasPorCobrar = useMemo(() => {
+        return [...cuentasPorCobrar].sort((a, b) => a.clienteName.localeCompare(b.clienteName));
+    }, [cuentasPorCobrar]);
+
+
     const resetForm = () => {
         setSelectedCpcId(''); setCuentaDestino(''); setDetalleEfectivo('');
         setManualAmount(''); setManualDesc(''); setIsManual(false); setManualConIva(false);
@@ -687,7 +692,7 @@ const RegistrarIngresoDialog = ({ isAdmin, cuentasPorCobrar, onSave }: { isAdmin
                     <div className="grid gap-4 py-4">
                         <Select value={selectedCpcId} onValueChange={setSelectedCpcId}>
                             <SelectTrigger><SelectValue placeholder="Seleccionar cliente pendiente" /></SelectTrigger>
-                            <SelectContent>{cuentasPorCobrar.map(cpc => <SelectItem key={cpc.id} value={cpc.id.toString()}>{cpc.clienteName} - {cpc.periodo}</SelectItem>)}</SelectContent>
+                            <SelectContent>{sortedCuentasPorCobrar.map(cpc => <SelectItem key={cpc.id} value={cpc.id.toString()}>{cpc.clienteName} - {cpc.periodo}</SelectItem>)}</SelectContent>
                         </Select>
                         {cuentasPorCobrar.length === 0 && <p className="text-sm text-muted-foreground">No hay cuentas por cobrar pendientes.</p>}
                         {selectedCpc && (
