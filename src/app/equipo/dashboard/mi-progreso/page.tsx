@@ -252,6 +252,7 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
     const isNovember = format(new Date(selectedMonth), 'MMMM', { locale: es }).toLowerCase() === 'noviembre';
     const novemberAdjustment = -528899;
 
+    const isAugust = format(new Date(selectedMonth), 'MMMM', { locale: es }).toLowerCase() === 'agosto';
     const augustAdjustment = 1316718;
 
     const combinedData = useMemo(() => {
@@ -265,8 +266,13 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
         return yearData.map(data => {
             const currentMonthName = format(new Date(selectedMonth), 'MMMM', { locale: es });
             let finalAgenciaProfit = data.agencia;
+
             if (data.month.toLowerCase() === currentMonthName.toLowerCase()) {
-                 finalAgenciaProfit = isNovember ? agenciaProfit + novemberAdjustment : agenciaProfit;
+                if (isNovember) {
+                    finalAgenciaProfit = agenciaProfit + novemberAdjustment;
+                } else {
+                    finalAgenciaProfit = agenciaProfit;
+                }
             }
             
             const totalOscar = data.oscar.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
@@ -283,7 +289,7 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
 
             return { ...data, agencia: finalAgenciaProfit, totalOscar, totalTransporte, totalRentas, totalBienesRaices, totalIntereses, ganancia };
         });
-    }, [agenciaProfit, selectedMonth, personalData, isNovember]);
+    }, [agenciaProfit, selectedMonth, personalData, isNovember, isAugust]);
 
     const handleUpdateCategory = (month: string, category: keyof Omit<MonthlyData, 'month' | 'agencia'>, newTransactions: Transaction[]) => {
         setPersonalData(prevData =>
@@ -537,3 +543,4 @@ export default function MiProgresoPage() {
 
 
     
+
