@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -251,7 +252,7 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
     const isNovember = format(new Date(selectedMonth), 'MMMM', { locale: es }).toLowerCase() === 'noviembre';
     const novemberAdjustment = -528899;
 
-    const octoberAdjustment = 1316718;
+    const augustAdjustment = 1316718;
 
     const combinedData = useMemo(() => {
         // Ensure data for all 12 months exists
@@ -276,8 +277,8 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
             
             let ganancia = finalAgenciaProfit + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses;
 
-            if (data.month.toLowerCase() === 'octubre') {
-              ganancia += octoberAdjustment;
+            if (data.month.toLowerCase() === 'agosto') {
+              ganancia += augustAdjustment;
             }
 
             return { ...data, agencia: finalAgenciaProfit, totalOscar, totalTransporte, totalRentas, totalBienesRaices, totalIntereses, ganancia };
