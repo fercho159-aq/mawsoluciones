@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -8,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { CheckCircle, Clock, XCircle, TrendingUp, Target, Calendar, DollarSign, TrendingDown, Building, Briefcase } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, TrendingUp, Target, Calendar, DollarSign, TrendingDown, Building, Briefcase, PlusCircle, Trash2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-provider';
 import AnimatedDiv from '@/components/animated-div';
 import { format, isWithinInterval, startOfMonth, endOfMonth, parseISO, getMonth } from 'date-fns';
@@ -16,6 +15,10 @@ import { es } from 'date-fns/locale';
 import { Input } from '@/components/ui/input';
 import { getMovimientos } from '../finanzas/_actions';
 import { MovimientoDiario } from '@/lib/db/schema';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 
 // --- Mock Data Simulation (for non-financial parts) ---
@@ -81,37 +84,164 @@ const PunctualityBadge = ({ status }: { status: string }) => {
     );
 };
 
-const personalFinanceData = [
-    { month: "Enero", agencia: 95360.00, oscar: 11880.00, transporte: 29000.00, rentas: 0, bienes_raices: 0, intereses: 0 },
-    { month: "Febrero", agencia: 186937.00, oscar: 5148.00, transporte: 10381.00, rentas: 10390.00, bienes_raices: 0, intereses: 0 },
-    { month: "Marzo", agencia: 111299.00, oscar: 2024.00, transporte: 8907.00, rentas: 1713.00, bienes_raices: 0, intereses: 0 },
-    { month: "Abril", agencia: 142469.00, oscar: 6100.00, transporte: 3645.00, rentas: 3989.00, bienes_raices: 0, intereses: 0 },
-    { month: "Mayo", agencia: 109715.00, oscar: 3960.00, transporte: 11520.00, rentas: 5159.00, bienes_raices: 0, intereses: 0 },
-    { month: "Junio", agencia: 213108.00, oscar: 6500.00, transporte: 11498.00, rentas: 3884.00, bienes_raices: 53382.00, intereses: 0 },
-    { month: "Julio", agencia: 212869.00, oscar: 0, transporte: -4731.00, rentas: 5571.00, bienes_raices: 0, intereses: 5806.00 },
-    { month: "Agosto", agencia: 82242.00, oscar: 2311.67, transporte: -164166.00, rentas: 1610.00, bienes_raices: -1154053.00, intereses: 1800.00 },
-    { month: "Septiembre", agencia: 178814.00, oscar: 0, transporte: 3755.00, rentas: 5267.00, bienes_raices: -843093.00, intereses: -22092.00 },
-    { month: "Octubre", agencia: 91700.00, oscar: 5720.00, transporte: 22208.00, rentas: 5100.00, bienes_raices: -6000.00, intereses: 5740.00 }
+interface Transaction {
+    id: number;
+    type: 'income' | 'expense';
+    concept: string;
+    amount: number;
+}
+
+interface MonthlyData {
+    month: string;
+    agencia: number;
+    oscar: Transaction[];
+    transporte: Transaction[];
+    rentas: Transaction[];
+    bienes_raices: Transaction[];
+    intereses: Transaction[];
+}
+
+const initialPersonalFinanceData: MonthlyData[] = [
+    { month: "Enero", agencia: 95360.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 11880}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 29000}], rentas: [], bienes_raices: [], intereses: [] },
+    { month: "Febrero", agencia: 186937.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5148}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 10381}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 10390}], bienes_raices: [], intereses: [] },
+    { month: "Marzo", agencia: 111299.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 2024}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 8907}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1713}], bienes_raices: [], intereses: [] },
+    { month: "Abril", agencia: 142469.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 6100}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3645}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3989}], bienes_raices: [], intereses: [] },
+    { month: "Mayo", agencia: 109715.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3960}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 11520}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5159}], bienes_raices: [], intereses: [] },
+    { month: "Junio", agencia: 213108.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 6500}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 11498}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3884}], bienes_raices: [{id: 1, type: 'income', concept: 'Ingreso', amount: 53382}], intereses: [] },
+    { month: "Julio", agencia: 212869.00, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: -4731}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5571}], bienes_raices: [], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5806}] },
+    { month: "Agosto", agencia: 82242.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 2311.67}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: -164166}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1610}], bienes_raices: [{id: 1, type: 'income', concept: 'Ingreso', amount: -1154053}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1800}] },
+    { month: "Septiembre", agencia: 178814.00, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3755}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5267}], bienes_raices: [{id: 1, type: 'income', concept: 'Ingreso', amount: -843093}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: -22092}] },
+    { month: "Octubre", agencia: 91700.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5720}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 22208}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5100}], bienes_raices: [{id: 1, type: 'income', concept: 'Ingreso', amount: -6000}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5740}] }
 ];
 
-const PersonalFinanceDashboard = ({ agenciaProfit }: { agenciaProfit: number }) => {
+const CategoryDetailModal = ({ categoryName, transactions, onUpdate }: { categoryName: string, transactions: Transaction[], onUpdate: (newTransactions: Transaction[]) => void }) => {
+    const [open, setOpen] = useState(false);
+    const [type, setType] = useState<'income' | 'expense'>('income');
+    const [concept, setConcept] = useState('');
+    const [amount, setAmount] = useState('');
+
+    const handleAddTransaction = () => {
+        if (!concept || !amount) return;
+        const newTransaction: Transaction = {
+            id: Date.now(),
+            type,
+            concept,
+            amount: parseFloat(amount),
+        };
+        onUpdate([...transactions, newTransaction]);
+        setConcept('');
+        setAmount('');
+    };
+
+    const handleDeleteTransaction = (id: number) => {
+        onUpdate(transactions.filter(t => t.id !== id));
+    };
+
+    const total = transactions.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <button className="w-full h-full text-left p-2 rounded hover:bg-muted transition-colors">
+                    {total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+                </button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Detalle de: {categoryName}</DialogTitle>
+                </DialogHeader>
+                <div className="max-h-[300px] overflow-y-auto pr-2">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Tipo</TableHead>
+                                <TableHead>Concepto</TableHead>
+                                <TableHead className="text-right">Monto</TableHead>
+                                <TableHead></TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {transactions.map(t => (
+                                <TableRow key={t.id}>
+                                    <TableCell><Badge variant={t.type === 'income' ? 'default' : 'destructive'} className={cn(t.type === 'income' && 'bg-green-500')}>{t.type === 'income' ? 'Ingreso' : 'Egreso'}</Badge></TableCell>
+                                    <TableCell>{t.concept}</TableCell>
+                                    <TableCell className={cn("text-right", t.type === 'income' ? 'text-green-500' : 'text-red-500')}>{t.amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                    <TableCell><Button variant="ghost" size="icon" onClick={() => handleDeleteTransaction(t.id)}><Trash2 className="w-4 h-4"/></Button></TableCell>
+                                </TableRow>
+                            ))}
+                             {transactions.length === 0 && <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">No hay movimientos.</TableCell></TableRow>}
+                        </TableBody>
+                    </Table>
+                </div>
+                 <div className="border-t pt-4 mt-2">
+                     <div className="grid grid-cols-5 gap-2 items-end">
+                        <div className="col-span-2 space-y-1">
+                            <Label>Concepto</Label>
+                            <Input value={concept} onChange={e => setConcept(e.target.value)} placeholder="Ej. Renta de local"/>
+                        </div>
+                        <div className="col-span-1 space-y-1">
+                            <Label>Monto</Label>
+                            <Input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00"/>
+                        </div>
+                        <div className="col-span-1 space-y-1">
+                            <Label>Tipo</Label>
+                            <RadioGroup value={type} onValueChange={(v) => setType(v as any)} className="flex items-center h-10 gap-2">
+                                <div className="flex items-center space-x-1"><RadioGroupItem value="income" id={`in-${categoryName}`}/><Label htmlFor={`in-${categoryName}`} className="font-normal">Ingreso</Label></div>
+                                <div className="flex items-center space-x-1"><RadioGroupItem value="expense" id={`ex-${categoryName}`}/><Label htmlFor={`ex-${categoryName}`} className="font-normal">Egreso</Label></div>
+                            </RadioGroup>
+                        </div>
+                        <Button onClick={handleAddTransaction}><PlusCircle className="w-4 h-4"/> Añadir</Button>
+                    </div>
+                </div>
+                 <div className="text-right font-bold text-lg mt-4">Total: {total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaProfit: number, selectedMonth: string }) => {
     
-    const [currentMonthData, setCurrentMonthData] = useState(() => {
-        const currentMonthIndex = new Date().getMonth();
-        return personalFinanceData.find((_, index) => index === currentMonthIndex) || { month: format(new Date(), 'MMMM', {locale: es}) };
-    });
+    const [personalData, setPersonalData] = useState<MonthlyData[]>(initialPersonalFinanceData);
+
+    const isNovember = format(new Date(selectedMonth), 'MMMM', { locale: es }).toLowerCase() === 'noviembre';
+    const novemberAdjustment = -528899;
 
     const combinedData = useMemo(() => {
-        const currentMonthIndex = new Date().getMonth();
-        return personalFinanceData.map((data, index) => {
-            if (index === currentMonthIndex) {
-                const total = agenciaProfit + (data.oscar || 0) + (data.transporte || 0) + (data.rentas || 0) + (data.bienes_raices || 0) + (data.intereses || 0);
-                return { ...data, agencia: agenciaProfit, ganancia: total };
-            }
-            const ganancia = data.agencia + data.oscar + data.transporte + data.rentas + data.bienes_raices + data.intereses;
-            return { ...data, ganancia };
+        // Ensure data for all 12 months exists
+        const yearData = Array.from({ length: 12 }, (_, i) => {
+            const monthName = format(new Date(2024, i), 'MMMM', { locale: es });
+            const monthData = personalData.find(d => d.month.toLowerCase() === monthName.toLowerCase());
+            return monthData || { month: monthName, agencia: 0, oscar: [], transporte: [], rentas: [], bienes_raices: [], intereses: [] };
         });
-    }, [agenciaProfit]);
+
+        return yearData.map(data => {
+            const currentMonthName = format(new Date(selectedMonth), 'MMMM', { locale: es });
+            let finalAgenciaProfit = data.agencia;
+            if (data.month.toLowerCase() === currentMonthName.toLowerCase()) {
+                 finalAgenciaProfit = isNovember ? agenciaProfit + novemberAdjustment : agenciaProfit;
+            }
+            
+            const totalOscar = data.oscar.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
+            const totalTransporte = data.transporte.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
+            const totalRentas = data.rentas.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
+            const totalBienesRaices = data.bienes_raices.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
+            const totalIntereses = data.intereses.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
+            
+            const ganancia = finalAgenciaProfit + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses;
+
+            return { ...data, agencia: finalAgenciaProfit, totalOscar, totalTransporte, totalRentas, totalBienesRaices, totalIntereses, ganancia };
+        });
+    }, [agenciaProfit, selectedMonth, personalData, isNovember]);
+
+    const handleUpdateCategory = (month: string, category: keyof Omit<MonthlyData, 'month' | 'agencia'>, newTransactions: Transaction[]) => {
+        setPersonalData(prevData =>
+            prevData.map(data =>
+                data.month.toLowerCase() === month.toLowerCase()
+                    ? { ...data, [category]: newTransactions }
+                    : data
+            )
+        );
+    }
     
     const formatCurrency = (value: number | undefined) => {
         if (value === undefined) return '$0.00';
@@ -141,14 +271,14 @@ const PersonalFinanceDashboard = ({ agenciaProfit }: { agenciaProfit: number }) 
                         </TableHeader>
                         <TableBody>
                             {combinedData.map((row) => (
-                                <TableRow key={row.month}>
+                                <TableRow key={row.month} className={cn(format(new Date(selectedMonth), 'MMMM', {locale:es}).toLowerCase() === row.month.toLowerCase() && 'bg-muted')}>
                                     <TableCell className="font-medium capitalize">{row.month}</TableCell>
                                     <TableCell className={cn(row.agencia < 0 ? "text-red-500" : "")}>{formatCurrency(row.agencia)}</TableCell>
-                                    <TableCell className={cn(row.oscar < 0 ? "text-red-500" : "")}>{formatCurrency(row.oscar)}</TableCell>
-                                    <TableCell className={cn(row.transporte < 0 ? "text-red-500" : "")}>{formatCurrency(row.transporte)}</TableCell>
-                                    <TableCell className={cn(row.rentas < 0 ? "text-red-500" : "")}>{formatCurrency(row.rentas)}</TableCell>
-                                    <TableCell className={cn(row.bienes_raices < 0 ? "text-red-500" : "")}>{formatCurrency(row.bienes_raices)}</TableCell>
-                                    <TableCell className={cn(row.intereses < 0 ? "text-red-500" : "")}>{formatCurrency(row.intereses)}</TableCell>
+                                    <TableCell className={cn(row.totalOscar < 0 ? "text-red-500" : "")}><CategoryDetailModal categoryName='Oscar' transactions={row.oscar} onUpdate={(t) => handleUpdateCategory(row.month, 'oscar', t)} /></TableCell>
+                                    <TableCell className={cn(row.totalTransporte < 0 ? "text-red-500" : "")}><CategoryDetailModal categoryName='Transporte' transactions={row.transporte} onUpdate={(t) => handleUpdateCategory(row.month, 'transporte', t)} /></TableCell>
+                                    <TableCell className={cn(row.totalRentas < 0 ? "text-red-500" : "")}><CategoryDetailModal categoryName='Rentas' transactions={row.rentas} onUpdate={(t) => handleUpdateCategory(row.month, 'rentas', t)} /></TableCell>
+                                    <TableCell className={cn(row.totalBienesRaices < 0 ? "text-red-500" : "")}><CategoryDetailModal categoryName='Bienes Raíces' transactions={row.bienes_raices} onUpdate={(t) => handleUpdateCategory(row.month, 'bienes_raices', t)} /></TableCell>
+                                    <TableCell className={cn(row.totalIntereses < 0 ? "text-red-500" : "")}><CategoryDetailModal categoryName='Intereses' transactions={row.intereses} onUpdate={(t) => handleUpdateCategory(row.month, 'intereses', t)} /></TableCell>
                                     <TableCell className={cn("font-bold", row.ganancia < 0 ? "text-red-500" : "text-green-500")}>{formatCurrency(row.ganancia)}</TableCell>
                                 </TableRow>
                             ))}
@@ -343,7 +473,7 @@ export default function MiProgresoPage() {
                 </Card>
             </div>
 
-             <PersonalFinanceDashboard agenciaProfit={financialSummary.profit} />
+             <PersonalFinanceDashboard agenciaProfit={financialSummary.profit} selectedMonth={monthFilter} />
         </>
       ) : (
         <>
@@ -410,7 +540,3 @@ export default function MiProgresoPage() {
     </div>
   );
 }
-
-    
-
-    
