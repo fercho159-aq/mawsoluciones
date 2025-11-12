@@ -109,25 +109,25 @@ const initialPersonalFinanceData: MonthlyData[] = [
     { month: "Abril", agencia: 142469.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 6100}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3645}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3989}], bienes_raices: [], intereses: [] },
     { month: "Mayo", agencia: 109715.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3960}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 11520}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5159}], bienes_raices: [], intereses: [] },
     { month: "Junio", agencia: 213108.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 6500}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 11498}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3884}], bienes_raices: [{id: 1, type: 'income', concept: 'Ingreso', amount: 53382}], intereses: [] },
-    { month: "Julio", agencia: 212869.00, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Gasto', amount: 4731}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5571}], bienes_raices: [], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5806}] },
-    { month: "Agosto", agencia: 82242.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 2311.67}], transporte: [{id: 1, type: 'income', concept: 'Gasto', amount: 164166}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1610}], bienes_raices: [{id: 1, type: 'income', concept: 'Gasto', amount: 1154053}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1800}] },
-    { month: "Septiembre", agencia: 178814.00, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3755}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5267}], bienes_raices: [{id: 1, type: 'income', concept: 'Gasto', amount: 843093}], intereses: [{id: 1, type: 'income', concept: 'Gasto', amount: 22092}] },
-    { month: "Octubre", agencia: 91700.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5720}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 22208}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5100}], bienes_raices: [{id: 1, type: 'income', concept: 'Gasto', amount: 6000}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5740}] },
+    { month: "Julio", agencia: 212869.00, oscar: [], transporte: [{id: 1, type: 'expense', concept: 'Gasto', amount: 4731}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5571}], bienes_raices: [], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5806}] },
+    { month: "Agosto", agencia: 82242.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 2311.67}], transporte: [{id: 1, type: 'expense', concept: 'Gasto', amount: 164166}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1610}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: 1154053}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1800}] },
+    { month: "Septiembre", agencia: 178814.00, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3755}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5267}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: 843093}], intereses: [{id: 1, type: 'expense', concept: 'Gasto', amount: 22092}] },
+    { month: "Octubre", agencia: 91700.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5720}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 22208}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5100}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: 6000}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5740}] },
     { month: "Noviembre", agencia: 18623.00, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 14129}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 4729}], bienes_raices: [{id: 1, type: 'income', concept: 'Ingreso', amount: 8726}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3573}] }
 ];
 
 const personalAssets = [
-    { name: 'Banamex Inversión', amount: 200053 },
-    { name: 'CETES', amount: 213858 },
-    { name: 'Banamex', amount: 3556 },
-    { name: 'MAW Sant', amount: 308376 },
-    { name: 'Santander', amount: 19569 },
-    { name: 'Paola', amount: 184170 },
-    { name: 'Efectivo', amount: 355000 },
-    { name: 'Divisas', amount: 109220 },
-    { name: 'Marco', amount: 18000 },
-    { name: 'Charlie 19 JULIK', amount: 12927 },
-    { name: 'JULIO', amount: 9500 },
+  { name: 'Banamex Inversión', amount: 200053 },
+  { name: 'CETES', amount: 213858 },
+  { name: 'Banamex', amount: 3556 },
+  { name: 'MAW Sant', amount: 308376 },
+  { name: 'Santander', amount: 19569 },
+  { name: 'Paola', amount: 184170 },
+  { name: 'Efectivo', amount: 355000 },
+  { name: 'Divisas', amount: 109220 },
+  { name: 'Marco', amount: 18000 },
+  { name: 'Charlie 19 JULIK', amount: 12927 },
+  { name: 'JULIO', amount: 9500 },
 ];
 
 const accountsReceivable = [
@@ -513,40 +513,7 @@ export default function MiProgresoPage() {
                 </Card>
             </AnimatedDiv>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Desglose de Ingresos</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-2">
-                            {Object.entries(financialSummary.incomeByCategory).length > 0 ? Object.entries(financialSummary.incomeByCategory).map(([category, amount]) => (
-                                <div key={category} className="flex justify-between">
-                                    <span className="text-muted-foreground">{category}</span>
-                                    <span className="font-medium">{amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
-                                </div>
-                            )) : <p className="text-sm text-muted-foreground">No hay ingresos en este periodo.</p>}
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Desglose de Gastos</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                         <div className="space-y-2">
-                            {Object.entries(financialSummary.expensesByCategory).length > 0 ? Object.entries(financialSummary.expensesByCategory).map(([category, amount]) => (
-                                <div key={category} className="flex justify-between">
-                                    <span className="text-muted-foreground">{category}</span>
-                                    <span className="font-medium">{amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
-                                </div>
-                            )) : <p className="text-sm text-muted-foreground">No hay gastos en este periodo.</p>}
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-             <PersonalFinanceDashboard agenciaProfit={financialSummary.profit} selectedMonth={monthFilter} />
+            <PersonalFinanceDashboard agenciaProfit={financialSummary.profit} selectedMonth={monthFilter} />
 
              <BalanceSheetDashboard />
         </>
@@ -560,4 +527,5 @@ export default function MiProgresoPage() {
     </div>
   );
 }
+
 
