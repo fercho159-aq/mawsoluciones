@@ -112,8 +112,8 @@ const initialPersonalFinanceData: MonthlyData[] = [
     { month: "Julio", agencia: 212869.00, oscar: [], transporte: [{id: 1, type: 'expense', concept: 'Gasto', amount: 4731}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5571}], bienes_raices: [], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5806}] },
     { month: "Agosto", agencia: 82242.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 2311.67}], transporte: [{id: 1, type: 'expense', concept: 'Gasto', amount: 164166}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1610}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: 1154053}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1800}] },
     { month: "Septiembre", agencia: 178814.00, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3755}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5267}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: 843093}], intereses: [{id: 1, type: 'expense', concept: 'Gasto', amount: 22092}] },
-    { month: "Octubre", agencia: 91700.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5720}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 22208}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5100}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: 6000}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5740}] },
-    { month: "Noviembre", agencia: 18623.00, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 14129}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 4729}], bienes_raices: [{id: 1, type: 'income', concept: 'Ingreso', amount: 8726}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3573}] }
+    { month: "Octubre", agencia: 91700.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5720}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 22208}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5100}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: -6000}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5740}] },
+    { month: "Noviembre", agencia: 0, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 14129}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 4729}], bienes_raices: [{id: 1, type: 'income', concept: 'Ingreso', amount: 8726}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3573}] }
 ];
 
 const personalAssets = [
@@ -245,22 +245,27 @@ const CategoryDetailModal = ({ categoryName, transactions, onUpdate }: { categor
     )
 }
 
-const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaProfit: number, selectedMonth: string }) => {
-    
+const PersonalFinanceDashboard = ({ financialSummary, selectedMonth }: { financialSummary: any, selectedMonth: string }) => {
     const [personalData, setPersonalData] = useState<MonthlyData[]>(initialPersonalFinanceData);
+
+    const handleUpdateCategory = (month: string, category: keyof Omit<MonthlyData, 'month' | 'agencia'>, newTransactions: Transaction[]) => {
+        setPersonalData(prevData =>
+            prevData.map(data =>
+                data.month.toLowerCase() === month.toLowerCase()
+                    ? { ...data, [category]: newTransactions }
+                    : data
+            )
+        );
+    }
     
     const combinedData = useMemo(() => {
-        const yearData = Array.from({ length: 12 }, (_, i) => {
-            const monthName = format(new Date(2024, i, 1), 'MMMM', { locale: es });
-            const monthData = personalData.find(d => d.month.toLowerCase() === monthName.toLowerCase());
-            return monthData || { month: monthName, agencia: 0, oscar: [], transporte: [], rentas: [], bienes_raices: [], intereses: [] };
-        });
-
-        return yearData.map((data, index) => {
-            const currentSelectedMonth = getMonth(new Date(selectedMonth));
+        return personalData.map((data, index) => {
             let agenciaValue = data.agencia;
-            if(index === currentSelectedMonth && index === 10) { // Noviembre
-                agenciaValue = agenciaProfit - 527138;
+            if(format(new Date(selectedMonth), 'MMMM', { locale: es }).toLowerCase() === data.month.toLowerCase()) {
+                agenciaValue = financialSummary.profit;
+                if(data.month.toLowerCase() === 'noviembre') {
+                    agenciaValue -= 527138;
+                }
             }
 
             const totalOscar = data.oscar.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
@@ -272,7 +277,7 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
             let ganancia = agenciaValue + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses;
 
             if (data.month.toLowerCase() === 'agosto') {
-                ganancia += 1316718;
+                ganancia = 82242 + 2311.67 - 164166 + 1610 - 1154053 + 1800 + 1316718;
             } else if (data.month.toLowerCase() === 'septiembre') {
               ganancia = 149865;
             } else if (data.month.toLowerCase() === 'octubre') {
@@ -281,17 +286,8 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
             
             return { ...data, agencia: agenciaValue, totalOscar, totalTransporte, totalRentas, totalBienesRaices, totalIntereses, ganancia };
         });
-    }, [personalData, agenciaProfit, selectedMonth]);
+    }, [personalData, financialSummary, selectedMonth]);
 
-    const handleUpdateCategory = (month: string, category: keyof Omit<MonthlyData, 'month' | 'agencia'>, newTransactions: Transaction[]) => {
-        setPersonalData(prevData =>
-            prevData.map(data =>
-                data.month.toLowerCase() === month.toLowerCase()
-                    ? { ...data, [category]: newTransactions }
-                    : data
-            )
-        );
-    }
     
     const formatCurrency = (value: number | undefined) => {
         if (value === undefined) return '$0.00';
@@ -517,7 +513,7 @@ export default function MiProgresoPage() {
                 </Card>
             </AnimatedDiv>
             
-            <PersonalFinanceDashboard agenciaProfit={financialSummary.profit} selectedMonth={monthFilter} />
+            <PersonalFinanceDashboard financialSummary={financialSummary} selectedMonth={monthFilter} />
 
              <BalanceSheetDashboard />
         </>
@@ -535,6 +531,7 @@ export default function MiProgresoPage() {
 
 
     
+
 
 
 
