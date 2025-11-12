@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { teamMembers } from '@/lib/team-data';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -10,22 +10,17 @@ import { cn } from '@/lib/utils';
 import { CheckCircle, Clock, XCircle, TrendingUp, Target, Calendar, DollarSign, TrendingDown } from 'lucide-react';
 import { useAuth } from '@/lib/auth-provider';
 import AnimatedDiv from '@/components/animated-div';
-import { addDays, startOfMonth, endOfMonth, isWithinInterval, format, parseISO } from 'date-fns';
+import { format, isWithinInterval, startOfMonth, endOfMonth, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { DateRange } from 'react-day-picker';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
-import { Calendar as CalendarIcon } from 'lucide-react';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { initialMovimientosDiarios } from '@/lib/finanzas-data';
+import { Input } from '@/components/ui/input';
+import { getMovimientos } from '../finanzas/_actions';
+import { MovimientoDiario } from '@/lib/db/schema';
 
 
-// --- Mock Data Simulation ---
-
+// --- Mock Data Simulation (for non-financial parts) ---
 const today = new Date();
 const currentMonthStart = startOfMonth(today);
 
-// Simulate tasks with different completion dates throughout the month
 const generateMockTasks = () => {
     const tasks = [];
     const statuses = ["Completado", "Trabajando", "Pendiente"];
@@ -43,13 +38,11 @@ const generateMockTasks = () => {
     return tasks;
 };
 
-// Simulate calendar events (visits/activities)
 const generateMockActivities = () => {
     const activities = [];
     for (const member of teamMembers) {
         for (let i = 0; i < 10; i++) {
              const activityDate = new Date(currentMonthStart.getTime() + Math.random() * (today.getTime() - currentMonthStart.getTime()));
-            // Admins and specific roles have client-facing activities
             if(['admin', 'julio', 'alma', 'fernando'].includes(member.role)) {
                  activities.push({
                     id: `act-${member.id}-${i}`,
@@ -89,24 +82,45 @@ const PunctualityBadge = ({ status }: { status: string }) => {
 
 export default function MiProgresoPage() {
     const { user } = useAuth();
+    const [isLoading, setIsLoading] = useState(true);
+    const [movimientos, setMovimientos] = useState<MovimientoDiario[]>([]);
     
-    const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
-        from: startOfMonth(new Date(2024, 10, 1)), // November 2024
-        to: endOfMonth(new Date(2024, 10, 1)),
-    });
+    const [monthFilter, setMonthFilter] = useState(format(new Date(), 'yyyy-MM'));
+
+     const fetchFinancialData = async () => {
+        setIsLoading(true);
+        try {
+            const movimientosData = await getMovimientos();
+            setMovimientos(movimientosData as MovimientoDiario[]);
+        } catch (error) {
+            console.error("Failed to fetch financial data:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    useEffect(() => {
+        if (user?.role === 'admin') {
+            fetchFinancialData();
+        } else {
+            setIsLoading(false);
+        }
+    }, [user]);
 
     const teamProgressData = useMemo(() => {
-        const range = dateRange?.from && dateRange?.to ? { start: dateRange.from, end: dateRange.to } : { start: new Date(), end: new Date() };
-
+        if (!monthFilter) return [];
+        const start = startOfMonth(parseISO(`${monthFilter}-01`));
+        const end = endOfMonth(start);
+        
         return teamMembers.map(member => {
             const memberTasks = mockTasks.filter(t => t.ejecutor === member.name);
             const memberActivities = mockActivities.filter(a => a.responsable === member.name);
 
-            const tasksInFrame = memberTasks.filter(t => isWithinInterval(t.completedAt, range));
+            const tasksInFrame = memberTasks.filter(t => isWithinInterval(t.completedAt, { start, end }));
             const completedTasks = tasksInFrame.filter(t => t.status === 'Completado').length;
             const totalTasks = tasksInFrame.length || 1;
             
-            const activitiesInFrame = memberActivities.filter(a => isWithinInterval(a.date, range)).length;
+            const activitiesInFrame = memberActivities.filter(a => isWithinInterval(a.date, { start, end })).length;
 
             const punctuality = mockPunctuality.find(p => p.name === member.name)?.status || 'N/A';
             
@@ -123,13 +137,15 @@ export default function MiProgresoPage() {
                 performanceScore: performanceScore,
             };
         });
-    }, [dateRange]);
+    }, [monthFilter]);
 
-     const financialSummary = useMemo(() => {
-        if (!dateRange?.from || !dateRange?.to) return { totalIncome: 0, totalExpenses: 0, incomeByCategory: {}, expensesByCategory: {}, profit: 0 };
+    const financialSummary = useMemo(() => {
+        if (!monthFilter) return { totalIncome: 0, totalExpenses: 0, incomeByCategory: {}, expensesByCategory: {}, profit: 0 };
+        const start = startOfMonth(parseISO(`${monthFilter}-01`));
+        const end = endOfMonth(start);
 
-        const financialsInFrame = initialMovimientosDiarios.filter(f => 
-            isWithinInterval(new Date(f.fecha), { start: dateRange.from!, end: dateRange.to! })
+        const financialsInFrame = movimientos.filter(f => 
+            isWithinInterval(new Date(f.fecha), { start, end })
         );
         
         const totalIncome = financialsInFrame.filter(f => f.tipo === 'Ingreso').reduce((sum, f) => sum + f.monto, 0);
@@ -148,8 +164,12 @@ export default function MiProgresoPage() {
         }, {} as Record<string, number>);
         
         return { totalIncome, totalExpenses, incomeByCategory, expensesByCategory, profit: totalIncome - totalExpenses };
-    }, [dateRange]);
+    }, [monthFilter, movimientos]);
 
+
+    if (isLoading) {
+       return <div className="flex items-center justify-center min-h-[50vh]"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div></div>
+    }
 
     if (!user) {
         return <div className="text-center text-foreground/70">Cargando datos de usuario...</div>
@@ -160,44 +180,14 @@ export default function MiProgresoPage() {
     return (
     <div>
         <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold font-headline">Mi Progreso</h1>
+            <h1 className="text-3xl font-bold font-headline">{user.role === 'admin' ? '¿Cómo va la Empresa?' : 'Mi Progreso'}</h1>
              {user.role === 'admin' && (
-                <Popover>
-                    <PopoverTrigger asChild>
-                    <Button
-                        id="date"
-                        variant={"outline"}
-                        className={cn(
-                        "w-[300px] justify-start text-left font-normal",
-                        !dateRange && "text-muted-foreground"
-                        )}
-                    >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateRange?.from ? (
-                        dateRange.to ? (
-                            <>
-                            {format(dateRange.from, "LLL dd, y", { locale: es })} -{" "}
-                            {format(dateRange.to, "LLL dd, y", { locale: es })}
-                            </>
-                        ) : (
-                            format(dateRange.from, "LLL dd, y")
-                        )
-                        ) : (
-                        <span>Elige una fecha</span>
-                        )}
-                    </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="end">
-                    <CalendarComponent
-                        initialFocus
-                        mode="range"
-                        defaultMonth={dateRange?.from}
-                        selected={dateRange}
-                        onSelect={setDateRange}
-                        numberOfMonths={2}
-                    />
-                    </PopoverContent>
-                </Popover>
+                <Input
+                    type="month"
+                    value={monthFilter}
+                    onChange={(e) => setMonthFilter(e.target.value)}
+                    className="w-[200px]"
+                />
             )}
         </div>
       
