@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -252,6 +251,8 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
     const isNovember = format(new Date(selectedMonth), 'MMMM', { locale: es }).toLowerCase() === 'noviembre';
     const novemberAdjustment = -528899;
 
+    const octoberAdjustment = 1316718;
+
     const combinedData = useMemo(() => {
         // Ensure data for all 12 months exists
         const yearData = Array.from({ length: 12 }, (_, i) => {
@@ -273,8 +274,11 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
             const totalBienesRaices = data.bienes_raices.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             const totalIntereses = data.intereses.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             
-            const ganancia = finalAgenciaProfit + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses;
+            let ganancia = finalAgenciaProfit + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses;
 
+            if (data.month.toLowerCase() === 'octubre') {
+              ganancia += octoberAdjustment;
+            }
 
             return { ...data, agencia: finalAgenciaProfit, totalOscar, totalTransporte, totalRentas, totalBienesRaices, totalIntereses, ganancia };
         });
@@ -531,5 +535,4 @@ export default function MiProgresoPage() {
 
 
 
-
-
+    
