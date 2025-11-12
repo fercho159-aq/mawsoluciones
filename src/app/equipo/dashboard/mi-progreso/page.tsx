@@ -286,6 +286,10 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
             if (data.month.toLowerCase() === 'agosto') {
               ganancia += augustAdjustment;
             }
+            
+            if (data.month.toLowerCase() === 'septiembre') {
+              ganancia = 827214;
+            }
 
             return { ...data, agencia: finalAgenciaProfit, totalOscar, totalTransporte, totalRentas, totalBienesRaices, totalIntereses, ganancia };
         });
@@ -543,4 +547,5 @@ export default function MiProgresoPage() {
 
 
     
+
 
