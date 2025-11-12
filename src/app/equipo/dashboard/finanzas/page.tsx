@@ -430,6 +430,7 @@ const PayCpcDialog = ({ onPay, children }: { onPay: (cuenta: Cuenta, detalle: st
                     <Button onClick={handlePay} disabled={!cuentaDestino}>Confirmar Pago</Button>
                 </DialogFooter>
             </DialogContent>
+        </Dialog>
     )
 }
 
