@@ -267,7 +267,11 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth }: { financi
             let agenciaValue = data.agencia;
 
             if (currentMonthIndex === dataMonthIndex) {
-                 agenciaValue = financialSummary.profit;
+                 if (currentMonthIndex === 10) { // Noviembre (0-indexed, 10)
+                    agenciaValue = financialSummary.profit - 527138;
+                 } else {
+                    agenciaValue = financialSummary.profit;
+                 }
             }
 
             const totalOscar = data.oscar.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
@@ -277,7 +281,7 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth }: { financi
             const totalIntereses = data.intereses.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             
             let ganancia = data.ganancia;
-             if (ganancia === undefined) { // Calculate only if not fixed
+             if (currentMonthIndex === dataMonthIndex) {
                 ganancia = agenciaValue + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses;
              }
             
@@ -542,4 +546,5 @@ export default function MiProgresoPage() {
 
 
     
+
 
