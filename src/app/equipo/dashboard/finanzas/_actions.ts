@@ -93,63 +93,67 @@ const parsePeriodoDate = (periodoString: string): Date | null => {
 
 export async function registrarPagoCpc(cpcId: number, cuentaDestino: string, detalleCuenta: string | null) {
      try {
-        await db.transaction(async (tx) => {
-            const cpcToPay = await tx.query.cuentasPorCobrar.findFirst({
-                where: eq(cuentasPorCobrar.id, cpcId),
-            });
-            
-            if (!cpcToPay) {
-                throw new Error("La cuenta por cobrar que intentas pagar ya no existe.");
-            }
+        // Since neon-http driver doesn't support transactions, we'll run operations sequentially.
+        
+        // 1. Fetch the cpc to pay
+        const cpcToPay = await db.query.cuentasPorCobrar.findFirst({
+            where: eq(cuentasPorCobrar.id, cpcId),
+        });
+        
+        if (!cpcToPay) {
+            throw new Error("La cuenta por cobrar que intentas pagar ya no existe.");
+        }
 
-            const ivaAmount = cpcToPay.conIva ? cpcToPay.monto * IVA_RATE : null;
+        const ivaAmount = cpcToPay.conIva ? cpcToPay.monto * IVA_RATE : null;
 
-            // 2. Crear movimiento de ingreso
-            await tx.insert(movimientosDiarios).values({
-                fecha: new Date(),
-                tipo: 'Ingreso',
-                descripcion: cpcToPay.concepto || `Pago de ${cpcToPay.clienteName} - ${cpcToPay.tipo} (${cpcToPay.periodo})`,
-                monto: cpcToPay.monto,
-                cuenta: cuentaDestino,
-                detalleCuenta: detalleCuenta,
-                categoria: cpcToPay.tipo,
-                cpcId: cpcToPay.id,
-                conIva: cpcToPay.conIva,
-                iva: ivaAmount,
-            });
+        // 2. Create income movement
+        await db.insert(movimientosDiarios).values({
+            fecha: new Date(),
+            tipo: 'Ingreso',
+            descripcion: cpcToPay.concepto || `Pago de ${cpcToPay.clienteName} - ${cpcToPay.tipo} (${cpcToPay.periodo})`,
+            monto: cpcToPay.monto,
+            cuenta: cuentaDestino,
+            detalleCuenta: detalleCuenta,
+            categoria: cpcToPay.tipo,
+            cpcId: cpcToPay.id,
+            conIva: cpcToPay.conIva,
+            iva: ivaAmount,
+        });
 
-            // 3. Recrear iguala para el siguiente mes si aplica
-            const isRecurrent = ['Iguala Contenido', 'Iguala Web', 'Iguala Ads'].includes(cpcToPay.tipo);
-            if (isRecurrent && cpcToPay.periodo) {
-                const startDate = parsePeriodoDate(cpcToPay.periodo);
-                if (startDate) {
-                    const nextMonthDate = addMonths(startDate, 1);
-                    const newPeriod = `Del ${format(nextMonthDate, 'd \'de\' MMMM', {locale: es})} al ${format(addMonths(nextMonthDate, 1), 'd \'de\' MMMM \'de\' yyyy', {locale: es})}`;
-                    const newFechaCobro = cpcToPay.fecha_cobro ? format(addMonths(parsePeriodoDate(cpcToPay.fecha_cobro)!, 1), "d 'de' MMMM 'de' yyyy", { locale: es }) : undefined;
-                    
-                    const existingNext = await tx.query.cuentasPorCobrar.findFirst({
-                        where: and(
-                            eq(cuentasPorCobrar.clienteId, cpcToPay.clienteId),
-                            eq(cuentasPorCobrar.tipo, cpcToPay.tipo),
-                            eq(cuentasPorCobrar.periodo, newPeriod)
-                        )
-                    });
+        // 3. Recreate recurrent payment for the next month if applicable
+        const isRecurrent = ['Iguala Contenido', 'Iguala Web', 'Iguala Ads'].includes(cpcToPay.tipo);
+        if (isRecurrent && cpcToPay.periodo) {
+            const startDate = parsePeriodoDate(cpcToPay.periodo);
+            if (startDate) {
+                const nextMonthDate = addMonths(startDate, 1);
+                const newPeriod = `Del ${format(nextMonthDate, 'd \'de\' MMMM', {locale: es})} al ${format(addMonths(nextMonthDate, 1), 'd \'de\' MMMM \'de\' yyyy', {locale: es})}`;
+                const newFechaCobro = cpcToPay.fecha_cobro ? format(addMonths(parsePeriodoDate(cpcToPay.fecha_cobro)!, 1), "d 'de' MMMM 'de' yyyy", { locale: es }) : undefined;
+                
+                const existingNext = await db.query.cuentasPorCobrar.findFirst({
+                    where: and(
+                        eq(cuentasPorCobrar.clienteId, cpcToPay.clienteId),
+                        eq(cuentasPorCobrar.tipo, cpcToPay.tipo),
+                        eq(cuentasPorCobrar.periodo, newPeriod)
+                    )
+                });
 
-                    if(!existingNext) {
-                         await tx.insert(cuentasPorCobrar).values({
-                            ...cpcToPay,
-                            id: undefined, // let db generate new id
-                            periodo: newPeriod,
-                            fecha_cobro: newFechaCobro,
-                            createdAt: new Date(),
-                         });
-                    }
+                if(!existingNext) {
+                     await db.insert(cuentasPorCobrar).values({
+                        clienteId: cpcToPay.clienteId,
+                        clienteName: cpcToPay.clienteName,
+                        periodo: newPeriod,
+                        monto: cpcToPay.monto,
+                        tipo: cpcToPay.tipo,
+                        fecha_cobro: newFechaCobro,
+                        conIva: cpcToPay.conIva,
+                        concepto: cpcToPay.concepto,
+                     });
                 }
             }
+        }
 
-            // 4. Eliminar la cuenta por cobrar pagada
-            await tx.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, cpcId));
-        });
+        // 4. Delete the paid cpc record
+        await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, cpcId));
 
         revalidatePath("/equipo/dashboard/finanzas");
     } catch (error: any) {

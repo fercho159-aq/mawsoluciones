@@ -121,16 +121,14 @@ export async function updateClient(id: number, data: Partial<Omit<NewClient, 'id
 
 export async function deleteClients(ids: number[]) {
     try {
-        await db.transaction(async (tx) => {
-            await tx.delete(pendientes_maw).where(inArray(pendientes_maw.clientId, ids));
-            await tx.delete(clientFinancialProfiles).where(inArray(clientFinancialProfiles.clientId, ids));
-            await tx.delete(clients).where(inArray(clients.id, ids));
-        });
+        await db.delete(pendientes_maw).where(inArray(pendientes_maw.clientId, ids));
+        await db.delete(clientFinancialProfiles).where(inArray(clientFinancialProfiles.clientId, ids));
+        await db.delete(clients).where(inArray(clients.id, ids));
         revalidatePath('/equipo/dashboard/clientes');
         revalidatePath('/equipo/dashboard/pendientes');
         revalidatePath('/equipo/dashboard/finanzas');
     } catch (error) {
         console.error("Error deleting clients:", error);
-        throw new Error("Could not delete clients. Note: The current database driver may not support transactions for bulk deletion.");
+        throw new Error("Could not delete clients. The current database driver may not support cascading deletes properly via `inArray`. Manual sequential deletion is performed.");
     }
 }
