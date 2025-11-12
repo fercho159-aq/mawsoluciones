@@ -250,7 +250,7 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
     const [personalData, setPersonalData] = useState<MonthlyData[]>(initialPersonalFinanceData);
 
     const isNovember = format(new Date(selectedMonth), 'MMMM', { locale: es }).toLowerCase() === 'noviembre';
-    const novemberAdjustment = -528899;
+    const novemberAdjustment = -527138;
 
     const isAugust = format(new Date(selectedMonth), 'MMMM', { locale: es }).toLowerCase() === 'agosto';
     const augustAdjustment = 1316718;
@@ -557,6 +557,7 @@ export default function MiProgresoPage() {
 
 
     
+
 
 
 
