@@ -1,6 +1,5 @@
 
 
-
 "use server";
 
 import { db } from "@/lib/db";
@@ -128,15 +127,15 @@ export async function addMovimiento(data: Omit<NewMovimientoDiario, 'id' | 'iva'
 export async function updateMovimiento(id: number, data: Partial<Omit<NewMovimientoDiario, 'id' | 'iva'>> & { conIva?: boolean }) {
     try {
         const monto = data.monto;
-        let ivaAmount = null;
-        if(monto !== undefined && data.conIva !== undefined) {
-             ivaAmount = data.conIva ? monto * IVA_RATE : null;
+        const updates: Partial<NewMovimientoDiario> = { ...data };
+
+        if(monto !== undefined && 'conIva' in data) {
+             updates.iva = data.conIva ? monto * IVA_RATE : null;
+        } else if ('conIva' in data && data.conIva === false) {
+             updates.iva = null;
         }
 
-        await db.update(movimientosDiarios).set({
-            ...data,
-            ...(ivaAmount !== null && { iva: ivaAmount })
-        }).where(eq(movimientosDiarios.id, id));
+        await db.update(movimientosDiarios).set(updates).where(eq(movimientosDiarios.id, id));
         revalidatePath("/equipo/dashboard/finanzas");
     } catch (error: any) {
         console.error("Error updating movimiento:", error);
