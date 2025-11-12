@@ -6,6 +6,8 @@ import { db } from "@/lib/db";
 import { cuentasPorCobrar, movimientosDiarios, type NewCuentaPorCobrar, type CuentaPorCobrar, type MovimientoDiario, type NewMovimientoDiario } from "@/lib/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { addMonths, format } from "date-fns";
+import { es } from "date-fns/locale";
 
 const IVA_RATE = 0.16;
 
@@ -60,36 +62,95 @@ export async function updateCpc(id: number, data: Partial<Omit<NewCuentaPorCobra
     }
 }
 
+const parsePeriodoDate = (periodoString: string): Date | null => {
+    const months: Record<string, number> = { 'enero': 0, 'febrero': 1, 'marzo': 2, 'abril': 3, 'mayo': 4, 'junio': 5, 'julio': 6, 'agosto': 7, 'septiembre': 8, 'octubre': 9, 'noviembre': 10, 'diciembre': 11 };
+    
+    // Regex para capturar "DD de mes"
+    const match = periodoString.toLowerCase().match(/(\d{1,2}) de (\w+)/);
+
+    if (match) {
+        const day = parseInt(match[1]);
+        const monthName = match[2];
+        const month = months[monthName];
+        
+        // Asumimos el año actual si no se especifica, pero intentamos buscar uno
+        const yearMatch = periodoString.match(/(\d{4})/);
+        const year = yearMatch ? parseInt(yearMatch[1]) : new Date().getFullYear();
+
+        if (!isNaN(day) && month !== undefined) {
+             // Handle cases like "31 de enero de 2025", we need to make sure the year is correctly parsed
+             // If the month is december and current month is january, we might be in the next year.
+             const currentMonth = new Date().getMonth();
+             const currentYear = new Date().getFullYear();
+             if (currentMonth === 0 && month === 11 && !yearMatch) {
+                 return new Date(currentYear - 1, month, day);
+             }
+            return new Date(year, month, day);
+        }
+    }
+    return null;
+}
+
 export async function registrarPagoCpc(cpcId: number, cuentaDestino: string, detalleCuenta: string | null) {
      try {
-        // 1. Get the details from the cpc record
-        const cpcToPay = await db.query.cuentasPorCobrar.findFirst({
-            where: eq(cuentasPorCobrar.id, cpcId),
-        });
-        
-        if (!cpcToPay) {
-            throw new Error("La cuenta por cobrar que intentas pagar ya no existe.");
-        }
-
-        const ivaAmount = cpcToPay.conIva ? cpcToPay.monto * IVA_RATE : null;
-
-        // 2. Create a new movement in movimientosDiarios, like a manual income
-        await db.insert(movimientosDiarios).values({
-            fecha: new Date(), // Use current date for the payment
-            tipo: 'Ingreso',
-            descripcion: cpcToPay.concepto || `Pago de ${cpcToPay.clienteName} - ${cpcToPay.tipo} (${cpcToPay.periodo})`,
-            monto: cpcToPay.monto,
-            cuenta: cuentaDestino,
-            detalleCuenta: detalleCuenta,
-            categoria: cpcToPay.tipo,
-            cpcId: cpcToPay.id, // Keep the reference
-            conIva: cpcToPay.conIva,
-            iva: ivaAmount,
-        });
-
-        // 3. Delete the cpc record now that it's paid
-        await db.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, cpcId));
+        await db.transaction(async (tx) => {
+            const cpcToPay = await tx.query.cuentasPorCobrar.findFirst({
+                where: eq(cuentasPorCobrar.id, cpcId),
+            });
             
+            if (!cpcToPay) {
+                throw new Error("La cuenta por cobrar que intentas pagar ya no existe.");
+            }
+
+            const ivaAmount = cpcToPay.conIva ? cpcToPay.monto * IVA_RATE : null;
+
+            // 2. Crear movimiento de ingreso
+            await tx.insert(movimientosDiarios).values({
+                fecha: new Date(),
+                tipo: 'Ingreso',
+                descripcion: cpcToPay.concepto || `Pago de ${cpcToPay.clienteName} - ${cpcToPay.tipo} (${cpcToPay.periodo})`,
+                monto: cpcToPay.monto,
+                cuenta: cuentaDestino,
+                detalleCuenta: detalleCuenta,
+                categoria: cpcToPay.tipo,
+                cpcId: cpcToPay.id,
+                conIva: cpcToPay.conIva,
+                iva: ivaAmount,
+            });
+
+            // 3. Recrear iguala para el siguiente mes si aplica
+            const isRecurrent = ['Iguala Contenido', 'Iguala Web', 'Iguala Ads'].includes(cpcToPay.tipo);
+            if (isRecurrent && cpcToPay.periodo) {
+                const startDate = parsePeriodoDate(cpcToPay.periodo);
+                if (startDate) {
+                    const nextMonthDate = addMonths(startDate, 1);
+                    const newPeriod = `Del ${format(nextMonthDate, 'd \'de\' MMMM', {locale: es})} al ${format(addMonths(nextMonthDate, 1), 'd \'de\' MMMM \'de\' yyyy', {locale: es})}`;
+                    const newFechaCobro = cpcToPay.fecha_cobro ? format(addMonths(parsePeriodoDate(cpcToPay.fecha_cobro)!, 1), "d 'de' MMMM 'de' yyyy", { locale: es }) : undefined;
+                    
+                    const existingNext = await tx.query.cuentasPorCobrar.findFirst({
+                        where: and(
+                            eq(cuentasPorCobrar.clienteId, cpcToPay.clienteId),
+                            eq(cuentasPorCobrar.tipo, cpcToPay.tipo),
+                            eq(cuentasPorCobrar.periodo, newPeriod)
+                        )
+                    });
+
+                    if(!existingNext) {
+                         await tx.insert(cuentasPorCobrar).values({
+                            ...cpcToPay,
+                            id: undefined, // let db generate new id
+                            periodo: newPeriod,
+                            fecha_cobro: newFechaCobro,
+                            createdAt: new Date(),
+                         });
+                    }
+                }
+            }
+
+            // 4. Eliminar la cuenta por cobrar pagada
+            await tx.delete(cuentasPorCobrar).where(eq(cuentasPorCobrar.id, cpcId));
+        });
+
         revalidatePath("/equipo/dashboard/finanzas");
     } catch (error: any) {
         console.error("Error registering cpc payment:", error);
