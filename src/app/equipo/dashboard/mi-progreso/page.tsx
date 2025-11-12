@@ -260,12 +260,14 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth }: { financi
     
     const combinedData = useMemo(() => {
         return personalData.map((data, index) => {
-            let agenciaValue = data.agencia;
-            if(format(new Date(selectedMonth), 'MMMM', { locale: es }).toLowerCase() === data.month.toLowerCase()) {
+            let agenciaValue;
+            if (format(new Date(selectedMonth), 'MMMM', { locale: es }).toLowerCase() === data.month.toLowerCase()) {
                 agenciaValue = financialSummary.profit;
-                if(data.month.toLowerCase() === 'noviembre') {
+                if (data.month.toLowerCase() === 'noviembre') {
                     agenciaValue -= 527138;
                 }
+            } else {
+                agenciaValue = data.agencia;
             }
 
             const totalOscar = data.oscar.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
@@ -277,7 +279,7 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth }: { financi
             let ganancia = agenciaValue + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses;
 
             if (data.month.toLowerCase() === 'agosto') {
-                ganancia = 82242 + 2311.67 - 164166 + 1610 - 1154053 + 1800 + 1316718;
+                ganancia = agenciaValue + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses + 1316718;
             } else if (data.month.toLowerCase() === 'septiembre') {
               ganancia = 149865;
             } else if (data.month.toLowerCase() === 'octubre') {
@@ -542,3 +544,6 @@ export default function MiProgresoPage() {
 
 
 
+
+
+    
