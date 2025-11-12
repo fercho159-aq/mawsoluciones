@@ -250,21 +250,26 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
     const [personalData, setPersonalData] = useState<MonthlyData[]>(initialPersonalFinanceData);
     
     const combinedData = useMemo(() => {
-        // Ensure data for all 12 months exists
         const yearData = Array.from({ length: 12 }, (_, i) => {
-            const monthName = format(new Date(2024, i), 'MMMM', { locale: es });
+            const monthName = format(new Date(2024, i, 1), 'MMMM', { locale: es });
             const monthData = personalData.find(d => d.month.toLowerCase() === monthName.toLowerCase());
             return monthData || { month: monthName, agencia: 0, oscar: [], transporte: [], rentas: [], bienes_raices: [], intereses: [] };
         });
 
-        return yearData.map(data => {
+        return yearData.map((data, index) => {
+            const currentSelectedMonth = getMonth(new Date(selectedMonth));
+            let agenciaValue = data.agencia;
+            if(index === currentSelectedMonth && index === 10) { // Noviembre
+                agenciaValue = agenciaProfit - 527138;
+            }
+
             const totalOscar = data.oscar.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             const totalTransporte = data.transporte.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             const totalRentas = data.rentas.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             const totalBienesRaices = data.bienes_raices.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             const totalIntereses = data.intereses.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             
-            let ganancia = data.agencia + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses;
+            let ganancia = agenciaValue + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses;
 
             if (data.month.toLowerCase() === 'agosto') {
                 ganancia += 1316718;
@@ -274,9 +279,9 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
               ganancia = 124468;
             }
             
-            return { ...data, agencia: data.agencia, totalOscar, totalTransporte, totalRentas, totalBienesRaices, totalIntereses, ganancia };
+            return { ...data, agencia: agenciaValue, totalOscar, totalTransporte, totalRentas, totalBienesRaices, totalIntereses, ganancia };
         });
-    }, [personalData]);
+    }, [personalData, agenciaProfit, selectedMonth]);
 
     const handleUpdateCategory = (month: string, category: keyof Omit<MonthlyData, 'month' | 'agencia'>, newTransactions: Transaction[]) => {
         setPersonalData(prevData =>
@@ -530,6 +535,7 @@ export default function MiProgresoPage() {
 
 
     
+
 
 
 
