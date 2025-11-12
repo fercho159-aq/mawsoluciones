@@ -76,7 +76,7 @@ export const pendientes_maw = pgTable('pendientes_maw', {
     status: varchar('status', { length: 50 }).notNull().default('Trabajando'),
     completed: boolean('completed').default(false).notNull(),
     createdAt: timestamp('created_at').defaultNow(),
-    fechaCorte: timestamp('fecha_corte'),
+    fechaCorte: integer('fecha_corte'),
     publicacionesAlMes: text('publicaciones_al_mes'),
     publicacionesALaSemana: text('publicaciones_a_la_semana'),
 
@@ -225,6 +225,7 @@ export type Colaborador = typeof colaboradores.$inferSelect;
 export type NewColaborador = typeof colaboradores.$inferInsert;
 export type Access = typeof accesses.$inferSelect;
 export type NewAccess = typeof accesses.$inferInsert;
+
 
 
 

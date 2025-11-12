@@ -592,22 +592,16 @@ const PendientesTable = ({
                                     </TableCell>
                                     {(isContenido || isAds) && index === 0 && (
                                         <TableCell rowSpan={pendientes.length  + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">
-                                             <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <Button variant="outline" className="w-full justify-start text-left font-normal h-auto py-1 px-2 text-xs">
-                                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                                        {pendiente.fechaCorte ? format(new Date(pendiente.fechaCorte), "d 'de' MMMM", { locale: es }) : <span>Sin fecha</span>}
-                                                    </Button>
-                                                </PopoverTrigger>
-                                                <PopoverContent className="w-auto p-0">
-                                                    <Calendar
-                                                        mode="single"
-                                                        selected={pendiente.fechaCorte ? new Date(pendiente.fechaCorte) : undefined}
-                                                        onSelect={(date) => onUpdateTask(pendiente, { fechaCorte: date })}
-                                                        initialFocus
-                                                    />
-                                                </PopoverContent>
-                                            </Popover>
+                                            <Select value={pendiente.fechaCorte?.toString() || 'sin-fecha'} onValueChange={(value) => onUpdateTask(pendiente, { fechaCorte: value === 'sin-fecha' ? null : parseInt(value) })}>
+                                                <SelectTrigger className="text-xs h-8">
+                                                    <SelectValue>{pendiente.fechaCorte || 'Sin fecha'}</SelectValue>
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="sin-fecha">Sin fecha</SelectItem>
+                                                    <SelectItem value="15">15</SelectItem>
+                                                    <SelectItem value="30">30</SelectItem>
+                                                </SelectContent>
+                                            </Select>
                                         </TableCell>
                                     )}
                                     {isContenido && index === 0 && (
