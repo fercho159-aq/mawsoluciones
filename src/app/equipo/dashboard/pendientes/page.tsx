@@ -770,7 +770,7 @@ const BoardView = ({ data, onUpdateTask, currentUser, onRefresh }: {
                                 onSave={(data) => onUpdateTask(pendiente, data)}
                                 canReassign={canReassign}
                            >
-                                <Card className="p-3 bg-background cursor-pointer hover:bg-accent space-y-2">
+                                <Card className={cn("p-3 bg-background cursor-pointer hover:bg-accent space-y-2", pendiente.completed && "opacity-50")}>
                                     <div className="flex justify-between items-start">
                                         <p className="font-semibold text-sm">{pendiente.clienteName}</p>
                                         <Badge variant="outline" className="text-xs">{pendiente.categoria}</Badge>
@@ -824,7 +824,6 @@ export default function PendientesPage() {
     const [ejecutorFilter, setEjecutorFilter] = useState('Todos');
     const [searchFilter, setSearchFilter] = useState('');
     const [viewMode, setViewMode] = useState<'table' | 'board'>('table');
-    const [selectedCompleted, setSelectedCompleted] = useState<number[]>([]);
 
     const [activeTab, setActiveTab] = useState('contenido');
     const { toast } = useToast();
@@ -902,18 +901,6 @@ export default function PendientesPage() {
     
     const canManage = user?.role === 'admin' || user?.permissions?.pendientes?.reasignarResponsables;
 
-    const handleBulkDelete = async () => {
-        if (selectedCompleted.length === 0) return;
-        try {
-            await deletePendientes(selectedCompleted);
-            toast({ title: 'Éxito', description: `${selectedCompleted.length} pendiente(s) eliminado(s) permanentemente.` });
-            setSelectedCompleted([]);
-            fetchData();
-        } catch (e: any) {
-            toast({ title: 'Error', description: `No se pudo completar la acción: ${e.message}`, variant: 'destructive' });
-        }
-    };
-
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-[50vh]">
@@ -927,10 +914,9 @@ export default function PendientesPage() {
     }
   
     const getFilteredDataForTab = (categoria: string) => {
-        return filteredData.filter(d => d.categoria.toLowerCase() === categoria.toLowerCase() && !d.completed);
+        return filteredData.filter(d => d.categoria.toLowerCase() === categoria.toLowerCase());
     }
     
-    const allCompleted = filteredData.filter(d => d.completed);
 
     return (
         <div>
@@ -986,7 +972,7 @@ export default function PendientesPage() {
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className={cn("grid w-full", canManage ? "grid-cols-4" : "grid-cols-3")}>
+                <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="contenido" className="flex items-center gap-2">
                         {tasksPerCategory.contenido && (
                             <motion.div
@@ -1020,12 +1006,6 @@ export default function PendientesPage() {
                         )}
                         Web
                     </TabsTrigger>
-                    {canManage && (
-                         <TabsTrigger value="completados" className="flex items-center gap-2">
-                           <CheckCircle className="w-4 h-4" />
-                           Completados
-                        </TabsTrigger>
-                    )}
                 </TabsList>
                 
                 <TabsContent value="contenido">
@@ -1090,75 +1070,6 @@ export default function PendientesPage() {
                         />
                      )}
                 </TabsContent>
-                
-                {canManage && (
-                    <TabsContent value="completados">
-                       <Card className="mt-4">
-                            <CardHeader>
-                                <CardTitle>Pendientes Completados</CardTitle>
-                                <CardDescription>Aquí puedes revisar las tareas finalizadas y eliminarlas si es necesario.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                {selectedCompleted.length > 0 && (
-                                     <div className="flex items-center gap-4 bg-muted p-2 rounded-md my-4">
-                                        <span className="text-sm font-medium">{selectedCompleted.length} seleccionado(s)</span>
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button variant="destructive" size="sm"><Trash2 className="w-4 h-4 mr-2"/>Eliminar</Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                                                    <AlertDialogDescription>Esta acción es irreversible y eliminará permanentemente los pendientes seleccionados.</AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={handleBulkDelete}>Confirmar</AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                        <Button variant="ghost" size="icon" onClick={() => setSelectedCompleted([])}><X className="w-4 h-4" /></Button>
-                                    </div>
-                                )}
-                                <div className="border rounded-lg">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead className="w-[50px]">
-                                                    <Checkbox
-                                                        checked={selectedCompleted.length > 0 && selectedCompleted.length === allCompleted.length}
-                                                        onCheckedChange={(checked) => setSelectedCompleted(checked ? allCompleted.map(p => p.id) : [])}
-                                                    />
-                                                </TableHead>
-                                                <TableHead>Cliente</TableHead>
-                                                <TableHead>Pendiente</TableHead>
-                                                <TableHead>Categoría</TableHead>
-                                                <TableHead>Ejecutor</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {allCompleted.map(p => (
-                                                <TableRow key={p.id}>
-                                                    <TableCell>
-                                                         <Checkbox
-                                                            checked={selectedCompleted.includes(p.id)}
-                                                            onCheckedChange={(checked) => setSelectedCompleted(prev => checked ? [...prev, p.id] : prev.filter(id => id !== p.id))}
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell>{p.clienteName}</TableCell>
-                                                    <TableCell className="line-through text-muted-foreground">{p.pendientePrincipal}</TableCell>
-                                                    <TableCell><Badge variant="secondary">{p.categoria}</Badge></TableCell>
-                                                    <TableCell>{p.ejecutor}</TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                    {allCompleted.length === 0 && <div className="text-center p-8 text-muted-foreground">No hay pendientes completados.</div>}
-                                </div>
-                            </CardContent>
-                       </Card>
-                    </TabsContent>
-                )}
             </Tabs>
         </div>
     );
