@@ -115,8 +115,8 @@ const generatePeriodOptions = () => {
 
         // Mensual del 15 al 15
         const startMidMonth = setDate(month, 15);
-        const endMidMonth = addMonths(startMidMonth, 1);
-        options.push(`15 de ${format(startMidMonth, 'MMMM', { locale: es })} al 15 de ${format(endMidMonth, 'MMMM yyyy', { locale: es })}`);
+        const endMidMonth = addDays(addMonths(startMidMonth, 1), -1);
+        options.push(`15 de ${format(startMidMonth, 'MMMM', { locale: es })} al 14 de ${format(addMonths(startMidMonth, 1), 'MMMM yyyy', { locale: es })}`);
     }
 
     return [...new Set(options)].sort((a, b) => {
@@ -168,7 +168,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
     
     const [selectedClientId, setSelectedClientId] = useState<string>('');
     const [monto, setMonto] = useState('');
-    const [tipo, setTipo] = useState<CategoriaIngreso>('Iguala Mensual');
+    const [tipo, setTipo] = useState<CategoriaIngreso>('Iguala Contenido');
     const [concepto, setConcepto] = useState('');
     const [periodo, setPeriodo] = useState('');
     const [fechaCobro, setFechaCobro] = useState<string | undefined>();
@@ -189,7 +189,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                 setConIva(cpc.conIva ?? false);
             } else if (client) { // Pre-fill client if adding from a specific row
                  setMonto('');
-                 setTipo('Iguala Mensual');
+                 setTipo('Iguala Contenido');
                  setConcepto('');
                  setPeriodo('');
                  setSelectedClientId(client.id.toString());
@@ -197,7 +197,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                  setConIva(false);
             } else { // Reset for global "add"
                 setMonto('');
-                 setTipo('Iguala Mensual');
+                 setTipo('Iguala Contenido');
                  setConcepto('');
                  setPeriodo('');
                  setSelectedClientId('');
@@ -300,7 +300,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                         <Select value={tipo} onValueChange={(v) => setTipo(v as CategoriaIngreso)}>
                             <SelectTrigger><SelectValue/></SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="Iguala Mensual">Iguala Mensual</SelectItem>
+                                <SelectItem value="Iguala Contenido">Iguala Contenido</SelectItem>
                                 <SelectItem value="Iguala Web">Iguala Web</SelectItem>
                                 <SelectItem value="Iguala Ads">Iguala Ads</SelectItem>
                                 <SelectItem value="Proyecto">Proyecto</SelectItem>
@@ -739,7 +739,7 @@ const RegistrarGastoDialog = ({ onSave }: { onSave: () => void }) => {
     const [nombreOtro, setNombreOtro] = useState('');
     const [conIva, setConIva] = useState(false);
 
-    const categoriasDisponibles: CategoriaIngreso[] = ["Iguala Mensual", "Iguala Web", "Iguala Ads", "Proyecto", "Contenido", "Ads", "Web", "Renovaciones", "Otros"];
+    const categoriasDisponibles: CategoriaIngreso[] = ["Iguala Contenido", "Iguala Web", "Iguala Ads", "Proyecto", "Contenido", "Ads", "Web", "Renovaciones", "Otros"];
 
     const resetForm = () => {
         setDescripcion(''); setMonto(''); setCuenta(''); setDetalleEfectivo('');
@@ -828,7 +828,7 @@ const MovimientoFormDialog = ({ movimiento, onSave, children }: { movimiento: Mo
     const isGasto = movimiento.tipo === 'Gasto';
     const categoriasDisponibles = isGasto ? 
         (["Publicidad", "Sueldos", "Comisiones", "Impuestos", "Personales", "Renta", "Otros"] as CategoriaGasto[]) :
-        (["Proyecto", "Iguala Mensual", "Renovaciones", "Otros", "Contenido", "Ads", "Web"] as CategoriaIngreso[]);
+        (["Proyecto", "Iguala Contenido", "Renovaciones", "Otros", "Contenido", "Ads", "Web"] as CategoriaIngreso[]);
 
     useEffect(() => {
         if (open) {
@@ -1183,6 +1183,7 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
 
 
 

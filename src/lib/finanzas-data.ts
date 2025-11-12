@@ -2,7 +2,7 @@
 
 export type Periodo = string;
 export type MovimientoTipo = "Ingreso" | "Gasto";
-export type CategoriaIngreso = "Proyecto" | "Iguala Mensual" | "Iguala Web" | "Iguala Ads" | "Renovaciones" | "Otros" | "Contenido" | "Ads" | "Web";
+export type CategoriaIngreso = "Proyecto" | "Iguala Contenido" | "Iguala Web" | "Iguala Ads" | "Renovaciones" | "Otros" | "Contenido" | "Ads" | "Web";
 export type CategoriaGasto = "Publicidad" | "Sueldos" | "Comisiones" | "Impuestos" | "Personales" | "Otros" | "Renta";
 export type Cuenta = "Cuenta Paola" | "Cuenta MAW" | "Cuenta Aldo" | "Efectivo";
 
