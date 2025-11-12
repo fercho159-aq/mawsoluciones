@@ -274,10 +274,9 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
             const totalIntereses = data.intereses.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             
             const ganancia = finalAgenciaProfit + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses;
-            const gananciaReal = finalAgenciaProfit + totalOscar + totalTransporte + totalRentas + totalIntereses;
 
 
-            return { ...data, agencia: finalAgenciaProfit, totalOscar, totalTransporte, totalRentas, totalBienesRaices, totalIntereses, ganancia, gananciaReal };
+            return { ...data, agencia: finalAgenciaProfit, totalOscar, totalTransporte, totalRentas, totalBienesRaices, totalIntereses, ganancia };
         });
     }, [agenciaProfit, selectedMonth, personalData, isNovember]);
 
@@ -314,7 +313,6 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
                                 <TableHead>Rentas</TableHead>
                                 <TableHead>Bienes Raíces</TableHead>
                                 <TableHead>Intereses</TableHead>
-                                <TableHead className="font-bold">Ganancia Real</TableHead>
                                 <TableHead className="font-bold">Ganancia</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -328,7 +326,6 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
                                     <TableCell className={cn(row.totalRentas < 0 ? "text-red-500" : "")}><CategoryDetailModal categoryName='Rentas' transactions={row.rentas} onUpdate={(t) => handleUpdateCategory(row.month, 'rentas', t)} /></TableCell>
                                     <TableCell className={cn(row.totalBienesRaices < 0 ? "text-red-500" : "")}><CategoryDetailModal categoryName='Bienes Raíces' transactions={row.bienes_raices} onUpdate={(t) => handleUpdateCategory(row.month, 'bienes_raices', t)} /></TableCell>
                                     <TableCell className={cn(row.totalIntereses < 0 ? "text-red-500" : "")}><CategoryDetailModal categoryName='Intereses' transactions={row.intereses} onUpdate={(t) => handleUpdateCategory(row.month, 'intereses', t)} /></TableCell>
-                                    <TableCell className={cn("font-bold", row.gananciaReal < 0 ? "text-red-500" : "text-green-500")}>{formatCurrency(row.gananciaReal)}</TableCell>
                                     <TableCell className={cn("font-bold", row.ganancia < 0 ? "text-red-500" : "text-green-500")}>{formatCurrency(row.ganancia)}</TableCell>
                                 </TableRow>
                             ))}
@@ -531,6 +528,7 @@ export default function MiProgresoPage() {
     </div>
   );
 }
+
 
 
 
