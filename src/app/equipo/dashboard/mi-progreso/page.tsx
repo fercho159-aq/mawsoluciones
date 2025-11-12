@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -7,10 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { CheckCircle, Clock, XCircle, TrendingUp, Target, Calendar, DollarSign, TrendingDown } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, TrendingUp, Target, Calendar, DollarSign, TrendingDown, Building, Briefcase } from 'lucide-react';
 import { useAuth } from '@/lib/auth-provider';
 import AnimatedDiv from '@/components/animated-div';
-import { format, isWithinInterval, startOfMonth, endOfMonth, parseISO } from 'date-fns';
+import { format, isWithinInterval, startOfMonth, endOfMonth, parseISO, getMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Input } from '@/components/ui/input';
 import { getMovimientos } from '../finanzas/_actions';
@@ -77,6 +78,85 @@ const PunctualityBadge = ({ status }: { status: string }) => {
              {status === 'Falta' && <XCircle className="w-3 h-3 mr-1" />}
             {status}
         </Badge>
+    );
+};
+
+const personalFinanceData = [
+    { month: "Enero", agencia: 95360.00, oscar: 11880.00, transporte: 29000.00, rentas: 0, bienes_raices: 0, intereses: 0 },
+    { month: "Febrero", agencia: 186937.00, oscar: 5148.00, transporte: 10381.00, rentas: 10390.00, bienes_raices: 0, intereses: 0 },
+    { month: "Marzo", agencia: 111299.00, oscar: 2024.00, transporte: 8907.00, rentas: 1713.00, bienes_raices: 0, intereses: 0 },
+    { month: "Abril", agencia: 142469.00, oscar: 6100.00, transporte: 3645.00, rentas: 3989.00, bienes_raices: 0, intereses: 0 },
+    { month: "Mayo", agencia: 109715.00, oscar: 3960.00, transporte: 11520.00, rentas: 5159.00, bienes_raices: 0, intereses: 0 },
+    { month: "Junio", agencia: 213108.00, oscar: 6500.00, transporte: 11498.00, rentas: 3884.00, bienes_raices: 53382.00, intereses: 0 },
+    { month: "Julio", agencia: 212869.00, oscar: 0, transporte: -4731.00, rentas: 5571.00, bienes_raices: 0, intereses: 5806.00 },
+    { month: "Agosto", agencia: 82242.00, oscar: 2311.67, transporte: -164166.00, rentas: 1610.00, bienes_raices: -1154053.00, intereses: 1800.00 },
+    { month: "Septiembre", agencia: 178814.00, oscar: 0, transporte: 3755.00, rentas: 5267.00, bienes_raices: -843093.00, intereses: -22092.00 },
+    { month: "Octubre", agencia: 91700.00, oscar: 5720.00, transporte: 22208.00, rentas: 5100.00, bienes_raices: -6000.00, intereses: 5740.00 }
+];
+
+const PersonalFinanceDashboard = ({ agenciaProfit }: { agenciaProfit: number }) => {
+    
+    const [currentMonthData, setCurrentMonthData] = useState(() => {
+        const currentMonthIndex = new Date().getMonth();
+        return personalFinanceData.find((_, index) => index === currentMonthIndex) || { month: format(new Date(), 'MMMM', {locale: es}) };
+    });
+
+    const combinedData = useMemo(() => {
+        const currentMonthIndex = new Date().getMonth();
+        return personalFinanceData.map((data, index) => {
+            if (index === currentMonthIndex) {
+                const total = agenciaProfit + (data.oscar || 0) + (data.transporte || 0) + (data.rentas || 0) + (data.bienes_raices || 0) + (data.intereses || 0);
+                return { ...data, agencia: agenciaProfit, ganancia: total };
+            }
+            const ganancia = data.agencia + data.oscar + data.transporte + data.rentas + data.bienes_raices + data.intereses;
+            return { ...data, ganancia };
+        });
+    }, [agenciaProfit]);
+    
+    const formatCurrency = (value: number | undefined) => {
+        if (value === undefined) return '$0.00';
+        return value.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+    }
+
+    return (
+        <Card className="mt-8">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Building className="w-5 h-5"/>Resumen Financiero Personal</CardTitle>
+                <CardDescription>Consolidado de tus fuentes de ingreso.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="border rounded-lg overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Mes</TableHead>
+                                <TableHead>Agencia</TableHead>
+                                <TableHead>Oscar</TableHead>
+                                <TableHead>Transporte</TableHead>
+                                <TableHead>Rentas</TableHead>
+                                <TableHead>Bienes Raíces</TableHead>
+                                <TableHead>Intereses</TableHead>
+                                <TableHead className="font-bold">Ganancia</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {combinedData.map((row) => (
+                                <TableRow key={row.month}>
+                                    <TableCell className="font-medium capitalize">{row.month}</TableCell>
+                                    <TableCell className={cn(row.agencia < 0 ? "text-red-500" : "")}>{formatCurrency(row.agencia)}</TableCell>
+                                    <TableCell className={cn(row.oscar < 0 ? "text-red-500" : "")}>{formatCurrency(row.oscar)}</TableCell>
+                                    <TableCell className={cn(row.transporte < 0 ? "text-red-500" : "")}>{formatCurrency(row.transporte)}</TableCell>
+                                    <TableCell className={cn(row.rentas < 0 ? "text-red-500" : "")}>{formatCurrency(row.rentas)}</TableCell>
+                                    <TableCell className={cn(row.bienes_raices < 0 ? "text-red-500" : "")}>{formatCurrency(row.bienes_raices)}</TableCell>
+                                    <TableCell className={cn(row.intereses < 0 ? "text-red-500" : "")}>{formatCurrency(row.intereses)}</TableCell>
+                                    <TableCell className={cn("font-bold", row.ganancia < 0 ? "text-red-500" : "text-green-500")}>{formatCurrency(row.ganancia)}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+            </CardContent>
+        </Card>
     );
 };
 
@@ -311,6 +391,7 @@ export default function MiProgresoPage() {
                     </CardContent>
                 </Card>
             </AnimatedDiv>
+             <PersonalFinanceDashboard agenciaProfit={financialSummary.profit} />
         </>
       ) : (
         <>
@@ -377,3 +458,5 @@ export default function MiProgresoPage() {
     </div>
   );
 }
+
+    
