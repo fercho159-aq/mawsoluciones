@@ -412,11 +412,11 @@ const ClientDataDialog = ({ pendientes, onSave, onRefresh, children }: { pendien
                 <div className="grid gap-4 py-4">
                     <div className="space-y-2">
                         <Label>Publicaciones al Mes</Label>
-                        <Input value={pubsMes} onChange={(e) => setPubsMes(e.target.value)} />
+                        <Textarea value={pubsMes} onChange={(e) => setPubsMes(e.target.value)} />
                     </div>
                     <div className="space-y-2">
                         <Label>Publicaciones a la Semana</Label>
-                        <Input value={pubsSemana} onChange={(e) => setPubsSemana(e.target.value)} />
+                        <Textarea value={pubsSemana} onChange={(e) => setPubsSemana(e.target.value)} />
                     </div>
                      <div className="space-y-2">
                         <Label>Próxima Grabación</Label>
@@ -592,7 +592,7 @@ const PendientesTable = ({
                                     </TableCell>
                                     {(isContenido || isAds) && index === 0 && (
                                         <TableCell rowSpan={pendientes.length  + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">
-                                            <Select value={pendiente.fechaCorte?.toString() || 'sin-fecha'} onValueChange={(value) => onUpdateTask(pendiente, { fechaCorte: value === 'sin-fecha' ? null : parseInt(value) })}>
+                                            <Select value={String(pendiente.fechaCorte) || 'sin-fecha'} onValueChange={(value) => onUpdateTask(pendiente, { fechaCorte: value === 'sin-fecha' ? null : parseInt(value) })}>
                                                 <SelectTrigger className="text-xs h-8">
                                                     <SelectValue>{pendiente.fechaCorte || 'Sin fecha'}</SelectValue>
                                                 </SelectTrigger>
@@ -606,8 +606,8 @@ const PendientesTable = ({
                                     )}
                                     {isContenido && index === 0 && (
                                         <>
-                                            <TableCell rowSpan={pendientes.length  + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">{pendientes[0].publicacionesAlMes || '-'}</TableCell>
-                                            <TableCell rowSpan={pendientes.length  + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">{pendientes[0].publicacionesALaSemana || '-'}</TableCell>
+                                            <TableCell rowSpan={pendientes.length  + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l whitespace-pre-wrap">{pendientes[0].publicacionesAlMes || '-'}</TableCell>
+                                            <TableCell rowSpan={pendientes.length  + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l whitespace-pre-wrap">{pendientes[0].publicacionesALaSemana || '-'}</TableCell>
                                         </>
                                     )}
                                      {isAds && index === 0 && (
@@ -625,7 +625,7 @@ const PendientesTable = ({
                                                     )}
                                                      {pendiente.hasTiktokAds && (
                                                         <div className='flex items-center gap-2'>
-                                                            <TikTokIcon className="w-4 h-4" />
+                                                            <TikTokIcon className='w-4 h-4' />
                                                             <div>
                                                                 <p>Msj: {pendiente.tiktokAdsMessages || '-'}</p>
                                                                 <p>Int: {pendiente.tiktokAdsInteraction || '-'}</p>
