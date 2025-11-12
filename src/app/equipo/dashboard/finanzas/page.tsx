@@ -38,6 +38,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { CategoriaIngreso, Cuenta } from '@/lib/finanzas-data';
 
 
 // Extend the window type for jspdf-autotable
@@ -172,7 +173,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
     const [periodo, setPeriodo] = useState('');
     const [fechaCobro, setFechaCobro] = useState<string | undefined>();
     const [conIva, setConIva] = useState(false);
-    const [periodoManual, setPeriodoManual] = useState('');
+    
     const periodOptions = useMemo(() => generatePeriodOptions(), [open]);
     const fechaCobroOptions = useMemo(() => generateFechaCobroOptions(), [open]);
 
@@ -183,15 +184,9 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                 setTipo(cpc.tipo as CategoriaIngreso);
                 setSelectedClientId(cpc.clienteId.toString());
                 setConcepto(cpc.concepto || '');
+                setPeriodo(cpc.periodo);
                 setFechaCobro(cpc.fecha_cobro || undefined);
                 setConIva(cpc.conIva ?? false);
-                 if (periodOptions.includes(cpc.periodo)) {
-                    setPeriodo(cpc.periodo);
-                    setPeriodoManual('');
-                } else {
-                    setPeriodo('Otro');
-                    setPeriodoManual(cpc.periodo);
-                }
             } else if (client) { // Pre-fill client if adding from a specific row
                  setMonto('');
                  setTipo('Iguala Mensual');
@@ -200,7 +195,6 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                  setSelectedClientId(client.id.toString());
                  setFechaCobro(undefined);
                  setConIva(false);
-                 setPeriodoManual('');
             } else { // Reset for global "add"
                 setMonto('');
                  setTipo('Iguala Mensual');
@@ -209,14 +203,13 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                  setSelectedClientId('');
                  setFechaCobro(undefined);
                  setConIva(false);
-                 setPeriodoManual('');
             }
         }
     }, [open, client, cpc, isEditing, periodOptions]);
 
     const handleSave = async () => {
         let targetClient: {id: number, name: string} | undefined;
-        const finalPeriodo = periodo === 'Otro' ? periodoManual : periodo;
+        
 
         if (client) {
             targetClient = { id: client.id, name: client.name };
@@ -229,7 +222,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
             }
         }
         
-        if (!targetClient || !monto || !finalPeriodo) {
+        if (!targetClient || !monto || !periodo) {
             toast({ title: "Error", description: "Cliente, monto y periodo son obligatorios.", variant: "destructive" });
             return;
         }
@@ -237,7 +230,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
         const data: Partial<NewCuentaPorCobrar> = {
             monto: parseFloat(monto),
             tipo,
-            periodo: finalPeriodo,
+            periodo,
             concepto: concepto || null,
             fecha_cobro: fechaCobro,
             conIva,
@@ -308,10 +301,12 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                             <SelectTrigger><SelectValue/></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="Iguala Mensual">Iguala Mensual</SelectItem>
+                                <SelectItem value="Iguala Web">Iguala Web</SelectItem>
+                                <SelectItem value="Iguala Ads">Iguala Ads</SelectItem>
                                 <SelectItem value="Proyecto">Proyecto</SelectItem>
-                                <SelectItem value="Web">Web</SelectItem>
                                 <SelectItem value="Contenido">Contenido</SelectItem>
                                 <SelectItem value="Ads">Ads</SelectItem>
+                                <SelectItem value="Web">Web</SelectItem>
                                 <SelectItem value="Renovaciones">Renovaciones</SelectItem>
                                 <SelectItem value="Otros">Otros</SelectItem>
                             </SelectContent>
@@ -324,7 +319,6 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                                 <SelectTrigger><SelectValue placeholder="Seleccionar periodo..."/></SelectTrigger>
                                 <SelectContent>
                                     {periodOptions.map(option => <SelectItem key={option} value={option}>{option}</SelectItem>)}
-                                    <SelectItem value="Otro">Otro (especificar)</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -333,12 +327,6 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                             <Input type="number" value={monto} onChange={e => setMonto(e.target.value)} placeholder="0.00" />
                         </div>
                      </div>
-                      {periodo === 'Otro' && (
-                        <div className="space-y-2">
-                            <Label>Especificar Periodo</Label>
-                            <Input value={periodoManual} onChange={e => setPeriodoManual(e.target.value)} placeholder="Ej. Semana 40, Proyecto X..." />
-                        </div>
-                     )}
                      <div className="space-y-2">
                         <Label>Fecha de Cobro</Label>
                         <Select value={fechaCobro} onValueChange={setFechaCobro}>
@@ -751,7 +739,7 @@ const RegistrarGastoDialog = ({ onSave }: { onSave: () => void }) => {
     const [nombreOtro, setNombreOtro] = useState('');
     const [conIva, setConIva] = useState(false);
 
-    const categoriasDisponibles: CategoriaGasto[] = ["Publicidad", "Sueldos", "Comisiones", "Impuestos", "Personales", "Renta", "Otros"];
+    const categoriasDisponibles: CategoriaIngreso[] = ["Iguala Mensual", "Iguala Web", "Iguala Ads", "Proyecto", "Contenido", "Ads", "Web", "Renovaciones", "Otros"];
 
     const resetForm = () => {
         setDescripcion(''); setMonto(''); setCuenta(''); setDetalleEfectivo('');
@@ -1195,5 +1183,6 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
 
 
