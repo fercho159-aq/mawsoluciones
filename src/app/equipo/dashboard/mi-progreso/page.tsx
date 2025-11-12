@@ -109,57 +109,54 @@ const initialPersonalFinanceData: MonthlyData[] = [
     { month: "Abril", agencia: 142469.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 6100}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3645}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3989}], bienes_raices: [], intereses: [] },
     { month: "Mayo", agencia: 109715.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3960}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 11520}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5159}], bienes_raices: [], intereses: [] },
     { month: "Junio", agencia: 213108.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 6500}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 11498}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3884}], bienes_raices: [{id: 1, type: 'income', concept: 'Ingreso', amount: 53382}], intereses: [] },
-    { month: "Julio", agencia: 212869.00, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: -4731}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5571}], bienes_raices: [], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5806}] },
-    { month: "Agosto", agencia: 82242.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 2311.67}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: -164166}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1610}], bienes_raices: [{id: 1, type: 'income', concept: 'Ingreso', amount: -1154053}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1800}] },
-    { month: "Septiembre", agencia: 178814.00, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3755}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5267}], bienes_raices: [{id: 1, type: 'income', concept: 'Ingreso', amount: -843093}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: -22092}] },
-    { month: "Octubre", agencia: 91700.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5720}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 22208}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5100}], bienes_raices: [{id: 1, type: 'income', concept: 'Ingreso', amount: -6000}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5740}] }
+    { month: "Julio", agencia: 212869.00, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Gasto', amount: 4731}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5571}], bienes_raices: [], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5806}] },
+    { month: "Agosto", agencia: 82242.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 2311.67}], transporte: [{id: 1, type: 'income', concept: 'Gasto', amount: 164166}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1610}], bienes_raices: [{id: 1, type: 'income', concept: 'Gasto', amount: 1154053}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1800}] },
+    { month: "Septiembre", agencia: 178814.00, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3755}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5267}], bienes_raices: [{id: 1, type: 'income', concept: 'Gasto', amount: 843093}], intereses: [{id: 1, type: 'income', concept: 'Gasto', amount: 22092}] },
+    { month: "Octubre", agencia: 91700.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5720}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 22208}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5100}], bienes_raices: [{id: 1, type: 'income', concept: 'Gasto', amount: 6000}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5740}] },
+    { month: "Noviembre", agencia: 18623.00, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 14129}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 4729}], bienes_raices: [{id: 1, type: 'income', concept: 'Ingreso', amount: 8726}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3573}] }
 ];
 
 const personalAssets = [
-  { name: 'Banamex Inversión', amount: 200053 },
-  { name: 'CETESS', amount: 213858 },
-  { name: 'Banamex', amount: 7762 },
-  { name: 'MAW Sant', amount: 316916 },
-  { name: 'Santander', amount: 19569 },
-  { name: 'Paola', amount: 176670 },
-  { name: 'Efectivo', amount: 322000 },
-  { name: 'Divisas', amount: 109220 },
-  { name: 'Marco', amount: 18000 },
-  { name: 'Charlie', amount: 12927 },
-  { name: 'Julio', amount: 3500 },
-  { name: 'Crédito', amount: 1010 },
-  { name: 'Licencia Mamá', amount: 1500 },
+    { name: 'Banamex Inversión', amount: 200053 },
+    { name: 'CETES', amount: 213858 },
+    { name: 'Banamex', amount: 3556 },
+    { name: 'MAW Sant', amount: 308376 },
+    { name: 'Santander', amount: 19569 },
+    { name: 'Paola', amount: 184170 },
+    { name: 'Efectivo', amount: 355000 },
+    { name: 'Divisas', amount: 109220 },
+    { name: 'Marco', amount: 18000 },
+    { name: 'Charlie 19 JULIK', amount: 12927 },
+    { name: 'JULIO', amount: 9500 },
 ];
 
 const accountsReceivable = [
-  { name: 'Estacionamiento 1', amount: 1000 },
-  { name: 'Depósito Señor Renta', amount: 1600 },
-  { name: 'Dani', amount: -863 },
+  { name: 'estacionmiento 1', amount: 1000 },
+  { name: 'depostio señor re', amount: 1600 },
+  { name: 'dani', amount: -863 },
   { name: 'Den 11,900 + 200', amount: 6170 },
-  { name: 'Internet Agustín J', amount: 0 },
-  { name: 'Internet Mirador', amount: 600 },
+  { name: 'intenet agustin J', amount: 0 },
+  { name: 'Internet mirador', amount: 600 },
   { name: 'FER EXTRA', amount: 44050 },
   { name: 'Trans yo juntado', amount: 108000 },
-  { name: 'Tanda 2 me debe', amount: 108000 },
-  { name: 'Paola', amount: 188985 },
-  { name: 'Oscar me debe 1', amount: 96958 },
-  { name: 'Vuelo Paola', amount: 17752 },
-  { name: 'Dani Montaña', amount: 4000 },
-  { name: 'Dani Granger', amount: 3200 },
+  { name: 'Tanda 2 me deb', amount: 104000 },
+  { name: 'paola', amount: 188985 },
+  { name: 'oscar me debe 1', amount: 96958 },
+  { name: 'vuelo paola', amount: 17752 },
+  { name: 'dani montaña', amount: 4000 },
+  { name: 'dani granger', amount: 3200 },
   { name: 'FER TREJO CO', amount: 4875 },
   { name: 'DANI CUYO', amount: 8726 },
-  { name: '2 semanas transp', amount: 11197 },
-  { name: '2 semanas tanda', amount: 8000 },
 ];
 
 const liabilities = [
-  { name: 'Terreno Querétaro', amount: 0 },
-  { name: 'Terreno Mamá', amount: 310188 },
-  { name: 'Terreno Cancún', amount: 0 },
-  { name: 'Renta', amount: 0 },
-  { name: 'Terreno Mamá Querétaro / Cuesta', amount: 343234 },
-  { name: 'Loft Departamento', amount: 1341264 },
-  { name: 'Gio le debo', amount: 3100 },
+  { name: 'terreno queretaro-10 JUL 23/ (448)', amount: 0 },
+  { name: 'terreno mama (1,143,593/3) / 245 M', amount: 310188 },
+  { name: 'terreno cancun - 25 NOV 24 / (420,2)', amount: 0 },
+  { name: 'renta - 26,000 - 8Dani - 11,900 Ar', amount: 0 },
+  { name: 'Terreno mama queretaro / Cuesta', amount: 341284 },
+  { name: 'Loft departamento depto 1,619,00', amount: 1341264 },
+  { name: 'gio le debo', amount: 3100 },
 ];
 
 
@@ -563,3 +560,4 @@ export default function MiProgresoPage() {
     </div>
   );
 }
+
