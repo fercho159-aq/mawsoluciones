@@ -248,19 +248,7 @@ const CategoryDetailModal = ({ categoryName, transactions, onUpdate }: { categor
 const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaProfit: number, selectedMonth: string }) => {
     
     const [personalData, setPersonalData] = useState<MonthlyData[]>(initialPersonalFinanceData);
-
-    const isNovember = format(new Date(selectedMonth), 'MMMM', { locale: es }).toLowerCase() === 'noviembre';
-    const novemberAdjustment = -527138;
-
-    const isAugust = format(new Date(selectedMonth), 'MMMM', { locale: es }).toLowerCase() === 'agosto';
-    const augustAdjustment = 1316718;
-
-    const isSeptember = format(new Date(selectedMonth), 'MMMM', { locale: es }).toLowerCase() === 'septiembre';
-    const septemberFixedProfit = 149865;
     
-    const isOctober = format(new Date(selectedMonth), 'MMMM', { locale: es }).toLowerCase() === 'octubre';
-    const octoberFixedProfit = 124468;
-
     const combinedData = useMemo(() => {
         // Ensure data for all 12 months exists
         const yearData = Array.from({ length: 12 }, (_, i) => {
@@ -270,15 +258,13 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
         });
 
         return yearData.map(data => {
-            const currentMonthName = format(new Date(selectedMonth), 'MMMM', { locale: es });
+            const currentSelectedMonthName = format(new Date(selectedMonth), 'MMMM', { locale: es });
             let finalAgenciaProfit = data.agencia;
 
-            if (data.month.toLowerCase() === currentMonthName.toLowerCase()) {
-                if (isNovember) {
-                    finalAgenciaProfit = agenciaProfit + novemberAdjustment;
-                } else {
-                    finalAgenciaProfit = agenciaProfit;
-                }
+            const isCurrentMonthFromData = data.month.toLowerCase() === currentSelectedMonthName.toLowerCase();
+
+            if (isCurrentMonthFromData && data.month.toLowerCase() === 'noviembre') {
+                finalAgenciaProfit = agenciaProfit - 527138;
             }
             
             const totalOscar = data.oscar.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
@@ -289,21 +275,23 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
             
             let ganancia = finalAgenciaProfit + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses;
 
-            if (data.month.toLowerCase() === 'agosto') {
-              ganancia += augustAdjustment;
+            if (isCurrentMonthFromData && data.month.toLowerCase() === 'agosto') {
+                ganancia += 1316718;
+            } else if (data.month.toLowerCase() === 'agosto' && !isCurrentMonthFromData) {
+                 ganancia += 1316718; // Apply historical adjustment even if not selected
             }
             
             if (data.month.toLowerCase() === 'septiembre') {
-              ganancia = septemberFixedProfit;
+              ganancia = 149865;
             }
-
+            
             if (data.month.toLowerCase() === 'octubre') {
-              ganancia = octoberFixedProfit;
+              ganancia = 124468;
             }
             
             return { ...data, agencia: finalAgenciaProfit, totalOscar, totalTransporte, totalRentas, totalBienesRaices, totalIntereses, ganancia };
         });
-    }, [agenciaProfit, selectedMonth, personalData, isNovember, isAugust, isSeptember, isOctober, septemberFixedProfit, novemberAdjustment, augustAdjustment, octoberFixedProfit]);
+    }, [agenciaProfit, selectedMonth, personalData]);
 
     const handleUpdateCategory = (month: string, category: keyof Omit<MonthlyData, 'month' | 'agencia'>, newTransactions: Transaction[]) => {
         setPersonalData(prevData =>
@@ -557,6 +545,7 @@ export default function MiProgresoPage() {
 
 
     
+
 
 
 
