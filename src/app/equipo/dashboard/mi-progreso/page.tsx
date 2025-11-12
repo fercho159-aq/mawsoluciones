@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -7,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { CheckCircle, Clock, XCircle, TrendingUp, Target, Calendar, DollarSign, TrendingDown, Building, Briefcase, PlusCircle, Trash2 } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, TrendingUp, Target, Calendar, DollarSign, TrendingDown, Building, Briefcase, PlusCircle, Trash2, PiggyBank, Handshake, Landmark } from 'lucide-react';
 import { useAuth } from '@/lib/auth-provider';
 import AnimatedDiv from '@/components/animated-div';
 import { format, isWithinInterval, startOfMonth, endOfMonth, parseISO, getMonth } from 'date-fns';
@@ -113,6 +114,54 @@ const initialPersonalFinanceData: MonthlyData[] = [
     { month: "Septiembre", agencia: 178814.00, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3755}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5267}], bienes_raices: [{id: 1, type: 'income', concept: 'Ingreso', amount: -843093}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: -22092}] },
     { month: "Octubre", agencia: 91700.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5720}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 22208}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5100}], bienes_raices: [{id: 1, type: 'income', concept: 'Ingreso', amount: -6000}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5740}] }
 ];
+
+const personalAssets = [
+  { name: 'Banamex Inversión', amount: 200053 },
+  { name: 'CETESS', amount: 213858 },
+  { name: 'Banamex', amount: 7762 },
+  { name: 'MAW Sant', amount: 316916 },
+  { name: 'Santander', amount: 19569 },
+  { name: 'Paola', amount: 176670 },
+  { name: 'Efectivo', amount: 322000 },
+  { name: 'Divisas', amount: 109220 },
+  { name: 'Marco', amount: 18000 },
+  { name: 'Charlie', amount: 12927 },
+  { name: 'Julio', amount: 3500 },
+  { name: 'Crédito', amount: 1010 },
+  { name: 'Licencia Mamá', amount: 1500 },
+];
+
+const accountsReceivable = [
+  { name: 'Estacionamiento 1', amount: 1000 },
+  { name: 'Depósito Señor Renta', amount: 1600 },
+  { name: 'Dani', amount: -863 },
+  { name: 'Den 11,900 + 200', amount: 6170 },
+  { name: 'Internet Agustín J', amount: 0 },
+  { name: 'Internet Mirador', amount: 600 },
+  { name: 'FER EXTRA', amount: 44050 },
+  { name: 'Trans yo juntado', amount: 108000 },
+  { name: 'Tanda 2 me debe', amount: 108000 },
+  { name: 'Paola', amount: 188985 },
+  { name: 'Oscar me debe 1', amount: 96958 },
+  { name: 'Vuelo Paola', amount: 17752 },
+  { name: 'Dani Montaña', amount: 4000 },
+  { name: 'Dani Granger', amount: 3200 },
+  { name: 'FER TREJO CO', amount: 4875 },
+  { name: 'DANI CUYO', amount: 8726 },
+  { name: '2 semanas transp', amount: 11197 },
+  { name: '2 semanas tanda', amount: 8000 },
+];
+
+const liabilities = [
+  { name: 'Terreno Querétaro', amount: 0 },
+  { name: 'Terreno Mamá', amount: 310188 },
+  { name: 'Terreno Cancún', amount: 0 },
+  { name: 'Renta', amount: 0 },
+  { name: 'Terreno Mamá Querétaro / Cuesta', amount: 343234 },
+  { name: 'Loft Departamento', amount: 1341264 },
+  { name: 'Gio le debo', amount: 3100 },
+];
+
 
 const CategoryDetailModal = ({ categoryName, transactions, onUpdate }: { categoryName: string, transactions: Transaction[], onUpdate: (newTransactions: Transaction[]) => void }) => {
     const [open, setOpen] = useState(false);
@@ -290,6 +339,67 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
     );
 };
 
+const BalanceSheetDashboard = () => {
+    const totalAssets = personalAssets.reduce((sum, asset) => sum + asset.amount, 0);
+    const totalReceivable = accountsReceivable.reduce((sum, item) => sum + item.amount, 0);
+    const totalLiabilities = liabilities.reduce((sum, item) => sum + item.amount, 0);
+    const netWorth = totalAssets + totalReceivable - totalLiabilities;
+    const formatCurrency = (value: number) => value.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><PiggyBank className="w-5 h-5 text-green-500"/>Activos Líquidos</CardTitle>
+                    <CardDescription className="text-2xl font-bold text-green-500">{formatCurrency(totalAssets)}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="max-h-60 overflow-y-auto space-y-2">
+                        {personalAssets.map(asset => (
+                            <div key={asset.name} className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">{asset.name}</span>
+                                <span className="font-medium">{formatCurrency(asset.amount)}</span>
+                            </div>
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
+             <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Handshake className="w-5 h-5 text-yellow-500"/>Cuentas por Cobrar</CardTitle>
+                    <CardDescription className="text-2xl font-bold text-yellow-500">{formatCurrency(totalReceivable)}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="max-h-60 overflow-y-auto space-y-2">
+                        {accountsReceivable.map(item => (
+                            <div key={item.name} className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">{item.name}</span>
+                                <span className={cn("font-medium", item.amount < 0 && "text-red-500")}>{formatCurrency(item.amount)}</span>
+                            </div>
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
+             <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Landmark className="w-5 h-5 text-red-500"/>Pasivos</CardTitle>
+                    <CardDescription className="text-2xl font-bold text-red-500">{formatCurrency(totalLiabilities)}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="max-h-60 overflow-y-auto space-y-2">
+                        {liabilities.map(item => (
+                            <div key={item.name} className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">{item.name}</span>
+                                <span className="font-medium">{formatCurrency(item.amount)}</span>
+                            </div>
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    )
+}
+
 export default function MiProgresoPage() {
     const { user } = useAuth();
     const [isLoading, setIsLoading] = useState(true);
@@ -316,38 +426,6 @@ export default function MiProgresoPage() {
             setIsLoading(false);
         }
     }, [user]);
-
-    const teamProgressData = useMemo(() => {
-        if (!monthFilter) return [];
-        const start = startOfMonth(parseISO(`${monthFilter}-01`));
-        const end = endOfMonth(start);
-        
-        return teamMembers.map(member => {
-            const memberTasks = mockTasks.filter(t => t.ejecutor === member.name);
-            const memberActivities = mockActivities.filter(a => a.responsable === member.name);
-
-            const tasksInFrame = memberTasks.filter(t => isWithinInterval(t.completedAt, { start, end }));
-            const completedTasks = tasksInFrame.filter(t => t.status === 'Completado').length;
-            const totalTasks = tasksInFrame.length || 1;
-            
-            const activitiesInFrame = memberActivities.filter(a => isWithinInterval(a.date, { start, end })).length;
-
-            const punctuality = mockPunctuality.find(p => p.name === member.name)?.status || 'N/A';
-            
-            const taskScore = (completedTasks / totalTasks) * 100;
-            const activityScore = Math.min(activitiesInFrame * 10, 100);
-            const performanceScore = Math.round((taskScore * 0.7) + (activityScore * 0.3));
-
-            return {
-                name: member.name,
-                punctuality: punctuality,
-                tasksCompleted: completedTasks,
-                totalTasks: tasksInFrame.length,
-                activities: activitiesInFrame,
-                performanceScore: performanceScore,
-            };
-        });
-    }, [monthFilter]);
 
     const financialSummary = useMemo(() => {
         if (!monthFilter) return { totalIncome: 0, totalExpenses: 0, incomeByCategory: {}, expensesByCategory: {}, profit: 0 };
@@ -384,8 +462,6 @@ export default function MiProgresoPage() {
     if (!user) {
         return <div className="text-center text-foreground/70">Cargando datos de usuario...</div>
     }
-
-    const userProgress = teamProgressData.find(member => member.name === user.name);
 
     return (
     <div>
@@ -474,67 +550,14 @@ export default function MiProgresoPage() {
             </div>
 
              <PersonalFinanceDashboard agenciaProfit={financialSummary.profit} selectedMonth={monthFilter} />
+
+             <BalanceSheetDashboard />
         </>
       ) : (
         <>
-             <p className="mt-4 text-foreground/80 mb-8">
-                Resumen de tu rendimiento personal para el periodo seleccionado.
+            <p className="mt-4 text-foreground/80 mb-8">
+                Esta sección está reservada para el administrador. Como miembro del equipo, puedes acceder a otras áreas del dashboard.
             </p>
-             {userProgress ? (
-                <AnimatedDiv>
-                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Rendimiento General</CardTitle>
-                                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className={`text-2xl font-bold ${
-                                    userProgress.performanceScore >= 80 ? 'text-green-500' : 
-                                    userProgress.performanceScore >= 60 ? 'text-yellow-500' : 'text-red-500'
-                                }`}>
-                                    {userProgress.performanceScore} / 100
-                                </div>
-                                <p className="text-xs text-muted-foreground">Calificación de tu progreso.</p>
-                            </CardContent>
-                        </Card>
-                         <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Tareas Completadas</CardTitle>
-                                <Target className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{userProgress.tasksCompleted} / {userProgress.totalTasks}</div>
-                                <p className="text-xs text-muted-foreground">Tareas finalizadas en el periodo.</p>
-                            </CardContent>
-                        </Card>
-                         <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Actividades</CardTitle>
-                                <Calendar className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">+{userProgress.activities}</div>
-                                <p className="text-xs text-muted-foreground">Citas y grabaciones realizadas.</p>
-                            </CardContent>
-                        </Card>
-                         <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Asistencia (Hoy)</CardTitle>
-                                <Clock className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="mt-2">
-                                     <PunctualityBadge status={userProgress.punctuality} />
-                                </div>
-                                <p className="text-xs text-muted-foreground mt-2">Tu estado de asistencia de hoy.</p>
-                            </CardContent>
-                        </Card>
-                   </div>
-                </AnimatedDiv>
-             ) : (
-                <div className="text-center text-foreground/70 p-8">No se encontraron datos de progreso para tu usuario.</div>
-             )}
         </>
       )}
     </div>
