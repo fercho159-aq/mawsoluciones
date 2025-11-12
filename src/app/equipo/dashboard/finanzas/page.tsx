@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useMemo, useEffect, startTransition } from 'react';
@@ -39,6 +38,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CategoriaIngreso, Cuenta } from '@/lib/finanzas-data';
+import { Textarea } from '@/components/ui/textarea';
 
 
 // Extend the window type for jspdf-autotable
@@ -113,12 +113,11 @@ const generatePeriodOptions = () => {
         // Mensual del 1 al fin de mes
         const startOfMonthDate = startOfMonth(month);
         const endOfMonthDate = endOfMonth(month);
-        options.push(`1 de ${format(startOfMonthDate, 'MMMM', { locale: es })} al ${format(endOfMonthDate, 'd')} de ${format(endOfMonthDate, 'MMMM yyyy', { locale: es })}`);
+        options.push(`Del 1 de ${format(startOfMonthDate, 'MMMM', { locale: es })} al ${format(endOfMonthDate, 'd')} de ${format(endOfMonthDate, 'MMMM yyyy', { locale: es })}`);
 
         // Mensual del 15 al 14
         const startMidMonth = setDate(month, 15);
-        const endMidMonth = addDays(addMonths(startMidMonth, 1), -1);
-         options.push(`15 de ${format(startMidMonth, 'MMMM', { locale: es })} al 14 de ${format(addMonths(startMidMonth, 1), 'MMMM yyyy', { locale: es })}`);
+        options.push(`Del 15 de ${format(startMidMonth, 'MMMM', { locale: es })} al 14 de ${format(addMonths(startMidMonth, 1), 'MMMM yyyy', { locale: es })}`);
     }
 
     return [...new Set(options)].sort((a, b) => {
@@ -301,7 +300,7 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                     )}
                     <div className="space-y-2">
                         <Label>Concepto</Label>
-                        <Input value={concepto} onChange={e => setConcepto(e.target.value)} placeholder="Ej. Iguala de Marketing, Proyecto Web..." />
+                        <Textarea value={concepto} onChange={e => setConcepto(e.target.value)} placeholder="Ej. Honorarios, Inversión en pauta, etc." />
                     </div>
                     <div className="space-y-2">
                         <Label>Tipo de Servicio</Label>
@@ -498,7 +497,7 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
             const newStart = addMonths(start, 1);
             const newEnd = addMonths(end, 1);
             
-            const newPeriod = `${format(newStart, "d 'de' MMMM", { locale: es })} al ${format(newEnd, "d 'de' MMMM yyyy", { locale: es })}`;
+            const newPeriod = `Del ${format(newStart, "d 'de' MMMM", { locale: es })} al ${format(newEnd, "d 'de' MMMM yyyy", { locale: es })}`;
             const newFechaCobro = cpc.fecha_cobro ? format(addMonths(parseDate(cpc.fecha_cobro), 1), "d 'de' MMMM 'de' yyyy", { locale: es }) : undefined;
 
             await addCpc({
@@ -591,7 +590,7 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
                                                     <CpcFormDialog cpc={d} onSave={onRefresh} isEditing={true}>
                                                         <div className='text-xs flex-grow cursor-pointer p-1 rounded-md hover:bg-muted'>
                                                             <div className='flex flex-col'>
-                                                                <span className='font-bold'>{d.concepto || d.tipo}</span>
+                                                                <span className='font-bold whitespace-pre-wrap'>{d.concepto || d.tipo}</span>
                                                                 <Badge variant="secondary" className='font-normal w-fit'>{d.periodo}</Badge>
                                                                 <span className='text-muted-foreground hidden sm:inline'>({d.fecha_cobro})</span>
                                                             </div>
@@ -945,8 +944,8 @@ const MovimientoFormDialog = ({ movimiento, onSave, children }: { movimiento: Mo
             toast({ title: "Éxito", description: "Movimiento actualizado." });
             onSave();
             setOpen(false);
-        } catch (error) {
-            toast({ title: "Error", description: "No se pudo actualizar el movimiento.", variant: "destructive" });
+        } catch (error: any) {
+            toast({ title: "Error", description: `No se pudo actualizar el movimiento: ${error.message}`, variant: "destructive" });
         }
     }
 
@@ -1163,7 +1162,7 @@ const TablaDiariaTab = ({ isAdmin, movimientos, onSave, cuentasPorCobrar }: { is
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className={cn("text-right font-bold", mov.tipo === 'Ingreso' ? 'text-green-500' : 'text-destructive')}>
-                                                <div>
+                                                <div className='whitespace-pre-wrap'>
                                                     {(mov.monto + (mov.iva || 0)).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
                                                     {mov.conIva && mov.iva != null && (
                                                         <div className="text-xs font-normal text-muted-foreground">
@@ -1267,8 +1266,3 @@ export default function FinanzasPage() {
         </div>
     );
 }
-
-
-
-
-
