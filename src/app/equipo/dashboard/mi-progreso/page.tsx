@@ -343,54 +343,6 @@ export default function MiProgresoPage() {
                 </Card>
             </div>
 
-            <AnimatedDiv>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Reporte de Rendimiento del Equipo</CardTitle>
-                        <CardDescription>Datos basados en el periodo seleccionado.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="border rounded-lg">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Miembro</TableHead>
-                                        <TableHead>Puntualidad (Hoy)</TableHead>
-                                        <TableHead>Tareas Completadas</TableHead>
-                                        <TableHead>Actividades (Visitas)</TableHead>
-                                        <TableHead className="text-right">Calificación Rendimiento</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {teamProgressData.map((member) => (
-                                        <TableRow key={member.name}>
-                                            <TableCell className="font-medium">{member.name}</TableCell>
-                                            <TableCell>
-                                                <PunctualityBadge status={member.punctuality} />
-                                            </TableCell>
-                                            <TableCell>
-                                                <span className={cn(member.tasksCompleted === member.totalTasks && member.totalTasks > 0 ? 'text-green-500' : 'text-foreground')}>
-                                                    {member.tasksCompleted} / {member.totalTasks}
-                                                </span>
-                                            </TableCell>
-                                            <TableCell>{member.activities}</TableCell>
-                                            <TableCell className="text-right font-bold">
-                                                 <span className={cn(
-                                                    member.performanceScore >= 80 && 'text-green-500',
-                                                    member.performanceScore >= 60 && member.performanceScore < 80 && 'text-yellow-500',
-                                                    member.performanceScore < 60 && 'text-red-500'
-                                                 )}>
-                                                    {member.performanceScore} / 100
-                                                 </span>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </div>
-                    </CardContent>
-                </Card>
-            </AnimatedDiv>
              <PersonalFinanceDashboard agenciaProfit={financialSummary.profit} />
         </>
       ) : (
@@ -458,5 +410,7 @@ export default function MiProgresoPage() {
     </div>
   );
 }
+
+    
 
     
