@@ -255,6 +255,9 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
     const isAugust = format(new Date(selectedMonth), 'MMMM', { locale: es }).toLowerCase() === 'agosto';
     const augustAdjustment = 1316718;
 
+    const isSeptember = format(new Date(selectedMonth), 'MMMM', { locale: es }).toLowerCase() === 'septiembre';
+    const septemberFixedProfit = 149865;
+
     const combinedData = useMemo(() => {
         // Ensure data for all 12 months exists
         const yearData = Array.from({ length: 12 }, (_, i) => {
@@ -288,12 +291,12 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
             }
             
             if (data.month.toLowerCase() === 'septiembre') {
-              ganancia = 827214;
+              ganancia = septemberFixedProfit;
             }
-
+            
             return { ...data, agencia: finalAgenciaProfit, totalOscar, totalTransporte, totalRentas, totalBienesRaices, totalIntereses, ganancia };
         });
-    }, [agenciaProfit, selectedMonth, personalData, isNovember, isAugust]);
+    }, [agenciaProfit, selectedMonth, personalData, isNovember, isAugust, isSeptember, septemberFixedProfit, novemberAdjustment, augustAdjustment]);
 
     const handleUpdateCategory = (month: string, category: keyof Omit<MonthlyData, 'month' | 'agencia'>, newTransactions: Transaction[]) => {
         setPersonalData(prevData =>
@@ -547,6 +550,7 @@ export default function MiProgresoPage() {
 
 
     
+
 
 
 
