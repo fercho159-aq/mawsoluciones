@@ -100,19 +100,20 @@ interface MonthlyData {
     rentas: Transaction[];
     bienes_raices: Transaction[];
     intereses: Transaction[];
+    ganancia?: number;
 }
 
 const initialPersonalFinanceData: MonthlyData[] = [
-    { month: "Enero", agencia: 95360.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 11880}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 29000}], rentas: [], bienes_raices: [], intereses: [] },
-    { month: "Febrero", agencia: 186937.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5148}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 10381}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 10390}], bienes_raices: [], intereses: [] },
-    { month: "Marzo", agencia: 111299.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 2024}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 8907}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1713}], bienes_raices: [], intereses: [] },
-    { month: "Abril", agencia: 142469.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 6100}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3645}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3989}], bienes_raices: [], intereses: [] },
-    { month: "Mayo", agencia: 109715.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3960}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 11520}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5159}], bienes_raices: [], intereses: [] },
-    { month: "Junio", agencia: 213108.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 6500}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 11498}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3884}], bienes_raices: [], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 53382}] },
-    { month: "Julio", agencia: 212869.00, oscar: [], transporte: [{id: 1, type: 'expense', concept: 'Gasto', amount: 4731}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5571}], bienes_raices: [], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5806}] },
-    { month: "Agosto", agencia: 82242.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 2311.67}], transporte: [{id: 1, type: 'expense', concept: 'Gasto', amount: 164166}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1610}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: 1154053}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1800}] },
-    { month: "Septiembre", agencia: 178814.00, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3755}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5267}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: 843093}], intereses: [{id: 1, type: 'expense', concept: 'Gasto', amount: 22092}] },
-    { month: "Octubre", agencia: 91700.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5720}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 22208}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5100}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: -6000}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5740}] },
+    { month: "Enero", agencia: 95360.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 11880}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 29000}], rentas: [], bienes_raices: [], intereses: [], ganancia: 123434.68 },
+    { month: "Febrero", agencia: 186937.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5148}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 10381}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 10390}], bienes_raices: [], intereses: [], ganancia: 212856.00 },
+    { month: "Marzo", agencia: 111299.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 2024}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 8907}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1713}], bienes_raices: [], intereses: [], ganancia: 123943.00 },
+    { month: "Abril", agencia: 142469.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 6100}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3645}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3989}], bienes_raices: [], intereses: [], ganancia: 156203.00 },
+    { month: "Mayo", agencia: 109715.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3960}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 11520}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5159}], bienes_raices: [], intereses: [], ganancia: 130354.00 },
+    { month: "Junio", agencia: 213108.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 6500}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 11498}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3884}], bienes_raices: [], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 53382}], ganancia: 288372.00 },
+    { month: "Julio", agencia: 212869.00, oscar: [], transporte: [{id: 1, type: 'expense', concept: 'Gasto', amount: 4731}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5571}], bienes_raices: [], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5806}], ganancia: 219515.00 },
+    { month: "Agosto", agencia: 82242.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 2311.67}], transporte: [{id: 1, type: 'expense', concept: 'Gasto', amount: 164166}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1610}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: 1154053}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1800}], ganancia: 86462.67 },
+    { month: "Septiembre", agencia: 178814.00, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3755}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5267}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: 843093}], intereses: [{id: 1, type: 'expense', concept: 'Gasto', amount: 22092}], ganancia: 149865.00 },
+    { month: "Octubre", agencia: 91700.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5720}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 22208}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5100}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: 6000}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5740}], ganancia: 124468.00 },
     { month: "Noviembre", agencia: 0, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 14129}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 4729}], bienes_raices: [{id: 1, type: 'income', concept: 'Ingreso', amount: 8726}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3573}] }
 ];
 
@@ -248,7 +249,7 @@ const CategoryDetailModal = ({ categoryName, transactions, onUpdate }: { categor
 const PersonalFinanceDashboard = ({ financialSummary, selectedMonth }: { financialSummary: any, selectedMonth: string }) => {
     const [personalData, setPersonalData] = useState<MonthlyData[]>(initialPersonalFinanceData);
 
-    const handleUpdateCategory = (month: string, category: keyof Omit<MonthlyData, 'month' | 'agencia'>, newTransactions: Transaction[]) => {
+    const handleUpdateCategory = (month: string, category: keyof Omit<MonthlyData, 'month' | 'agencia' | 'ganancia'>, newTransactions: Transaction[]) => {
         setPersonalData(prevData =>
             prevData.map(data =>
                 data.month.toLowerCase() === month.toLowerCase()
@@ -260,18 +261,14 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth }: { financi
     
     const combinedData = useMemo(() => {
         return personalData.map((data, index) => {
+            const currentMonthIndex = getMonth(new Date(selectedMonth));
+            const dataMonthIndex = getMonth(new Date(2024, index)); // Assuming 2024 for all data
+            
             let agenciaValue = data.agencia;
 
-            const currentMonthName = format(new Date(selectedMonth), 'MMMM', { locale: es }).toLowerCase();
-            const dataMonthName = data.month.toLowerCase();
-            
-            if (currentMonthName === dataMonthName) {
-                agenciaValue = financialSummary.profit;
-                if (dataMonthName === 'noviembre') {
-                    agenciaValue -= 527138;
-                }
+            if (currentMonthIndex === dataMonthIndex) {
+                 agenciaValue = financialSummary.profit;
             }
-
 
             const totalOscar = data.oscar.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             const totalTransporte = data.transporte.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
@@ -279,15 +276,10 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth }: { financi
             const totalBienesRaices = data.bienes_raices.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             const totalIntereses = data.intereses.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             
-            let ganancia = agenciaValue + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses;
-
-            if (data.month.toLowerCase() === 'agosto') {
-                ganancia = agenciaValue + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses + 1316718;
-            } else if (data.month.toLowerCase() === 'septiembre') {
-              ganancia = 149865;
-            } else if (data.month.toLowerCase() === 'octubre') {
-              ganancia = 124468;
-            }
+            let ganancia = data.ganancia;
+             if (ganancia === undefined) { // Calculate only if not fixed
+                ganancia = agenciaValue + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses;
+             }
             
             return { ...data, agencia: agenciaValue, totalOscar, totalTransporte, totalRentas, totalBienesRaices, totalIntereses, ganancia };
         });
@@ -330,7 +322,7 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth }: { financi
                                     <TableCell className={cn(row.totalRentas < 0 ? "text-red-500" : "")}><CategoryDetailModal categoryName='Rentas' transactions={row.rentas} onUpdate={(t) => handleUpdateCategory(row.month, 'rentas', t)} /></TableCell>
                                     <TableCell className={cn(row.totalBienesRaices < 0 ? "text-red-500" : "")}><CategoryDetailModal categoryName='Bienes Raíces' transactions={row.bienes_raices} onUpdate={(t) => handleUpdateCategory(row.month, 'bienes_raices', t)} /></TableCell>
                                     <TableCell className={cn(row.totalIntereses < 0 ? "text-red-500" : "")}><CategoryDetailModal categoryName='Intereses' transactions={row.intereses} onUpdate={(t) => handleUpdateCategory(row.month, 'intereses', t)} /></TableCell>
-                                    <TableCell className={cn("font-bold", row.ganancia < 0 ? "text-red-500" : "text-green-500")}>{formatCurrency(row.ganancia)}</TableCell>
+                                    <TableCell className={cn("font-bold", (row.ganancia || 0) < 0 ? "text-red-500" : "text-green-500")}>{formatCurrency(row.ganancia)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -550,3 +542,4 @@ export default function MiProgresoPage() {
 
 
     
+
