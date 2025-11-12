@@ -258,40 +258,25 @@ const PersonalFinanceDashboard = ({ agenciaProfit, selectedMonth }: { agenciaPro
         });
 
         return yearData.map(data => {
-            const currentSelectedMonthName = format(new Date(selectedMonth), 'MMMM', { locale: es });
-            let finalAgenciaProfit = data.agencia;
-
-            const isCurrentMonthFromData = data.month.toLowerCase() === currentSelectedMonthName.toLowerCase();
-
-            if (isCurrentMonthFromData && data.month.toLowerCase() === 'noviembre') {
-                finalAgenciaProfit = agenciaProfit - 527138;
-            }
-            
             const totalOscar = data.oscar.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             const totalTransporte = data.transporte.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             const totalRentas = data.rentas.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             const totalBienesRaices = data.bienes_raices.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             const totalIntereses = data.intereses.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             
-            let ganancia = finalAgenciaProfit + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses;
+            let ganancia = data.agencia + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses;
 
-            if (isCurrentMonthFromData && data.month.toLowerCase() === 'agosto') {
+            if (data.month.toLowerCase() === 'agosto') {
                 ganancia += 1316718;
-            } else if (data.month.toLowerCase() === 'agosto' && !isCurrentMonthFromData) {
-                 ganancia += 1316718; // Apply historical adjustment even if not selected
-            }
-            
-            if (data.month.toLowerCase() === 'septiembre') {
+            } else if (data.month.toLowerCase() === 'septiembre') {
               ganancia = 149865;
-            }
-            
-            if (data.month.toLowerCase() === 'octubre') {
+            } else if (data.month.toLowerCase() === 'octubre') {
               ganancia = 124468;
             }
             
-            return { ...data, agencia: finalAgenciaProfit, totalOscar, totalTransporte, totalRentas, totalBienesRaices, totalIntereses, ganancia };
+            return { ...data, agencia: data.agencia, totalOscar, totalTransporte, totalRentas, totalBienesRaices, totalIntereses, ganancia };
         });
-    }, [agenciaProfit, selectedMonth, personalData]);
+    }, [personalData]);
 
     const handleUpdateCategory = (month: string, category: keyof Omit<MonthlyData, 'month' | 'agencia'>, newTransactions: Transaction[]) => {
         setPersonalData(prevData =>
@@ -545,6 +530,7 @@ export default function MiProgresoPage() {
 
 
     
+
 
 
 
