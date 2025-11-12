@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect, startTransition } from 'react';
@@ -14,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Info, Trash2, Plus, MoreHorizontal, Download, FileWarning, Calendar as CalendarIcon, Percent, Copy } from 'lucide-react';
+import { ArrowUpDown, PlusCircle, MinusCircle, DollarSign, TrendingUp, TrendingDown, Info, Trash2, Plus, MoreHorizontal, Download, FileWarning, Calendar as CalendarIcon, Percent, Copy, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -248,11 +249,13 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
                 await updateCpc(cpc.id, data);
                 toast({ title: "Éxito", description: "Cuenta por cobrar actualizada." });
             } else {
-                 await addCpc({
+                 const { id, ...rest } = {
                     clienteId: targetClient.id,
                     clienteName: targetClient.name,
                     ...data,
-                } as NewCuentaPorCobrar);
+                } as NewCuentaPorCobrar;
+
+                await addCpc(rest);
                 toast({ title: "Éxito", description: "Cuenta por cobrar creada." });
             }
             startTransition(() => {
@@ -391,6 +394,46 @@ const CpcFormDialog = ({ clients, client, cpc, onSave, children, isEditing }: {
     )
 }
 
+const PayCpcDialog = ({ onPay, children }: { onPay: (cuenta: Cuenta, detalle: string) => void; children: React.ReactNode }) => {
+    const [open, setOpen] = useState(false);
+    const [cuentaDestino, setCuentaDestino] = useState<Cuenta | ''>('');
+    const [detalleEfectivo, setDetalleEfectivo] = useState('');
+
+    const handlePay = () => {
+        if (!cuentaDestino) return;
+        onPay(cuentaDestino, detalleEfectivo);
+        setOpen(false);
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>{children}</DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Registrar Pago</DialogTitle>
+                    <DialogDescription>Selecciona la cuenta de destino para este pago.</DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <Select value={cuentaDestino} onValueChange={(value) => setCuentaDestino(value as any)}>
+                        <SelectTrigger><SelectValue placeholder="Seleccionar cuenta de destino" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Cuenta Paola">Cuenta Paola</SelectItem>
+                            <SelectItem value="Cuenta MAW">Cuenta MAW</SelectItem>
+                            <SelectItem value="Cuenta Aldo">Cuenta Aldo</SelectItem>
+                            <SelectItem value="Efectivo">Efectivo</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    {cuentaDestino === 'Efectivo' && <Input value={detalleEfectivo} onChange={e => setDetalleEfectivo(e.target.value)} placeholder="Especifique (ej. Caja chica, Fany)"/>}
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                    <Button onClick={handlePay} disabled={!cuentaDestino}>Confirmar Pago</Button>
+                </DialogFooter>
+            </DialogContent>
+    )
+}
+
+
 const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: CuentaPorCobrar[], clients: Client[], onRefresh: () => void, isAdmin: boolean }) => {
     
     type SortField = 'totalDebt' | 'nextDueDate';
@@ -452,7 +495,7 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
             if (sortField === 'nextDueDate') {
                 const dateA = a.nextDueDate?.getTime() || (sortOrder === 'asc' ? Infinity : -Infinity);
                 const dateB = b.nextDueDate?.getTime() || (sortOrder === 'asc' ? Infinity : -Infinity);
-                return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+                return sortOrder === 'asc' ? dateA - dateB : dateB - a.date;
             }
             return a.client.name.localeCompare(b.client.name);
         });
@@ -499,9 +542,10 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
             
             const newPeriod = `Del ${format(newStart, "d 'de' MMMM", { locale: es })} al ${format(newEnd, "d 'de' MMMM yyyy", { locale: es })}`;
             const newFechaCobro = cpc.fecha_cobro ? format(addMonths(parseDate(cpc.fecha_cobro), 1), "d 'de' MMMM 'de' yyyy", { locale: es }) : undefined;
+            const { id, ...cpcData } = cpc;
 
             await addCpc({
-                ...cpc,
+                ...cpcData,
                 periodo: newPeriod,
                 fecha_cobro: newFechaCobro,
             });
@@ -523,6 +567,16 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
         const year = parseInt(parts[2]);
         return new Date(year, month, day);
     };
+
+    const handlePayCpc = async (cpc: CuentaPorCobrar, cuentaDestino: Cuenta, detalleCuenta: string) => {
+        try {
+            await registrarPagoCpc(cpc.id, cuentaDestino, detalleCuenta || null);
+            toast({ title: "Éxito", description: `Pago de ${cpc.clienteName} registrado.` });
+            onRefresh();
+        } catch (error: any) {
+            toast({ title: "Error", description: `No se pudo registrar el pago: ${error.message}`, variant: "destructive" });
+        }
+    }
 
 
     return (
@@ -586,7 +640,7 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
                                     <TableCell>
                                         <div className="flex flex-col items-start gap-1">
                                             {debts.length > 0 ? debts.map(d => (
-                                                <div key={d.id} className="flex items-center gap-2 w-full group">
+                                                <div key={d.id} className="flex items-center justify-between gap-2 w-full group">
                                                     <CpcFormDialog cpc={d} onSave={onRefresh} isEditing={true}>
                                                         <div className='text-xs flex-grow cursor-pointer p-1 rounded-md hover:bg-muted'>
                                                             <div className='flex flex-col'>
@@ -597,18 +651,35 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
                                                             <span>{d.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
                                                         </div>
                                                     </CpcFormDialog>
-                                                    {['Iguala Contenido', 'Iguala Web', 'Iguala Ads'].includes(d.tipo) && (
-                                                        <TooltipProvider>
-                                                            <Tooltip>
-                                                                <TooltipTrigger asChild>
-                                                                    <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleRecreate(d)}>
-                                                                        <Copy className="w-4 h-4"/>
-                                                                    </Button>
-                                                                </TooltipTrigger>
-                                                                <TooltipContent><p>Recrear para el sig. mes</p></TooltipContent>
-                                                            </Tooltip>
-                                                        </TooltipProvider>
-                                                    )}
+                                                     <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <MoreHorizontal className="w-4 h-4"/>
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
+                                                             <PayCpcDialog onPay={(cuenta, detalle) => handlePayCpc(d, cuenta, detalle)}>
+                                                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                                                    <Check className="w-4 h-4 mr-2" />
+                                                                    Marcar como Pagado
+                                                                </DropdownMenuItem>
+                                                            </PayCpcDialog>
+                                                            {['Iguala Contenido', 'Iguala Web', 'Iguala Ads'].includes(d.tipo) && (
+                                                                <DropdownMenuItem onClick={() => handleRecreate(d)}>
+                                                                    <Copy className="w-4 h-4 mr-2"/>
+                                                                    Recrear para sig. mes
+                                                                </DropdownMenuItem>
+                                                            )}
+                                                            <DropdownMenuItem onClick={() => generatePdf(client, [d], 'recibo')}>
+                                                                <Download className="w-4 h-4 mr-2" />
+                                                                Descargar Recibo
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => generatePdf(client, [d], 'prefactura')}>
+                                                                <FileWarning className="w-4 h-4 mr-2" />
+                                                                Descargar Prefactura
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
                                                 </div>
                                             )) : (
                                                  <CpcFormDialog client={client} onSave={onRefresh} isEditing={false}>
@@ -633,25 +704,11 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
                                         {totalDebt.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        {debts.length > 0 && (
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon">
-                                                        <MoreHorizontal className="w-4 h-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent>
-                                                    <DropdownMenuItem onClick={() => generatePdf(client, debts, 'recibo')}>
-                                                        <Download className="w-4 h-4 mr-2" />
-                                                        Descargar Recibo
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => generatePdf(client, debts, 'prefactura')}>
-                                                        <Download className="w-4 h-4 mr-2" />
-                                                        Descargar Prefactura
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        )}
+                                        <PayCpcDialog onPay={(cuenta, detalle) => handlePayCpc(debts[0], cuenta, detalle)}>
+                                            <Button size="sm" disabled={debts.length === 0}>
+                                                <Check className="w-4 h-4 mr-1"/> Marcar Pago
+                                            </Button>
+                                        </PayCpcDialog>
                                     </TableCell>
                                 </TableRow>
                             ))}
