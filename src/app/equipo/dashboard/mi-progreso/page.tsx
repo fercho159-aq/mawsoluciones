@@ -260,15 +260,18 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth }: { financi
     
     const combinedData = useMemo(() => {
         return personalData.map((data, index) => {
-            let agenciaValue;
-            if (format(new Date(selectedMonth), 'MMMM', { locale: es }).toLowerCase() === data.month.toLowerCase()) {
+            let agenciaValue = data.agencia;
+
+            const currentMonthName = format(new Date(selectedMonth), 'MMMM', { locale: es }).toLowerCase();
+            const dataMonthName = data.month.toLowerCase();
+            
+            if (currentMonthName === dataMonthName) {
                 agenciaValue = financialSummary.profit;
-                if (data.month.toLowerCase() === 'noviembre') {
+                if (dataMonthName === 'noviembre') {
                     agenciaValue -= 527138;
                 }
-            } else {
-                agenciaValue = data.agencia;
             }
+
 
             const totalOscar = data.oscar.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             const totalTransporte = data.transporte.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
