@@ -515,40 +515,8 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
     const allServiceTypes = Array.from(new Set(data.map(d => d.tipo))) as CategoriaIngreso[];
     
      const handleRecreate = async (cpc: CuentaPorCobrar) => {
-        const parsePeriod = (period: string) => {
-            const months: Record<string, number> = { 'enero': 0, 'febrero': 1, 'marzo': 2, 'abril': 3, 'mayo': 4, 'junio': 5, 'julio': 6, 'agosto': 7, 'septiembre': 8, 'octubre': 9, 'noviembre': 10, 'diciembre': 11 };
-            const parts = period.toLowerCase().split(' al ');
-            const startStr = parts[0];
-            const endStr = parts[1];
-
-            const parsePart = (part: string) => {
-                const dayMatch = part.match(/(\d+)/);
-                const day = dayMatch ? parseInt(dayMatch[1]) : 1;
-                const monthNameMatch = part.match(/de (\w+)/);
-                const monthName = monthNameMatch ? monthNameMatch[1] : '';
-                const yearMatch = part.match(/(\d{4})/);
-                const year = yearMatch ? parseInt(yearMatch[1]) : new Date().getFullYear();
-                const month = months[monthName];
-                return new Date(year, month, day);
-            }
-
-            return { start: parsePart(startStr), end: parsePart(endStr) };
-        }
-        
         try {
-            const { start, end } = parsePeriod(cpc.periodo);
-            const newStart = addMonths(start, 1);
-            const newEnd = addMonths(end, 1);
-            
-            const newPeriod = `Del ${format(newStart, "d 'de' MMMM", { locale: es })} al ${format(newEnd, "d 'de' MMMM yyyy", { locale: es })}`;
-            const newFechaCobro = cpc.fecha_cobro ? format(addMonths(parseDate(cpc.fecha_cobro), 1), "d 'de' MMMM 'de' yyyy", { locale: es }) : undefined;
-            const { id, ...cpcData } = cpc;
-
-            await addCpc({
-                ...cpcData,
-                periodo: newPeriod,
-                fecha_cobro: newFechaCobro,
-            });
+            await registrarPagoCpc(cpc.id, 'Pendiente', null);
             toast({ title: 'Éxito', description: `Iguala para ${cpc.clienteName} recreada para el siguiente mes.` });
             onRefresh();
 
@@ -653,9 +621,9 @@ const CuentasPorCobrarTab = ({ data, clients, onRefresh, isAdmin }: { data: Cuen
                                                     </CpcFormDialog>
                                                      <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                <MoreHorizontal className="w-4 h-4"/>
-                                                            </Button>
+                                                          <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                              <MoreHorizontal className="w-4 h-4"/>
+                                                          </Button>
                                                         </DropdownMenuTrigger>
                                                         <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
                                                              <PayCpcDialog onPay={(cuenta, detalle) => handlePayCpc(d, cuenta, detalle)}>
@@ -1323,3 +1291,4 @@ export default function FinanzasPage() {
         </div>
     );
 }
+
