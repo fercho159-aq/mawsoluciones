@@ -451,7 +451,17 @@ const ClientDataDialog = ({ pendientes, onSave, onRefresh, children }: { pendien
     )
 }
 
-const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdatePendienteText, clients, categoria }: { 
+const PendientesTable = ({ 
+    data, 
+    onUpdateTask, 
+    currentUser, 
+    onRefresh, 
+    onUpdatePendienteText, 
+    clients, 
+    categoria,
+    selectedPendientes,
+    onSelectionChange
+}: { 
     data: PendienteWithRelations[]; 
     onUpdateTask: (task: PendienteWithRelations, data: Partial<PendienteMaw>) => void; 
     currentUser: any; 
@@ -459,6 +469,8 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
     onUpdatePendienteText: (id: number, text: string) => void;
     clients: Client[];
     categoria: string;
+    selectedPendientes: number[];
+    onSelectionChange: (id: number, checked: boolean) => void;
 }) => {
     const { toast } = useToast();
     const [addingToClientId, setAddingToClientId] = useState<number | null>(null);
@@ -518,6 +530,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
             <Table>
                 <TableHeader>
                     <TableRow>
+                        <TableHead className="w-[40px] px-2"></TableHead>
                         <TableHead className="w-[200px] min-w-[200px]">Cliente</TableHead>
                         <TableHead>Pendiente</TableHead>
                          {(isContenido || isAds) && <TableHead className="w-[150px] min-w-[150px]">Fecha de Corte</TableHead>}
@@ -538,7 +551,14 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                         return (
                         <React.Fragment key={clienteName}>
                             {pendientes.map((pendiente, index) => (
-                                <TableRow key={pendiente.id}>
+                                <TableRow key={pendiente.id} data-state={selectedPendientes.includes(pendiente.id) ? "selected" : ""}>
+                                     <TableCell className="px-2">
+                                        <Checkbox
+                                            checked={selectedPendientes.includes(pendiente.id)}
+                                            onCheckedChange={(checked) => onSelectionChange(pendiente.id, Boolean(checked))}
+                                            aria-label={`Seleccionar pendiente ${pendiente.id}`}
+                                        />
+                                    </TableCell>
                                     {index === 0 && (
                                         <TableCell 
                                             rowSpan={pendientes.length + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} 
@@ -698,7 +718,7 @@ const PendientesTable = ({ data, onUpdateTask, currentUser, onRefresh, onUpdateP
                             ))}
                              {currentUser?.permissions?.pendientes?.reasignarResponsables && (
                                 <TableRow>
-                                    <TableCell colSpan={isAds ? 2 : (isContenido ? 3 : 1)} className="p-0 h-full">
+                                    <TableCell colSpan={isAds ? 3 : (isContenido ? 4 : 2)} className="p-0 h-full">
                                         {addingToClientId === client.id ? (
                                             <AddPendienteInline 
                                                 client={client}
@@ -824,6 +844,7 @@ export default function PendientesPage() {
     const [ejecutorFilter, setEjecutorFilter] = useState('Todos');
     const [searchFilter, setSearchFilter] = useState('');
     const [viewMode, setViewMode] = useState<'table' | 'board'>('table');
+    const [selectedPendientes, setSelectedPendientes] = useState<number[]>([]);
 
     const [activeTab, setActiveTab] = useState('contenido');
     const { toast } = useToast();
@@ -901,6 +922,33 @@ export default function PendientesPage() {
     
     const canManage = user?.role === 'admin' || user?.permissions?.pendientes?.reasignarResponsables;
 
+    const handleSelectionChange = (id: number, checked: boolean) => {
+        setSelectedPendientes(prev =>
+            checked ? [...prev, id] : prev.filter(pId => pId !== id)
+        );
+    };
+
+    const handleBulkDelete = async () => {
+        const completedToDelete = pendientes
+            .filter(p => selectedPendientes.includes(p.id) && p.completed)
+            .map(p => p.id);
+
+        if (completedToDelete.length === 0) {
+            toast({ title: 'Nada para eliminar', description: 'Solo se pueden eliminar los pendientes completados seleccionados.', variant: 'default' });
+            return;
+        }
+
+        try {
+            await deletePendientes(completedToDelete);
+            toast({ title: 'Éxito', description: `${completedToDelete.length} pendiente(s) completado(s) eliminado(s).` });
+            setSelectedPendientes([]);
+            fetchData();
+        } catch (error) {
+            toast({ title: 'Error', description: 'No se pudo completar la eliminación.', variant: 'destructive' });
+        }
+    };
+
+
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-[50vh]">
@@ -962,6 +1010,30 @@ export default function PendientesPage() {
                 </CardContent>
             </Card>
 
+            {selectedPendientes.length > 0 && user?.role === 'admin' && (
+                <div className="flex items-center gap-4 bg-muted p-2 rounded-md my-4">
+                    <span className="text-sm font-medium">{selectedPendientes.length} seleccionado(s)</span>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive" size="sm"><Trash2 className="w-4 h-4 mr-2"/>Eliminar seleccionados</Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Esta acción eliminará permanentemente los pendientes <strong>completados</strong> que has seleccionado. Los pendientes no completados no se verán afectados.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleBulkDelete}>Confirmar</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                    <Button variant="ghost" size="icon" onClick={() => setSelectedPendientes([])}><X className="w-4 h-4" /></Button>
+                </div>
+            )}
+
             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
                 <span>Filtros:</span>
                 <span className="font-semibold text-foreground">{searchFilter || 'Todos'}</span>
@@ -1018,6 +1090,8 @@ export default function PendientesPage() {
                             onUpdatePendienteText={handleUpdatePendienteText}
                             clients={clients}
                             categoria="Contenido"
+                            selectedPendientes={selectedPendientes}
+                            onSelectionChange={handleSelectionChange}
                         />
                    ) : (
                         <BoardView 
@@ -1039,6 +1113,8 @@ export default function PendientesPage() {
                             onUpdatePendienteText={handleUpdatePendienteText}
                             clients={clients}
                             categoria="Ads"
+                            selectedPendientes={selectedPendientes}
+                            onSelectionChange={handleSelectionChange}
                         />
                     ) : (
                          <BoardView 
@@ -1060,6 +1136,8 @@ export default function PendientesPage() {
                             onUpdatePendienteText={handleUpdatePendienteText}
                             clients={clients}
                             categoria="Web"
+                            selectedPendientes={selectedPendientes}
+                            onSelectionChange={handleSelectionChange}
                         />
                      ) : (
                          <BoardView 
@@ -1074,3 +1152,4 @@ export default function PendientesPage() {
         </div>
     );
 }
+
