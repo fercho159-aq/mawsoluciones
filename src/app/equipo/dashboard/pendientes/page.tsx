@@ -510,7 +510,7 @@ const PendientesTable = ({
     }
 
     const groupedData = useMemo(() => {
-        const sortedData = [...data].sort((a,b)=> a.clienteName.localeCompare(b.clienteName));
+        const sortedData = [...data].sort((a, b) => a.clienteName.localeCompare(b.clienteName));
         return sortedData.reduce((acc, pendiente) => {
             (acc[pendiente.clienteName] = acc[pendiente.clienteName] || []).push(pendiente);
             return acc;
