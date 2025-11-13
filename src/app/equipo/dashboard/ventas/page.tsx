@@ -57,7 +57,7 @@ const responsables: ResponsableVentas[] = ["Alma", "Fer", "Julio"];
 const statuses: StatusLead[] = ["Lead Nuevo", "Contactado", "Videollamada", "En Negociación", "Convertido", "No Interesado"];
 const leadSources: OrigenLead[] = ["Referencia", "Sitio Web", "TikTok", "Facebook", "Instagram"];
 
-const AddLeadDialog = ({ onAddLead, children, prospect, isEditing }: { onAddLead: (lead: Partial<Omit<NewProspect, 'id' | 'createdAt'>>) => void, children: React.ReactNode, prospect?: Prospect | null, isEditing: boolean }) => {
+const AddLeadDialog = ({ onAddLead, children, prospect, isEditing }: { onAddLead: (lead: Partial<Omit<NewProspect, 'id' | 'createdAt'>>) => Promise<void>, children: React.ReactNode, prospect?: Prospect | null, isEditing: boolean }) => {
     const [open, setOpen] = useState(false);
     const [name, setName] = useState('');
     const [company, setCompany] = useState('');
@@ -111,8 +111,8 @@ const AddLeadDialog = ({ onAddLead, children, prospect, isEditing }: { onAddLead
             
             resetForm();
             setOpen(false);
-        } catch (error) {
-             toast({ title: "Error", description: "No se pudo guardar el prospecto.", variant: 'destructive' });
+        } catch (error: any) {
+             toast({ title: "Error", description: error.message || 'No se pudo guardar el prospecto.', variant: 'destructive' });
         }
     };
     

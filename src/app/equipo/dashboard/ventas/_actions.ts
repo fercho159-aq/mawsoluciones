@@ -29,19 +29,19 @@ export async function addMawProspect(data: Partial<Omit<NewProspect, 'id' | 'cre
         lastSellerIndex = (lastSellerIndex + 1) % responsables.length;
 
         await db.insert(prospects_maw).values({
-            name: data.company || data.name, // Ensure name is set
+            name: data.name || data.company, 
             company: data.company,
             phone: data.phone,
             email: data.email,
             source: data.source || 'Manual',
-            status: 'Lead Nuevo',
-            responsable: newSeller,
-            data: data, // Store the full form data
+            status: data.status || 'Lead Nuevo',
+            responsable: data.responsable as any || newSeller,
+            data: data, 
         });
         revalidatePath("/equipo/dashboard/ventas");
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error adding prospect:", error);
-        throw new Error("No se pudo añadir el prospecto.");
+        throw new Error("No se pudo añadir el prospecto a la base de datos: " + error.message);
     }
 }
 
