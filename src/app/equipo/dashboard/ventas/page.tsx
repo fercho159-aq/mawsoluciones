@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Check, Sparkles, PlusCircle, Trash2 } from 'lucide-react';
+import { Check, Sparkles, PlusCircle, Trash2, Phone } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -38,6 +38,7 @@ import { teamMembers } from '@/lib/team-data';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import WhatsappIcon from '@/components/icons/whatsapp-icon';
 
 
 type OrigenLead = "Facebook" | "TikTok" | "Referencia" | "Sitio Web" | "Instagram" | string;
@@ -109,8 +110,11 @@ const AddLeadDialog = ({ onAddLead, children, prospect, isEditing }: { onAddLead
                 toast({ title: "Prospecto Añadido", description: `${name || company} se ha añadido al pipeline.` });
             }
             
-            resetForm();
-            setOpen(false);
+            startTransition(() => {
+                onAddLead({}); // To trigger re-fetch
+                setOpen(false);
+                resetForm();
+            });
         } catch (error: any) {
              toast({ title: "Error", description: error.message || 'No se pudo guardar el prospecto.', variant: 'destructive' });
         }
@@ -413,10 +417,6 @@ export default function VentasPage() {
         await addMawProspect(newProspectData);
         fetchProspectsData();
     };
-    
-    const handleSave = () => {
-        fetchProspectsData();
-    };
 
     const origenes = useMemo(() => {
         const allOrigins = new Set(prospects.map(l => l.source || 'N/A' ));
@@ -511,12 +511,12 @@ export default function VentasPage() {
                             <TableHead>Origen</TableHead>
                             <TableHead>Responsable</TableHead>
                             <TableHead>Status</TableHead>
-                            <TableHead className="text-right">Acción</TableHead>
+                            <TableHead className="text-right">Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {filteredProspects.map((lead) => (
-                           <AddLeadDialog onAddLead={handleSave} prospect={lead} isEditing={true} key={lead.id}>
+                           <AddLeadDialog onAddLead={handleAddLead} prospect={lead} isEditing={true} key={lead.id}>
                             <TableRow className="cursor-pointer">
                                 <TableCell className="font-medium">{lead.name || lead.company}</TableCell>
                                 <TableCell>{lead.source}</TableCell>
@@ -526,11 +526,41 @@ export default function VentasPage() {
                                         {lead.status}
                                     </Badge>
                                 </TableCell>
-                                <TableCell className="text-right">
+                                <TableCell className="text-right space-x-2">
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            const phoneNumber = lead.phone?.replace(/[^0-9]/g, '');
+                                            if (phoneNumber) {
+                                                const message = encodeURIComponent(`¡Hola ${lead.name || lead.company}! Te contacto de parte de MAW Soluciones, ¿cómo estás?`);
+                                                window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+                                            }
+                                        }}
+                                        disabled={!lead.phone}
+                                        title="Enviar WhatsApp"
+                                    >
+                                        <WhatsappIcon className="w-5 h-5 text-green-500" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (lead.phone) {
+                                                window.location.href = `tel:${lead.phone}`;
+                                            }
+                                        }}
+                                        disabled={!lead.phone}
+                                        title="Llamar"
+                                    >
+                                        <Phone className="w-5 h-5" />
+                                    </Button>
                                      <ConvertLeadDialog prospect={lead} onSave={fetchProspectsData}>
                                          <Button variant="default" size="sm" onClick={(e) => e.stopPropagation()}>
                                             <Sparkles className="w-4 h-4 mr-2" />
-                                            Convertir en Cliente
+                                            Convertir
                                         </Button>
                                      </ConvertLeadDialog>
                                 </TableCell>
