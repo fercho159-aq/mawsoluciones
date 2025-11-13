@@ -22,7 +22,6 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-
 // --- Mock Data Simulation (for non-financial parts) ---
 const today = new Date();
 const currentMonthStart = startOfMonth(today);
@@ -93,6 +92,11 @@ interface Transaction {
     amount: number;
 }
 
+interface BalanceSheetItem {
+    name: string;
+    amount: number;
+}
+
 interface MonthlyData {
     month: string;
     agencia: number;
@@ -112,14 +116,14 @@ const initialPersonalFinanceData: MonthlyData[] = [
     { month: "Mayo", agencia: 109715.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3960}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 11520}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5159}], bienes_raices: [], intereses: [], ganancia: 130354.00 },
     { month: "Junio", agencia: 213108.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 6500}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 11498}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3884}], bienes_raices: [], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 53382}], ganancia: 288372.00 },
     { month: "Julio", agencia: 212869.00, oscar: [], transporte: [{id: 1, type: 'expense', concept: 'Gasto', amount: 4731}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5571}], bienes_raices: [], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5806}], ganancia: 219515.00 },
-    { month: "Agosto", agencia: 82242.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 2311.67}], transporte: [{id: 1, type: 'expense', concept: 'Gasto', amount: 164166}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1610}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: 1154053}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1800}], ganancia: 86462.67 },
+    { month: "Agosto", agencia: 82242.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 2311.67}], transporte: [{id: 1, type: 'expense', concept: 'Gasto', amount: 164166}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1610}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: 1154053}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1800}], ganancia: -1230255.33 },
     { month: "Septiembre", agencia: 178814.00, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3755}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5267}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: 843093}], intereses: [{id: 1, type: 'expense', concept: 'Gasto', amount: 22092}], ganancia: 149865.00 },
-    { month: "Octubre", agencia: 91700.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5720}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 22208}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5100}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: 6000}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5740}], ganancia: 124468.00 },
-    { month: "Noviembre", agencia: 0, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 14129}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 4729}], bienes_raices: [{id: 1, type: 'income', concept: 'Ingreso', amount: 8726}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3573}], ganancia: undefined },
+    { month: "Octubre", agencia: 91700, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5720}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 22208}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5100}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: 6000}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5740}], ganancia: 124468.00 },
+    { month: "Noviembre", agencia: 18623, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 14129}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 4729}], bienes_raices: [{id: 1, type: 'income', concept: 'Ingreso', amount: 8726}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3573}], ganancia: undefined },
     { month: "Diciembre", agencia: 0, oscar: [], transporte: [], rentas: [], bienes_raices: [], intereses: [], ganancia: undefined }
 ];
 
-const personalAssets = [
+const initialPersonalAssets: BalanceSheetItem[] = [
   { name: 'Banamex Inversión', amount: 200053 },
   { name: 'CETES', amount: 213858 },
   { name: 'Banamex', amount: 3556 },
@@ -128,14 +132,9 @@ const personalAssets = [
   { name: 'Paola', amount: 184170 },
   { name: 'Efectivo', amount: 355000 },
   { name: 'Divisas', amount: 109220 },
-  { name: 'Marco', amount: 18000 },
 ];
 
-const accountsReceivable = [
-    { name: 'estacionmiento 1', amount: 1000 },
-    { name: 'depostio señor re', amount: 1600 },
-    { name: 'dani', amount: -863 },
-    { name: 'Den 11,900 + 200', amount: 6170 },
+const initialAccountsReceivable: BalanceSheetItem[] = [
     { name: 'intenet agustin J', amount: 0 },
     { name: 'Internet mirador', amount: 600 },
     { name: 'FER EXTRA', amount: 44050 },
@@ -150,9 +149,7 @@ const accountsReceivable = [
     { name: 'DANI CUYO', amount: 8726 },
 ];
 
-const liabilities = [
-  { name: 'terreno queretaro-10 JUL 23/ (448)', amount: 0 },
-  { name: 'terreno mama (1,143,593/3) / 245 M', amount: 310188 },
+const initialLiabilities: BalanceSheetItem[] = [
   { name: 'terreno cancun - 25 NOV 24 / (420,2)', amount: 0 },
   { name: 'renta - 26,000 - 8Dani - 11,900 Ar', amount: 0 },
   { name: 'Terreno mama queretaro / Cuesta', amount: 341284 },
@@ -166,19 +163,37 @@ const CategoryDetailModal = ({ categoryName, transactions, onUpdate }: { categor
     const [type, setType] = useState<'income' | 'expense'>('income');
     const [concept, setConcept] = useState('');
     const [amount, setAmount] = useState('');
+    const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
-    const handleAddTransaction = () => {
+    const handleAddOrUpdateTransaction = () => {
         if (!concept || !amount) return;
-        const newTransaction: Transaction = {
-            id: Date.now(),
-            type,
-            concept,
-            amount: parseFloat(amount),
-        };
-        onUpdate([...transactions, newTransaction]);
+        
+        if (editingTransaction) {
+            const updatedTransactions = transactions.map(t =>
+                t.id === editingTransaction.id ? { ...t, type, concept, amount: parseFloat(amount) } : t
+            );
+            onUpdate(updatedTransactions);
+            setEditingTransaction(null);
+        } else {
+            const newTransaction: Transaction = {
+                id: Date.now(),
+                type,
+                concept,
+                amount: parseFloat(amount),
+            };
+            onUpdate([...transactions, newTransaction]);
+        }
         setConcept('');
         setAmount('');
+        setType('income');
     };
+
+    const handleEditTransaction = (transaction: Transaction) => {
+        setEditingTransaction(transaction);
+        setConcept(transaction.concept);
+        setAmount(transaction.amount.toString());
+        setType(transaction.type);
+    }
 
     const handleDeleteTransaction = (id: number) => {
         onUpdate(transactions.filter(t => t.id !== id));
@@ -209,7 +224,7 @@ const CategoryDetailModal = ({ categoryName, transactions, onUpdate }: { categor
                         </TableHeader>
                         <TableBody>
                             {transactions.map(t => (
-                                <TableRow key={t.id}>
+                                <TableRow key={t.id} onDoubleClick={() => handleEditTransaction(t)} className="cursor-pointer">
                                     <TableCell><Badge variant={t.type === 'income' ? 'default' : 'destructive'} className={cn(t.type === 'income' && 'bg-green-500')}>{t.type === 'income' ? 'Ingreso' : 'Egreso'}</Badge></TableCell>
                                     <TableCell>{t.concept}</TableCell>
                                     <TableCell className={cn("text-right", t.type === 'income' ? 'text-green-500' : 'text-red-500')}>{t.amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
@@ -237,7 +252,7 @@ const CategoryDetailModal = ({ categoryName, transactions, onUpdate }: { categor
                                 <div className="flex items-center space-x-1"><RadioGroupItem value="expense" id={`ex-${categoryName}`}/><Label htmlFor={`ex-${categoryName}`} className="font-normal">Egreso</Label></div>
                             </RadioGroup>
                         </div>
-                        <Button onClick={handleAddTransaction}><PlusCircle className="w-4 h-4"/> Añadir</Button>
+                        <Button onClick={handleAddOrUpdateTransaction}><PlusCircle className="w-4 h-4 mr-1"/> {editingTransaction ? 'Actualizar' : 'Añadir'}</Button>
                     </div>
                 </div>
                  <div className="text-right font-bold text-lg mt-4">Total: {total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div>
@@ -262,8 +277,12 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
     const combinedData = useMemo(() => {
         return personalData.map((data, index) => {
             let agenciaValue = data.agencia;
-            if (selectedYear === new Date().getFullYear() && getMonth(new Date(selectedMonth)) === index && index === 10) { // Noviembre
-                agenciaValue = financialSummary.profit - 527138;
+            const currentMonthIndex = getMonth(new Date(`${selectedMonth}-01T00:00:00`));
+
+            if (selectedYear === new Date().getFullYear() && data.month.toLowerCase() === 'noviembre') {
+                 if(index === currentMonthIndex) {
+                    agenciaValue = financialSummary.profit - 527138;
+                 }
             }
 
             const totalOscar = data.oscar.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
@@ -273,9 +292,9 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
             const totalIntereses = data.intereses.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             
             let ganancia = data.ganancia;
-            if (ganancia === undefined) {
+             if (ganancia === undefined || (selectedYear === new Date().getFullYear() && index === currentMonthIndex)) {
                  ganancia = agenciaValue + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses;
-            }
+             }
             
             return { ...data, agencia: agenciaValue, totalOscar, totalTransporte, totalRentas, totalBienesRaices, totalIntereses, ganancia };
         });
@@ -332,7 +351,7 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
                         </TableHeader>
                         <TableBody>
                             {combinedData.map((row) => (
-                                <TableRow key={row.month} className={cn(format(new Date(selectedMonth), 'MMMM', {locale:es}).toLowerCase() === row.month.toLowerCase() && 'bg-muted')}>
+                                <TableRow key={row.month} className={cn(format(new Date(`${selectedMonth}-01T00:00:00`), 'MMMM', {locale:es}).toLowerCase() === row.month.toLowerCase() && 'bg-muted')}>
                                     <TableCell className="font-medium capitalize">{row.month}</TableCell>
                                     <TableCell className={cn(row.agencia < 0 ? "text-red-500" : "")}>{formatCurrency(row.agencia)}</TableCell>
                                     <TableCell className={cn(row.totalOscar < 0 ? "text-red-500" : "")}><CategoryDetailModal categoryName='Oscar' transactions={row.oscar} onUpdate={(t) => handleUpdateCategory(row.month, 'oscar', t)} /></TableCell>
@@ -363,63 +382,120 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
     );
 };
 
+const BalanceSheetItemModal = ({ items, onUpdate, children }: { items: BalanceSheetItem[], onUpdate: (items: BalanceSheetItem[]) => void, children: React.ReactNode }) => {
+    const [open, setOpen] = useState(false);
+    const [localItems, setLocalItems] = useState<BalanceSheetItem[]>([]);
+
+    useEffect(() => {
+        if(open) {
+            setLocalItems(JSON.parse(JSON.stringify(items))); // Deep copy
+        }
+    }, [open, items]);
+
+    const handleAmountChange = (index: number, newAmount: string) => {
+        const updatedItems = [...localItems];
+        updatedItems[index].amount = parseFloat(newAmount) || 0;
+        setLocalItems(updatedItems);
+    }
+    
+    const handleSave = () => {
+        onUpdate(localItems);
+        setOpen(false);
+    }
+    
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>{children}</DialogTrigger>
+            <DialogContent>
+                <DialogHeader><DialogTitle>Editar Valores</DialogTitle></DialogHeader>
+                <div className="max-h-[60vh] overflow-y-auto space-y-4 pr-2">
+                    {localItems.map((item, index) => (
+                        <div key={index} className="grid grid-cols-2 gap-4 items-center">
+                            <Label>{item.name}</Label>
+                            <Input 
+                                type="number" 
+                                value={item.amount} 
+                                onChange={(e) => handleAmountChange(index, e.target.value)} 
+                            />
+                        </div>
+                    ))}
+                </div>
+                <div className="flex justify-end gap-2 mt-4">
+                    <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                    <Button onClick={handleSave}>Guardar Cambios</Button>
+                </div>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
 const BalanceSheetDashboard = () => {
-    const totalAssets = personalAssets.reduce((sum, asset) => sum + asset.amount, 0);
-    const totalReceivable = accountsReceivable.reduce((sum, item) => sum + item.amount, 0);
+    const [assets, setAssets] = useState<BalanceSheetItem[]>(initialPersonalAssets);
+    const [receivables, setReceivables] = useState<BalanceSheetItem[]>(initialAccountsReceivable);
+    const [liabilities, setLiabilities] = useState<BalanceSheetItem[]>(initialLiabilities);
+
+    const totalAssets = assets.reduce((sum, asset) => sum + asset.amount, 0);
+    const totalReceivable = receivables.reduce((sum, item) => sum + item.amount, 0);
     const totalLiabilities = liabilities.reduce((sum, item) => sum + item.amount, 0);
     const netWorth = totalAssets + totalReceivable - totalLiabilities;
     const formatCurrency = (value: number) => value.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 mt-8">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><PiggyBank className="w-5 h-5 text-green-500"/>Activos Líquidos</CardTitle>
-                    <CardDescription className="text-2xl font-bold text-green-500">{formatCurrency(totalAssets)}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="max-h-60 overflow-y-auto space-y-2">
-                        {personalAssets.map(asset => (
-                            <div key={asset.name} className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">{asset.name}</span>
-                                <span className="font-medium">{formatCurrency(asset.amount)}</span>
-                            </div>
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
-             <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Handshake className="w-5 h-5 text-yellow-500"/>Cuentas por Cobrar</CardTitle>
-                    <CardDescription className="text-2xl font-bold text-yellow-500">{formatCurrency(totalReceivable)}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="max-h-60 overflow-y-auto space-y-2">
-                        {accountsReceivable.map(item => (
-                            <div key={item.name} className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">{item.name}</span>
-                                <span className={cn("font-medium", item.amount < 0 && "text-red-500")}>{formatCurrency(item.amount)}</span>
-                            </div>
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
-             <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Landmark className="w-5 h-5 text-red-500"/>Pasivos</CardTitle>
-                    <CardDescription className="text-2xl font-bold text-red-500">{formatCurrency(totalLiabilities)}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="max-h-60 overflow-y-auto space-y-2">
-                        {liabilities.map(item => (
-                            <div key={item.name} className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">{item.name}</span>
-                                <span className="font-medium">{formatCurrency(item.amount)}</span>
-                            </div>
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
+            <BalanceSheetItemModal items={assets} onUpdate={setAssets}>
+                <Card className="cursor-pointer hover:bg-muted transition-colors">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><PiggyBank className="w-5 h-5 text-green-500"/>Activos Líquidos</CardTitle>
+                        <CardDescription className="text-2xl font-bold text-green-500">{formatCurrency(totalAssets)}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="max-h-60 overflow-y-auto space-y-2 pr-2">
+                            {assets.map(asset => (
+                                <div key={asset.name} className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">{asset.name}</span>
+                                    <span className="font-medium">{formatCurrency(asset.amount)}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            </BalanceSheetItemModal>
+             <BalanceSheetItemModal items={receivables} onUpdate={setReceivables}>
+                <Card className="cursor-pointer hover:bg-muted transition-colors">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Handshake className="w-5 h-5 text-yellow-500"/>Cuentas por Cobrar</CardTitle>
+                        <CardDescription className="text-2xl font-bold text-yellow-500">{formatCurrency(totalReceivable)}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="max-h-60 overflow-y-auto space-y-2 pr-2">
+                            {receivables.map(item => (
+                                <div key={item.name} className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">{item.name}</span>
+                                    <span className={cn("font-medium", item.amount < 0 && "text-red-500")}>{formatCurrency(item.amount)}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            </BalanceSheetItemModal>
+             <BalanceSheetItemModal items={liabilities} onUpdate={setLiabilities}>
+                <Card className="cursor-pointer hover:bg-muted transition-colors">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Landmark className="w-5 h-5 text-red-500"/>Pasivos</CardTitle>
+                        <CardDescription className="text-2xl font-bold text-red-500">{formatCurrency(totalLiabilities)}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="max-h-60 overflow-y-auto space-y-2 pr-2">
+                            {liabilities.map(item => (
+                                <div key={item.name} className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">{item.name}</span>
+                                    <span className="font-medium">{formatCurrency(item.amount)}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            </BalanceSheetItemModal>
             <Card className="bg-primary/10 border-primary">
                  <CardHeader>
                     <CardTitle className="flex items-center gap-2"><DollarSign className="w-5 h-5 text-primary"/>Patrimonio Neto</CardTitle>
@@ -602,6 +678,7 @@ export default function MiProgresoPage() {
 
 
     
+
 
 
 
