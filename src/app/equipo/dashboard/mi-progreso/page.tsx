@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useMemo, useEffect, startTransition } from 'react';
@@ -18,75 +17,6 @@ import { getPersonalFinance, updatePersonalFinanceEntry, type PersonalFinanceTra
 import { useToast } from '@/hooks/use-toast';
 import { format, getMonth, parseISO, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
-
-const TransactionModal = ({
-    month,
-    category,
-    initialTransactions,
-    onSave,
-  }: {
-    month: string;
-    category: string;
-    initialTransactions: PersonalFinanceTransaction[];
-    onSave: (month: string, category: string, transactions: PersonalFinanceTransaction[]) => void;
-  }) => {
-    const [open, setOpen] = useState(false);
-    const [transactions, setTransactions] = useState<PersonalFinanceTransaction[]>([]);
-  
-    useEffect(() => {
-      if (open) {
-        setTransactions(initialTransactions);
-      }
-    }, [open, initialTransactions]);
-  
-    const total = transactions.reduce((acc, t) => acc + (t.tipo === 'INGRESO' ? t.monto : -t.monto), 0);
-  
-    const handleUpdate = (index: number, field: keyof PersonalFinanceTransaction, value: any) => {
-      const newTransactions = [...transactions];
-      (newTransactions[index] as any)[field] = value;
-      setTransactions(newTransactions);
-    };
-
-    const handleSaveChanges = () => {
-        onSave(month, category, transactions);
-        setOpen(false);
-    }
-  
-    return (
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <button className="w-full h-full text-left p-2 rounded hover:bg-muted transition-colors">
-            {total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
-          </button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Detalle de: {category} - {month}</DialogTitle>
-          </DialogHeader>
-          <div className="max-h-[300px] overflow-y-auto pr-2">
-            {transactions.map((t, i) => (
-              <div key={t.id} className="grid grid-cols-3 gap-2 mb-2">
-                <Input
-                  value={t.descripcion}
-                  onChange={(e) => handleUpdate(i, 'descripcion', e.target.value)}
-                  placeholder="Concepto"
-                  className="col-span-2"
-                />
-                <Input
-                  type="number"
-                  value={t.monto}
-                  onChange={(e) => handleUpdate(i, 'monto', parseFloat(e.target.value) || 0)}
-                  placeholder="Monto"
-                />
-              </div>
-            ))}
-          </div>
-          <div className="text-right font-bold text-lg mt-4">Total: {total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div>
-           <Button onClick={handleSaveChanges}>Guardar Cambios</Button>
-        </DialogContent>
-      </Dialog>
-    );
-};
 
 const EditableCell = ({ value, onSave }: { value: number | undefined, onSave: (newValue: number) => void }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -112,19 +42,19 @@ const EditableCell = ({ value, onSave }: { value: number | undefined, onSave: (n
                 onBlur={handleBlur}
                 onKeyDown={(e) => e.key === 'Enter' && handleBlur()}
                 autoFocus
-                className="w-full h-8 text-right"
+                className="w-full h-8 text-right bg-transparent border-primary"
             />
         )
     }
 
     return (
-        <div onClick={() => setIsEditing(true)} className="cursor-pointer w-full text-right p-2 h-8">
+        <div onClick={() => setIsEditing(true)} className="cursor-pointer w-full text-right p-2 h-8 rounded-md hover:bg-muted/50">
             { (value || 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
         </div>
     )
 }
 
-const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYear }: { financialSummary: any, selectedMonth: string, selectedYear: number }) => {
+const PersonalFinanceDashboard = ({ financialSummary, selectedYear }: { financialSummary: any, selectedYear: number }) => {
     const [personalData, setPersonalData] = useState<ComoVoyEnMisFinanzas[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const { toast } = useToast();
@@ -170,13 +100,12 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
 
     const monthlyData = useMemo(() => {
         const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-        const categories = ["Agencia", "Oscar", "Transporte", "Rentas", "Bienes Raices", "Intereses", "ALDO HA GASTADO", "Ganancia"];
-        const incomeExpenseCategories = ["Agencia", "Oscar", "Transporte", "Rentas", "Bienes Raices", "Intereses"];
-
+        const incomeCategories = ["Agencia", "Oscar", "Transporte", "Rentas", "Bienes Raices", "Intereses"];
+        
         return monthNames.map((month, monthIndex) => {
             const row: { [key: string]: any } = { month };
             
-            categories.forEach(category => {
+            incomeCategories.forEach(category => {
                 const entries = personalData.filter(d => {
                     const entryDate = new Date(d.fecha);
                     return getMonth(entryDate) === monthIndex && entryDate.getFullYear() === selectedYear && d.categoria === category;
@@ -184,41 +113,30 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
                 row[category] = entries.reduce((sum, item) => sum + (item.tipo === 'INGRESO' ? item.monto : -item.monto), 0);
             });
             
-            const currentMonthName = format(new Date(`${selectedMonth}-01T12:00:00`), 'MMMM', {locale:es});
-            
-            // Lógica especial para Agencia en Octubre y Noviembre
-            if (month.toLowerCase() === 'octubre' && selectedYear === 2024) {
-                 row['Agencia'] = 91700;
-            } else if (month.toLowerCase() === 'noviembre' && selectedYear === 2024) {
-                 row['Agencia'] = financialSummary.profit - 527138;
-            } else if (month.toLowerCase() === currentMonthName.toLowerCase()) {
-                const isCurrentMonthAfterNov2024 = new Date(selectedYear, monthIndex) >= new Date(2024, 10);
-                if(isCurrentMonthAfterNov2024) {
-                    row['Agencia'] = financialSummary.profit;
-                }
+            const currentMonthIndex = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+
+            // Sincronizar 'Agencia' con la utilidad neta para el mes actual y futuros
+            if (selectedYear > currentYear || (selectedYear === currentYear && monthIndex >= currentMonthIndex)) {
+                 row['Agencia'] = financialSummary.profit;
             }
-            
+
             // Lógica para Ganancia
-            const existingGananciaEntry = personalData.find(d => {
+            const gananciaEntry = personalData.find(d => {
                  const entryDate = new Date(d.fecha);
                  return getMonth(entryDate) === monthIndex && entryDate.getFullYear() === selectedYear && d.categoria === 'Ganancia'
             });
 
-            if (existingGananciaEntry) {
-                row['Ganancia'] = existingGananciaEntry.tipo === 'INGRESO' ? existingGananciaEntry.monto : -existingGananciaEntry.monto;
+            if (gananciaEntry) {
+                row['Ganancia'] = gananciaEntry.monto;
             } else {
-                 row['Ganancia'] = incomeExpenseCategories.reduce((acc, cat) => acc + (row[cat] || 0), 0);
+                 row['Ganancia'] = incomeCategories.reduce((acc, cat) => acc + (row[cat] || 0), 0);
             }
 
             return row;
         });
-    }, [personalData, financialSummary.profit, selectedMonth, selectedYear]);
+    }, [personalData, financialSummary.profit, selectedYear]);
 
-    const formatCurrency = (value: number | undefined) => {
-        if (value === undefined || isNaN(value)) return '$0.00';
-        return value.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
-    }
-    
     const totals = useMemo(() => {
         return monthlyData.reduce((acc, row) => {
             Object.keys(row).forEach(key => {
@@ -229,12 +147,7 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
             return acc;
         }, {} as {[key: string]: number});
     }, [monthlyData]);
-
-    const averages = Object.keys(totals).reduce((acc, key) => {
-        acc[key] = totals[key] / 12;
-        return acc;
-    }, {} as {[key: string]: number});
-
+    
     return (
         <Card className="mt-8">
             <CardHeader>
@@ -253,16 +166,19 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
                                 <TableHead>Rentas</TableHead>
                                 <TableHead>Bienes Raíces</TableHead>
                                 <TableHead>Intereses</TableHead>
-                                <TableHead>Aldo ha gastado</TableHead>
-                                <TableHead className="font-bold">Ganancia</TableHead>
+                                <TableHead className="font-bold text-right">Ganancia</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {isLoading ? (
-                                Array.from({length: 12}).map((_, i) => <TableRow key={i}><TableCell colSpan={9} className="text-center">Cargando...</TableCell></TableRow>)
+                                Array.from({length: 12}).map((_, i) => (
+                                    <TableRow key={i}>
+                                        <TableCell colSpan={8} className="text-center h-12">Cargando datos...</TableCell>
+                                    </TableRow>
+                                ))
                             ) : (
                                 monthlyData.map((row) => (
-                                    <TableRow key={row.month} className={cn(format(new Date(`${selectedMonth}-01T12:00:00`), 'MMMM', {locale:es}).toLowerCase() === row.month.toLowerCase() && 'bg-muted')}>
+                                    <TableRow key={row.month} className="h-12">
                                         <TableCell className="font-medium capitalize">{row.month}</TableCell>
                                         <TableCell className={cn(row.Agencia < 0 ? "text-red-500" : "")}><EditableCell value={row.Agencia} onSave={(v) => handleCellSave(row.month, 'Agencia', v)}/></TableCell>
                                         <TableCell className={cn(row.Oscar < 0 ? "text-red-500" : "")}><EditableCell value={row.Oscar} onSave={(v) => handleCellSave(row.month, 'Oscar', v)}/></TableCell>
@@ -270,23 +186,23 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
                                         <TableCell className={cn(row.Rentas < 0 ? "text-red-500" : "")}><EditableCell value={row.Rentas} onSave={(v) => handleCellSave(row.month, 'Rentas', v)}/></TableCell>
                                         <TableCell className={cn(row['Bienes Raices'] < 0 ? "text-red-500" : "")}><EditableCell value={row['Bienes Raices']} onSave={(v) => handleCellSave(row.month, 'Bienes Raices', v)}/></TableCell>
                                         <TableCell className={cn(row.Intereses < 0 ? "text-red-500" : "")}><EditableCell value={row.Intereses} onSave={(v) => handleCellSave(row.month, 'Intereses', v)}/></TableCell>
-                                        <TableCell className={cn(row['ALDO HA GASTADO'] < 0 ? "text-red-500" : "")}><EditableCell value={row['ALDO HA GASTADO']} onSave={(v) => handleCellSave(row.month, 'ALDO HA GASTADO', v)}/></TableCell>
                                         <TableCell className={cn("font-bold", (row.Ganancia || 0) < 0 ? "text-red-500" : "text-green-500")}><EditableCell value={row.Ganancia} onSave={(v) => handleCellSave(row.month, 'Ganancia', v)}/></TableCell>
                                     </TableRow>
                                 ))
                             )}
                         </TableBody>
                          <TableFooter>
-                            <TableRow className="font-bold bg-muted/50">
-                                <TableCell>Promedio Mensual</TableCell>
-                                <TableCell>{formatCurrency(averages.Agencia)}</TableCell>
-                                <TableCell>{formatCurrency(averages.Oscar)}</TableCell>
-                                <TableCell>{formatCurrency(averages.Transporte)}</TableCell>
-                                <TableCell>{formatCurrency(averages.Rentas)}</TableCell>
-                                <TableCell>{formatCurrency(averages['Bienes Raices'])}</TableCell>
-                                <TableCell>{formatCurrency(averages.Intereses)}</TableCell>
-                                <TableCell>{formatCurrency(averages['ALDO HA GASTADO'])}</TableCell>
-                                <TableCell className={cn((averages.Ganancia || 0) < 0 ? "text-red-500" : "text-green-500")}>{formatCurrency(averages.Ganancia)}</TableCell>
+                            <TableRow className="font-bold bg-muted/50 text-base">
+                                <TableCell>Total Anual</TableCell>
+                                <TableCell className="text-right">{totals.Agencia?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                <TableCell className="text-right">{totals.Oscar?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                <TableCell className="text-right">{totals.Transporte?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                <TableCell className="text-right">{totals.Rentas?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                <TableCell className="text-right">{totals['Bienes Raices']?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                <TableCell className="text-right">{totals.Intereses?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                <TableCell className={cn("text-right", (totals.Ganancia || 0) < 0 ? "text-red-500" : "text-green-500")}>
+                                  {totals.Ganancia?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+                                </TableCell>
                             </TableRow>
                         </TableFooter>
                     </Table>
@@ -590,7 +506,7 @@ export default function MiProgresoPage() {
                 </Card>
             </div>
             
-            <PersonalFinanceDashboard financialSummary={financialSummary} selectedMonth={monthFilter} selectedYear={currentYear} />
+            <PersonalFinanceDashboard financialSummary={financialSummary} selectedYear={currentYear} />
 
              <BalanceSheetDashboard />
         </>
@@ -604,4 +520,3 @@ export default function MiProgresoPage() {
     </div>
   );
 }
-
