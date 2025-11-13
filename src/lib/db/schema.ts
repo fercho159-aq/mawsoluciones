@@ -91,6 +91,19 @@ export const pasivos_maw = pgTable('pasivos_maw', {
   fecha_vencimiento: timestamp('fecha_vencimiento'),
 });
 
+// Tabla para Blog Posts
+export const blog_posts = pgTable('blog_posts', {
+  id: serial('id').primaryKey(),
+  slug: varchar('slug', { length: 255 }).unique().notNull(),
+  title: varchar('title', { length: 255 }).notNull(),
+  category: varchar('category', { length: 100 }),
+  excerpt: text('excerpt'),
+  date: timestamp('date', { withTimezone: true }).defaultNow().notNull(),
+  author: varchar('author', { length: 255 }),
+  content: text('content').notNull(),
+  created_at: timestamp('created_at', { withTimezone: true }).defaultNow(),
+});
+
 
 // --- TABLAS RELACIONADAS ---
 
@@ -220,6 +233,8 @@ export const pendientesMawRelations = relations(pendientes_maw, ({ one }) => ({
     })
 }));
 
+export const blogPostsRelations = relations(blog_posts, () => ({}));
+
 export const cuentasPorCobrarRelations = relations(cuentasPorCobrar, ({ one, many }) => ({
 	client: one(clients, {
 		fields: [cuentasPorCobrar.clienteId],
@@ -269,3 +284,5 @@ export type Activo = typeof activos_maw.$inferSelect;
 export type NewActivo = typeof activos_maw.$inferInsert;
 export type Pasivo = typeof pasivos_maw.$inferSelect;
 export type NewPasivo = typeof pasivos_maw.$inferInsert;
+export type BlogPost = typeof blog_posts.$inferSelect;
+export type NewBlogPost = typeof blog_posts.$inferInsert;
