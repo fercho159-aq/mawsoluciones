@@ -78,9 +78,10 @@ export async function deleteProspect(id: number) {
     try {
         await db.delete(prospects_maw).where(eq(prospects_maw.id, id));
         revalidatePath("/equipo/dashboard/ventas");
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error deleting prospect:", error);
-        throw new Error("No se pudo eliminar el prospecto.");
+        throw new Error(error.message || "No se pudo eliminar el prospecto.");
     }
 }
+
 

@@ -58,7 +58,7 @@ const responsables: ResponsableVentas[] = ["Alma", "Fer", "Julio"];
 const statuses: StatusLead[] = ["Lead Nuevo", "Contactado", "Videollamada", "En Negociación", "Convertido", "No Interesado"];
 const leadSources: OrigenLead[] = ["Referencia", "Sitio Web", "TikTok", "Facebook", "Instagram"];
 
-const AddLeadDialog = ({ onAddLead, children, prospect, isEditing }: { onAddLead: (lead: Partial<Omit<NewProspect, 'id' | 'createdAt'>>) => Promise<void>, children: React.ReactNode, prospect?: Prospect | null, isEditing: boolean }) => {
+const AddLeadDialog = ({ onAction, children, prospect, isEditing }: { onAction: () => void, children: React.ReactNode, prospect?: Prospect | null, isEditing: boolean }) => {
     const [open, setOpen] = useState(false);
     const [name, setName] = useState('');
     const [company, setCompany] = useState('');
@@ -106,12 +106,12 @@ const AddLeadDialog = ({ onAddLead, children, prospect, isEditing }: { onAddLead
                 await updateProspect(prospect.id, dataToSave);
                  toast({ title: "Éxito", description: `Prospecto actualizado.` });
             } else {
-                await onAddLead(dataToSave);
+                await addMawProspect(dataToSave);
                 toast({ title: "Prospecto Añadido", description: `${name || company} se ha añadido al pipeline.` });
             }
             
             startTransition(() => {
-                onAddLead({}); // To trigger re-fetch
+                onAction();
                 setOpen(false);
                 resetForm();
             });
@@ -125,10 +125,12 @@ const AddLeadDialog = ({ onAddLead, children, prospect, isEditing }: { onAddLead
             try {
                 await deleteProspect(prospect.id);
                 toast({ title: 'Éxito', description: 'Prospecto eliminado.' });
-                setOpen(false);
-                onAddLead({}); // To trigger re-fetch
-            } catch(e) {
-                toast({ title: 'Error', description: 'No se pudo eliminar el prospecto.', variant: 'destructive' });
+                startTransition(() => {
+                    onAction();
+                    setOpen(false);
+                });
+            } catch(e: any) {
+                toast({ title: 'Error', description: e.message || 'No se pudo eliminar el prospecto.', variant: 'destructive' });
             }
         }
     }
@@ -413,9 +415,8 @@ export default function VentasPage() {
         fetchProspectsData();
     }, []);
 
-    const handleAddLead = async (newProspectData: Partial<Omit<NewProspect, 'id' | 'createdAt'>>) => {
-        await addMawProspect(newProspectData);
-        fetchProspectsData();
+    const handleAction = async () => {
+        await fetchProspectsData();
     };
 
     const origenes = useMemo(() => {
@@ -453,7 +454,7 @@ export default function VentasPage() {
     <div>
         <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold font-headline">Pipeline de Ventas</h1>
-            <AddLeadDialog onAddLead={handleAddLead} isEditing={false}>
+            <AddLeadDialog onAction={handleAction} isEditing={false}>
                 <Button>
                     <PlusCircle className="w-4 h-4 mr-2" />
                     Añadir Prospecto
@@ -516,7 +517,7 @@ export default function VentasPage() {
                     </TableHeader>
                     <TableBody>
                         {filteredProspects.map((lead) => (
-                           <AddLeadDialog onAddLead={handleAddLead} prospect={lead} isEditing={true} key={lead.id}>
+                           <AddLeadDialog onAction={handleAction} prospect={lead} isEditing={true} key={lead.id}>
                             <TableRow className="cursor-pointer">
                                 <TableCell className="font-medium">{lead.name || lead.company}</TableCell>
                                 <TableCell>{lead.source}</TableCell>
@@ -557,7 +558,7 @@ export default function VentasPage() {
                                     >
                                         <Phone className="w-5 h-5" />
                                     </Button>
-                                     <ConvertLeadDialog prospect={lead} onSave={fetchProspectsData}>
+                                     <ConvertLeadDialog prospect={lead} onSave={handleAction}>
                                          <Button variant="default" size="sm" onClick={(e) => e.stopPropagation()}>
                                             <Sparkles className="w-4 h-4 mr-2" />
                                             Convertir
@@ -580,3 +581,4 @@ export default function VentasPage() {
     </div>
   );
 }
+
