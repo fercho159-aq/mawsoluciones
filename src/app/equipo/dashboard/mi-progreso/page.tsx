@@ -186,7 +186,7 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
                  }
             });
             
-            const currentMonthName = format(new Date(`${selectedMonth}-01T00:00:00`), 'MMMM', {locale:es});
+            const currentMonthName = format(new Date(`${selectedMonth}-01T12:00:00`), 'MMMM', {locale:es});
             
             if (month.toLowerCase() === 'octubre' && selectedYear === 2024) {
                  row['Agencia'] = 91700;
@@ -262,7 +262,7 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
                                 Array.from({length: 12}).map((_, i) => <TableRow key={i}><TableCell colSpan={8} className="text-center">Cargando...</TableCell></TableRow>)
                             ) : (
                                 monthlyData.map((row) => (
-                                    <TableRow key={row.month} className={cn(format(new Date(`${selectedMonth}-01T00:00:00`), 'MMMM', {locale:es}).toLowerCase() === row.month.toLowerCase() && 'bg-muted')}>
+                                    <TableRow key={row.month} className={cn(format(new Date(`${selectedMonth}-01T12:00:00`), 'MMMM', {locale:es}).toLowerCase() === row.month.toLowerCase() && 'bg-muted')}>
                                         <TableCell className="font-medium capitalize">{row.month}</TableCell>
                                         <TableCell className={cn(row.Agencia < 0 ? "text-red-500" : "")}><EditableCell value={row.Agencia} onSave={(v) => handleCellSave(row.month, 'Agencia', v)}/></TableCell>
                                         <TableCell className={cn(row.Oscar < 0 ? "text-red-500" : "")}><EditableCell value={row.Oscar} onSave={(v) => handleCellSave(row.month, 'Oscar', v)}/></TableCell>
