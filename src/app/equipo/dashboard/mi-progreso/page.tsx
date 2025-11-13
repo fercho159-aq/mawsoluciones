@@ -318,7 +318,7 @@ const BalanceSheet = ({ data, onRefresh, isAdmin }: { data: { activos: Activo[],
     )
 }
 
-const AssetLiabilityDialog = ({ item, onSave, isAsset, triggerAsChild = false }: { item?: Activo | Pasivo, onSave: (data: any) => void, isAsset: boolean, triggerAsChild?: boolean }) => {
+const AssetLiabilityDialog = ({ item, onSave, isAsset, triggerAsChild = false, children }: { item?: Activo | Pasivo, onSave: (data: any) => void, isAsset: boolean, triggerAsChild?: boolean, children?: React.ReactNode }) => {
     const [open, setOpen] = useState(false);
     const { toast } = useToast();
     
@@ -446,7 +446,7 @@ const AssetLiabilityDialog = ({ item, onSave, isAsset, triggerAsChild = false }:
     );
 
     if (triggerAsChild) {
-        return <Dialog open={open} onOpenChange={setOpen}><DialogTrigger asChild>{item}</DialogTrigger>{dialogContent}</Dialog>
+        return <Dialog open={open} onOpenChange={setOpen}><DialogTrigger asChild>{children}</DialogTrigger>{dialogContent}</Dialog>
     }
 
     return (
@@ -529,3 +529,4 @@ export default function MiProgresoPage() {
     </div>
   );
 }
+
