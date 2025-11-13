@@ -30,7 +30,7 @@ import { useToast } from '@/hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { format } from 'date-fns';
+import { format, isToday, subDays, startOfMonth, endOfMonth, isWithinInterval, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { getProspects, addMawProspect, convertProspectToClient, updateProspect, deleteProspect } from './_actions';
 import type { Prospect, NewProspect, Colaborador } from '@/lib/db/schema';
@@ -406,6 +406,7 @@ export default function VentasPage() {
     const [responsableFilter, setResponsableFilter] = useState('Todos');
     const [statusFilter, setStatusFilter] = useState('Todos');
     const [origenFilter, setOrigenFilter] = useState('Todos');
+    const [dateFilter, setDateFilter] = useState('Todos');
 
     const fetchProspectsData = async () => {
         setIsLoading(true);
@@ -429,13 +430,37 @@ export default function VentasPage() {
     }, [prospects]);
 
     const filteredProspects = useMemo(() => {
+        const now = new Date();
+        
         return prospects.filter(lead => {
             const responsableMatch = responsableFilter === 'Todos' || lead.responsable === responsableFilter;
             const statusMatch = statusFilter === 'Todos' || lead.status === statusFilter;
             const origenMatch = origenFilter === 'Todos' || lead.source === origenFilter;
-            return responsableMatch && statusMatch && origenMatch;
+            
+            if (!lead.createdAt) return responsableMatch && statusMatch && origenMatch;
+
+            const leadDate = new Date(lead.createdAt);
+            let dateMatch = true;
+            if (dateFilter !== 'Todos') {
+                if (dateFilter === 'Hoy') {
+                    dateMatch = isToday(leadDate);
+                } else if (dateFilter === 'Últimos 7 días') {
+                    dateMatch = leadDate >= subDays(now, 7);
+                } else if (dateFilter === 'Este mes') {
+                    const start = startOfMonth(now);
+                    const end = endOfMonth(now);
+                    dateMatch = isWithinInterval(leadDate, { start, end });
+                } else if (dateFilter === 'Mes pasado') {
+                    const lastMonth = subMonths(now, 1);
+                    const start = startOfMonth(lastMonth);
+                    const end = endOfMonth(lastMonth);
+                    dateMatch = isWithinInterval(leadDate, { start, end });
+                }
+            }
+            
+            return responsableMatch && statusMatch && origenMatch && dateMatch;
         });
-    }, [prospects, responsableFilter, statusFilter, origenFilter]);
+    }, [prospects, responsableFilter, statusFilter, origenFilter, dateFilter]);
 
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-[50vh]"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div></div>;
@@ -474,7 +499,20 @@ export default function VentasPage() {
                                 </Select>
                             </TableHead>
                             <TableHead>Notas</TableHead>
-                            <TableHead>Fecha de Creación</TableHead>
+                            <TableHead>
+                               <Select value={dateFilter} onValueChange={setDateFilter}>
+                                    <SelectTrigger className="border-0 bg-transparent p-0 focus:ring-0 focus:ring-offset-0">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Todos">Todas las fechas</SelectItem>
+                                        <SelectItem value="Hoy">Hoy</SelectItem>
+                                        <SelectItem value="Últimos 7 días">Últimos 7 días</SelectItem>
+                                        <SelectItem value="Este mes">Este mes</SelectItem>
+                                        <SelectItem value="Mes pasado">Mes pasado</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </TableHead>
                             <TableHead>
                                <Select value={responsableFilter} onValueChange={setResponsableFilter}>
                                     <SelectTrigger className="border-0 bg-transparent p-0 focus:ring-0 focus:ring-offset-0">
@@ -570,4 +608,3 @@ export default function VentasPage() {
     </div>
   );
 }
-
