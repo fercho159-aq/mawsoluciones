@@ -59,7 +59,7 @@ const responsables: ResponsableVentas[] = ["Alma", "Fer", "Julio"];
 const statuses: StatusLead[] = ["Lead Nuevo", "Contactado", "Videollamada", "En Negociación", "Convertido", "No Interesado"];
 const leadSources: OrigenLead[] = ["Referencia", "Sitio Web", "TikTok", "Facebook", "Instagram"];
 
-const AddLeadDialog = ({ onAction, children, prospect, isEditing }: { onAction: () => void, children: React.ReactNode, prospect?: Prospect | null, isEditing: boolean }) => {
+const AddLeadDialog = ({ onAction, children, prospect, isEditing }: { onAction: () => Promise<void>, children: React.ReactNode, prospect?: Prospect | null, isEditing: boolean }) => {
     const [open, setOpen] = useState(false);
     const [name, setName] = useState('');
     const [company, setCompany] = useState('');
@@ -517,6 +517,7 @@ export default function VentasPage() {
                         <TableRow>
                             <TableHead>Cliente</TableHead>
                             <TableHead>Origen</TableHead>
+                            <TableHead>Notas</TableHead>
                             <TableHead>Fecha de Creación</TableHead>
                             <TableHead>Responsable</TableHead>
                             <TableHead>Status</TableHead>
@@ -529,6 +530,7 @@ export default function VentasPage() {
                             <TableRow className="cursor-pointer">
                                 <TableCell className="font-medium">{lead.name || lead.company}</TableCell>
                                 <TableCell>{lead.source}</TableCell>
+                                <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">{lead.notas}</TableCell>
                                 <TableCell>
                                     {lead.createdAt ? format(new Date(lead.createdAt), 'dd MMM yyyy', { locale: es }) : 'N/A'}
                                 </TableCell>
@@ -592,5 +594,3 @@ export default function VentasPage() {
     </div>
   );
 }
-
-
