@@ -129,27 +129,25 @@ const personalAssets = [
   { name: 'Efectivo', amount: 355000 },
   { name: 'Divisas', amount: 109220 },
   { name: 'Marco', amount: 18000 },
-  { name: 'Charlie 19 JULIK', amount: 12927 },
-  { name: 'JULIO', amount: 9500 },
 ];
 
 const accountsReceivable = [
-  { name: 'estacionmiento 1', amount: 1000 },
-  { name: 'depostio señor re', amount: 1600 },
-  { name: 'dani', amount: -863 },
-  { name: 'Den 11,900 + 200', amount: 6170 },
-  { name: 'intenet agustin J', amount: 0 },
-  { name: 'Internet mirador', amount: 600 },
-  { name: 'FER EXTRA', amount: 44050 },
-  { name: 'Trans yo juntado', amount: 108000 },
-  { name: 'Tanda 2 me deb', amount: 104000 },
-  { name: 'paola', amount: 188985 },
-  { name: 'oscar me debe 1', amount: 96958 },
-  { name: 'vuelo paola', amount: 17752 },
-  { name: 'dani montaña', amount: 4000 },
-  { name: 'dani granger', amount: 3200 },
-  { name: 'FER TREJO CO', amount: 4875 },
-  { name: 'DANI CUYO', amount: 8726 },
+    { name: 'estacionmiento 1', amount: 1000 },
+    { name: 'depostio señor re', amount: 1600 },
+    { name: 'dani', amount: -863 },
+    { name: 'Den 11,900 + 200', amount: 6170 },
+    { name: 'intenet agustin J', amount: 0 },
+    { name: 'Internet mirador', amount: 600 },
+    { name: 'FER EXTRA', amount: 44050 },
+    { name: 'Trans yo juntado', amount: 108000 },
+    { name: 'Tanda 2 me deb', amount: 104000 },
+    { name: 'paola', amount: 188985 },
+    { name: 'oscar me debe 1', amount: 96958 },
+    { name: 'vuelo paola', amount: 17752 },
+    { name: 'dani montaña', amount: 4000 },
+    { name: 'dani granger', amount: 3200 },
+    { name: 'FER TREJO CO', amount: 4875 },
+    { name: 'DANI CUYO', amount: 8726 },
 ];
 
 const liabilities = [
@@ -262,27 +260,9 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
     }
     
     const combinedData = useMemo(() => {
-        const currentYear = new Date().getFullYear();
-        if (selectedYear !== currentYear) {
-             return personalData.map(data => {
-                const totalOscar = data.oscar.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
-                const totalTransporte = data.transporte.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
-                const totalRentas = data.rentas.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
-                const totalBienesRaices = data.bienes_raices.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
-                const totalIntereses = data.intereses.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
-                const ganancia = data.ganancia !== undefined ? data.ganancia : (data.agencia + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses);
-                 return { ...data, totalOscar, totalTransporte, totalRentas, totalBienesRaices, totalIntereses, ganancia };
-            });
-        }
-        
         return personalData.map((data, index) => {
-            const dataMonthIndex = index;
-            
             let agenciaValue = data.agencia;
-            let ganancia = data.ganancia;
-
-            // Apply special logic only for November
-            if (dataMonthIndex === 10) { // 10 is November
+            if (selectedYear === new Date().getFullYear() && getMonth(new Date(selectedMonth)) === index && index === 10) { // Noviembre
                 agenciaValue = financialSummary.profit - 527138;
             }
 
@@ -292,7 +272,8 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
             const totalBienesRaices = data.bienes_raices.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             const totalIntereses = data.intereses.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
             
-            if (dataMonthIndex >= 10 || data.ganancia === undefined) { // Nov and Dec
+            let ganancia = data.ganancia;
+            if (ganancia === undefined) {
                  ganancia = agenciaValue + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses;
             }
             
@@ -390,7 +371,7 @@ const BalanceSheetDashboard = () => {
     const formatCurrency = (value: number) => value.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 mt-8">
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><PiggyBank className="w-5 h-5 text-green-500"/>Activos Líquidos</CardTitle>
@@ -437,6 +418,15 @@ const BalanceSheetDashboard = () => {
                             </div>
                         ))}
                     </div>
+                </CardContent>
+            </Card>
+            <Card className="bg-primary/10 border-primary">
+                 <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><DollarSign className="w-5 h-5 text-primary"/>Patrimonio Neto</CardTitle>
+                    <CardDescription className="text-2xl font-bold text-primary">{formatCurrency(netWorth)}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                     <p className="text-sm text-muted-foreground">Este es tu capital total, calculado como (Activos + Cuentas por Cobrar) - Pasivos.</p>
                 </CardContent>
             </Card>
         </div>
@@ -612,6 +602,7 @@ export default function MiProgresoPage() {
 
 
     
+
 
 
 
