@@ -33,7 +33,7 @@ export async function updatePersonalFinanceEntry(entry: PersonalFinanceTransacti
         // Buscar si ya existe una entrada para esa categoría en ese mes y año
         const existingEntries = await db.select().from(como_voy_en_mis_finanzas).where(
             and(
-                eq(como_voy_en_mis_finanzas.categoria, categoria),
+                eq(como_voy_en_mis_finanzas.categoria, categoria!),
                 eq(sql`EXTRACT(MONTH FROM fecha)`, month + 1),
                 eq(sql`EXTRACT(YEAR FROM fecha)`, year)
             )
@@ -43,8 +43,8 @@ export async function updatePersonalFinanceEntry(entry: PersonalFinanceTransacti
             // Si existen, las actualizamos (o la primera, si hay varias)
             const idToUpdate = existingEntries[0].id;
             await db.update(como_voy_en_mis_finanzas).set({
-                monto: Math.abs(rest.monto), // Guardar siempre como positivo
-                tipo: rest.monto >= 0 ? 'INGRESO' : 'GASTO',
+                monto: Math.abs(rest.monto!), // Guardar siempre como positivo
+                tipo: rest.monto! >= 0 ? 'INGRESO' : 'GASTO',
                 descripcion: rest.descripcion || `${categoria} - ${entryDate.toLocaleString('es-MX', { month: 'long' })}`,
             }).where(eq(como_voy_en_mis_finanzas.id, idToUpdate));
 
@@ -53,10 +53,10 @@ export async function updatePersonalFinanceEntry(entry: PersonalFinanceTransacti
             await db.insert(como_voy_en_mis_finanzas).values({
                 fecha: entryDate,
                 categoria,
-                monto: Math.abs(rest.monto),
-                tipo: rest.monto >= 0 ? 'INGRESO' : 'GASTO',
+                monto: Math.abs(rest.monto!),
+                tipo: rest.monto! >= 0 ? 'INGRESO' : 'GASTO',
                 descripcion: rest.descripcion || `${categoria} - ${entryDate.toLocaleString('es-MX', { month: 'long' })}`,
-                cuenta: 'Efectivo',
+                cuenta: 'Efectivo', // Valor predeterminado ya que no se especifica en la UI
             });
         }
 
