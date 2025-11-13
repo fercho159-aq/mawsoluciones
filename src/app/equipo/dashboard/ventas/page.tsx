@@ -517,6 +517,7 @@ export default function VentasPage() {
                         <TableRow>
                             <TableHead>Cliente</TableHead>
                             <TableHead>Origen</TableHead>
+                            <TableHead>Fecha de Creación</TableHead>
                             <TableHead>Responsable</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead className="text-right">Acciones</TableHead>
@@ -528,6 +529,9 @@ export default function VentasPage() {
                             <TableRow className="cursor-pointer">
                                 <TableCell className="font-medium">{lead.name || lead.company}</TableCell>
                                 <TableCell>{lead.source}</TableCell>
+                                <TableCell>
+                                    {lead.createdAt ? format(new Date(lead.createdAt), 'dd MMM yyyy', { locale: es }) : 'N/A'}
+                                </TableCell>
                                 <TableCell>{lead.responsable}</TableCell>
                                 <TableCell>
                                     <Badge className={cn("text-white", statusColors[lead.status as StatusLead])}>
@@ -588,4 +592,5 @@ export default function VentasPage() {
     </div>
   );
 }
+
 
