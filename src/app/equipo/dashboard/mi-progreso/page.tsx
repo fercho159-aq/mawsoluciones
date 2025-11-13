@@ -88,19 +88,18 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedYear }: { financia
         const entry: PersonalFinanceTransaction = {
             id: -1, // Will be ignored on insert
             fecha: entryDate.toISOString(),
-            tipo: newAmount >= 0 ? 'INGRESO' : 'GASTO',
+            tipo: 'INGRESO', // Se asume ingreso, la lógica del backend podría ajustarlo
             descripcion: `${category} - ${month} ${year}`,
-            monto: Math.abs(newAmount),
+            monto: newAmount,
             cuenta: 'Efectivo',
             categoria: category
         };
-        handleSave(entry)
+        handleSave(entry);
     }
-
 
     const monthlyData = useMemo(() => {
         const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-        const incomeCategories = ["Agencia", "Oscar", "Transporte", "Rentas", "Bienes Raices", "Intereses"];
+        const incomeCategories = ["Agencia", "Oscar", "Transporte", "Rentas", "Bienes Raices", "Intereses", "Ganancia"];
         
         return monthNames.map((month, monthIndex) => {
             const row: { [key: string]: any } = { month };
@@ -113,24 +112,24 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedYear }: { financia
                 row[category] = entries.reduce((sum, item) => sum + (item.tipo === 'INGRESO' ? item.monto : -item.monto), 0);
             });
             
-            const currentMonthIndex = new Date().getMonth();
+            const currentMonth = new Date().getMonth();
             const currentYear = new Date().getFullYear();
 
             // Sincronizar 'Agencia' con la utilidad neta para el mes actual y futuros
-            if (selectedYear > currentYear || (selectedYear === currentYear && monthIndex >= currentMonthIndex)) {
-                 row['Agencia'] = financialSummary.profit;
+            if (selectedYear > currentYear || (selectedYear === currentYear && monthIndex >= currentMonth)) {
+                if(month === 'Octubre' && selectedYear === 2024){
+                    row['Agencia'] = 91700;
+                } else if(month === 'Noviembre' && selectedYear === 2024) {
+                    row['Agencia'] = financialSummary.profit - 527138;
+                }
+                else {
+                    row['Agencia'] = financialSummary.profit;
+                }
             }
 
-            // Lógica para Ganancia
-            const gananciaEntry = personalData.find(d => {
-                 const entryDate = new Date(d.fecha);
-                 return getMonth(entryDate) === monthIndex && entryDate.getFullYear() === selectedYear && d.categoria === 'Ganancia'
-            });
-
-            if (gananciaEntry) {
-                row['Ganancia'] = gananciaEntry.monto;
-            } else {
-                 row['Ganancia'] = incomeCategories.reduce((acc, cat) => acc + (row[cat] || 0), 0);
+            // Lógica para Ganancia: si hay un valor guardado, úsalo, si no, calcúlalo.
+            if (!row['Ganancia']) {
+                 row['Ganancia'] = (row['Agencia'] || 0) + (row['Oscar'] || 0) + (row['Transporte'] || 0) + (row['Rentas'] || 0) + (row['Bienes Raices'] || 0) + (row['Intereses'] || 0);
             }
 
             return row;
@@ -148,6 +147,15 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedYear }: { financia
         }, {} as {[key: string]: number});
     }, [monthlyData]);
     
+    const averages = useMemo(() => {
+        const avg: { [key: string]: number } = {};
+        const monthCount = monthlyData.length || 1;
+        Object.keys(totals).forEach(key => {
+            avg[key] = totals[key] / monthCount;
+        });
+        return avg;
+    }, [totals, monthlyData]);
+
     return (
         <Card className="mt-8">
             <CardHeader>
@@ -180,12 +188,12 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedYear }: { financia
                                 monthlyData.map((row) => (
                                     <TableRow key={row.month} className="h-12">
                                         <TableCell className="font-medium capitalize">{row.month}</TableCell>
-                                        <TableCell className={cn(row.Agencia < 0 ? "text-red-500" : "")}><EditableCell value={row.Agencia} onSave={(v) => handleCellSave(row.month, 'Agencia', v)}/></TableCell>
-                                        <TableCell className={cn(row.Oscar < 0 ? "text-red-500" : "")}><EditableCell value={row.Oscar} onSave={(v) => handleCellSave(row.month, 'Oscar', v)}/></TableCell>
-                                        <TableCell className={cn(row.Transporte < 0 ? "text-red-500" : "")}><EditableCell value={row.Transporte} onSave={(v) => handleCellSave(row.month, 'Transporte', v)}/></TableCell>
-                                        <TableCell className={cn(row.Rentas < 0 ? "text-red-500" : "")}><EditableCell value={row.Rentas} onSave={(v) => handleCellSave(row.month, 'Rentas', v)}/></TableCell>
-                                        <TableCell className={cn(row['Bienes Raices'] < 0 ? "text-red-500" : "")}><EditableCell value={row['Bienes Raices']} onSave={(v) => handleCellSave(row.month, 'Bienes Raices', v)}/></TableCell>
-                                        <TableCell className={cn(row.Intereses < 0 ? "text-red-500" : "")}><EditableCell value={row.Intereses} onSave={(v) => handleCellSave(row.month, 'Intereses', v)}/></TableCell>
+                                        <TableCell><EditableCell value={row.Agencia} onSave={(v) => handleCellSave(row.month, 'Agencia', v)}/></TableCell>
+                                        <TableCell><EditableCell value={row.Oscar} onSave={(v) => handleCellSave(row.month, 'Oscar', v)}/></TableCell>
+                                        <TableCell><EditableCell value={row.Transporte} onSave={(v) => handleCellSave(row.month, 'Transporte', v)}/></TableCell>
+                                        <TableCell><EditableCell value={row.Rentas} onSave={(v) => handleCellSave(row.month, 'Rentas', v)}/></TableCell>
+                                        <TableCell><EditableCell value={row['Bienes Raices']} onSave={(v) => handleCellSave(row.month, 'Bienes Raices', v)}/></TableCell>
+                                        <TableCell><EditableCell value={row.Intereses} onSave={(v) => handleCellSave(row.month, 'Intereses', v)}/></TableCell>
                                         <TableCell className={cn("font-bold", (row.Ganancia || 0) < 0 ? "text-red-500" : "text-green-500")}><EditableCell value={row.Ganancia} onSave={(v) => handleCellSave(row.month, 'Ganancia', v)}/></TableCell>
                                     </TableRow>
                                 ))
@@ -202,6 +210,18 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedYear }: { financia
                                 <TableCell className="text-right">{totals.Intereses?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
                                 <TableCell className={cn("text-right", (totals.Ganancia || 0) < 0 ? "text-red-500" : "text-green-500")}>
                                   {totals.Ganancia?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+                                </TableCell>
+                            </TableRow>
+                             <TableRow className="font-semibold bg-muted/20 text-sm">
+                                <TableCell>Promedio Mensual</TableCell>
+                                <TableCell className="text-right text-muted-foreground">{averages.Agencia?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                <TableCell className="text-right text-muted-foreground">{averages.Oscar?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                <TableCell className="text-right text-muted-foreground">{averages.Transporte?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                <TableCell className="text-right text-muted-foreground">{averages.Rentas?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                <TableCell className="text-right text-muted-foreground">{averages['Bienes Raices']?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                <TableCell className="text-right text-muted-foreground">{averages.Intereses?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                <TableCell className={cn("text-right text-muted-foreground", (averages.Ganancia || 0) < 0 ? "text-red-500" : "")}>
+                                  {averages.Ganancia?.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
                                 </TableCell>
                             </TableRow>
                         </TableFooter>
