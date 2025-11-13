@@ -510,17 +510,34 @@ const PendientesTable = ({
     }
 
     const groupedData = useMemo(() => {
-        const sortedData = [...data].sort((a, b) => a.clienteName.localeCompare(b.clienteName));
-        return sortedData.reduce((acc, pendiente) => {
-            (acc[pendiente.clienteName] = acc[pendiente.clienteName] || []).push(pendiente);
-            return acc;
-        }, {} as Record<string, PendienteWithRelations[]>);
-    }, [data]);
+        const uniqueClientNames = Array.from(new Set(clients.map(c => c.name)));
+        const sortedClientNames = uniqueClientNames.sort((a, b) => a.localeCompare(b));
+
+        const dataMap: Record<string, PendienteWithRelations[]> = {};
+
+        // Initialize map with all clients from the main client list
+        sortedClientNames.forEach(clientName => {
+            dataMap[clientName] = [];
+        });
+
+        // Populate with pendientes
+        data.forEach(pendiente => {
+            if (dataMap[pendiente.clienteName]) {
+                dataMap[pendiente.clienteName].push(pendiente);
+            }
+        });
+        
+        return dataMap;
+    }, [data, clients]);
+
+    const clientHasPendientesInFilter = (clientName: string) => {
+        return data.some(p => p.clienteName === clientName);
+    }
     
-    if (data.length === 0) {
+    if (Object.keys(groupedData).length === 0) {
         return (
             <div className="text-center p-8 text-foreground/70">
-                No se encontraron pendientes con los filtros seleccionados.
+                No se encontraron clientes.
             </div>
         );
     }
@@ -548,6 +565,49 @@ const PendientesTable = ({
                         const client = clients.find(c => c.name === clienteName);
                         if (!client) return null;
 
+                        const rowCount = Math.max(1, pendientes.length);
+                        const displayRowSpan = rowCount + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0);
+
+                        // If no pendientes match the current filter, but we want to show the client row
+                        if (pendientes.length === 0 && !clientHasPendientesInFilter(clienteName)) {
+                             // This part is simplified, you might want to show a single empty row or a special message
+                            return (
+                                <React.Fragment key={clienteName}>
+                                    <TableRow>
+                                        <TableCell className="px-2"></TableCell>
+                                        <TableCell rowSpan={1} className="align-top font-medium p-2 border-r">
+                                            <ClientDataDialog pendientes={[]} onSave={() => {}} onRefresh={onRefresh}>
+                                                 <div className='flex flex-col h-full justify-between cursor-pointer hover:bg-muted p-2 rounded-md'>
+                                                    <span>{clienteName}</span>
+                                                </div>
+                                            </ClientDataDialog>
+                                        </TableCell>
+                                        <TableCell colSpan={isContenido ? 7 : (isAds ? 5 : 4)} className="p-0">
+                                            <div className="h-full">
+                                                <Button variant="ghost" size="sm" className="w-full h-full justify-start text-muted-foreground" onClick={() => setAddingToClientId(client.id)}>
+                                                    <Plus className="w-4 h-4 mr-2" />
+                                                    Añadir primer pendiente
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                     {addingToClientId === client.id && (
+                                        <TableRow>
+                                            <TableCell colSpan={isContenido ? 8 : (isAds ? 6 : 5)}>
+                                                <AddPendienteInline
+                                                    client={client}
+                                                    categoria={categoria}
+                                                    onAdd={(text) => handleAddPendiente(text, client, pendientes[0] || {encargado: '', ejecutor: ''})}
+                                                    onCancel={() => setAddingToClientId(null)}
+                                                />
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </React.Fragment>
+                            )
+                        }
+
+
                         return (
                         <React.Fragment key={clienteName}>
                             {pendientes.map((pendiente, index) => (
@@ -561,7 +621,7 @@ const PendientesTable = ({
                                     </TableCell>
                                     {index === 0 && (
                                         <TableCell 
-                                            rowSpan={pendientes.length + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} 
+                                            rowSpan={displayRowSpan} 
                                             className="align-top font-medium p-2 border-r"
                                         >
                                             <ClientDataDialog pendientes={pendientes} onSave={(id, data) => onUpdateTask(pendientes.find(p => p.id === id)!, data)} onRefresh={onRefresh}>
@@ -585,16 +645,14 @@ const PendientesTable = ({
                                                 pendiente={pendiente} 
                                                 onSave={(data) => onUpdateTask(pendiente, data)}
                                                 canReassign={canReassign}
-                                            >
-                                                <div className="cursor-pointer flex-1 p-2">{pendiente.pendientePrincipal}</div>
-                                            </PendienteDialog>
+                                            />
                                         </div>
                                     </TableCell>
                                     {(isContenido || isAds) && index === 0 && (
-                                        <TableCell rowSpan={pendientes.length  + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">
-                                            <Select value={String(pendiente.fechaCorte) || 'sin-fecha'} onValueChange={(value) => onUpdateTask(pendiente, { fechaCorte: value === 'sin-fecha' ? null : parseInt(value) })}>
+                                        <TableCell rowSpan={displayRowSpan} className="p-2 align-middle text-center border-l">
+                                            <Select value={String(pendientes[0]?.fechaCorte) || 'sin-fecha'} onValueChange={(value) => onUpdateTask(pendientes[0], { fechaCorte: value === 'sin-fecha' ? null : parseInt(value) })}>
                                                 <SelectTrigger className="text-xs h-8">
-                                                    <SelectValue>{pendiente.fechaCorte || 'Sin fecha'}</SelectValue>
+                                                    <SelectValue>{pendientes[0]?.fechaCorte || 'Sin fecha'}</SelectValue>
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectItem value="sin-fecha">Sin fecha</SelectItem>
@@ -606,51 +664,51 @@ const PendientesTable = ({
                                     )}
                                     {isContenido && index === 0 && (
                                         <>
-                                            <TableCell rowSpan={pendientes.length  + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l whitespace-pre-wrap">{pendientes[0].publicacionesAlMes || '-'}</TableCell>
-                                            <TableCell rowSpan={pendientes.length  + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l whitespace-pre-wrap">{pendientes[0].publicacionesALaSemana || '-'}</TableCell>
+                                            <TableCell rowSpan={displayRowSpan} className="p-2 align-middle text-center border-l whitespace-pre-wrap">{pendientes[0].publicacionesAlMes || '-'}</TableCell>
+                                            <TableCell rowSpan={displayRowSpan} className="p-2 align-middle text-center border-l whitespace-pre-wrap">{pendientes[0].publicacionesALaSemana || '-'}</TableCell>
                                         </>
                                     )}
                                      {isAds && index === 0 && (
-                                        <TableCell rowSpan={pendientes.length  + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)} className="p-2 align-middle text-center border-l">
-                                            <AdsMetricsDialog pendiente={pendiente} onSave={(data) => onUpdateTask(pendiente, data)}>
+                                        <TableCell rowSpan={displayRowSpan} className="p-2 align-middle text-center border-l">
+                                            <AdsMetricsDialog pendiente={pendientes[0]} onSave={(data) => onUpdateTask(pendientes[0], data)}>
                                                 <div className="cursor-pointer hover:bg-muted p-1 rounded-md text-xs space-y-2">
-                                                    {pendiente.hasFacebookAds && (
+                                                    {pendientes[0].hasFacebookAds && (
                                                         <div className='flex items-center gap-2'>
                                                             <Facebook className="w-4 h-4 text-blue-600" />
                                                             <div>
-                                                                <p>Msj: {pendiente.facebookAdsMessages || '-'}</p>
-                                                                <p>Int: {pendiente.facebookAdsInteraction || '-'}</p>
+                                                                <p>Msj: {pendientes[0].facebookAdsMessages || '-'}</p>
+                                                                <p>Int: {pendientes[0].facebookAdsInteraction || '-'}</p>
                                                             </div>
                                                         </div>
                                                     )}
-                                                     {pendiente.hasTiktokAds && (
+                                                     {pendientes[0].hasTiktokAds && (
                                                         <div className='flex items-center gap-2'>
                                                             <TikTokIcon className='w-4 h-4' />
                                                             <div>
-                                                                <p>Msj: {pendiente.tiktokAdsMessages || '-'}</p>
-                                                                <p>Int: {pendiente.tiktokAdsInteraction || '-'}</p>
+                                                                <p>Msj: {pendientes[0].tiktokAdsMessages || '-'}</p>
+                                                                <p>Int: {pendientes[0].tiktokAdsInteraction || '-'}</p>
                                                             </div>
                                                         </div>
                                                     )}
-                                                     {pendiente.hasGoogleAds && (
+                                                     {pendientes[0].hasGoogleAds && (
                                                         <div className='flex items-center gap-2'>
                                                             <Bot className="w-4 h-4 text-green-500" />
                                                             <div>
-                                                                <p>Msj: {pendiente.googleAdsMessages || '-'}</p>
-                                                                <p>Int: {pendiente.googleAdsInteraction || '-'}</p>
+                                                                <p>Msj: {pendientes[0].googleAdsMessages || '-'}</p>
+                                                                <p>Int: {pendientes[0].googleAdsInteraction || '-'}</p>
                                                             </div>
                                                         </div>
                                                     )}
-                                                      {pendiente.hasLinkedinAds && (
+                                                      {pendientes[0].hasLinkedinAds && (
                                                         <div className='flex items-center gap-2'>
                                                             <Linkedin className="w-4 h-4 text-sky-700" />
                                                             <div>
-                                                                <p>Msj: {pendiente.linkedinAdsMessages || '-'}</p>
-                                                                <p>Int: {pendiente.linkedinAdsInteraction || '-'}</p>
+                                                                <p>Msj: {pendientes[0].linkedinAdsMessages || '-'}</p>
+                                                                <p>Int: {pendientes[0].linkedinAdsInteraction || '-'}</p>
                                                             </div>
                                                         </div>
                                                     )}
-                                                    {(!pendiente.hasFacebookAds && !pendiente.hasTiktokAds && !pendiente.hasGoogleAds && !pendiente.hasLinkedinAds) && <span className='text-muted-foreground'>-</span>}
+                                                    {(!pendientes[0].hasFacebookAds && !pendientes[0].hasTiktokAds && !pendientes[0].hasGoogleAds && !pendientes[0].hasLinkedinAds) && <span className='text-muted-foreground'>-</span>}
                                                 </div>
                                             </AdsMetricsDialog>
                                         </TableCell>
@@ -688,20 +746,20 @@ const PendientesTable = ({
                                         </Select>
                                     </TableCell>
                                     {isContenido && index === 0 && (
-                                        <TableCell className="p-2 text-center align-middle" rowSpan={pendientes.length  + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0)}>
+                                        <TableCell className="p-2 text-center align-middle" rowSpan={displayRowSpan}>
                                             <ScheduleRecordingDialog
-                                                event={pendiente.recordingEvent}
-                                                pendienteId={pendiente.id}
-                                                clientName={pendiente.clienteName}
-                                                project={pendiente.pendientePrincipal}
-                                                assignedToName={pendiente.ejecutor}
+                                                event={pendientes[0]?.recordingEvent}
+                                                pendienteId={pendientes[0]?.id}
+                                                clientName={pendientes[0]?.clienteName}
+                                                project={pendientes[0]?.pendientePrincipal}
+                                                assignedToName={pendientes[0]?.ejecutor}
                                                 onSave={onRefresh}
                                             >
                                             <div className="cursor-pointer hover:bg-muted p-2 rounded-md h-full flex flex-col justify-center">
-                                                {pendiente.recordingEvent ? (
+                                                {pendientes[0]?.recordingEvent ? (
                                                     <div className="flex flex-col h-auto text-xs font-semibold">
-                                                        <span>{format(new Date(pendiente.recordingEvent.fullStart), 'dd MMM', { locale: es })}</span>
-                                                        <span className='text-xs text-muted-foreground'>{format(new Date(pendiente.recordingEvent.fullStart), 'HH:mm')}</span>
+                                                        <span>{format(new Date(pendientes[0].recordingEvent.fullStart), 'dd MMM', { locale: es })}</span>
+                                                        <span className='text-xs text-muted-foreground'>{format(new Date(pendientes[0].recordingEvent.fullStart), 'HH:mm')}</span>
                                                     </div>
                                                 ) : <span className="text-xs text-muted-foreground">No agendado</span>}
                                             </div>
@@ -712,12 +770,12 @@ const PendientesTable = ({
                             ))}
                              {currentUser?.permissions?.pendientes?.reasignarResponsables && (
                                 <TableRow>
-                                    <TableCell colSpan={isAds ? 3 : (isContenido ? 4 : 2)} className="p-0 h-full">
+                                    <TableCell colSpan={isAds ? 4 : (isContenido ? 1 : 2)} className="p-0 h-full">
                                         {addingToClientId === client.id ? (
                                             <AddPendienteInline 
                                                 client={client}
                                                 categoria={categoria}
-                                                onAdd={(text) => handleAddPendiente(text, client, pendientes[0])}
+                                                onAdd={(text) => handleAddPendiente(text, client, pendientes[0] || {encargado: '', ejecutor: ''})}
                                                 onCancel={() => setAddingToClientId(null)}
                                             />
                                         ) : (
@@ -729,7 +787,7 @@ const PendientesTable = ({
                                             </div>
                                         )}
                                     </TableCell>
-                                    <TableCell colSpan={isContenido ? 4 : 3}></TableCell>
+                                    <TableCell colSpan={3}></TableCell>
                                 </TableRow>
                              )}
                         </React.Fragment>
