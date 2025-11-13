@@ -56,17 +56,17 @@ export const prospects_maw = pgTable('prospects_maw', {
 // Nueva tabla para finanzas personales
 export const como_voy_en_mis_finanzas = pgTable('como_voy_en_mis_finanzas', {
     id: serial('id').primaryKey(),
-    fecha: timestamp('fecha').notNull(),
+    fecha: timestamp('fecha').notNull().defaultNow(),
     tipo: varchar('tipo', { length: 50 }).notNull(), // INGRESO o GASTO
-    descripcion: text('descripcion'),
+    descripcion: text('descripcion').notNull(),
     monto: real('monto').notNull(),
-    cuenta: varchar('cuenta', { length: 100 }).default('Efectivo'),
-    categoria: varchar('categoria', { length: 100 }).notNull(),
-    detalle_cuenta: text('detalle_cuenta'),
-    nombre_otro: text('nombre_otro'),
+    cuenta: varchar('cuenta', { length: 100 }).notNull(),
+    detalle_cuenta: varchar('detalle_cuenta', { length: 255 }),
+    categoria: varchar('categoria', { length: 100 }),
+    nombre_otro: varchar('nombre_otro', { length: 255 }),
     cpc_id: integer('cpc_id'),
-    requires_invoice: boolean('requires_invoice'),
-    con_iva: boolean('con_iva'),
+    requires_invoice: boolean('requires_invoice').notNull().default(false),
+    con_iva: boolean('con_iva').default(false),
     iva: real('iva'),
 });
 

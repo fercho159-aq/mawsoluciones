@@ -39,7 +39,7 @@ const TransactionModal = ({
       }
     }, [open, initialTransactions]);
   
-    const total = transactions.reduce((acc, t) => acc + (t.type === 'INGRESO' ? t.amount : -t.amount), 0);
+    const total = transactions.reduce((acc, t) => acc + (t.tipo === 'INGRESO' ? t.monto : -t.monto), 0);
   
     const handleUpdate = (index: number, field: keyof PersonalFinanceTransaction, value: any) => {
       const newTransactions = [...transactions];
@@ -67,15 +67,15 @@ const TransactionModal = ({
             {transactions.map((t, i) => (
               <div key={t.id} className="grid grid-cols-3 gap-2 mb-2">
                 <Input
-                  value={t.description}
-                  onChange={(e) => handleUpdate(i, 'description', e.target.value)}
+                  value={t.descripcion}
+                  onChange={(e) => handleUpdate(i, 'descripcion', e.target.value)}
                   placeholder="Concepto"
                   className="col-span-2"
                 />
                 <Input
                   type="number"
-                  value={t.amount}
-                  onChange={(e) => handleUpdate(i, 'amount', parseFloat(e.target.value) || 0)}
+                  value={t.monto}
+                  onChange={(e) => handleUpdate(i, 'monto', parseFloat(e.target.value) || 0)}
                   placeholder="Monto"
                 />
               </div>
@@ -174,22 +174,41 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
 
         return monthNames.map((month, monthIndex) => {
             const row: { [key: string]: any } = { month };
+            const currentYear = new Date().getFullYear();
 
             categories.forEach(category => {
-                const entries = personalData.filter(d => getMonth(new Date(d.fecha)) === monthIndex && d.categoria === category);
-                row[category] = entries.reduce((sum, item) => sum + (item.tipo === 'INGRESO' ? item.monto : -item.monto), 0);
+                 if (category !== 'Ganancia') {
+                    const entries = personalData.filter(d => {
+                        const entryDate = new Date(d.fecha);
+                        return getMonth(entryDate) === monthIndex && entryDate.getFullYear() === selectedYear && d.categoria === category;
+                    });
+                    row[category] = entries.reduce((sum, item) => sum + (item.tipo === 'INGRESO' ? item.monto : -item.monto), 0);
+                 }
             });
             
             const currentMonthName = format(new Date(`${selectedMonth}-01T00:00:00`), 'MMMM', {locale:es});
             
-            if (month.toLowerCase() === currentMonthName.toLowerCase() && month.toLowerCase() === 'noviembre' && selectedYear === 2024) {
-                 row['Agencia'] = financialSummary.profit - 527138;
-            } else if (month.toLowerCase() === 'octubre' && selectedYear === 2024) {
+            if (month.toLowerCase() === 'octubre' && selectedYear === 2024) {
                  row['Agencia'] = 91700;
+            } else if (month.toLowerCase() === 'noviembre' && selectedYear === 2024) {
+                 row['Agencia'] = financialSummary.profit - 527138;
+            } else if (month.toLowerCase() === currentMonthName.toLowerCase()) {
+                const isCurrentMonthAfterNov2024 = new Date(selectedYear, monthIndex) > new Date(2024, 10);
+                if(isCurrentMonthAfterNov2024) {
+                    row['Agencia'] = financialSummary.profit;
+                }
             }
 
-            if (row['Ganancia'] === 0) { // If 'Ganancia' is not manually set, calculate it
-               row['Ganancia'] = (row['Agencia'] || 0) + (row['Oscar'] || 0) + (row['Transporte'] || 0) + (row['Rentas'] || 0) + (row['Bienes Raices'] || 0) + (row['Intereses'] || 0);
+
+            const existingGanancia = personalData.find(d => {
+                 const entryDate = new Date(d.fecha);
+                 return getMonth(entryDate) === monthIndex && entryDate.getFullYear() === selectedYear && d.categoria === 'Ganancia'
+            });
+
+            if (existingGanancia) {
+                row['Ganancia'] = existingGanancia.tipo === 'INGRESO' ? existingGanancia.monto : -existingGanancia.monto;
+            } else {
+                 row['Ganancia'] = (row['Agencia'] || 0) + (row['Oscar'] || 0) + (row['Transporte'] || 0) + (row['Rentas'] || 0) + (row['Bienes Raices'] || 0) + (row['Intereses'] || 0);
             }
 
             return row;
@@ -276,53 +295,6 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
 };
 
 
-const BalanceSheetItemModal = ({ items, onUpdate, children }: { items: any[], onUpdate: (items: any[]) => void, children: React.ReactNode }) => {
-    const [open, setOpen] = useState(false);
-    const [localItems, setLocalItems] = useState<any[]>([]);
-
-    useEffect(() => {
-        if(open) {
-            setLocalItems(JSON.parse(JSON.stringify(items))); // Deep copy
-        }
-    }, [open, items]);
-
-    const handleAmountChange = (index: number, newAmount: string) => {
-        const updatedItems = [...localItems];
-        updatedItems[index].amount = parseFloat(newAmount) || 0;
-        setLocalItems(updatedItems);
-    }
-    
-    const handleSave = () => {
-        onUpdate(localItems);
-        setOpen(false);
-    }
-    
-    return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>{children}</DialogTrigger>
-            <DialogContent>
-                <DialogHeader><DialogTitle>Editar Valores</DialogTitle></DialogHeader>
-                <div className="max-h-[60vh] overflow-y-auto space-y-4 pr-2">
-                    {localItems.map((item, index) => (
-                        <div key={index} className="grid grid-cols-2 gap-4 items-center">
-                            <Label>{item.name}</Label>
-                            <Input 
-                                type="number" 
-                                value={item.amount} 
-                                onChange={(e) => handleAmountChange(index, e.target.value)} 
-                            />
-                        </div>
-                    ))}
-                </div>
-                <div className="flex justify-end gap-2 mt-4">
-                    <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                    <Button onClick={handleSave}>Guardar Cambios</Button>
-                </div>
-            </DialogContent>
-        </Dialog>
-    )
-}
-
 const BalanceSheetDashboard = () => {
     const [assets, setAssets] = useState([
         { name: 'Banamex Inversión', amount: 200053 },
@@ -362,9 +334,57 @@ const BalanceSheetDashboard = () => {
     const netWorth = totalAssets + totalReceivable - totalLiabilities;
     const formatCurrency = (value: number) => value.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
 
+    const BalanceSheetItemModal = ({ items, onUpdate, children, title }: { items: any[], onUpdate: (items: any[]) => void, children: React.ReactNode, title: string }) => {
+        const [open, setOpen] = useState(false);
+        const [localItems, setLocalItems] = useState<any[]>([]);
+
+        useEffect(() => {
+            if(open) {
+                setLocalItems(JSON.parse(JSON.stringify(items))); // Deep copy
+            }
+        }, [open, items]);
+
+        const handleAmountChange = (index: number, newAmount: string) => {
+            const updatedItems = [...localItems];
+            updatedItems[index].amount = parseFloat(newAmount) || 0;
+            setLocalItems(updatedItems);
+        }
+        
+        const handleSave = () => {
+            onUpdate(localItems);
+            setOpen(false);
+        }
+        
+        return (
+            <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>{children}</DialogTrigger>
+                <DialogContent>
+                    <DialogHeader><DialogTitle>Editar {title}</DialogTitle></DialogHeader>
+                    <div className="max-h-[60vh] overflow-y-auto space-y-4 pr-2">
+                        {localItems.map((item, index) => (
+                            <div key={index} className="grid grid-cols-2 gap-4 items-center">
+                                <Label>{item.name}</Label>
+                                <Input 
+                                    type="number" 
+                                    value={item.amount} 
+                                    onChange={(e) => handleAmountChange(index, e.target.value)} 
+                                />
+                            </div>
+                        ))}
+                    </div>
+                    <div className="flex justify-end gap-2 mt-4">
+                        <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                        <Button onClick={handleSave}>Guardar Cambios</Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        )
+    }
+
+
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 mt-8">
-            <BalanceSheetItemModal items={assets} onUpdate={setAssets}>
+            <BalanceSheetItemModal items={assets} onUpdate={setAssets} title="Activos Líquidos">
                 <Card className="cursor-pointer hover:bg-muted transition-colors">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><PiggyBank className="w-5 h-5 text-green-500"/>Activos Líquidos</CardTitle>
@@ -382,7 +402,7 @@ const BalanceSheetDashboard = () => {
                     </CardContent>
                 </Card>
             </BalanceSheetItemModal>
-             <BalanceSheetItemModal items={receivables} onUpdate={setReceivables}>
+             <BalanceSheetItemModal items={receivables} onUpdate={setReceivables} title="Cuentas por Cobrar">
                 <Card className="cursor-pointer hover:bg-muted transition-colors">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><Handshake className="w-5 h-5 text-yellow-500"/>Cuentas por Cobrar</CardTitle>
@@ -400,7 +420,7 @@ const BalanceSheetDashboard = () => {
                     </CardContent>
                 </Card>
             </BalanceSheetItemModal>
-             <BalanceSheetItemModal items={liabilities} onUpdate={setLiabilities}>
+             <BalanceSheetItemModal items={liabilities} onUpdate={setLiabilities} title="Pasivos">
                 <Card className="cursor-pointer hover:bg-muted transition-colors">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><Landmark className="w-5 h-5 text-red-500"/>Pasivos</CardTitle>
@@ -582,5 +602,3 @@ export default function MiProgresoPage() {
     </div>
   );
 }
-
-    
