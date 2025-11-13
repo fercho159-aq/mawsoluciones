@@ -511,28 +511,35 @@ const PendientesTable = ({
 
     const groupedData = useMemo(() => {
         const uniqueClientNames = Array.from(new Set(clients.map(c => c.name)));
-        const sortedClientNames = uniqueClientNames.sort((a, b) => a.localeCompare(b));
-
-        const dataMap: Record<string, PendienteWithRelations[]> = {};
-
-        // Initialize map with all clients from the main client list
-        sortedClientNames.forEach(clientName => {
-            dataMap[clientName] = [];
-        });
-
-        // Populate with pendientes
-        data.forEach(pendiente => {
-            if (dataMap[pendiente.clienteName]) {
-                dataMap[pendiente.clienteName].push(pendiente);
-            }
-        });
         
-        return dataMap;
-    }, [data, clients]);
+        const dataMap: Record<string, PendienteWithRelations[]> = {};
+        const clientsWithPendientes = new Set<string>();
 
-    const clientHasPendientesInFilter = (clientName: string) => {
-        return data.some(p => p.clienteName === clientName);
-    }
+        data.forEach(p => {
+            clientsWithPendientes.add(p.clienteName);
+            if (!dataMap[p.clienteName]) {
+                dataMap[p.clienteName] = [];
+            }
+            dataMap[p.clienteName].push(p);
+        });
+
+        const activeClientNames = Array.from(clientsWithPendientes).sort((a,b) => a.localeCompare(b));
+        const inactiveClientNames = uniqueClientNames.filter(name => !clientsWithPendientes.has(name)).sort((a,b) => a.localeCompare(b));
+        
+        inactiveClientNames.forEach(name => {
+            dataMap[name] = [];
+        })
+        
+        const sortedClientNames = [...activeClientNames, ...inactiveClientNames];
+        
+        const finalMap: Record<string, PendienteWithRelations[]> = {};
+        sortedClientNames.forEach(name => {
+            finalMap[name] = dataMap[name];
+        })
+
+        return finalMap;
+
+    }, [data, clients]);
     
     if (Object.keys(groupedData).length === 0) {
         return (
@@ -568,9 +575,7 @@ const PendientesTable = ({
                         const rowCount = Math.max(1, pendientes.length);
                         const displayRowSpan = rowCount + (currentUser?.permissions?.pendientes?.reasignarResponsables ? 1 : 0);
 
-                        // If no pendientes match the current filter, but we want to show the client row
-                        if (pendientes.length === 0 && !clientHasPendientesInFilter(clienteName)) {
-                             // This part is simplified, you might want to show a single empty row or a special message
+                        if (pendientes.length === 0) {
                             return (
                                 <React.Fragment key={clienteName}>
                                     <TableRow>
