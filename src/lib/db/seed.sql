@@ -1,68 +1,99 @@
--- Este archivo contiene los datos iniciales para la tabla como_voy_en_mis_finanzas basados en la imagen proporcionada.
--- Ejecuta este script en tu base de datos para poblar la tabla.
--- Se recomienda vaciar la tabla antes de ejecutar para evitar duplicados: DELETE FROM como_voy_en_mis_finanzas;
+-- Este script puebla la tabla como_voy_en_mis_finanzas con datos de ejemplo para el año 2024.
 
 -- Enero 2024
 INSERT INTO como_voy_en_mis_finanzas (fecha, tipo, descripcion, monto, cuenta, categoria) VALUES
-('2024-01-15', 'INGRESO', 'Ingreso Agencia - Enero 2024', 18367.00, 'Efectivo', 'Agencia'),
-('2024-01-15', 'INGRESO', 'Ingreso Transporte - Enero 2024', 50000.00, 'Efectivo', 'Transporte'),
-('2024-01-15', 'INGRESO', 'Ingreso Rentas - Enero 2024', 18000.00, 'Efectivo', 'Rentas'),
-('2024-01-15', 'GASTO', 'Gasto Aldo - Enero 2024', 76011.00, 'Efectivo', 'ALDO HA GASTADO');
+('2024-01-15', 'INGRESO', 'Ingreso Agencia - Enero', 95360.00, 'Agencia', 'AGENCIA'),
+('2024-01-15', 'INGRESO', 'Ingreso Oscar - Enero', 11880.00, 'Personal', 'OSCAR'),
+('2024-01-15', 'INGRESO', 'Ingreso Transporte - Enero', 29000.00, 'Transporte', 'TRANSPORTE'),
+('2024-01-15', 'INGRESO', 'Ingreso Rentas - Enero', 0.00, 'Rentas', 'RENTAS'),
+('2024-01-15', 'INGRESO', 'Ingreso Ganancia - Enero', 123434.68, 'Ganancia', 'Ganancia');
 
 -- Febrero 2024
 INSERT INTO como_voy_en_mis_finanzas (fecha, tipo, descripcion, monto, cuenta, categoria) VALUES
-('2024-02-15', 'INGRESO', 'Ingreso Agencia - Febrero 2024', 72551.00, 'Efectivo', 'Agencia'),
-('2024-02-15', 'INGRESO', 'Ingreso Transporte - Febrero 2024', 20000.00, 'Efectivo', 'Transporte'),
-('2024-02-15', 'INGRESO', 'Ingreso Rentas - Febrero 2024', 18000.00, 'Efectivo', 'Rentas'),
-('2024-02-15', 'GASTO', 'Gasto Aldo - Febrero 2024', 112019.00, 'Efectivo', 'ALDO HA GASTADO');
+('2024-02-15', 'INGRESO', 'Ingreso Agencia - Febrero', 186937.00, 'Agencia', 'AGENCIA'),
+('2024-02-15', 'INGRESO', 'Ingreso Oscar - Febrero', 5148.00, 'Personal', 'OSCAR'),
+('2024-02-15', 'INGRESO', 'Ingreso Transporte - Febrero', 10381.00, 'Transporte', 'TRANSPORTE'),
+('2024-02-15', 'INGRESO', 'Ingreso Rentas - Febrero', 10390.00, 'Rentas', 'RENTAS'),
+('2024-02-15', 'INGRESO', 'Ingreso Ganancia - Febrero', 212856.00, 'Ganancia', 'Ganancia');
 
 -- Marzo 2024
 INSERT INTO como_voy_en_mis_finanzas (fecha, tipo, descripcion, monto, cuenta, categoria) VALUES
-('2024-03-15', 'INGRESO', 'Ingreso Agencia - Marzo 2024', 79307.00, 'Efectivo', 'Agencia'),
-('2024-03-15', 'INGRESO', 'Ingreso Oscar - Marzo 2024', 10000.00, 'Efectivo', 'Oscar'),
-('2024-03-15', 'INGRESO', 'Ingreso Rentas - Marzo 2024', 18000.00, 'Efectivo', 'Rentas'),
-('2024-03-15', 'GASTO', 'Gasto Aldo - Marzo 2024', 85098.00, 'Efectivo', 'ALDO HA GASTADO');
+('2024-03-15', 'INGRESO', 'Ingreso Agencia - Marzo', 111299.00, 'Agencia', 'AGENCIA'),
+('2024-03-15', 'INGRESO', 'Ingreso Oscar - Marzo', 2024.00, 'Personal', 'OSCAR'),
+('2024-03-15', 'INGRESO', 'Ingreso Transporte - Marzo', 8907.00, 'Transporte', 'TRANSPORTE'),
+('2024-03-15', 'INGRESO', 'Ingreso Rentas - Marzo', 1713.00, 'Rentas', 'RENTAS'),
+('2024-03-15', 'INGRESO', 'Ingreso Ganancia - Marzo', 123943.00, 'Ganancia', 'Ganancia');
 
 -- Abril 2024
 INSERT INTO como_voy_en_mis_finanzas (fecha, tipo, descripcion, monto, cuenta, categoria) VALUES
-('2024-04-15', 'INGRESO', 'Ingreso Agencia - Abril 2024', 89332.00, 'Efectivo', 'Agencia'),
-('2024-04-15', 'INGRESO', 'Ingreso Oscar - Abril 2024', 20000.00, 'Efectivo', 'Oscar'),
-('2024-04-15', 'INGRESO', 'Ingreso Rentas - Abril 2024', 18000.00, 'Efectivo', 'Rentas'),
-('2024-04-15', 'GASTO', 'Gasto Aldo - Abril 2024', 86326.00, 'Efectivo', 'ALDO HA GASTADO');
+('2024-04-15', 'INGRESO', 'Ingreso Agencia - Abril', 142469.00, 'Agencia', 'AGENCIA'),
+('2024-04-15', 'INGRESO', 'Ingreso Oscar - Abril', 6100.00, 'Personal', 'OSCAR'),
+('2024-04-15', 'INGRESO', 'Ingreso Transporte - Abril', 3645.00, 'Transporte', 'TRANSPORTE'),
+('2024-04-15', 'INGRESO', 'Ingreso Rentas - Abril', 3989.00, 'Rentas', 'RENTAS'),
+('2024-04-15', 'INGRESO', 'Ingreso Ganancia - Abril', 156203.00, 'Ganancia', 'Ganancia');
 
 -- Mayo 2024
 INSERT INTO como_voy_en_mis_finanzas (fecha, tipo, descripcion, monto, cuenta, categoria) VALUES
-('2024-05-15', 'INGRESO', 'Ingreso Agencia - Mayo 2024', 80313.00, 'Efectivo', 'Agencia'),
-('2024-05-15', 'INGRESO', 'Ingreso Oscar - Mayo 2024', 20000.00, 'Efectivo', 'Oscar'),
-('2024-05-15', 'INGRESO', 'Ingreso Rentas - Mayo 2024', 18000.00, 'Efectivo', 'Rentas'),
-('2024-05-15', 'GASTO', 'Gasto Aldo - Mayo 2024', 106000.00, 'Efectivo', 'ALDO HA GASTADO');
+('2024-05-15', 'INGRESO', 'Ingreso Agencia - Mayo', 109715.00, 'Agencia', 'AGENCIA'),
+('2024-05-15', 'INGRESO', 'Ingreso Oscar - Mayo', 3960.00, 'Personal', 'OSCAR'),
+('2024-05-15', 'INGRESO', 'Ingreso Transporte - Mayo', 11520.00, 'Transporte', 'TRANSPORTE'),
+('2024-05-15', 'INGRESO', 'Ingreso Rentas - Mayo', 5159.00, 'Rentas', 'RENTAS'),
+('2024-05-15', 'INGRESO', 'Ingreso Ganancia - Mayo', 130354.00, 'Ganancia', 'Ganancia');
 
 -- Junio 2024
 INSERT INTO como_voy_en_mis_finanzas (fecha, tipo, descripcion, monto, cuenta, categoria) VALUES
-('2024-06-15', 'INGRESO', 'Ingreso Agencia - Junio 2024', 68858.00, 'Efectivo', 'Agencia'),
-('2024-06-15', 'INGRESO', 'Ingreso Rentas - Junio 2024', 18000.00, 'Efectivo', 'Rentas'),
-('2024-06-15', 'GASTO', 'Gasto Aldo - Junio 2024', 106000.00, 'Efectivo', 'ALDO HA GASTADO');
+('2024-06-15', 'INGRESO', 'Ingreso Agencia - Junio', 213108.00, 'Agencia', 'AGENCIA'),
+('2024-06-15', 'INGRESO', 'Ingreso Oscar - Junio', 6500.00, 'Personal', 'OSCAR'),
+('2024-06-15', 'INGRESO', 'Ingreso Transporte - Junio', 11498.00, 'Transporte', 'TRANSPORTE'),
+('2024-06-15', 'INGRESO', 'Ingreso Rentas - Junio', 3884.00, 'Rentas', 'RENTAS'),
+('2024-06-15', 'INGRESO', 'Ingreso Intereses - Junio', 53382.00, 'Intereses', 'INTERESES'),
+('2024-06-15', 'INGRESO', 'Ingreso Ganancia - Junio', 288372.00, 'Ganancia', 'Ganancia');
 
 -- Julio 2024
 INSERT INTO como_voy_en_mis_finanzas (fecha, tipo, descripcion, monto, cuenta, categoria) VALUES
-('2024-07-15', 'INGRESO', 'Ingreso Agencia - Julio 2024', 61759.00, 'Efectivo', 'Agencia'),
-('2024-07-15', 'INGRESO', 'Ingreso Rentas - Julio 2024', 18000.00, 'Efectivo', 'Rentas'),
-('2024-07-15', 'GASTO', 'Gasto Aldo - Julio 2024', 106000.00, 'Efectivo', 'ALDO HA GASTADO');
+('2024-07-15', 'INGRESO', 'Ingreso Agencia - Julio', 212869.00, 'Agencia', 'AGENCIA'),
+('2024-07-15', 'INGRESO', 'Ingreso Oscar - Julio', 0.00, 'Personal', 'OSCAR'),
+('2024-07-15', 'GASTO', 'Gasto Transporte - Julio', 4731.00, 'Transporte', 'TRANSPORTE'),
+('2024-07-15', 'INGRESO', 'Ingreso Rentas - Julio', 5571.00, 'Rentas', 'RENTAS'),
+('2024-07-15', 'INGRESO', 'Ingreso Intereses - Julio', 5806.00, 'Intereses', 'INTERESES'),
+('2024-07-15', 'INGRESO', 'Ingreso Ganancia - Julio', 219515.00, 'Ganancia', 'Ganancia');
 
 -- Agosto 2024
 INSERT INTO como_voy_en_mis_finanzas (fecha, tipo, descripcion, monto, cuenta, categoria) VALUES
-('2024-08-15', 'INGRESO', 'Ingreso Agencia - Agosto 2024', 98579.00, 'Efectivo', 'Agencia'),
-('2024-08-15', 'INGRESO', 'Ingreso Rentas - Agosto 2024', 18000.00, 'Efectivo', 'Rentas'),
-('2024-08-15', 'GASTO', 'Gasto Aldo - Agosto 2024', 106000.00, 'Efectivo', 'ALDO HA GASTADO');
+('2024-08-15', 'INGRESO', 'Ingreso Agencia - Agosto', 82242.00, 'Agencia', 'AGENCIA'),
+('2024-08-15', 'INGRESO', 'Ingreso Oscar - Agosto', 2311.67, 'Personal', 'OSCAR'),
+('2024-08-15', 'GASTO', 'Gasto Transporte - Agosto', 164166.00, 'Transporte', 'TRANSPORTE'),
+('2024-08-15', 'INGRESO', 'Ingreso Rentas - Agosto', 1610.00, 'Rentas', 'RENTAS'),
+('2024-08-15', 'GASTO', 'Gasto Bienes Raices - Agosto', 1154053.00, 'Bienes Raices', 'BIENES RAICES'),
+('2024-08-15', 'INGRESO', 'Ingreso Intereses - Agosto', 1800.00, 'Intereses', 'INTERESES'),
+('2024-08-15', 'INGRESO', 'Ingreso Ganancia - Agosto', 86462.67, 'Ganancia', 'Ganancia');
 
 -- Septiembre 2024
 INSERT INTO como_voy_en_mis_finanzas (fecha, tipo, descripcion, monto, cuenta, categoria) VALUES
-('2024-09-15', 'INGRESO', 'Ingreso Agencia - Septiembre 2024', 59400.00, 'Efectivo', 'Agencia'),
-('2024-09-15', 'INGRESO', 'Ingreso Rentas - Septiembre 2024', 18000.00, 'Efectivo', 'Rentas'),
-('2024-09-15', 'GASTO', 'Gasto Aldo - Septiembre 2024', 106000.00, 'Efectivo', 'ALDO HA GASTADO');
+('2024-09-15', 'INGRESO', 'Ingreso Agencia - Septiembre', 178814.00, 'Agencia', 'AGENCIA'),
+('2024-09-15', 'INGRESO', 'Ingreso Oscar - Septiembre', 0.00, 'Personal', 'OSCAR'),
+('2024-09-15', 'INGRESO', 'Ingreso Transporte - Septiembre', 3755.00, 'Transporte', 'TRANSPORTE'),
+('2024-09-15', 'INGRESO', 'Ingreso Rentas - Septiembre', 5267.00, 'Rentas', 'RENTAS'),
+('2024-09-15', 'GASTO', 'Gasto Bienes Raices - Septiembre', 843093.00, 'Bienes Raices', 'BIENES RAICES'),
+('2024-09-15', 'GASTO', 'Gasto Intereses - Septiembre', 22092.00, 'Intereses', 'INTERESES'),
+('2024-09-15', 'INGRESO', 'Ingreso Ganancia - Septiembre', 149865.00, 'Ganancia', 'Ganancia');
 
 -- Octubre 2024
 INSERT INTO como_voy_en_mis_finanzas (fecha, tipo, descripcion, monto, cuenta, categoria) VALUES
-('2024-10-15', 'INGRESO', 'Ingreso Agencia - Octubre 2024', 91700.00, 'Efectivo', 'Agencia'),
-('2024-10-15', 'INGRESO', 'Ingreso Rentas - Octubre 2024', 18000.00, 'Efectivo', 'Rentas'),
-('2024-10-15', 'GASTO', 'Gasto Aldo - Octubre 2024', 106000.00, 'Efectivo', 'ALDO HA GASTADO');
+('2024-10-15', 'INGRESO', 'Ingreso Agencia - Octubre', 91700.00, 'Agencia', 'AGENCIA'),
+('2024-10-15', 'INGRESO', 'Ingreso Oscar - Octubre', 5720.00, 'Personal', 'OSCAR'),
+('2024-10-15', 'INGRESO', 'Ingreso Transporte - Octubre', 22208.00, 'Transporte', 'TRANSPORTE'),
+('2024-10-15', 'INGRESO', 'Ingreso Rentas - Octubre', 5100.00, 'Rentas', 'RENTAS'),
+('2024-10-15', 'GASTO', 'Gasto Bienes Raices - Octubre', 6000.00, 'Bienes Raices', 'BIENES RAICES'),
+('2024-10-15', 'INGRESO', 'Ingreso Intereses - Octubre', 5740.00, 'Intereses', 'INTERESES'),
+('2024-10-15', 'INGRESO', 'Ingreso Ganancia - Octubre', 124468.00, 'Ganancia', 'Ganancia');
+
+-- Noviembre 2024
+INSERT INTO como_voy_en_mis_finanzas (fecha, tipo, descripcion, monto, cuenta, categoria) VALUES
+('2024-11-15', 'INGRESO', 'Ingreso Agencia - Noviembre', 18623.00, 'Agencia', 'AGENCIA'),
+('2024-11-15', 'INGRESO', 'Ingreso Oscar - Noviembre', 0.00, 'Personal', 'OSCAR'),
+('2024-11-15', 'INGRESO', 'Ingreso Transporte - Noviembre', 14129.00, 'Transporte', 'TRANSPORTE'),
+('2024-11-15', 'INGRESO', 'Ingreso Rentas - Noviembre', 4729.00, 'Rentas', 'RENTAS'),
+('2024-11-15', 'INGRESO', 'Ingreso Bienes Raices - Noviembre', 8726.00, 'Bienes Raices', 'BIENES RAICES'),
+('2024-11-15', 'INGRESO', 'Ingreso Intereses - Noviembre', 3573.00, 'Intereses', 'INTERESES'),
+('2024-11-15', 'INGRESO', 'Ingreso Ganancia - Noviembre', 49780.00, 'Ganancia', 'Ganancia');
