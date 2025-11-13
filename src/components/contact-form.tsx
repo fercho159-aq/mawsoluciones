@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { addLead } from "@/app/leads/_actions";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -41,9 +43,15 @@ export function ContactForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // In a real app, you would send this data to your backend.
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    
+    await addLead({
+      name: values.name,
+      email: values.email,
+      notas: values.message,
+      source: 'Formulario de Contacto'
+    });
+
     toast({
       title: "¡Mensaje Enviado!",
       description: "Gracias por contactarnos. Te responderemos pronto.",

@@ -110,8 +110,8 @@ const AutomationCalculator = () => {
 ${selectedGoalsText}
 *Ahorro de tiempo estimado:* ${estimatedHoursSaved} horas/mes
 \n*Mi número es:* ${whatsappNumber}
-    `.trim();
-    const whatsappUrl = `https://wa.me/5542314150?text=${encodeURIComponent(message.trim())}`;
+    `.trim().replace(/\n\s*\n/g, '\n');
+    const whatsappUrl = `https://wa.me/525542314150?text=${encodeURIComponent(message.trim())}`;
     window.open(whatsappUrl, '_blank');
     
     addLead({
@@ -271,7 +271,7 @@ ${selectedGoalsText}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -50 }}
                 transition={{ duration: 0.3 }}
-                className="min-h-[250px]"
+                className="min-h-[300px]"
             >
                 {renderStep()}
             </motion.div>
@@ -326,4 +326,3 @@ ${selectedGoalsText}
 export default AutomationCalculator;
 
     
-

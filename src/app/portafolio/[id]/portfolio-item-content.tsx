@@ -1,3 +1,4 @@
+
 "use client";
 
 import { portfolioItems, type PortfolioItemType } from "@/lib/portfolio-data";
@@ -17,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { motion, AnimatePresence } from "framer-motion";
 import BackButton from "@/components/back-button";
+import { addLead } from '@/app/leads/_actions';
 
 interface QuoteFormData {
   name: string;
@@ -49,6 +51,15 @@ const QuoteDialog = ({ itemTitle }: { itemTitle: string }) => {
     if (formData.hasWebsite === 'Sí') {
       message += `\n*Sitio web actual:* ${formData.currentWebsite}`;
     }
+
+    addLead({
+        name: formData.name,
+        company: formData.company,
+        phone: formData.phone,
+        source: 'Quote Form - Portafolio',
+        notas: `Interesado en un sitio como: ${itemTitle}. Sitio actual: ${formData.hasWebsite === 'Sí' ? formData.currentWebsite : 'No'}.`,
+        data: formData
+    });
 
     const whatsappUrl = `https://wa.me/525542314150?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');

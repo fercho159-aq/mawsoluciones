@@ -140,7 +140,7 @@ const ContentRecommender = () => {
 ${recomendacionTexto}
 \n*Mi número es:* ${whatsappNumber}
     `.trim().replace(/\n\s*\n/g, '\n');
-    const whatsappUrl = `https://wa.me/5542314150?text=${encodeURIComponent(message.trim())}`;
+    const whatsappUrl = `https://wa.me/525542314150?text=${encodeURIComponent(message.trim())}`;
     window.open(whatsappUrl, '_blank');
     
     addLead({
@@ -356,4 +356,3 @@ export default ContentRecommender;
 
 
     
-

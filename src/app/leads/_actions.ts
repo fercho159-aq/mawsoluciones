@@ -21,6 +21,7 @@ export async function addLead(data: Partial<Omit<NewProspect, 'id' | 'createdAt'
         source: data.source || 'Sitio Web',
         status: 'Lead Nuevo',
         responsable: newSeller,
+        data: data.data,
     });
     
     revalidatePath("/equipo/dashboard/ventas"); 

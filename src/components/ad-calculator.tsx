@@ -203,7 +203,7 @@ const AdCalculator = () => {
 *Presupuesto mensual estimado:* ${formData.presupuesto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
 \n*Mi número es:* ${whatsappNumber}
     `.trim();
-    const whatsappUrl = `https://wa.me/5542314150?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/525542314150?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
     
     addLead({
