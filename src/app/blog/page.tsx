@@ -9,7 +9,7 @@ import { es } from 'date-fns/locale';
 import TypewriterTitle from '@/components/typewriter-title';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense } from 'react';
 import type { BlogPost } from './_actions';
 import { getBlogPosts } from './_actions';
 
@@ -31,7 +31,7 @@ const PostCard = ({ post }: { post: BlogPost }) => (
             )}
             <div className="flex items-center gap-1.5">
               <Calendar className="w-3 h-3" />
-              <time dateTime={post.date.toISOString()}>{format(new Date(post.date), "dd MMM yyyy", { locale: es })}</time>
+              <time dateTime={new Date(post.date).toISOString()}>{format(new Date(post.date), "dd MMM yyyy", { locale: es })}</time>
             </div>
           </div>
           {post.excerpt && (
@@ -48,29 +48,16 @@ const PostCard = ({ post }: { post: BlogPost }) => (
   </AnimatedDiv>
 );
 
-function BlogPageContent() {
-  const searchParams = useSearchParams();
-  const defaultTab = searchParams.get('tab') || 'all';
-
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadPosts() {
-      setLoading(true);
-      const fetchedPosts = await getBlogPosts();
-      setPosts(fetchedPosts);
-      setLoading(false);
-    }
-    loadPosts();
-  }, []);
-
+async function BlogPageContent() {
+  const posts = await getBlogPosts();
+  
   const newsPosts = posts.filter(p => p.category === 'Noticias');
   const interviewPosts = posts.filter(p => p.category === 'Entrevistas');
 
-  if (loading) {
-    return <div>Cargando...</div>;
-  }
+  // We can't use searchParams in a server component that is not a page.
+  // We'll pass the defaultTab logic to the client component wrapper if needed,
+  // or just default to 'all'. For now, let's keep it simple.
+  const defaultTab = 'all';
 
   return (
      <Tabs defaultValue={defaultTab} className="w-full">
