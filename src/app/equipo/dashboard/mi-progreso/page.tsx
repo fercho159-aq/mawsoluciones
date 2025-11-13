@@ -171,43 +171,43 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
     const monthlyData = useMemo(() => {
         const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
         const categories = ["Agencia", "Oscar", "Transporte", "Rentas", "Bienes Raices", "Intereses", "ALDO HA GASTADO", "Ganancia"];
+        const incomeExpenseCategories = ["Agencia", "Oscar", "Transporte", "Rentas", "Bienes Raices", "Intereses"];
 
         return monthNames.map((month, monthIndex) => {
             const row: { [key: string]: any } = { month };
             
             categories.forEach(category => {
-                 if (category !== 'Ganancia') {
-                    const entries = personalData.filter(d => {
-                        const entryDate = new Date(d.fecha);
-                        return getMonth(entryDate) === monthIndex && entryDate.getFullYear() === selectedYear && d.categoria === category;
-                    });
-                    row[category] = entries.reduce((sum, item) => sum + (item.tipo === 'INGRESO' ? item.monto : -item.monto), 0);
-                 }
+                const entries = personalData.filter(d => {
+                    const entryDate = new Date(d.fecha);
+                    return getMonth(entryDate) === monthIndex && entryDate.getFullYear() === selectedYear && d.categoria === category;
+                });
+                row[category] = entries.reduce((sum, item) => sum + (item.tipo === 'INGRESO' ? item.monto : -item.monto), 0);
             });
             
             const currentMonthName = format(new Date(`${selectedMonth}-01T12:00:00`), 'MMMM', {locale:es});
             
+            // Lógica especial para Agencia en Octubre y Noviembre
             if (month.toLowerCase() === 'octubre' && selectedYear === 2024) {
                  row['Agencia'] = 91700;
             } else if (month.toLowerCase() === 'noviembre' && selectedYear === 2024) {
                  row['Agencia'] = financialSummary.profit - 527138;
             } else if (month.toLowerCase() === currentMonthName.toLowerCase()) {
-                const isCurrentMonthAfterNov2024 = new Date(selectedYear, monthIndex) > new Date(2024, 10);
+                const isCurrentMonthAfterNov2024 = new Date(selectedYear, monthIndex) >= new Date(2024, 10);
                 if(isCurrentMonthAfterNov2024) {
                     row['Agencia'] = financialSummary.profit;
                 }
             }
-
-
-            const existingGanancia = personalData.find(d => {
+            
+            // Lógica para Ganancia
+            const existingGananciaEntry = personalData.find(d => {
                  const entryDate = new Date(d.fecha);
                  return getMonth(entryDate) === monthIndex && entryDate.getFullYear() === selectedYear && d.categoria === 'Ganancia'
             });
 
-            if (existingGanancia) {
-                row['Ganancia'] = existingGanancia.tipo === 'INGRESO' ? existingGanancia.monto : -existingGanancia.monto;
+            if (existingGananciaEntry) {
+                row['Ganancia'] = existingGananciaEntry.tipo === 'INGRESO' ? existingGananciaEntry.monto : -existingGananciaEntry.monto;
             } else {
-                 row['Ganancia'] = (row['Agencia'] || 0) + (row['Oscar'] || 0) + (row['Transporte'] || 0) + (row['Rentas'] || 0) + (row['Bienes Raices'] || 0) + (row['Intereses'] || 0) + (row['ALDO HA GASTADO'] || 0);
+                 row['Ganancia'] = incomeExpenseCategories.reduce((acc, cat) => acc + (row[cat] || 0), 0);
             }
 
             return row;
@@ -604,3 +604,4 @@ export default function MiProgresoPage() {
     </div>
   );
 }
+
