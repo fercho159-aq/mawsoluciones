@@ -56,7 +56,15 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
         <div className="container mx-auto px-4 md:px-6">
           <div className="max-w-3xl mx-auto">
             <div
-              className="prose prose-lg dark:prose-invert prose-headings:font-headline prose-a:text-primary hover:prose-a:text-primary/80 prose-strong:text-foreground max-w-none"
+              className="prose prose-lg dark:prose-invert max-w-none 
+              prose-headings:font-headline prose-headings:text-foreground prose-headings:font-bold
+              prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl
+              prose-p:text-foreground/80 prose-p:leading-relaxed
+              prose-strong:text-foreground
+              prose-a:text-primary hover:prose-a:text-primary/80
+              prose-ul:list-disc prose-ol:list-decimal 
+              prose-li:text-foreground/80
+              prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-foreground/60"
             >
               <ReactMarkdown>{post.content}</ReactMarkdown>
             </div>
