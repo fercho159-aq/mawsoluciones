@@ -45,7 +45,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
               )}
               <div className="flex items-center gap-2">
                 <Calendar className="w-5 h-5" />
-                <time dateTime={post.date.toISOString()}>{format(new Date(post.date), "d 'de' MMMM, yyyy", { locale: es })}</time>
+                <time dateTime={new Date(post.date).toISOString()}>{format(new Date(post.date), "d 'de' MMMM, yyyy", { locale: es })}</time>
               </div>
             </div>
           </div>
@@ -56,7 +56,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
         <div className="container mx-auto px-4 md:px-6">
           <div className="max-w-3xl mx-auto">
             <div
-              className="prose prose-lg lg:prose-xl max-w-none text-foreground/80 prose-headings:font-headline prose-headings:text-foreground prose-a:text-primary hover:prose-a:text-primary/80 prose-strong:text-foreground"
+              className="prose prose-lg dark:prose-invert prose-headings:font-headline prose-a:text-primary hover:prose-a:text-primary/80 prose-strong:text-foreground max-w-none"
             >
               <ReactMarkdown>{post.content}</ReactMarkdown>
             </div>
