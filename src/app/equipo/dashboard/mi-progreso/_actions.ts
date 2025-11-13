@@ -22,6 +22,10 @@ export async function updatePersonalFinanceEntry(entry: PersonalFinanceTransacti
     try {
         const { fecha, categoria, ...rest } = entry;
         const entryDate = new Date(fecha);
+        if (isNaN(entryDate.getTime())) {
+            throw new Error('Invalid date provided for personal finance entry.');
+        }
+
         const year = entryDate.getUTCFullYear();
         const month = entryDate.getUTCMonth();
 

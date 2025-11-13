@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect, startTransition } from 'react';
@@ -80,9 +81,16 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedYear }: { financia
         }
     }
     
-    const handleCellSave = (month: string, category: string, newAmount: number) => {
-        const monthIndex = new Date(Date.parse(month +" 1, 2024")).getMonth();
+    const handleCellSave = async (month: string, category: string, newAmount: number) => {
+        const monthNames: Record<string, number> = { "Enero": 0, "Febrero": 1, "Marzo": 2, "Abril": 3, "Mayo": 4, "Junio": 5, "Julio": 6, "Agosto": 7, "Septiembre": 8, "Octubre": 9, "Noviembre": 10, "Diciembre": 11 };
+        const monthIndex = monthNames[month as keyof typeof monthNames];
         const year = selectedYear;
+        
+        if (monthIndex === undefined) {
+            console.error("Invalid month name:", month);
+            return;
+        }
+
         const entryDate = new Date(year, monthIndex, 15);
 
         const entry: PersonalFinanceTransaction = {
@@ -116,15 +124,13 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedYear }: { financia
             const currentYear = new Date().getFullYear();
 
             // Sincronizar 'Agencia' con la utilidad neta para el mes actual y futuros
-            if (selectedYear > currentYear || (selectedYear === currentYear && monthIndex >= currentMonth)) {
-                if(month === 'Octubre' && selectedYear === 2024){
-                    row['Agencia'] = 91700;
-                } else if(month === 'Noviembre' && selectedYear === 2024) {
-                    row['Agencia'] = financialSummary.profit - 527138;
-                }
-                else {
-                    row['Agencia'] = financialSummary.profit;
-                }
+            if (month === 'Octubre' && selectedYear === 2024){
+                row['Agencia'] = 91700;
+            } else if(month === 'Noviembre' && selectedYear === 2024) {
+                row['Agencia'] = financialSummary.profit - 527138;
+            }
+            else if(selectedYear > currentYear || (selectedYear === currentYear && monthIndex >= currentMonth)) {
+                row['Agencia'] = financialSummary.profit;
             }
 
             // Lógica para Ganancia: si hay un valor guardado, úsalo, si no, calcúlalo.
