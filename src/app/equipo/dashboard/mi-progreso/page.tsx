@@ -170,12 +170,11 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
 
     const monthlyData = useMemo(() => {
         const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-        const categories = ["Agencia", "Oscar", "Transporte", "Rentas", "Bienes Raices", "Intereses", "Ganancia"];
+        const categories = ["Agencia", "Oscar", "Transporte", "Rentas", "Bienes Raices", "Intereses", "ALDO HA GASTADO", "Ganancia"];
 
         return monthNames.map((month, monthIndex) => {
             const row: { [key: string]: any } = { month };
-            const currentYear = new Date().getFullYear();
-
+            
             categories.forEach(category => {
                  if (category !== 'Ganancia') {
                     const entries = personalData.filter(d => {
@@ -208,7 +207,7 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
             if (existingGanancia) {
                 row['Ganancia'] = existingGanancia.tipo === 'INGRESO' ? existingGanancia.monto : -existingGanancia.monto;
             } else {
-                 row['Ganancia'] = (row['Agencia'] || 0) + (row['Oscar'] || 0) + (row['Transporte'] || 0) + (row['Rentas'] || 0) + (row['Bienes Raices'] || 0) + (row['Intereses'] || 0);
+                 row['Ganancia'] = (row['Agencia'] || 0) + (row['Oscar'] || 0) + (row['Transporte'] || 0) + (row['Rentas'] || 0) + (row['Bienes Raices'] || 0) + (row['Intereses'] || 0) + (row['ALDO HA GASTADO'] || 0);
             }
 
             return row;
@@ -254,12 +253,13 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
                                 <TableHead>Rentas</TableHead>
                                 <TableHead>Bienes Raíces</TableHead>
                                 <TableHead>Intereses</TableHead>
+                                <TableHead>Aldo ha gastado</TableHead>
                                 <TableHead className="font-bold">Ganancia</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {isLoading ? (
-                                Array.from({length: 12}).map((_, i) => <TableRow key={i}><TableCell colSpan={8} className="text-center">Cargando...</TableCell></TableRow>)
+                                Array.from({length: 12}).map((_, i) => <TableRow key={i}><TableCell colSpan={9} className="text-center">Cargando...</TableCell></TableRow>)
                             ) : (
                                 monthlyData.map((row) => (
                                     <TableRow key={row.month} className={cn(format(new Date(`${selectedMonth}-01T12:00:00`), 'MMMM', {locale:es}).toLowerCase() === row.month.toLowerCase() && 'bg-muted')}>
@@ -270,6 +270,7 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
                                         <TableCell className={cn(row.Rentas < 0 ? "text-red-500" : "")}><EditableCell value={row.Rentas} onSave={(v) => handleCellSave(row.month, 'Rentas', v)}/></TableCell>
                                         <TableCell className={cn(row['Bienes Raices'] < 0 ? "text-red-500" : "")}><EditableCell value={row['Bienes Raices']} onSave={(v) => handleCellSave(row.month, 'Bienes Raices', v)}/></TableCell>
                                         <TableCell className={cn(row.Intereses < 0 ? "text-red-500" : "")}><EditableCell value={row.Intereses} onSave={(v) => handleCellSave(row.month, 'Intereses', v)}/></TableCell>
+                                        <TableCell className={cn(row['ALDO HA GASTADO'] < 0 ? "text-red-500" : "")}><EditableCell value={row['ALDO HA GASTADO']} onSave={(v) => handleCellSave(row.month, 'ALDO HA GASTADO', v)}/></TableCell>
                                         <TableCell className={cn("font-bold", (row.Ganancia || 0) < 0 ? "text-red-500" : "text-green-500")}><EditableCell value={row.Ganancia} onSave={(v) => handleCellSave(row.month, 'Ganancia', v)}/></TableCell>
                                     </TableRow>
                                 ))
@@ -284,6 +285,7 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
                                 <TableCell>{formatCurrency(averages.Rentas)}</TableCell>
                                 <TableCell>{formatCurrency(averages['Bienes Raices'])}</TableCell>
                                 <TableCell>{formatCurrency(averages.Intereses)}</TableCell>
+                                <TableCell>{formatCurrency(averages['ALDO HA GASTADO'])}</TableCell>
                                 <TableCell className={cn((averages.Ganancia || 0) < 0 ? "text-red-500" : "text-green-500")}>{formatCurrency(averages.Ganancia)}</TableCell>
                             </TableRow>
                         </TableFooter>
