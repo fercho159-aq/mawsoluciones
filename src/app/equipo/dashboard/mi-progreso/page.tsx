@@ -101,8 +101,7 @@ const PersonalFinanceDashboard = ({ personalData, selectedYear, onRefresh }: { p
                 row[category] = totalAmount;
             });
             
-            // Si no hay valor editado para "Ganancia", se calcula
-            if (!row['Ganancia']) {
+            if (row['Ganancia'] === 0 || !row['Ganancia']) {
                 row['Ganancia'] = incomeCategories
                     .filter(cat => cat !== 'Ganancia')
                     .reduce((sum, cat) => sum + (row[cat] || 0), 0);
@@ -261,3 +260,4 @@ export default function MiProgresoPage() {
     </div>
   );
 }
+
