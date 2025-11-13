@@ -81,9 +81,9 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedYear }: { financia
         }
     }
     
-    const handleCellSave = async (month: string, category: string, newAmount: number) => {
-        const monthNames: Record<string, number> = { "Enero": 0, "Febrero": 1, "Marzo": 2, "Abril": 3, "Mayo": 4, "Junio": 5, "Julio": 6, "Agosto": 7, "Septiembre": 8, "Octubre": 9, "Noviembre": 10, "Diciembre": 11 };
-        const monthIndex = monthNames[month as keyof typeof monthNames];
+     const handleCellSave = async (month: string, category: string, newAmount: number) => {
+        const monthNames: Record<string, number> = { "enero": 0, "febrero": 1, "marzo": 2, "abril": 3, "mayo": 4, "junio": 5, "julio": 6, "agosto": 7, "septiembre": 8, "octubre": 9, "noviembre": 10, "diciembre": 11 };
+        const monthIndex = monthNames[month.toLowerCase() as keyof typeof monthNames];
         const year = selectedYear;
         
         if (monthIndex === undefined) {
@@ -116,9 +116,9 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedYear }: { financia
             const processCategory = (category: string) => {
                 const entries = personalData.filter(d => {
                     const entryDate = new Date(d.fecha);
-                    return getMonth(entryDate) === monthIndex && entryDate.getFullYear() === selectedYear && d.categoria === category;
+                    return getMonth(entryDate) === monthIndex && entryDate.getFullYear() === selectedYear && d.categoria?.toLowerCase() === category.toLowerCase();
                 });
-                return entries.reduce((sum, item) => sum + (item.tipo === 'INGRESO' ? item.monto : -item.monto), 0);
+                return entries.reduce((sum, item) => sum + (item.tipo.toUpperCase() === 'INGRESO' ? item.monto : -item.monto), 0);
             };
 
             incomeCategories.forEach(category => {
@@ -131,13 +131,11 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedYear }: { financia
             const currentMonth = new Date().getMonth();
             const currentYear = new Date().getFullYear();
 
-            // Sincronizar 'Agencia' con la utilidad neta para el mes actual y futuros
             if (month === 'Octubre' && selectedYear === 2024){
                 row['Agencia'] = 91700;
             } else if(month === 'Noviembre' && selectedYear === 2024) {
                 row['Agencia'] = financialSummary.profit - 527138;
-            }
-            else if(selectedYear > currentYear || (selectedYear === currentYear && monthIndex >= currentMonth)) {
+            } else if(selectedYear > currentYear || (selectedYear === currentYear && monthIndex >= currentMonth)) {
                 if(financialSummary.profit !== 0) {
                      row['Agencia'] = financialSummary.profit;
                 }
@@ -145,7 +143,7 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedYear }: { financia
 
             const gananciaEntries = personalData.filter(d => {
                 const entryDate = new Date(d.fecha);
-                return getMonth(entryDate) === monthIndex && entryDate.getFullYear() === selectedYear && d.categoria === 'Ganancia';
+                return getMonth(entryDate) === monthIndex && entryDate.getFullYear() === selectedYear && d.categoria?.toLowerCase() === 'ganancia';
             });
             
             if (gananciaEntries.length > 0) {
@@ -171,7 +169,7 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedYear }: { financia
     
     const averages = useMemo(() => {
         const avg: { [key: string]: number } = {};
-        const monthsWithData = monthlyData.filter(row => Object.values(row).some(v => typeof v === 'number' && v !== 0)).length || 1;
+        const monthsWithData = monthlyData.filter(row => Object.values(row).slice(1).some(v => typeof v === 'number' && v !== 0)).length || 1;
         Object.keys(totals).forEach(key => {
             avg[key] = totals[key] / monthsWithData;
         });
