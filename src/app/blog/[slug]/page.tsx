@@ -7,7 +7,6 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import AnimatedDiv from "@/components/animated-div";
-import ReactMarkdown from 'react-markdown';
 import { Card, CardContent } from "@/components/ui/card";
 
 export default async function BlogPostPage({ params }: { params: { slug: string } }) {
@@ -65,8 +64,8 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
               prose-ul:list-disc prose-ol:list-decimal 
               prose-li:text-foreground/80
               prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-foreground/60"
+              dangerouslySetInnerHTML={{ __html: post.content }}
             >
-              <ReactMarkdown>{post.content}</ReactMarkdown>
             </div>
 
             <div className="text-center mt-20">
