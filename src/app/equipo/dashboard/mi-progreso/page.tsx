@@ -16,6 +16,7 @@ import { getPersonalFinance, updatePersonalFinanceEntry, getBalanceSheetData, ad
 import { ComoVoyEnMisFinanzas, Activo, Pasivo, NewActivo, NewPasivo } from '@/lib/db/schema';
 import { useToast } from '@/hooks/use-toast';
 import { getMonth, getYear, format, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
@@ -529,4 +530,5 @@ export default function MiProgresoPage() {
     </div>
   );
 }
+
 
