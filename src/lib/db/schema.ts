@@ -51,6 +51,7 @@ export const prospects_maw = pgTable('prospects_maw', {
     responsable: varchar('responsable', { length: 100 }),
     createdAt: timestamp('created_at').defaultNow(),
     data: jsonb('data'),
+    notas: text('notas'),
 });
 
 // Nueva tabla para finanzas personales

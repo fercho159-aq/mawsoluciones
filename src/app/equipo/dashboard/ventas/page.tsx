@@ -39,6 +39,7 @@ import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import WhatsappIcon from '@/components/icons/whatsapp-icon';
+import { Textarea } from '@/components/ui/textarea';
 
 
 type OrigenLead = "Facebook" | "TikTok" | "Referencia" | "Sitio Web" | "Instagram" | string;
@@ -67,6 +68,7 @@ const AddLeadDialog = ({ onAction, children, prospect, isEditing }: { onAction: 
     const [source, setSource] = useState<OrigenLead>('Referencia');
     const [status, setStatus] = useState<StatusLead>('Lead Nuevo');
     const [responsable, setResponsable] = useState<ResponsableVentas | ''>('');
+    const [notas, setNotas] = useState('');
 
     const { toast } = useToast();
 
@@ -79,6 +81,7 @@ const AddLeadDialog = ({ onAction, children, prospect, isEditing }: { onAction: 
             setSource(prospect.source || 'Referencia');
             setStatus(prospect.status as StatusLead || 'Lead Nuevo');
             setResponsable(prospect.responsable as ResponsableVentas || '');
+            setNotas(prospect.notas || '');
         } else {
             resetForm();
         }
@@ -86,7 +89,7 @@ const AddLeadDialog = ({ onAction, children, prospect, isEditing }: { onAction: 
 
     const resetForm = () => {
         setName(''); setCompany(''); setEmail(''); setPhone(''); setSource('Referencia');
-        setStatus('Lead Nuevo'); setResponsable('');
+        setStatus('Lead Nuevo'); setResponsable(''); setNotas('');
     }
 
     const handleSave = async () => {
@@ -99,7 +102,7 @@ const AddLeadDialog = ({ onAction, children, prospect, isEditing }: { onAction: 
             return;
         }
 
-        const dataToSave = { name, company, email, phone, source, status, responsable: responsable || undefined };
+        const dataToSave: Partial<NewProspect> = { name, company, email, phone, source, status, notas, responsable: responsable || undefined };
 
         try {
             if (isEditing && prospect) {
@@ -138,7 +141,7 @@ const AddLeadDialog = ({ onAction, children, prospect, isEditing }: { onAction: 
     return (
         <Dialog open={open} onOpenChange={(o) => {setOpen(o); if (!o) resetForm()}}>
             <DialogTrigger asChild>{children}</DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>{isEditing ? 'Editar' : 'Añadir Nuevo'} Prospecto</DialogTitle>
                 </DialogHeader>
@@ -190,6 +193,10 @@ const AddLeadDialog = ({ onAction, children, prospect, isEditing }: { onAction: 
                         </div>
                         </>
                     )}
+                    <div className="space-y-2">
+                        <Label htmlFor="notas">Notas</Label>
+                        <Textarea id="notas" value={notas} onChange={(e) => setNotas(e.target.value)} placeholder="Añade notas importantes sobre el prospecto aquí..." />
+                    </div>
                 </div>
                 <DialogFooter className="justify-between">
                     <div>
