@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getPersonalFinance, updatePersonalFinanceEntry, type PersonalFinanceTransaction } from './_actions';
 import { useToast } from '@/hooks/use-toast';
-import { format, getMonth, parseISO, startOfMonth } from 'date-fns';
+import { format, getMonth, parseISO, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 const TransactionModal = ({
@@ -180,20 +180,21 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
                 row[category] = entries.reduce((sum, item) => sum + (item.tipo === 'INGRESO' ? item.monto : -item.monto), 0);
             });
             
-            if (month.toLowerCase() === 'noviembre' && selectedYear === 2024) { // Specific logic for Nov 2024
+            const currentMonthName = format(new Date(`${selectedMonth}-01T00:00:00`), 'MMMM', {locale:es});
+            
+            if (month.toLowerCase() === currentMonthName.toLowerCase() && month.toLowerCase() === 'noviembre' && selectedYear === 2024) {
                  row['Agencia'] = financialSummary.profit - 527138;
             } else if (month.toLowerCase() === 'octubre' && selectedYear === 2024) {
                  row['Agencia'] = 91700;
             }
 
-
             if (row['Ganancia'] === 0) { // If 'Ganancia' is not manually set, calculate it
-               row['Ganancia'] = row['Agencia'] + row['Oscar'] + row['Transporte'] + row['Rentas'] + row['Bienes Raices'] + row['Intereses'];
+               row['Ganancia'] = (row['Agencia'] || 0) + (row['Oscar'] || 0) + (row['Transporte'] || 0) + (row['Rentas'] || 0) + (row['Bienes Raices'] || 0) + (row['Intereses'] || 0);
             }
 
             return row;
         });
-    }, [personalData, financialSummary.profit, selectedYear]);
+    }, [personalData, financialSummary.profit, selectedMonth, selectedYear]);
 
     const formatCurrency = (value: number | undefined) => {
         if (value === undefined || isNaN(value)) return '$0.00';
@@ -582,3 +583,4 @@ export default function MiProgresoPage() {
   );
 }
 
+    
