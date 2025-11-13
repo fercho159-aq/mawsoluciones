@@ -27,14 +27,14 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
         
         {/* Google tag (gtag.js) */}
-        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-44Z7QW60V2"></Script>
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-RK806X2669"></Script>
         <Script id="google-analytics">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
 
-            gtag('config', 'G-44Z7QW60V2');
+            gtag('config', 'G-RK806X2669');
           `}
         </Script>
       </head>
