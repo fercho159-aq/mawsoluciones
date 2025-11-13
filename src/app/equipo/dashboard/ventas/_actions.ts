@@ -36,12 +36,43 @@ export async function addMawProspect(data: Partial<Omit<NewProspect, 'id' | 'cre
             source: data.source || 'Manual',
             status: data.status || 'Lead Nuevo',
             responsable: data.responsable as any || newSeller,
-            data: data, 
+            data: data.data,
+            notas: data.notas,
         });
         revalidatePath("/equipo/dashboard/ventas");
     } catch (error: any) {
         console.error("Error adding prospect:", error);
         throw new Error("No se pudo añadir el prospecto a la base de datos: " + error.message);
+    }
+}
+
+export async function bulkAddMawProspects(prospects: Partial<Omit<NewProspect, 'id' | 'createdAt'>>[]) {
+    if (!prospects || prospects.length === 0) {
+        return;
+    }
+    try {
+        const prospectsToInsert = prospects.map(prospect => {
+            const newSeller = responsables[lastSellerIndex % responsables.length];
+            lastSellerIndex = (lastSellerIndex + 1) % responsables.length;
+            return {
+                 name: prospect.name || prospect.company, 
+                company: prospect.company,
+                phone: prospect.phone,
+                email: prospect.email,
+                source: prospect.source || 'Campaña',
+                status: 'Lead Nuevo',
+                responsable: newSeller,
+                data: prospect.data,
+                notas: prospect.notas,
+            }
+        });
+
+        await db.insert(prospects_maw).values(prospectsToInsert);
+
+        revalidatePath("/equipo/dashboard/ventas");
+    } catch (error: any) {
+        console.error("Error bulk adding prospects:", error);
+        throw new Error("No se pudieron añadir los prospectos a la base de datos: " + error.message);
     }
 }
 
@@ -83,5 +114,3 @@ export async function deleteProspect(id: number) {
         throw new Error(error.message || "No se pudo eliminar el prospecto.");
     }
 }
-
-

@@ -32,7 +32,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format, isToday, subDays, startOfMonth, endOfMonth, isWithinInterval, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { getProspects, addMawProspect, convertProspectToClient, updateProspect, deleteProspect } from './_actions';
+import { getProspects, addMawProspect, convertProspectToClient, updateProspect, deleteProspect, bulkAddMawProspects } from './_actions';
 import type { Prospect, NewProspect, Colaborador } from '@/lib/db/schema';
 import { teamMembers } from '@/lib/team-data';
 import { Separator } from '@/components/ui/separator';
@@ -225,6 +225,91 @@ const AddLeadDialog = ({ onAction, children, prospect, isEditing }: { onAction: 
         </Dialog>
     )
 }
+
+const BulkAddLeadsDialog = ({ onAction }: { onAction: () => Promise<void> }) => {
+    const [open, setOpen] = useState(false);
+    const [text, setText] = useState('');
+    const { toast } = useToast();
+
+    const handleSave = async () => {
+        if (!text.trim()) {
+            toast({ title: 'Error', description: 'El campo de texto está vacío.', variant: 'destructive' });
+            return;
+        }
+
+        const lines = text.trim().split('\n').slice(1); // Saltar encabezado
+        const prospectsToAdd: Partial<NewProspect>[] = [];
+        
+        const columnIndices = {
+            form_name: 9,
+            Email: 10,
+            Name: 11,
+            'Phone number': 12,
+        };
+
+        for (const line of lines) {
+            const columns = line.split('\t');
+            if (columns.length > Math.max(...Object.values(columnIndices))) {
+                const formName = columns[columnIndices.form_name];
+                
+                if (formName && formName.toLowerCase().includes('aldo form')) {
+                    prospectsToAdd.push({
+                        name: columns[columnIndices.Name]?.trim() || '',
+                        company: '', 
+                        email: columns[columnIndices.Email]?.trim() || null,
+                        phone: columns[columnIndices['Phone number']]?.trim() || null,
+                        source: 'Campaña Aldo',
+                        data: { raw: line }
+                    });
+                }
+            }
+        }
+        
+        if (prospectsToAdd.length === 0) {
+            toast({ title: 'Sin coincidencias', description: 'No se encontraron prospectos del "Aldo form" en los datos ingresados.', variant: 'default' });
+            return;
+        }
+
+        try {
+            await bulkAddMawProspects(prospectsToAdd);
+            toast({ title: 'Éxito', description: `${prospectsToAdd.length} prospecto(s) de campaña han sido añadidos.` });
+            startTransition(() => {
+                onAction();
+                setOpen(false);
+                setText('');
+            });
+        } catch(error: any) {
+            toast({ title: 'Error', description: error.message, variant: 'destructive' });
+        }
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                 <Button variant="outline"><PlusCircle className="w-4 h-4 mr-2" /> Añadir Prospectos Campaña</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                    <DialogTitle>Añadir Prospectos de Campaña</DialogTitle>
+                    <DialogDescription>Pega aquí los datos exportados. El sistema filtrará y añadirá automáticamente los prospectos del "Aldo form".</DialogDescription>
+                </DialogHeader>
+                 <div className="py-4">
+                    <Textarea 
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        placeholder="Pega aquí tus datos, incluyendo la fila de encabezado..."
+                        className="h-64"
+                    />
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                    <Button onClick={handleSave}>Guardar Prospectos</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+};
+
 
 const adsTeam: Colaborador[] = teamMembers.filter(m => ['Julio', 'Luis', 'Fany', 'Carlos', 'Paola', 'Cristhian', 'Daniel'].includes(m.name));
 const webTeam: Colaborador[] = teamMembers.filter(m => ['Julio', 'Fernando', 'Alexis'].includes(m.name));
@@ -470,12 +555,15 @@ export default function VentasPage() {
     <div>
         <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold font-headline">Pipeline de Ventas</h1>
-            <AddLeadDialog onAction={handleAction} isEditing={false}>
-                <Button>
-                    <PlusCircle className="w-4 h-4 mr-2" />
-                    Añadir Prospecto
-                </Button>
-            </AddLeadDialog>
+            <div className="flex gap-2">
+                <BulkAddLeadsDialog onAction={handleAction} />
+                <AddLeadDialog onAction={handleAction} isEditing={false}>
+                    <Button>
+                        <PlusCircle className="w-4 h-4 mr-2" />
+                        Añadir Prospecto
+                    </Button>
+                </AddLeadDialog>
+            </div>
         </div>
        <Card>
         <CardHeader>
