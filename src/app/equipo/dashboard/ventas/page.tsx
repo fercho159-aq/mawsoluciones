@@ -102,7 +102,7 @@ const AddLeadDialog = ({ onAction, children, prospect, isEditing }: { onAction: 
             return;
         }
 
-        const dataToSave: Partial<NewProspect> = { name, company, email, phone, source, status, notas, responsable: responsable || undefined };
+        const dataToSave: Partial<NewProspect> = { name, company, email, phone, source, status, notas, responsable: responsable || undefined, data: { name, company, email, phone, source, status, notas, responsable } };
 
         try {
             if (isEditing && prospect) {
@@ -403,17 +403,14 @@ export default function VentasPage() {
     const [prospects, setProspects] = useState<Prospect[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Filtros
     const [responsableFilter, setResponsableFilter] = useState('Todos');
     const [statusFilter, setStatusFilter] = useState('Todos');
     const [origenFilter, setOrigenFilter] = useState('Todos');
-    const [monthFilter, setMonthFilter] = useState('Todos');
-    const [searchFilter, setSearchFilter] = useState('');
 
     const fetchProspectsData = async () => {
         setIsLoading(true);
         const prospectsData = await getProspects();
-        const sortedProspects = (prospectsData as Prospect[]).sort((a, b) => (a.name || a.company || '').localeCompare(b.name || b.company || ''));
+        const sortedProspects = (prospectsData as Prospect[]).sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
         setProspects(sortedProspects);
         setIsLoading(false);
     }
@@ -431,27 +428,14 @@ export default function VentasPage() {
         return ['Todos', ...Array.from(allOrigins)];
     }, [prospects]);
 
-    const availableMonths = useMemo(() => {
-        const months = new Set<string>();
-        prospects.forEach(lead => {
-            if (lead.createdAt) {
-                months.add(format(new Date(lead.createdAt), 'yyyy-MM'));
-            }
-        });
-        return Array.from(months).sort().reverse();
-    }, [prospects]);
-
     const filteredProspects = useMemo(() => {
         return prospects.filter(lead => {
-            const searchMatch = searchFilter === '' || lead.name?.toLowerCase().includes(searchFilter.toLowerCase()) || lead.company?.toLowerCase().includes(searchFilter.toLowerCase());
             const responsableMatch = responsableFilter === 'Todos' || lead.responsable === responsableFilter;
             const statusMatch = statusFilter === 'Todos' || lead.status === statusFilter;
             const origenMatch = origenFilter === 'Todos' || lead.source === origenFilter;
-            const monthMatch = monthFilter === 'Todos' || (lead.createdAt && format(new Date(lead.createdAt), 'yyyy-MM') === monthFilter);
-
-            return searchMatch && responsableMatch && statusMatch && origenMatch && monthMatch;
+            return responsableMatch && statusMatch && origenMatch;
         });
-    }, [prospects, searchFilter, responsableFilter, statusFilter, origenFilter, monthFilter]);
+    }, [prospects, responsableFilter, statusFilter, origenFilter]);
 
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-[50vh]"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div></div>;
@@ -474,53 +458,45 @@ export default function VentasPage() {
             <CardDescription>Gestiona los leads desde el primer contacto hasta la conversión.</CardDescription>
         </CardHeader>
         <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
-                <Input 
-                    placeholder="Buscar por cliente..."
-                    value={searchFilter}
-                    onChange={(e) => setSearchFilter(e.target.value)}
-                    className="col-span-2 md:col-span-1"
-                />
-                <Select value={responsableFilter} onValueChange={setResponsableFilter}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="Todos">Todos los Responsables</SelectItem>
-                        {responsables.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
-                    </SelectContent>
-                </Select>
-                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="Todos">Todos los Status</SelectItem>
-                        {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                    </SelectContent>
-                </Select>
-                <Select value={origenFilter} onValueChange={setOrigenFilter}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                        {origenes.map(o => <SelectItem key={o} value={o!}>{o}</SelectItem>)}
-                    </SelectContent>
-                </Select>
-                 <Select value={monthFilter} onValueChange={setMonthFilter}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="Todos">Todos los Meses</SelectItem>
-                        {availableMonths.map(month => (
-                            <SelectItem key={month} value={month}>{format(new Date(`${month}-02`), "MMMM yyyy", {locale: es})}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
             <div className="border rounded-lg">
                 <Table>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Cliente</TableHead>
-                            <TableHead>Origen</TableHead>
+                            <TableHead>
+                                <Select value={origenFilter} onValueChange={setOrigenFilter}>
+                                    <SelectTrigger className="border-0 bg-transparent p-0 focus:ring-0 focus:ring-offset-0">
+                                        <SelectValue placeholder="Origen" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {origenes.map(o => <SelectItem key={o} value={o!}>{o}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </TableHead>
                             <TableHead>Notas</TableHead>
                             <TableHead>Fecha de Creación</TableHead>
-                            <TableHead>Responsable</TableHead>
-                            <TableHead>Status</TableHead>
+                            <TableHead>
+                               <Select value={responsableFilter} onValueChange={setResponsableFilter}>
+                                    <SelectTrigger className="border-0 bg-transparent p-0 focus:ring-0 focus:ring-offset-0">
+                                        <SelectValue placeholder="Responsable" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Todos">Todos</SelectItem>
+                                        {responsables.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </TableHead>
+                            <TableHead>
+                                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                    <SelectTrigger className="border-0 bg-transparent p-0 focus:ring-0 focus:ring-offset-0">
+                                        <SelectValue placeholder="Status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Todos">Todos</SelectItem>
+                                        {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </TableHead>
                             <TableHead className="text-right">Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -594,3 +570,4 @@ export default function VentasPage() {
     </div>
   );
 }
+
