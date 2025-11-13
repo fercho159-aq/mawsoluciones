@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import React, { useState, useMemo, useEffect, startTransition } from 'react';
@@ -14,7 +12,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Edit, Trash, X, Instagram, Facebook, Link as LinkIcon } from 'lucide-react';
+import { PlusCircle, Edit, Trash, X, Instagram, Facebook, Link as LinkIcon, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -251,6 +249,7 @@ export default function ClientesPage() {
     const { user, loading } = useAuth();
     
     const [clients, setClients] = useState<Client[]>([]);
+    const [searchFilter, setSearchFilter] = useState('');
     const [selectedClients, setSelectedClients] = useState<number[]>([]);
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -278,6 +277,13 @@ export default function ClientesPage() {
     useEffect(() => {
         fetchClients();
     }, []);
+
+    const filteredClients = useMemo(() => {
+        return clients.filter(client => 
+            client.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+            client.representativeName.toLowerCase().includes(searchFilter.toLowerCase())
+        );
+    }, [clients, searchFilter]);
     
     const handleRowClick = (client: Client) => {
         if(user?.permissions?.clientes?.editarClientes) {
@@ -294,7 +300,7 @@ export default function ClientesPage() {
 
     const handleSelectAll = (checked: boolean) => {
         if (checked) {
-            setSelectedClients(clients.map(c => c.id));
+            setSelectedClients(filteredClients.map(c => c.id));
         } else {
             setSelectedClients([]);
         }
@@ -333,22 +339,33 @@ export default function ClientesPage() {
         );
     }
     
-    const isAllSelected = selectedClients.length > 0 && selectedClients.length === clients.length;
+    const isAllSelected = selectedClients.length > 0 && selectedClients.length === filteredClients.length;
 
     return (
         <div>
             <h1 className="text-3xl font-bold font-headline mb-8">Gestión de Clientes</h1>
             <Card>
-                <CardHeader className='flex-row justify-between items-center'>
+                <CardHeader className='flex-col sm:flex-row justify-between items-start sm:items-center gap-4'>
                     <div>
                         <CardTitle>Listado de Clientes</CardTitle>
                         <CardDescription>Añade nuevos clientes y consulta su estado.</CardDescription>
                     </div>
-                    { (user?.permissions?.clientes?.agregarClientes) && (
-                         <ClientFormDialog onSave={fetchClients} isEditing={false} open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-                            <Button onClick={() => setIsAddModalOpen(true)}><PlusCircle className="w-4 h-4 mr-2" /> Añadir Nuevo Cliente</Button>
-                        </ClientFormDialog>
-                    )}
+                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                        <div className="relative">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Buscar cliente..."
+                                value={searchFilter}
+                                onChange={(e) => setSearchFilter(e.target.value)}
+                                className="pl-8 sm:w-[200px] md:w-[250px]"
+                            />
+                        </div>
+                        { (user?.permissions?.clientes?.agregarClientes) && (
+                            <ClientFormDialog onSave={fetchClients} isEditing={false} open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+                                <Button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto"><PlusCircle className="w-4 h-4 mr-2" /> Añadir Nuevo</Button>
+                            </ClientFormDialog>
+                        )}
+                    </div>
                 </CardHeader>
                 <CardContent>
                     {selectedClients.length > 0 && (
@@ -392,7 +409,7 @@ export default function ClientesPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {clients.map(client => (
+                                {filteredClients.map(client => (
                                     <TableRow 
                                         key={client.id} 
                                         data-state={selectedClients.includes(client.id) && "selected"}
@@ -431,7 +448,7 @@ export default function ClientesPage() {
                                 ))}
                             </TableBody>
                         </Table>
-                         {clients.length === 0 && (
+                         {filteredClients.length === 0 && (
                             <div className="text-center p-8 text-muted-foreground">
                                 No hay clientes en esta vista.
                             </div>

@@ -12,6 +12,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 
 type Platform = "Facebook Ads" | "TikTok Ads" | "Google Ads";
 
@@ -76,7 +77,7 @@ export default function AccesosPage() {
   return (
     <div>
       <h1 className="text-3xl font-bold font-headline">Accesos a Plataformas</h1>
-       <p className="mt-4 text-foreground/80 mb-8">
+       <p className="text-foreground/80 mb-8">
         Gestiona y consulta las credenciales de acceso a las plataformas publicitarias de los clientes.
       </p>
 
@@ -86,12 +87,15 @@ export default function AccesosPage() {
                 <CardDescription>Usa las pestañas para filtrar por plataforma y busca por cliente.</CardDescription>
             </CardHeader>
             <CardContent>
-                 <Input 
-                    placeholder="Buscar por cliente..."
-                    value={searchFilter}
-                    onChange={(e) => setSearchFilter(e.target.value)}
-                    className="max-w-xs mb-4"
-                />
+                <div className="relative mb-4">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                      placeholder="Buscar por cliente..."
+                      value={searchFilter}
+                      onChange={(e) => setSearchFilter(e.target.value)}
+                      className="max-w-xs pl-8"
+                  />
+                </div>
                 <Tabs defaultValue="facebook">
                     <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="facebook">Facebook Ads</TabsTrigger>

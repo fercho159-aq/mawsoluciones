@@ -1,7 +1,6 @@
-
 'use client';
 
-import React, { useState, useEffect, startTransition } from 'react';
+import React, { useState, useEffect, startTransition, useMemo } from 'react';
 import {
   Table,
   TableHeader,
@@ -12,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, User, UserCog } from 'lucide-react';
+import { PlusCircle, User, UserCog, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -149,6 +148,7 @@ const ColaboradorFormDialog = ({ colaborador, onSave }: { colaborador?: Colabora
 
 export default function ColaboradoresPage() {
     const { user, loading } = useAuth();
+    const [searchFilter, setSearchFilter] = useState('');
     // Leer directamente desde el archivo estático y ordenarlo
     const [colaboradores, setColaboradores] = useState<Colaborador[]>(() => 
         [...teamMembers].sort((a, b) => a.name.localeCompare(b.name))
@@ -162,6 +162,14 @@ export default function ColaboradoresPage() {
         setColaboradores([...teamMembers].sort((a, b) => a.name.localeCompare(b.name)));
         setIsLoading(false);
     };
+
+    const filteredColaboradores = useMemo(() => {
+        return colaboradores.filter(colab => 
+            colab.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+            colab.email.toLowerCase().includes(searchFilter.toLowerCase()) ||
+            colab.role.toLowerCase().includes(searchFilter.toLowerCase())
+        );
+    }, [colaboradores, searchFilter]);
 
     if (loading || isLoading) {
         return <div className="flex items-center justify-center min-h-[50vh]"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div></div>
@@ -184,12 +192,25 @@ export default function ColaboradoresPage() {
         <div>
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold font-headline">Gestión de Colaboradores</h1>
-                <ColaboradorFormDialog onSave={fetchColaboradores} />
             </div>
             <Card>
-                <CardHeader>
-                    <CardTitle>Equipo</CardTitle>
-                    <CardDescription>Añade, edita y gestiona los permisos de los miembros de tu equipo.</CardDescription>
+                <CardHeader className="flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                      <CardTitle>Equipo</CardTitle>
+                      <CardDescription>Añade, edita y gestiona los permisos de los miembros de tu equipo.</CardDescription>
+                    </div>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                        <div className="relative">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Buscar colaborador..."
+                                value={searchFilter}
+                                onChange={(e) => setSearchFilter(e.target.value)}
+                                className="pl-8 sm:w-[200px] md:w-[250px]"
+                            />
+                        </div>
+                        <ColaboradorFormDialog onSave={fetchColaboradores} />
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <div className="border rounded-lg">
@@ -203,7 +224,7 @@ export default function ColaboradoresPage() {
                                 </TableRow>
                             </TableHeader>
                              <TableBody>
-                                {colaboradores.map(colab => (
+                                {filteredColaboradores.map(colab => (
                                     <TableRow key={colab.id}>
                                         <TableCell className="font-medium">{colab.name}</TableCell>
                                         <TableCell className="capitalize">{colab.role}</TableCell>
@@ -215,6 +236,11 @@ export default function ColaboradoresPage() {
                                 ))}
                             </TableBody>
                         </Table>
+                         {filteredColaboradores.length === 0 && (
+                            <div className="text-center p-8 text-muted-foreground">
+                                No se encontraron colaboradores.
+                            </div>
+                        )}
                     </div>
                 </CardContent>
             </Card>
