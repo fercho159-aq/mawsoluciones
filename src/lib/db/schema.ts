@@ -70,6 +70,26 @@ export const como_voy_en_mis_finanzas = pgTable('como_voy_en_mis_finanzas', {
     iva: real('iva'),
 });
 
+// Tabla para Activos
+export const activos_maw = pgTable('activos_maw', {
+  id: serial('id').primaryKey(),
+  nombre: varchar('nombre', { length: 255 }).notNull(),
+  tipo: varchar('tipo', { length: 100 }).notNull(), // Ej. Circulante, Fijo
+  valor: real('valor').notNull(),
+  descripcion: text('descripcion'),
+  fecha_adquisicion: timestamp('fecha_adquisicion').defaultNow(),
+});
+
+// Tabla para Pasivos
+export const pasivos_maw = pgTable('pasivos_maw', {
+  id: serial('id').primaryKey(),
+  nombre: varchar('nombre', { length: 255 }).notNull(),
+  tipo: varchar('tipo', { length: 100 }).notNull(), // Ej. Corto Plazo, Largo Plazo
+  monto: real('monto').notNull(),
+  descripcion: text('descripcion'),
+  fecha_vencimiento: timestamp('fecha_vencimiento'),
+});
+
 
 // --- TABLAS RELACIONADAS ---
 
@@ -244,3 +264,7 @@ export type Access = typeof accesses.$inferSelect;
 export type NewAccess = typeof accesses.$inferInsert;
 export type ComoVoyEnMisFinanzas = typeof como_voy_en_mis_finanzas.$inferSelect;
 export type NewComoVoyEnMisFinanzas = typeof como_voy_en_mis_finanzas.$inferInsert;
+export type Activo = typeof activos_maw.$inferSelect;
+export type NewActivo = typeof activos_maw.$inferInsert;
+export type Pasivo = typeof pasivos_maw.$inferSelect;
+export type NewPasivo = typeof pasivos_maw.$inferInsert;

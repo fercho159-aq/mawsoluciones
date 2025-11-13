@@ -1,18 +1,27 @@
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect, startTransition } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { DollarSign, Building } from 'lucide-react';
+import { DollarSign, Building, TrendingUp, TrendingDown, PlusCircle, Edit, Trash2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-provider';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getPersonalFinance, updatePersonalFinanceEntry, type PersonalFinanceTransaction } from './_actions';
-import { ComoVoyEnMisFinanzas } from '@/lib/db/schema';
+import { getPersonalFinance, updatePersonalFinanceEntry, getBalanceSheetData, addActivo, updateActivo, deleteActivo, addPasivo, updatePasivo, deletePasivo, type PersonalFinanceTransaction } from './_actions';
+import { ComoVoyEnMisFinanzas, Activo, Pasivo, NewActivo, NewPasivo } from '@/lib/db/schema';
 import { useToast } from '@/hooks/use-toast';
-import { getMonth, getYear } from 'date-fns';
+import { getMonth, getYear, format, parseISO } from 'date-fns';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { CalendarIcon } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Textarea } from '@/components/ui/textarea';
 
 const EditableCell = ({ value, onSave }: { value: number | undefined, onSave: (newValue: number) => void }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -68,7 +77,7 @@ const PersonalFinanceDashboard = ({ personalData, selectedYear, onRefresh }: { p
         const entry: PersonalFinanceTransaction = {
             id: -1,
             fecha: entryDate.toISOString(),
-            tipo: 'INGRESO',
+            tipo: newAmount >= 0 ? 'INGRESO' : 'GASTO',
             descripcion: `${category} - ${month} ${year}`,
             monto: newAmount,
             cuenta: 'Efectivo',
@@ -190,27 +199,289 @@ const PersonalFinanceDashboard = ({ personalData, selectedYear, onRefresh }: { p
     );
 };
 
+const BalanceSheet = ({ data, onRefresh, isAdmin }: { data: { activos: Activo[], pasivos: Pasivo[], totalCuentasPorCobrar: number }, onRefresh: () => void, isAdmin: boolean }) => {
+    const { toast } = useToast();
+
+    const handleAddAsset = async (asset: Omit<NewActivo, 'id'>) => {
+        try {
+            await addActivo(asset);
+            toast({ title: 'Éxito', description: 'Activo añadido.' });
+            onRefresh();
+        } catch (e: any) {
+            toast({ title: 'Error', description: e.message, variant: 'destructive' });
+        }
+    };
+    
+    const handleAddLiability = async (liability: Omit<NewPasivo, 'id'>) => {
+        try {
+            await addPasivo(liability);
+            toast({ title: 'Éxito', description: 'Pasivo añadido.' });
+            onRefresh();
+        } catch (e: any) {
+            toast({ title: 'Error', description: e.message, variant: 'destructive' });
+        }
+    };
+    
+    const totalActivos = data.activos.reduce((sum, asset) => sum + asset.valor, 0) + data.totalCuentasPorCobrar;
+    const totalPasivos = data.pasivos.reduce((sum, liab) => sum + liab.monto, 0);
+    const capitalContable = totalActivos - totalPasivos;
+
+    return (
+        <Card className="mt-8">
+            <CardHeader>
+                <CardTitle>Balance General</CardTitle>
+                <CardDescription>Una fotografía de la situación financiera de la empresa.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid md:grid-cols-2 gap-8">
+                {/* Activos */}
+                <div>
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-xl font-semibold text-green-500 flex items-center gap-2"><TrendingUp/> Activos</h3>
+                        {isAdmin && <AssetLiabilityDialog onSave={handleAddAsset} isAsset={true} />}
+                    </div>
+                    <div className="border rounded-lg">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Nombre</TableHead>
+                                    <TableHead className="text-right">Valor</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {data.activos.map(asset => (
+                                    <AssetLiabilityDialog key={asset.id} item={asset} onSave={onRefresh} isAsset={true} triggerAsChild={true}>
+                                        <TableRow className="cursor-pointer">
+                                            <TableCell className="font-medium">{asset.nombre}</TableCell>
+                                            <TableCell className="text-right">{asset.valor.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                        </TableRow>
+                                    </AssetLiabilityDialog>
+                                ))}
+                                <TableRow>
+                                    <TableCell className="font-medium">Cuentas por Cobrar</TableCell>
+                                    <TableCell className="text-right">{data.totalCuentasPorCobrar.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                </TableRow>
+                            </TableBody>
+                            <TableFooter>
+                                <TableRow className="font-bold text-base">
+                                    <TableCell>Total Activos</TableCell>
+                                    <TableCell className="text-right">{totalActivos.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                </TableRow>
+                            </TableFooter>
+                        </Table>
+                    </div>
+                </div>
+
+                {/* Pasivos */}
+                <div>
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-xl font-semibold text-red-500 flex items-center gap-2"><TrendingDown/> Pasivos</h3>
+                         {isAdmin && <AssetLiabilityDialog onSave={handleAddLiability} isAsset={false} />}
+                    </div>
+                     <div className="border rounded-lg">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Nombre</TableHead>
+                                    <TableHead className="text-right">Monto</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                 {data.pasivos.map(liability => (
+                                     <AssetLiabilityDialog key={liability.id} item={liability} onSave={onRefresh} isAsset={false} triggerAsChild={true}>
+                                        <TableRow className="cursor-pointer">
+                                            <TableCell className="font-medium">{liability.nombre}</TableCell>
+                                            <TableCell className="text-right">{liability.monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                        </TableRow>
+                                    </AssetLiabilityDialog>
+                                ))}
+                            </TableBody>
+                            <TableFooter>
+                                <TableRow className="font-bold text-base">
+                                    <TableCell>Total Pasivos</TableCell>
+                                    <TableCell className="text-right">{totalPasivos.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
+                                </TableRow>
+                            </TableFooter>
+                        </Table>
+                    </div>
+                </div>
+            </CardContent>
+             <CardFooter className="bg-muted p-6 rounded-b-lg">
+                 <div className="w-full text-center">
+                    <h3 className="text-xl font-semibold">Capital Contable</h3>
+                    <p className={cn("text-4xl font-bold mt-2", capitalContable >= 0 ? "text-green-500" : "text-red-500")}>
+                        {capitalContable.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+                    </p>
+                    <p className="text-sm text-muted-foreground">(Activos Totales - Pasivos Totales)</p>
+                 </div>
+            </CardFooter>
+        </Card>
+    )
+}
+
+const AssetLiabilityDialog = ({ item, onSave, isAsset, triggerAsChild = false }: { item?: Activo | Pasivo, onSave: (data: any) => void, isAsset: boolean, triggerAsChild?: boolean }) => {
+    const [open, setOpen] = useState(false);
+    const { toast } = useToast();
+    
+    const [nombre, setNombre] = useState('');
+    const [tipo, setTipo] = useState('');
+    const [valor, setValor] = useState('');
+    const [descripcion, setDescripcion] = useState('');
+    const [fecha, setFecha] = useState<Date | undefined>();
+
+    const isEditing = !!item;
+
+    useEffect(() => {
+        if (open && item) {
+            setNombre(item.nombre);
+            setTipo(item.tipo);
+            setValor(isAsset ? (item as Activo).valor.toString() : (item as Pasivo).monto.toString());
+            setDescripcion(item.descripcion || '');
+            const itemDate = isAsset ? (item as Activo).fecha_adquisicion : (item as Pasivo).fecha_vencimiento;
+            if (itemDate) setFecha(new Date(itemDate));
+        } else if (!isEditing) {
+            setNombre(''); setTipo(''); setValor(''); setDescripcion(''); setFecha(undefined);
+        }
+    }, [open, item, isAsset]);
+
+    const handleSave = async () => {
+        if (!nombre || !tipo || !valor) {
+            toast({ title: 'Error', description: 'Nombre, tipo y valor son obligatorios.', variant: 'destructive' });
+            return;
+        }
+
+        const commonData = { nombre, tipo, descripcion, };
+        
+        let data;
+        if (isAsset) {
+            data = { ...commonData, valor: parseFloat(valor), fecha_adquisicion: fecha } as NewActivo;
+        } else {
+            data = { ...commonData, monto: parseFloat(valor), fecha_vencimiento: fecha } as NewPasivo;
+        }
+
+        try {
+            if (isEditing) {
+                const updateFunction = isAsset ? updateActivo : updatePasivo;
+                await updateFunction(item!.id, data);
+            } else {
+                await onSave(data);
+            }
+            toast({ title: 'Éxito', description: `${isAsset ? 'Activo' : 'Pasivo'} guardado.` });
+            setOpen(false);
+            if (!isEditing) onSave(data); // This is a bit of a hack to trigger a re-fetch
+        } catch(e: any) {
+            toast({ title: 'Error', description: e.message, variant: 'destructive' });
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!item) return;
+        try {
+            const deleteFunction = isAsset ? deleteActivo : deletePasivo;
+            await deleteFunction(item.id);
+            toast({ title: 'Éxito', description: `${isAsset ? 'Activo' : 'Pasivo'} eliminado.` });
+            setOpen(false);
+            onSave({}); // Trigger refresh
+        } catch(e: any) {
+            toast({ title: 'Error', description: e.message, variant: 'destructive' });
+        }
+    }
+
+    const dialogContent = (
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>{isEditing ? 'Editar' : 'Añadir'} {isAsset ? 'Activo' : 'Pasivo'}</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+                <Input value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Nombre" />
+                <Select value={tipo} onValueChange={setTipo}>
+                    <SelectTrigger><SelectValue placeholder="Tipo" /></SelectTrigger>
+                    <SelectContent>
+                        {isAsset ? (
+                            <>
+                                <SelectItem value="Circulante">Circulante (Efectivo, Bancos)</SelectItem>
+                                <SelectItem value="Fijo">Fijo (Equipo, Inmuebles)</SelectItem>
+                                <SelectItem value="Intangible">Intangible (Marcas, Software)</SelectItem>
+                            </>
+                        ) : (
+                            <>
+                                <SelectItem value="Corto Plazo">Corto Plazo (&lt; 1 año)</SelectItem>
+                                <SelectItem value="Largo Plazo">Largo Plazo (&gt; 1 año)</SelectItem>
+                            </>
+                        )}
+                    </SelectContent>
+                </Select>
+                <Input type="number" value={valor} onChange={e => setValor(e.target.value)} placeholder={isAsset ? 'Valor (MXN)' : 'Monto (MXN)'} />
+                <Textarea value={descripcion} onChange={e => setDescripcion(e.target.value)} placeholder="Descripción (opcional)" />
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button variant="outline" className={cn("justify-start text-left font-normal", !fecha && "text-muted-foreground")}>
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {fecha ? format(fecha, 'PPP', { locale: es }) : <span>{isAsset ? 'Fecha de Adquisición' : 'Fecha de Vencimiento'}</span>}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={fecha} onSelect={setFecha} initialFocus /></PopoverContent>
+                </Popover>
+            </div>
+            <DialogFooter className='justify-between'>
+                <div>
+                {isEditing && (
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild><Button variant="destructive" size="icon"><Trash2 /></Button></AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader><AlertDialogTitle>¿Estás seguro?</AlertDialogTitle><AlertDialogDescription>Esta acción es irreversible.</AlertDialogDescription></AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDelete}>Confirmar</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                )}
+                </div>
+                <div className='flex gap-2'>
+                    <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                    <Button onClick={handleSave}>Guardar</Button>
+                </div>
+            </DialogFooter>
+        </DialogContent>
+    );
+
+    if (triggerAsChild) {
+        return <Dialog open={open} onOpenChange={setOpen}><DialogTrigger asChild>{item}</DialogTrigger>{dialogContent}</Dialog>
+    }
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" />Añadir</Button>
+            </DialogTrigger>
+            {dialogContent}
+        </Dialog>
+    );
+};
+
 
 export default function MiProgresoPage() {
     const { user } = useAuth();
     const [isLoading, setIsLoading] = useState(true);
     const [personalData, setPersonalData] = useState<ComoVoyEnMisFinanzas[]>([]);
+    const [balanceSheetData, setBalanceSheetData] = useState<{activos: Activo[], pasivos: Pasivo[], totalCuentasPorCobrar: number}>({activos: [], pasivos: [], totalCuentasPorCobrar: 0});
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     
-    const fetchPersonalData = async () => {
+    const fetchData = async () => {
         setIsLoading(true);
         try {
-            const data = await getPersonalFinance();
-            setPersonalData(data as ComoVoyEnMisFinanzas[]);
+            const [pData, bData] = await Promise.all([getPersonalFinance(), getBalanceSheetData()]);
+            setPersonalData(pData as ComoVoyEnMisFinanzas[]);
+            setBalanceSheetData(bData as any);
         } catch (error) {
-            console.error("Failed to fetch personal finance data:", error);
+            console.error("Failed to fetch data:", error);
         } finally {
             setIsLoading(false);
         }
     };
     
     useEffect(() => {
-        fetchPersonalData();
+        fetchData();
     }, []);
 
     if (isLoading) {
@@ -245,10 +516,8 @@ export default function MiProgresoPage() {
       
       {user.role === 'admin' ? (
         <>
-            <p className="mt-4 text-foreground/80 mb-8">
-                Como administrador, puedes ver un resumen del rendimiento y las finanzas del equipo para el periodo seleccionado.
-            </p>
-            <PersonalFinanceDashboard personalData={personalData} selectedYear={currentYear} onRefresh={fetchPersonalData} />
+            <PersonalFinanceDashboard personalData={personalData} selectedYear={currentYear} onRefresh={fetchData} />
+            <BalanceSheet data={balanceSheetData} onRefresh={fetchData} isAdmin={user.role === 'admin'} />
         </>
       ) : (
         <>
@@ -260,4 +529,3 @@ export default function MiProgresoPage() {
     </div>
   );
 }
-

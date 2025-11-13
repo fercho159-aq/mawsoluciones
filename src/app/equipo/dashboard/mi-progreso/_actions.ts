@@ -1,9 +1,10 @@
 
+
 "use server";
 
 import { db } from "@/lib/db";
-import { como_voy_en_mis_finanzas, NewComoVoyEnMisFinanzas } from "@/lib/db/schema";
-import { eq, and, sql } from 'drizzle-orm';
+import { como_voy_en_mis_finanzas, NewComoVoyEnMisFinanzas, activos_maw, NewActivo, pasivos_maw, NewPasivo, cuentasPorCobrar } from "@/lib/db/schema";
+import { eq, and, sql, sum } from 'drizzle-orm';
 import { revalidatePath } from "next/cache";
 
 export type PersonalFinanceTransaction = Omit<NewComoVoyEnMisFinanzas, 'id'> & { id?: number };
@@ -64,5 +65,85 @@ export async function updatePersonalFinanceEntry(entry: PersonalFinanceTransacti
     } catch (error) {
         console.error("Error updating personal finance entry:", error);
         throw new Error("No se pudo actualizar la entrada financiera.");
+    }
+}
+
+
+// --- Balance Sheet Actions ---
+
+export async function getBalanceSheetData() {
+    try {
+        const [activos, pasivos, cxcResult] = await Promise.all([
+            db.query.activos_maw.findMany(),
+            db.query.pasivos_maw.findMany(),
+            db.select({ total: sum(cuentasPorCobrar.monto) }).from(cuentasPorCobrar)
+        ]);
+
+        const totalCuentasPorCobrar = Number(cxcResult[0]?.total || 0);
+
+        return { activos, pasivos, totalCuentasPorCobrar };
+    } catch (error) {
+        console.error("Error fetching balance sheet data:", error);
+        return { activos: [], pasivos: [], totalCuentasPorCobrar: 0 };
+    }
+}
+
+export async function addActivo(data: Omit<NewActivo, 'id'>) {
+    try {
+        await db.insert(activos_maw).values(data);
+        revalidatePath('/equipo/dashboard/mi-progreso');
+    } catch (error) {
+        console.error("Error adding asset:", error);
+        throw new Error("No se pudo añadir el activo.");
+    }
+}
+
+export async function updateActivo(id: number, data: Partial<Omit<NewActivo, 'id'>>) {
+    try {
+        await db.update(activos_maw).set(data).where(eq(activos_maw.id, id));
+        revalidatePath('/equipo/dashboard/mi-progreso');
+    } catch (error) {
+        console.error("Error updating asset:", error);
+        throw new Error("No se pudo actualizar el activo.");
+    }
+}
+
+export async function deleteActivo(id: number) {
+    try {
+        await db.delete(activos_maw).where(eq(activos_maw.id, id));
+        revalidatePath('/equipo/dashboard/mi-progreso');
+    } catch (error) {
+        console.error("Error deleting asset:", error);
+        throw new Error("No se pudo eliminar el activo.");
+    }
+}
+
+export async function addPasivo(data: Omit<NewPasivo, 'id'>) {
+    try {
+        await db.insert(pasivos_maw).values(data);
+        revalidatePath('/equipo/dashboard/mi-progreso');
+    } catch (error) {
+        console.error("Error adding liability:", error);
+        throw new Error("No se pudo añadir el pasivo.");
+    }
+}
+
+export async function updatePasivo(id: number, data: Partial<Omit<NewPasivo, 'id'>>) {
+    try {
+        await db.update(pasivos_maw).set(data).where(eq(pasivos_maw.id, id));
+        revalidatePath('/equipo/dashboard/mi-progreso');
+    } catch (error) {
+        console.error("Error updating liability:", error);
+        throw new Error("No se pudo actualizar el pasivo.");
+    }
+}
+
+export async function deletePasivo(id: number) {
+    try {
+        await db.delete(pasivos_maw).where(eq(pasivos_maw.id, id));
+        revalidatePath('/equipo/dashboard/mi-progreso');
+    } catch (error) {
+        console.error("Error deleting liability:", error);
+        throw new Error("No se pudo eliminar el pasivo.");
     }
 }
