@@ -62,3 +62,23 @@ export async function convertProspectToClient(prospectId: number, clientData: Ne
         throw new Error("No se pudo convertir el prospecto a cliente.");
     }
 }
+
+export async function updateProspect(id: number, data: Partial<Omit<NewProspect, 'id' | 'createdAt'>>) {
+    try {
+        await db.update(prospects_maw).set(data).where(eq(prospects_maw.id, id));
+        revalidatePath("/equipo/dashboard/ventas");
+    } catch (error) {
+        console.error("Error updating prospect:", error);
+        throw new Error("No se pudo actualizar el prospecto.");
+    }
+}
+
+export async function deleteProspect(id: number) {
+    try {
+        await db.delete(prospects_maw).where(eq(prospects_maw.id, id));
+        revalidatePath("/equipo/dashboard/ventas");
+    } catch (error) {
+        console.error("Error deleting prospect:", error);
+        throw new Error("No se pudo eliminar el prospecto.");
+    }
+}

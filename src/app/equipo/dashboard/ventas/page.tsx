@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Check, Sparkles, PlusCircle } from 'lucide-react';
+import { Check, Sparkles, PlusCircle, Trash2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -32,11 +32,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { getProspects, addMawProspect, convertProspectToClient } from './_actions';
+import { getProspects, addMawProspect, convertProspectToClient, updateProspect, deleteProspect } from './_actions';
 import type { Prospect, NewProspect, Colaborador } from '@/lib/db/schema';
 import { teamMembers } from '@/lib/team-data';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 
 type OrigenLead = "Facebook" | "TikTok" | "Referencia" | "Sitio Web" | "Instagram" | string;
@@ -56,16 +57,38 @@ const responsables: ResponsableVentas[] = ["Alma", "Fer", "Julio"];
 const statuses: StatusLead[] = ["Lead Nuevo", "Contactado", "Videollamada", "En Negociación", "Convertido", "No Interesado"];
 const leadSources: OrigenLead[] = ["Referencia", "Sitio Web", "TikTok", "Facebook", "Instagram"];
 
-const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<Omit<NewProspect, 'id' | 'createdAt'>>) => void }) => {
+const AddLeadDialog = ({ onAddLead, children, prospect, isEditing }: { onAddLead: (lead: Partial<Omit<NewProspect, 'id' | 'createdAt'>>) => void, children: React.ReactNode, prospect?: Prospect | null, isEditing: boolean }) => {
     const [open, setOpen] = useState(false);
     const [name, setName] = useState('');
     const [company, setCompany] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [source, setSource] = useState<OrigenLead>('Referencia');
+    const [status, setStatus] = useState<StatusLead>('Lead Nuevo');
+    const [responsable, setResponsable] = useState<ResponsableVentas | ''>('');
+
     const { toast } = useToast();
 
-    const handleAdd = async () => {
+    useEffect(() => {
+        if (open && isEditing && prospect) {
+            setName(prospect.name || '');
+            setCompany(prospect.company || '');
+            setEmail(prospect.email || '');
+            setPhone(prospect.phone || '');
+            setSource(prospect.source || 'Referencia');
+            setStatus(prospect.status as StatusLead || 'Lead Nuevo');
+            setResponsable(prospect.responsable as ResponsableVentas || '');
+        } else {
+            resetForm();
+        }
+    }, [open, isEditing, prospect])
+
+    const resetForm = () => {
+        setName(''); setCompany(''); setEmail(''); setPhone(''); setSource('Referencia');
+        setStatus('Lead Nuevo'); setResponsable('');
+    }
+
+    const handleSave = async () => {
         if (!name && !company) {
             toast({
                 title: "Error",
@@ -75,40 +98,45 @@ const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<Omit<NewProspe
             return;
         }
 
+        const dataToSave = { name, company, email, phone, source, status, responsable: responsable || undefined };
+
         try {
-            await onAddLead({ name, company, email, phone, source });
-            toast({
-                title: "Prospecto Añadido",
-                description: `${name || company} se ha añadido al pipeline.`,
-            });
-            setName('');
-            setCompany('');
-            setEmail('');
-            setPhone('');
-            setSource('Referencia');
+            if (isEditing && prospect) {
+                await updateProspect(prospect.id, dataToSave);
+                 toast({ title: "Éxito", description: `Prospecto actualizado.` });
+            } else {
+                await onAddLead(dataToSave);
+                toast({ title: "Prospecto Añadido", description: `${name || company} se ha añadido al pipeline.` });
+            }
+            
+            resetForm();
             setOpen(false);
         } catch (error) {
-             toast({
-                title: "Error",
-                description: "No se pudo añadir el prospecto.",
-                variant: 'destructive'
-            });
+             toast({ title: "Error", description: "No se pudo guardar el prospecto.", variant: 'destructive' });
         }
     };
+    
+    const handleDelete = async () => {
+        if (prospect) {
+            try {
+                await deleteProspect(prospect.id);
+                toast({ title: 'Éxito', description: 'Prospecto eliminado.' });
+                setOpen(false);
+                onAddLead({}); // To trigger re-fetch
+            } catch(e) {
+                toast({ title: 'Error', description: 'No se pudo eliminar el prospecto.', variant: 'destructive' });
+            }
+        }
+    }
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button>
-                    <PlusCircle className="w-4 h-4 mr-2" />
-                    Añadir Prospecto
-                </Button>
-            </DialogTrigger>
+        <Dialog open={open} onOpenChange={(o) => {setOpen(o); if (!o) resetForm()}}>
+            <DialogTrigger asChild>{children}</DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Añadir Nuevo Prospecto</DialogTitle>
+                    <DialogTitle>{isEditing ? 'Editar' : 'Añadir Nuevo'} Prospecto</DialogTitle>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
+                <div className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto px-2">
                     <div className="space-y-2">
                         <Label htmlFor="cliente">Nombre del Contacto</Label>
                         <Input id="cliente" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej. Juan Pérez" />
@@ -118,11 +146,11 @@ const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<Omit<NewProspe
                         <Input id="empresa" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Ej. Tacos El Veloz" />
                     </div>
                      <div className="space-y-2">
-                        <Label htmlFor="email">Email (Opcional)</Label>
+                        <Label htmlFor="email">Email</Label>
                         <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="contacto@ejemplo.com" />
                     </div>
                      <div className="space-y-2">
-                        <Label htmlFor="telefono">Teléfono (Opcional)</Label>
+                        <Label htmlFor="telefono">Teléfono</Label>
                         <Input id="telefono" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="5512345678" />
                     </div>
                      <div className="space-y-2">
@@ -134,10 +162,51 @@ const AddLeadDialog = ({ onAddLead }: { onAddLead: (lead: Partial<Omit<NewProspe
                             </SelectContent>
                         </Select>
                     </div>
+                    {isEditing && (
+                        <>
+                        <div className="space-y-2">
+                            <Label htmlFor="status">Status</Label>
+                            <Select value={status} onValueChange={(v) => setStatus(v as StatusLead)}>
+                                <SelectTrigger id="status"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="responsable">Responsable</Label>
+                            <Select value={responsable} onValueChange={(v) => setResponsable(v as ResponsableVentas)}>
+                                <SelectTrigger id="responsable"><SelectValue placeholder="Asignar"/></SelectTrigger>
+                                <SelectContent>
+                                    {responsables.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        </>
+                    )}
                 </div>
-                <DialogFooter>
-                    <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                    <Button onClick={handleAdd}>Añadir Prospecto</Button>
+                <DialogFooter className="justify-between">
+                    <div>
+                    {isEditing && (
+                         <AlertDialog>
+                            <AlertDialogTrigger asChild><Button variant="destructive" size="sm"><Trash2 className="w-4 h-4 mr-2"/>Eliminar</Button></AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                <AlertDialogDescription>Esta acción es irreversible y eliminará permanentemente este prospecto.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDelete}>Confirmar</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    )}
+                    </div>
+                    <div className='flex gap-2'>
+                        <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+                        <Button onClick={handleSave}>{isEditing ? 'Guardar Cambios' : 'Añadir Prospecto'}</Button>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -203,7 +272,7 @@ const ConvertLeadDialog = ({ prospect, onSave, children }: { prospect: Prospect 
     const handleSave = async () => {
         if (!prospect) return;
 
-        if (!name || !representativeName || !whatsapp || !serviceType || areas.length === 0) {
+        if (!name || !representativeName || !whatsapp || areas.length === 0) {
             toast({ title: "Error", description: "Completa todos los campos obligatorios para crear el cliente.", variant: "destructive" });
             return;
         }
@@ -260,14 +329,6 @@ const ConvertLeadDialog = ({ prospect, onSave, children }: { prospect: Prospect 
                     
                     <Separator className="my-2"/>
                     <h4 className="font-medium">Configuración de Servicios*</h4>
-                    <Select value={serviceType} onValueChange={(v) => setServiceType(v as any)}>
-                        <SelectTrigger><SelectValue placeholder="Tipo de Servicio*"/></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="Iguala">Iguala</SelectItem>
-                            <SelectItem value="Proyecto">Proyecto</SelectItem>
-                            <SelectItem value="Ambos">Ambos</SelectItem>
-                        </SelectContent>
-                    </Select>
                     
                     <div>
                         <Label>Áreas a Gestionar en Pendientes*</Label>
@@ -328,7 +389,6 @@ const ConvertLeadDialog = ({ prospect, onSave, children }: { prospect: Prospect 
 export default function VentasPage() {
     const [prospects, setProspects] = useState<Prospect[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [selectedLead, setSelectedLead] = useState<Prospect | null>(null);
 
     // Filtros
     const [responsableFilter, setResponsableFilter] = useState('Todos');
@@ -337,7 +397,7 @@ export default function VentasPage() {
     const [monthFilter, setMonthFilter] = useState('Todos');
     const [searchFilter, setSearchFilter] = useState('');
 
-    const fetchProspects = async () => {
+    const fetchProspectsData = async () => {
         setIsLoading(true);
         const prospectsData = await getProspects();
         const sortedProspects = (prospectsData as Prospect[]).sort((a, b) => (a.name || a.company || '').localeCompare(b.name || b.company || ''));
@@ -346,12 +406,16 @@ export default function VentasPage() {
     }
     
     useEffect(() => {
-        fetchProspects();
+        fetchProspectsData();
     }, []);
 
     const handleAddLead = async (newProspectData: Partial<Omit<NewProspect, 'id' | 'createdAt'>>) => {
         await addMawProspect(newProspectData);
-        fetchProspects();
+        fetchProspectsData();
+    };
+    
+    const handleSave = () => {
+        fetchProspectsData();
     };
 
     const origenes = useMemo(() => {
@@ -389,7 +453,12 @@ export default function VentasPage() {
     <div>
         <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold font-headline">Pipeline de Ventas</h1>
-            <AddLeadDialog onAddLead={handleAddLead} />
+            <AddLeadDialog onAddLead={handleAddLead} isEditing={false}>
+                <Button>
+                    <PlusCircle className="w-4 h-4 mr-2" />
+                    Añadir Prospecto
+                </Button>
+            </AddLeadDialog>
         </div>
        <Card>
         <CardHeader>
@@ -429,7 +498,7 @@ export default function VentasPage() {
                     <SelectContent>
                         <SelectItem value="Todos">Todos los Meses</SelectItem>
                         {availableMonths.map(month => (
-                            <SelectItem key={month} value={month}>{format(new Date(month), "MMMM yyyy", {locale: es})}</SelectItem>
+                            <SelectItem key={month} value={month}>{format(new Date(`${month}-02`), "MMMM yyyy", {locale: es})}</SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
@@ -446,8 +515,9 @@ export default function VentasPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filteredProspects.filter(l => l.status !== 'Convertido' && l.status !== 'No Interesado').map((lead) => (
-                            <TableRow key={lead.id}>
+                        {filteredProspects.map((lead) => (
+                           <AddLeadDialog onAddLead={handleSave} prospect={lead} isEditing={true} key={lead.id}>
+                            <TableRow className="cursor-pointer">
                                 <TableCell className="font-medium">{lead.name || lead.company}</TableCell>
                                 <TableCell>{lead.source}</TableCell>
                                 <TableCell>{lead.responsable}</TableCell>
@@ -457,20 +527,21 @@ export default function VentasPage() {
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-right">
-                                     <ConvertLeadDialog prospect={lead} onSave={fetchProspects}>
-                                         <Button variant="default" size="sm">
+                                     <ConvertLeadDialog prospect={lead} onSave={fetchProspectsData}>
+                                         <Button variant="default" size="sm" onClick={(e) => e.stopPropagation()}>
                                             <Sparkles className="w-4 h-4 mr-2" />
                                             Convertir en Cliente
                                         </Button>
                                      </ConvertLeadDialog>
                                 </TableCell>
                             </TableRow>
+                           </AddLeadDialog>
                         ))}
                     </TableBody>
                 </Table>
-                 {filteredProspects.filter(l => l.status !== 'Convertido' && l.status !== 'No Interesado').length === 0 && (
+                 {filteredProspects.length === 0 && (
                     <div className="text-center p-8 text-muted-foreground">
-                        No hay prospectos activos con los filtros seleccionados.
+                        No hay prospectos con los filtros seleccionados.
                     </div>
                 )}
             </div>
