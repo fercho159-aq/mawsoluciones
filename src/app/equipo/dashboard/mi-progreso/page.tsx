@@ -2,331 +2,219 @@
 
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { teamMembers } from '@/lib/team-data';
+import React, { useState, useMemo, useEffect, startTransition } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { CheckCircle, Clock, XCircle, TrendingUp, Target, Calendar, DollarSign, TrendingDown, Building, Briefcase, PlusCircle, Trash2, PiggyBank, Handshake, Landmark } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, Building, Briefcase, PiggyBank, Handshake, Landmark } from 'lucide-react';
 import { useAuth } from '@/lib/auth-provider';
-import AnimatedDiv from '@/components/animated-div';
-import { format, isWithinInterval, startOfMonth, endOfMonth, parseISO, getMonth } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { Input } from '@/components/ui/input';
 import { getMovimientos } from '../finanzas/_actions';
-import { MovimientoDiario } from '@/lib/db/schema';
+import { MovimientoDiario, ComoVoyEnMisFinanzas } from '@/lib/db/schema';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { getPersonalFinance, updatePersonalFinanceEntry, type PersonalFinanceTransaction } from './_actions';
+import { useToast } from '@/hooks/use-toast';
+import { format, getMonth, parseISO, startOfMonth } from 'date-fns';
+import { es } from 'date-fns/locale';
 
-// --- Mock Data Simulation (for non-financial parts) ---
-const today = new Date();
-const currentMonthStart = startOfMonth(today);
+const TransactionModal = ({
+    month,
+    category,
+    initialTransactions,
+    onSave,
+  }: {
+    month: string;
+    category: string;
+    initialTransactions: PersonalFinanceTransaction[];
+    onSave: (month: string, category: string, transactions: PersonalFinanceTransaction[]) => void;
+  }) => {
+    const [open, setOpen] = useState(false);
+    const [transactions, setTransactions] = useState<PersonalFinanceTransaction[]>([]);
+  
+    useEffect(() => {
+      if (open) {
+        setTransactions(initialTransactions);
+      }
+    }, [open, initialTransactions]);
+  
+    const total = transactions.reduce((acc, t) => acc + (t.type === 'INGRESO' ? t.amount : -t.amount), 0);
+  
+    const handleUpdate = (index: number, field: keyof PersonalFinanceTransaction, value: any) => {
+      const newTransactions = [...transactions];
+      (newTransactions[index] as any)[field] = value;
+      setTransactions(newTransactions);
+    };
 
-const generateMockTasks = () => {
-    const tasks = [];
-    const statuses = ["Completado", "Trabajando", "Pendiente"];
-    for (const member of teamMembers) {
-        for (let i = 0; i < 15; i++) {
-            const taskDate = new Date(currentMonthStart.getTime() + Math.random() * (today.getTime() - currentMonthStart.getTime()));
-            tasks.push({
-                id: `task-${member.id}-${i}`,
-                ejecutor: member.name,
-                status: statuses[Math.floor(Math.random() * statuses.length)],
-                completedAt: taskDate,
-            });
-        }
+    const handleSaveChanges = () => {
+        onSave(month, category, transactions);
+        setOpen(false);
     }
-    return tasks;
-};
-
-const generateMockActivities = () => {
-    const activities = [];
-    for (const member of teamMembers) {
-        for (let i = 0; i < 10; i++) {
-             const activityDate = new Date(currentMonthStart.getTime() + Math.random() * (today.getTime() - currentMonthStart.getTime()));
-            if(['admin', 'julio', 'alma', 'fernando'].includes(member.role)) {
-                 activities.push({
-                    id: `act-${member.id}-${i}`,
-                    responsable: member.name,
-                    date: activityDate,
-                });
-            }
-        }
-    }
-    return activities;
-};
-
-const mockTasks = generateMockTasks();
-const mockActivities = generateMockActivities();
-const mockPunctuality = teamMembers.map(member => ({
-    name: member.name,
-    status: Math.random() > 0.8 ? 'Tarde' : (Math.random() > 0.95 ? 'Falta' : 'Puntual'),
-}));
-// --- End of Mock Data Simulation ---
-
-
-const PunctualityBadge = ({ status }: { status: string }) => {
+  
     return (
-        <Badge variant={status === 'Puntual' ? 'default' : 'destructive'} className={cn(
-            'text-white',
-            status === 'Puntual' && 'bg-green-500 hover:bg-green-500/80',
-            status === 'Tarde' && 'bg-yellow-500 hover:bg-yellow-500/80',
-            status === 'Falta' && 'bg-red-500 hover:bg-red-500/80'
-        )}>
-             {status === 'Puntual' && <CheckCircle className="w-3 h-3 mr-1" />}
-             {status === 'Tarde' && <Clock className="w-3 h-3 mr-1" />}
-             {status === 'Falta' && <XCircle className="w-3 h-3 mr-1" />}
-            {status}
-        </Badge>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <button className="w-full h-full text-left p-2 rounded hover:bg-muted transition-colors">
+            {total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+          </button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Detalle de: {category} - {month}</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[300px] overflow-y-auto pr-2">
+            {transactions.map((t, i) => (
+              <div key={t.id} className="grid grid-cols-3 gap-2 mb-2">
+                <Input
+                  value={t.description}
+                  onChange={(e) => handleUpdate(i, 'description', e.target.value)}
+                  placeholder="Concepto"
+                  className="col-span-2"
+                />
+                <Input
+                  type="number"
+                  value={t.amount}
+                  onChange={(e) => handleUpdate(i, 'amount', parseFloat(e.target.value) || 0)}
+                  placeholder="Monto"
+                />
+              </div>
+            ))}
+          </div>
+          <div className="text-right font-bold text-lg mt-4">Total: {total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div>
+           <Button onClick={handleSaveChanges}>Guardar Cambios</Button>
+        </DialogContent>
+      </Dialog>
     );
 };
 
-interface Transaction {
-    id: number;
-    type: 'income' | 'expense';
-    concept: string;
-    amount: number;
-}
+const EditableCell = ({ value, onSave }: { value: number | undefined, onSave: (newValue: number) => void }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentValue, setCurrentValue] = useState(value || 0);
 
-interface BalanceSheetItem {
-    name: string;
-    amount: number;
-}
+    useEffect(() => {
+        setCurrentValue(value || 0);
+    }, [value])
 
-interface MonthlyData {
-    month: string;
-    agencia: number;
-    oscar: Transaction[];
-    transporte: Transaction[];
-    rentas: Transaction[];
-    bienes_raices: Transaction[];
-    intereses: Transaction[];
-    ganancia?: number;
-}
-
-const initialPersonalFinanceData: MonthlyData[] = [
-    { month: "Enero", agencia: 95360.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 11880}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 29000}], rentas: [], bienes_raices: [], intereses: [], ganancia: 123434.68 },
-    { month: "Febrero", agencia: 186937.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5148}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 10381}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 10390}], bienes_raices: [], intereses: [], ganancia: 212856.00 },
-    { month: "Marzo", agencia: 111299.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 2024}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 8907}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1713}], bienes_raices: [], intereses: [], ganancia: 123943.00 },
-    { month: "Abril", agencia: 142469.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 6100}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3645}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3989}], bienes_raices: [], intereses: [], ganancia: 156203.00 },
-    { month: "Mayo", agencia: 109715.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3960}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 11520}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5159}], bienes_raices: [], intereses: [], ganancia: 130354.00 },
-    { month: "Junio", agencia: 213108.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 6500}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 11498}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3884}], bienes_raices: [], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 53382}], ganancia: 288372.00 },
-    { month: "Julio", agencia: 212869.00, oscar: [], transporte: [{id: 1, type: 'expense', concept: 'Gasto', amount: 4731}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5571}], bienes_raices: [], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5806}], ganancia: 219515.00 },
-    { month: "Agosto", agencia: 82242.00, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 2311.67}], transporte: [{id: 1, type: 'expense', concept: 'Gasto', amount: 164166}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1610}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: 1154053}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 1800}], ganancia: -1230255.33 },
-    { month: "Septiembre", agencia: 178814.00, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3755}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5267}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: 843093}], intereses: [{id: 1, type: 'expense', concept: 'Gasto', amount: 22092}], ganancia: 149865.00 },
-    { month: "Octubre", agencia: 91700, oscar: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5720}], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 22208}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5100}], bienes_raices: [{id: 1, type: 'expense', concept: 'Gasto', amount: 6000}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 5740}], ganancia: 124468.00 },
-    { month: "Noviembre", agencia: 18623, oscar: [], transporte: [{id: 1, type: 'income', concept: 'Ingreso', amount: 14129}], rentas: [{id: 1, type: 'income', concept: 'Ingreso', amount: 4729}], bienes_raices: [{id: 1, type: 'income', concept: 'Ingreso', amount: 8726}], intereses: [{id: 1, type: 'income', concept: 'Ingreso', amount: 3573}], ganancia: undefined },
-    { month: "Diciembre", agencia: 0, oscar: [], transporte: [], rentas: [], bienes_raices: [], intereses: [], ganancia: undefined }
-];
-
-const initialPersonalAssets: BalanceSheetItem[] = [
-  { name: 'Banamex Inversión', amount: 200053 },
-  { name: 'CETES', amount: 213858 },
-  { name: 'Banamex', amount: 3556 },
-  { name: 'MAW Sant', amount: 308376 },
-  { name: 'Santander', amount: 19569 },
-  { name: 'Paola', amount: 184170 },
-  { name: 'Efectivo', amount: 355000 },
-  { name: 'Divisas', amount: 109220 },
-];
-
-const initialAccountsReceivable: BalanceSheetItem[] = [
-    { name: 'intenet agustin J', amount: 0 },
-    { name: 'Internet mirador', amount: 600 },
-    { name: 'FER EXTRA', amount: 44050 },
-    { name: 'Trans yo juntado', amount: 108000 },
-    { name: 'Tanda 2 me deb', amount: 104000 },
-    { name: 'paola', amount: 188985 },
-    { name: 'oscar me debe 1', amount: 96958 },
-    { name: 'vuelo paola', amount: 17752 },
-    { name: 'dani montaña', amount: 4000 },
-    { name: 'dani granger', amount: 3200 },
-    { name: 'FER TREJO CO', amount: 4875 },
-    { name: 'DANI CUYO', amount: 8726 },
-];
-
-const initialLiabilities: BalanceSheetItem[] = [
-  { name: 'terreno cancun - 25 NOV 24 / (420,2)', amount: 0 },
-  { name: 'renta - 26,000 - 8Dani - 11,900 Ar', amount: 0 },
-  { name: 'Terreno mama queretaro / Cuesta', amount: 341284 },
-  { name: 'Loft departamento depto 1,619,00', amount: 1341264 },
-  { name: 'gio le debo', amount: 3100 },
-];
-
-
-const CategoryDetailModal = ({ categoryName, transactions, onUpdate }: { categoryName: string, transactions: Transaction[], onUpdate: (newTransactions: Transaction[]) => void }) => {
-    const [open, setOpen] = useState(false);
-    const [type, setType] = useState<'income' | 'expense'>('income');
-    const [concept, setConcept] = useState('');
-    const [amount, setAmount] = useState('');
-    const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-
-    const handleAddOrUpdateTransaction = () => {
-        if (!concept || !amount) return;
-        
-        if (editingTransaction) {
-            const updatedTransactions = transactions.map(t =>
-                t.id === editingTransaction.id ? { ...t, type, concept, amount: parseFloat(amount) } : t
-            );
-            onUpdate(updatedTransactions);
-            setEditingTransaction(null);
-        } else {
-            const newTransaction: Transaction = {
-                id: Date.now(),
-                type,
-                concept,
-                amount: parseFloat(amount),
-            };
-            onUpdate([...transactions, newTransaction]);
+    const handleBlur = () => {
+        setIsEditing(false);
+        if (currentValue !== value) {
+            onSave(currentValue);
         }
-        setConcept('');
-        setAmount('');
-        setType('income');
     };
-
-    const handleEditTransaction = (transaction: Transaction) => {
-        setEditingTransaction(transaction);
-        setConcept(transaction.concept);
-        setAmount(transaction.amount.toString());
-        setType(transaction.type);
+    
+    if (isEditing) {
+        return (
+            <Input 
+                type="number"
+                value={currentValue}
+                onChange={(e) => setCurrentValue(parseFloat(e.target.value) || 0)}
+                onBlur={handleBlur}
+                onKeyDown={(e) => e.key === 'Enter' && handleBlur()}
+                autoFocus
+                className="w-full h-8 text-right"
+            />
+        )
     }
 
-    const handleDeleteTransaction = (id: number) => {
-        onUpdate(transactions.filter(t => t.id !== id));
-    };
-
-    const total = transactions.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
-
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <button className="w-full h-full text-left p-2 rounded hover:bg-muted transition-colors">
-                    {total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
-                </button>
-            </DialogTrigger>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Detalle de: {categoryName}</DialogTitle>
-                </DialogHeader>
-                <div className="max-h-[300px] overflow-y-auto pr-2">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Tipo</TableHead>
-                                <TableHead>Concepto</TableHead>
-                                <TableHead className="text-right">Monto</TableHead>
-                                <TableHead></TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {transactions.map(t => (
-                                <TableRow key={t.id} onDoubleClick={() => handleEditTransaction(t)} className="cursor-pointer">
-                                    <TableCell><Badge variant={t.type === 'income' ? 'default' : 'destructive'} className={cn(t.type === 'income' && 'bg-green-500')}>{t.type === 'income' ? 'Ingreso' : 'Egreso'}</Badge></TableCell>
-                                    <TableCell>{t.concept}</TableCell>
-                                    <TableCell className={cn("text-right", t.type === 'income' ? 'text-green-500' : 'text-red-500')}>{t.amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</TableCell>
-                                    <TableCell><Button variant="ghost" size="icon" onClick={() => handleDeleteTransaction(t.id)}><Trash2 className="w-4 h-4"/></Button></TableCell>
-                                </TableRow>
-                            ))}
-                             {transactions.length === 0 && <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">No hay movimientos.</TableCell></TableRow>}
-                        </TableBody>
-                    </Table>
-                </div>
-                 <div className="border-t pt-4 mt-2">
-                     <div className="grid grid-cols-5 gap-2 items-end">
-                        <div className="col-span-2 space-y-1">
-                            <Label>Concepto</Label>
-                            <Input value={concept} onChange={e => setConcept(e.target.value)} placeholder="Ej. Renta de local"/>
-                        </div>
-                        <div className="col-span-1 space-y-1">
-                            <Label>Monto</Label>
-                            <Input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00"/>
-                        </div>
-                        <div className="col-span-1 space-y-1">
-                            <Label>Tipo</Label>
-                            <RadioGroup value={type} onValueChange={(v) => setType(v as any)} className="flex items-center h-10 gap-2">
-                                <div className="flex items-center space-x-1"><RadioGroupItem value="income" id={`in-${categoryName}`}/><Label htmlFor={`in-${categoryName}`} className="font-normal">Ingreso</Label></div>
-                                <div className="flex items-center space-x-1"><RadioGroupItem value="expense" id={`ex-${categoryName}`}/><Label htmlFor={`ex-${categoryName}`} className="font-normal">Egreso</Label></div>
-                            </RadioGroup>
-                        </div>
-                        <Button onClick={handleAddOrUpdateTransaction}><PlusCircle className="w-4 h-4 mr-1"/> {editingTransaction ? 'Actualizar' : 'Añadir'}</Button>
-                    </div>
-                </div>
-                 <div className="text-right font-bold text-lg mt-4">Total: {total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</div>
-            </DialogContent>
-        </Dialog>
+        <div onClick={() => setIsEditing(true)} className="cursor-pointer w-full text-right p-2 h-8">
+            { (value || 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+        </div>
     )
 }
 
 const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYear }: { financialSummary: any, selectedMonth: string, selectedYear: number }) => {
-    const [personalData, setPersonalData] = useState<MonthlyData[]>(initialPersonalFinanceData);
-
-    const handleUpdateCategory = (month: string, category: keyof Omit<MonthlyData, 'month' | 'agencia' | 'ganancia'>, newTransactions: Transaction[]) => {
-        setPersonalData(prevData =>
-            prevData.map(data =>
-                data.month.toLowerCase() === month.toLowerCase()
-                    ? { ...data, [category]: newTransactions }
-                    : data
-            )
-        );
+    const [personalData, setPersonalData] = useState<ComoVoyEnMisFinanzas[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const { toast } = useToast();
+    
+    const fetchData = async () => {
+        setIsLoading(true);
+        const data = await getPersonalFinance();
+        setPersonalData(data);
+        setIsLoading(false);
     }
     
-    const combinedData = useMemo(() => {
-        return personalData.map((data, index) => {
-            let agenciaValue = data.agencia;
-            const currentMonthIndex = getMonth(new Date(`${selectedMonth}-01T00:00:00`));
+    useEffect(() => {
+        fetchData();
+    }, []);
 
-            if (selectedYear === new Date().getFullYear() && data.month.toLowerCase() === 'noviembre') {
-                 if(index === currentMonthIndex) {
-                    agenciaValue = financialSummary.profit - 527138;
-                 }
+    const handleSave = async (itemToUpdate: PersonalFinanceTransaction) => {
+        try {
+            await updatePersonalFinanceEntry(itemToUpdate);
+            toast({ title: 'Éxito', description: 'Dato actualizado correctamente.' });
+            fetchData();
+        } catch (error: any) {
+            toast({ title: 'Error', description: error.message, variant: 'destructive' });
+        }
+    }
+    
+    const handleCellSave = (month: string, category: string, newAmount: number) => {
+        const monthIndex = new Date(Date.parse(month +" 1, 2024")).getMonth();
+        const year = selectedYear;
+        const entryDate = new Date(year, monthIndex, 15);
+
+        const entry: PersonalFinanceTransaction = {
+            id: -1, // Will be ignored on insert
+            fecha: entryDate.toISOString(),
+            tipo: newAmount >= 0 ? 'INGRESO' : 'GASTO',
+            descripcion: `${category} - ${month} ${year}`,
+            monto: Math.abs(newAmount),
+            cuenta: 'Efectivo',
+            categoria: category
+        };
+        handleSave(entry)
+    }
+
+
+    const monthlyData = useMemo(() => {
+        const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const categories = ["Agencia", "Oscar", "Transporte", "Rentas", "Bienes Raices", "Intereses", "Ganancia"];
+
+        return monthNames.map((month, monthIndex) => {
+            const row: { [key: string]: any } = { month };
+
+            categories.forEach(category => {
+                const entries = personalData.filter(d => getMonth(new Date(d.fecha)) === monthIndex && d.categoria === category);
+                row[category] = entries.reduce((sum, item) => sum + (item.tipo === 'INGRESO' ? item.monto : -item.monto), 0);
+            });
+            
+            if (month.toLowerCase() === 'noviembre' && selectedYear === 2024) { // Specific logic for Nov 2024
+                 row['Agencia'] = financialSummary.profit - 527138;
+            } else if (month.toLowerCase() === 'octubre' && selectedYear === 2024) {
+                 row['Agencia'] = 91700;
             }
 
-            const totalOscar = data.oscar.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
-            const totalTransporte = data.transporte.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
-            const totalRentas = data.rentas.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
-            const totalBienesRaices = data.bienes_raices.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
-            const totalIntereses = data.intereses.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
-            
-            let ganancia = data.ganancia;
-             if (ganancia === undefined || (selectedYear === new Date().getFullYear() && index === currentMonthIndex)) {
-                 ganancia = agenciaValue + totalOscar + totalTransporte + totalRentas + totalBienesRaices + totalIntereses;
-             }
-            
-            return { ...data, agencia: agenciaValue, totalOscar, totalTransporte, totalRentas, totalBienesRaices, totalIntereses, ganancia };
+
+            if (row['Ganancia'] === 0) { // If 'Ganancia' is not manually set, calculate it
+               row['Ganancia'] = row['Agencia'] + row['Oscar'] + row['Transporte'] + row['Rentas'] + row['Bienes Raices'] + row['Intereses'];
+            }
+
+            return row;
         });
-    }, [personalData, financialSummary, selectedMonth, selectedYear]);
+    }, [personalData, financialSummary.profit, selectedYear]);
 
     const formatCurrency = (value: number | undefined) => {
-        if (value === undefined) return '$0.00';
+        if (value === undefined || isNaN(value)) return '$0.00';
         return value.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
     }
     
     const totals = useMemo(() => {
-        return combinedData.reduce((acc, row) => {
-            acc.agencia += row.agencia;
-            acc.oscar += row.totalOscar;
-            acc.transporte += row.totalTransporte;
-            acc.rentas += row.totalRentas;
-            acc.bienes_raices += row.totalBienesRaices;
-            acc.intereses += row.totalIntereses;
-            acc.ganancia += row.ganancia || 0;
+        return monthlyData.reduce((acc, row) => {
+            Object.keys(row).forEach(key => {
+                if (key !== 'month') {
+                    acc[key] = (acc[key] || 0) + (row[key] || 0);
+                }
+            });
             return acc;
-        }, { agencia: 0, oscar: 0, transporte: 0, rentas: 0, bienes_raices: 0, intereses: 0, ganancia: 0});
-    }, [combinedData]);
+        }, {} as {[key: string]: number});
+    }, [monthlyData]);
 
-    const averages = {
-        agencia: totals.agencia / 12,
-        oscar: totals.oscar / 12,
-        transporte: totals.transporte / 12,
-        rentas: totals.rentas / 12,
-        bienes_raices: totals.bienes_raices / 12,
-        intereses: totals.intereses / 12,
-        ganancia: totals.ganancia / 12
-    }
+    const averages = Object.keys(totals).reduce((acc, key) => {
+        acc[key] = totals[key] / 12;
+        return acc;
+    }, {} as {[key: string]: number});
 
     return (
         <Card className="mt-8">
@@ -350,29 +238,33 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {combinedData.map((row) => (
-                                <TableRow key={row.month} className={cn(format(new Date(`${selectedMonth}-01T00:00:00`), 'MMMM', {locale:es}).toLowerCase() === row.month.toLowerCase() && 'bg-muted')}>
-                                    <TableCell className="font-medium capitalize">{row.month}</TableCell>
-                                    <TableCell className={cn(row.agencia < 0 ? "text-red-500" : "")}>{formatCurrency(row.agencia)}</TableCell>
-                                    <TableCell className={cn(row.totalOscar < 0 ? "text-red-500" : "")}><CategoryDetailModal categoryName='Oscar' transactions={row.oscar} onUpdate={(t) => handleUpdateCategory(row.month, 'oscar', t)} /></TableCell>
-                                    <TableCell className={cn(row.totalTransporte < 0 ? "text-red-500" : "")}><CategoryDetailModal categoryName='Transporte' transactions={row.transporte} onUpdate={(t) => handleUpdateCategory(row.month, 'transporte', t)} /></TableCell>
-                                    <TableCell className={cn(row.totalRentas < 0 ? "text-red-500" : "")}><CategoryDetailModal categoryName='Rentas' transactions={row.rentas} onUpdate={(t) => handleUpdateCategory(row.month, 'rentas', t)} /></TableCell>
-                                    <TableCell className={cn(row.totalBienesRaices < 0 ? "text-red-500" : "")}><CategoryDetailModal categoryName='Bienes Raíces' transactions={row.bienes_raices} onUpdate={(t) => handleUpdateCategory(row.month, 'bienes_raices', t)} /></TableCell>
-                                    <TableCell className={cn(row.totalIntereses < 0 ? "text-red-500" : "")}><CategoryDetailModal categoryName='Intereses' transactions={row.intereses} onUpdate={(t) => handleUpdateCategory(row.month, 'intereses', t)} /></TableCell>
-                                    <TableCell className={cn("font-bold", (row.ganancia || 0) < 0 ? "text-red-500" : "text-green-500")}>{formatCurrency(row.ganancia)}</TableCell>
-                                </TableRow>
-                            ))}
+                            {isLoading ? (
+                                Array.from({length: 12}).map((_, i) => <TableRow key={i}><TableCell colSpan={8} className="text-center">Cargando...</TableCell></TableRow>)
+                            ) : (
+                                monthlyData.map((row) => (
+                                    <TableRow key={row.month} className={cn(format(new Date(`${selectedMonth}-01T00:00:00`), 'MMMM', {locale:es}).toLowerCase() === row.month.toLowerCase() && 'bg-muted')}>
+                                        <TableCell className="font-medium capitalize">{row.month}</TableCell>
+                                        <TableCell className={cn(row.Agencia < 0 ? "text-red-500" : "")}><EditableCell value={row.Agencia} onSave={(v) => handleCellSave(row.month, 'Agencia', v)}/></TableCell>
+                                        <TableCell className={cn(row.Oscar < 0 ? "text-red-500" : "")}><EditableCell value={row.Oscar} onSave={(v) => handleCellSave(row.month, 'Oscar', v)}/></TableCell>
+                                        <TableCell className={cn(row.Transporte < 0 ? "text-red-500" : "")}><EditableCell value={row.Transporte} onSave={(v) => handleCellSave(row.month, 'Transporte', v)}/></TableCell>
+                                        <TableCell className={cn(row.Rentas < 0 ? "text-red-500" : "")}><EditableCell value={row.Rentas} onSave={(v) => handleCellSave(row.month, 'Rentas', v)}/></TableCell>
+                                        <TableCell className={cn(row['Bienes Raices'] < 0 ? "text-red-500" : "")}><EditableCell value={row['Bienes Raices']} onSave={(v) => handleCellSave(row.month, 'Bienes Raices', v)}/></TableCell>
+                                        <TableCell className={cn(row.Intereses < 0 ? "text-red-500" : "")}><EditableCell value={row.Intereses} onSave={(v) => handleCellSave(row.month, 'Intereses', v)}/></TableCell>
+                                        <TableCell className={cn("font-bold", (row.Ganancia || 0) < 0 ? "text-red-500" : "text-green-500")}><EditableCell value={row.Ganancia} onSave={(v) => handleCellSave(row.month, 'Ganancia', v)}/></TableCell>
+                                    </TableRow>
+                                ))
+                            )}
                         </TableBody>
                          <TableFooter>
                             <TableRow className="font-bold bg-muted/50">
                                 <TableCell>Promedio Mensual</TableCell>
-                                <TableCell>{formatCurrency(averages.agencia)}</TableCell>
-                                <TableCell>{formatCurrency(averages.oscar)}</TableCell>
-                                <TableCell>{formatCurrency(averages.transporte)}</TableCell>
-                                <TableCell>{formatCurrency(averages.rentas)}</TableCell>
-                                <TableCell>{formatCurrency(averages.bienes_raices)}</TableCell>
-                                <TableCell>{formatCurrency(averages.intereses)}</TableCell>
-                                <TableCell className={cn((averages.ganancia || 0) < 0 ? "text-red-500" : "text-green-500")}>{formatCurrency(averages.ganancia)}</TableCell>
+                                <TableCell>{formatCurrency(averages.Agencia)}</TableCell>
+                                <TableCell>{formatCurrency(averages.Oscar)}</TableCell>
+                                <TableCell>{formatCurrency(averages.Transporte)}</TableCell>
+                                <TableCell>{formatCurrency(averages.Rentas)}</TableCell>
+                                <TableCell>{formatCurrency(averages['Bienes Raices'])}</TableCell>
+                                <TableCell>{formatCurrency(averages.Intereses)}</TableCell>
+                                <TableCell className={cn((averages.Ganancia || 0) < 0 ? "text-red-500" : "text-green-500")}>{formatCurrency(averages.Ganancia)}</TableCell>
                             </TableRow>
                         </TableFooter>
                     </Table>
@@ -382,9 +274,10 @@ const PersonalFinanceDashboard = ({ financialSummary, selectedMonth, selectedYea
     );
 };
 
-const BalanceSheetItemModal = ({ items, onUpdate, children }: { items: BalanceSheetItem[], onUpdate: (items: BalanceSheetItem[]) => void, children: React.ReactNode }) => {
+
+const BalanceSheetItemModal = ({ items, onUpdate, children }: { items: any[], onUpdate: (items: any[]) => void, children: React.ReactNode }) => {
     const [open, setOpen] = useState(false);
-    const [localItems, setLocalItems] = useState<BalanceSheetItem[]>([]);
+    const [localItems, setLocalItems] = useState<any[]>([]);
 
     useEffect(() => {
         if(open) {
@@ -430,9 +323,37 @@ const BalanceSheetItemModal = ({ items, onUpdate, children }: { items: BalanceSh
 }
 
 const BalanceSheetDashboard = () => {
-    const [assets, setAssets] = useState<BalanceSheetItem[]>(initialPersonalAssets);
-    const [receivables, setReceivables] = useState<BalanceSheetItem[]>(initialAccountsReceivable);
-    const [liabilities, setLiabilities] = useState<BalanceSheetItem[]>(initialLiabilities);
+    const [assets, setAssets] = useState([
+        { name: 'Banamex Inversión', amount: 200053 },
+        { name: 'CETES', amount: 213858 },
+        { name: 'Banamex', amount: 3556 },
+        { name: 'MAW Sant', amount: 308376 },
+        { name: 'Santander', amount: 19569 },
+        { name: 'Paola', amount: 184170 },
+        { name: 'Efectivo', amount: 355000 },
+        { name: 'Divisas', amount: 109220 },
+      ]);
+    const [receivables, setReceivables] = useState([
+        { name: 'intenet agustin J', amount: 0 },
+        { name: 'Internet mirador', amount: 600 },
+        { name: 'FER EXTRA', amount: 44050 },
+        { name: 'Trans yo juntado', amount: 108000 },
+        { name: 'Tanda 2 me deb', amount: 104000 },
+        { name: 'paola', amount: 188985 },
+        { name: 'oscar me debe 1', amount: 96958 },
+        { name: 'vuelo paola', amount: 17752 },
+        { name: 'dani montaña', amount: 4000 },
+        { name: 'dani granger', amount: 3200 },
+        { name: 'FER TREJO CO', amount: 4875 },
+        { name: 'DANI CUYO', amount: 8726 },
+    ]);
+    const [liabilities, setLiabilities] = useState([
+        { name: 'terreno cancun - 25 NOV 24 / (420,2)', amount: 0 },
+        { name: 'renta - 26,000 - 8Dani - 11,900 Ar', amount: 0 },
+        { name: 'Terreno mama queretaro / Cuesta', amount: 341284 },
+        { name: 'Loft departamento depto 1,619,00', amount: 1341264 },
+        { name: 'gio le debo', amount: 3100 },
+      ]);
 
     const totalAssets = assets.reduce((sum, asset) => sum + asset.amount, 0);
     const totalReceivable = receivables.reduce((sum, item) => sum + item.amount, 0);
@@ -613,7 +534,7 @@ export default function MiProgresoPage() {
                 Como administrador, puedes ver un resumen del rendimiento y las finanzas del equipo para el periodo seleccionado.
             </p>
 
-            <AnimatedDiv className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total de Ingresos</CardTitle>
@@ -644,7 +565,7 @@ export default function MiProgresoPage() {
                         <p className="text-xs text-muted-foreground">Ingresos - Gastos</p>
                     </CardContent>
                 </Card>
-            </AnimatedDiv>
+            </div>
             
             <PersonalFinanceDashboard financialSummary={financialSummary} selectedMonth={monthFilter} selectedYear={currentYear} />
 
@@ -660,27 +581,4 @@ export default function MiProgresoPage() {
     </div>
   );
 }
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
 

@@ -53,6 +53,23 @@ export const prospects_maw = pgTable('prospects_maw', {
     data: jsonb('data'),
 });
 
+// Nueva tabla para finanzas personales
+export const como_voy_en_mis_finanzas = pgTable('como_voy_en_mis_finanzas', {
+    id: serial('id').primaryKey(),
+    fecha: timestamp('fecha').notNull(),
+    tipo: varchar('tipo', { length: 50 }).notNull(), // INGRESO o GASTO
+    descripcion: text('descripcion'),
+    monto: real('monto').notNull(),
+    cuenta: varchar('cuenta', { length: 100 }).default('Efectivo'),
+    categoria: varchar('categoria', { length: 100 }).notNull(),
+    detalle_cuenta: text('detalle_cuenta'),
+    nombre_otro: text('nombre_otro'),
+    cpc_id: integer('cpc_id'),
+    requires_invoice: boolean('requires_invoice'),
+    con_iva: boolean('con_iva'),
+    iva: real('iva'),
+});
+
 
 // --- TABLAS RELACIONADAS ---
 
@@ -225,15 +242,5 @@ export type Colaborador = typeof colaboradores.$inferSelect;
 export type NewColaborador = typeof colaboradores.$inferInsert;
 export type Access = typeof accesses.$inferSelect;
 export type NewAccess = typeof accesses.$inferInsert;
-
-
-
-
-
-
-
-
-
-
-
-
+export type ComoVoyEnMisFinanzas = typeof como_voy_en_mis_finanzas.$inferSelect;
+export type NewComoVoyEnMisFinanzas = typeof como_voy_en_mis_finanzas.$inferInsert;
