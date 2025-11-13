@@ -20,14 +20,8 @@ export async function getProspects() {
   }
 }
 
-const responsables: ("Alma" | "Fer" | "Julio")[] = ["Alma", "Fer", "Julio"];
-let lastSellerIndex = 0;
-
 export async function addMawProspect(data: Partial<Omit<NewProspect, 'id' | 'createdAt'>>) {
     try {
-        const newSeller = responsables[lastSellerIndex % responsables.length];
-        lastSellerIndex = (lastSellerIndex + 1) % responsables.length;
-
         await db.insert(prospects_maw).values({
             name: data.name || data.company, 
             company: data.company,
@@ -35,7 +29,7 @@ export async function addMawProspect(data: Partial<Omit<NewProspect, 'id' | 'cre
             email: data.email,
             source: data.source || 'Manual',
             status: data.status || 'Lead Nuevo',
-            responsable: data.responsable as any || newSeller,
+            responsable: data.responsable as any || 'Sin asignar', // Cambiado
             data: data.data,
             notas: data.notas,
         });
@@ -52,8 +46,6 @@ export async function bulkAddMawProspects(prospects: Partial<Omit<NewProspect, '
     }
     try {
         const prospectsToInsert = prospects.map(prospect => {
-            const newSeller = responsables[lastSellerIndex % responsables.length];
-            lastSellerIndex = (lastSellerIndex + 1) % responsables.length;
             return {
                  name: prospect.name || prospect.company, 
                 company: prospect.company,
@@ -61,7 +53,7 @@ export async function bulkAddMawProspects(prospects: Partial<Omit<NewProspect, '
                 email: prospect.email,
                 source: prospect.source || 'Campaña',
                 status: 'Lead Nuevo',
-                responsable: newSeller,
+                responsable: 'Sin asignar', // Cambiado
                 data: prospect.data,
                 notas: prospect.notas,
             }

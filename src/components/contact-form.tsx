@@ -26,6 +26,9 @@ const formSchema = z.object({
   email: z.string().email({
     message: "Por favor, introduce un email válido.",
   }),
+  phone: z.string().min(10, {
+    message: "Por favor, introduce un número de teléfono válido.",
+  }),
   message: z.string().min(10, {
     message: "El mensaje debe tener al menos 10 caracteres.",
   }),
@@ -39,6 +42,7 @@ export function ContactForm() {
     defaultValues: {
       name: "",
       email: "",
+      phone: "",
       message: "",
     },
   });
@@ -48,6 +52,7 @@ export function ContactForm() {
     await addLead({
       name: values.name,
       email: values.email,
+      phone: values.phone,
       notas: values.message,
       source: 'Formulario de Contacto'
     });
@@ -83,6 +88,19 @@ export function ContactForm() {
               <FormLabel>Email</FormLabel>
               <FormControl>
                 <Input placeholder="tu@email.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Teléfono</FormLabel>
+              <FormControl>
+                <Input type="tel" placeholder="Tu número de teléfono" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
