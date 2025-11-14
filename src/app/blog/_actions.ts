@@ -1,3 +1,4 @@
+
 'use server';
 
 import { db } from '@/lib/db';
@@ -8,7 +9,6 @@ import { unstable_noStore as noStore } from 'next/cache';
 export type BlogPost = typeof blog_posts.$inferSelect;
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
-  noStore();
   try {
     const posts = await db.query.blog_posts.findMany({
       orderBy: (posts, { desc }) => [desc(posts.date)],
@@ -27,7 +27,6 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
 }
 
 export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
-    noStore();
     try {
         const post = await db.query.blog_posts.findFirst({
             where: eq(blog_posts.slug, slug),
