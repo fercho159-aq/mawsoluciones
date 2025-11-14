@@ -13,7 +13,13 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
     const posts = await db.query.blog_posts.findMany({
       orderBy: (posts, { desc }) => [desc(posts.date)],
     });
-    return posts;
+    // Temporal fix to replace Google Drive URL with a working one.
+    return posts.map(post => {
+      if (post.featured_image_url && post.featured_image_url.includes('drive.google.com')) {
+        return { ...post, featured_image_url: 'https://i.imgur.com/y4Uu2my.png' };
+      }
+      return post;
+    });
   } catch (error) {
     console.error("Error fetching blog posts:", error);
     return [];
@@ -26,6 +32,9 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
         const post = await db.query.blog_posts.findFirst({
             where: eq(blog_posts.slug, slug),
         });
+        if (post && post.featured_image_url && post.featured_image_url.includes('drive.google.com')) {
+          post.featured_image_url = 'https://i.imgur.com/y4Uu2my.png';
+        }
         return post || null;
     } catch (error) {
         console.error(`Error fetching blog post with slug ${slug}:`, error);
