@@ -24,25 +24,25 @@ const services = [
   {
     icon: <CodeXml className="w-10 h-10 text-primary" />,
     title: "Sitios Web",
-    description: "Diseñamos y desarrollamos sitios web modernos, rápidos y optimizados para la conversión.",
+    description: "que te importa",
     href: "/servicios/desarrollo-web"
   },
   {
     icon: <PenSquare className="w-10 h-10 text-primary" />,
     title: "Contenido",
-    description: "Creamos contenido atractivo y de alta calidad que resuena con tu audiencia y fortalece tu marca.",
+    description: "que te importa",
     href: "/servicios/creacion-de-contenido"
   },
   {
     icon: <Megaphone className="w-10 h-10 text-primary" />,
     title: "Ads",
-    description: "Planificamos, ejecutamos y medimos campañas publicitarias para maximizar tu retorno de inversión (ROI).",
+    description: "que te importa",
     href: "/servicios/gestion-de-campanas"
   },
   {
     icon: <Bot className="w-10 h-10 text-primary" />,
     title: "Automatización",
-    description: "Implementamos sistemas de automatización para nutrir leads y optimizar tus embudos de venta.",
+    description: "que te importa",
     href: "/servicios/automatizacion"
   },
 ];
@@ -360,5 +360,7 @@ const Services = () => {
 };
 
 export default Services;
+
+    
 
     

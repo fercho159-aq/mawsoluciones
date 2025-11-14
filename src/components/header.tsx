@@ -32,37 +32,37 @@ const servicesLinks = [
   { 
     href: "/servicios/desarrollo-web", 
     label: "Sitios Web",
-    description: "Diseñamos y desarrollamos sitios web modernos, rápidos y optimizados para la conversión.",
+    description: "que te importa",
     icon: <CodeXml className="w-5 h-5" />
   },
   { 
     href: "/servicios/creacion-de-contenido", 
     label: "Contenido",
-    description: "Creamos contenido atractivo y de alta calidad que resuena con tu audiencia y fortalece tu marca.",
+    description: "que te importa",
     icon: <PenSquare className="w-5 h-5" />
   },
   { 
     href: "/servicios/gestion-de-campanas", 
     label: "Ads",
-    description: "Planificamos, ejecutamos y medimos campañas publicitarias para maximizar tu retorno de inversión (ROI).",
+    description: "que te importa",
     icon: <Megaphone className="w-5 h-5" />
   },
   { 
     href: "/servicios/automatizacion", 
     label: "Automatización",
-    description: "Implementamos sistemas de automatización para nutrir leads y optimizar tus embudos de venta.",
+    description: "que te importa",
     icon: <Bot className="w-5 h-5" />
   },
    { 
     href: "/servicios/desarrollo-a-la-medida", 
     label: "Desarrollo a la Medida",
-    description: "Creamos soluciones de software y aplicaciones personalizadas para resolver problemas específicos de tu negocio.",
+    description: "que te importa",
     icon: <Combine className="w-5 h-5" />
   },
    { 
     href: "/servicios/automatizacion-y-desarrollo", 
     label: "Automatización + Desarrollo",
-    description: "Conectamos tus sistemas y bases de datos para crear flujos de trabajo potentes y personalizados.",
+    description: "que te importa",
     icon: <Zap className="w-5 h-5" />
   },
 ];
@@ -517,3 +517,5 @@ const Header = () => {
 };
 
 export default Header;
+
+    
