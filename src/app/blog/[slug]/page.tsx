@@ -9,6 +9,56 @@ import { es } from "date-fns/locale";
 import AnimatedDiv from "@/components/animated-div";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
+import { Metadata, ResolvingMetadata } from "next";
+
+type Props = {
+  params: { slug: string };
+};
+
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const post = await getBlogPostBySlug(params.slug);
+
+  if (!post) {
+    return {
+      title: "Publicación no encontrada",
+    };
+  }
+
+  const previousImages = (await parent).openGraph?.images || [];
+
+  return {
+    title: post.title,
+    description: post.excerpt,
+    openGraph: {
+      title: post.title,
+      description: post.excerpt || "Una publicación de MAW Soluciones",
+      url: `https://mawsoluciones.com/blog/${post.slug}`,
+      siteName: "MAW Soluciones",
+      images: [
+        {
+          url: post.featured_image_url || '/images/placeholder.png',
+          width: 1024,
+          height: 1024,
+          alt: post.title,
+        },
+        ...previousImages,
+      ],
+      locale: "es_MX",
+      type: "article",
+      authors: [post.author || "MAW Soluciones"],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: post.title,
+        description: post.excerpt || "Una publicación de MAW Soluciones",
+        images: [post.featured_image_url || '/images/placeholder.png'],
+    }
+  };
+}
+
 
 export default async function BlogPostPage({ params }: { params: { slug: string } }) {
   const post = await getBlogPostBySlug(params.slug);
