@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CodeXml, Send, Link as LinkIcon, ShoppingCart } from "lucide-react";
 import Image from "next/image";
@@ -34,7 +33,7 @@ const ServicePage = () => {
 
   return (
     <div className="bg-background">
-      <section className="py-24 sm:py-32 md:py-40 bg-card">
+      <section className="py-16 bg-card">
         <div className="container mx-auto px-4 md:px-6 text-center">
           <div className="max-w-3xl mx-auto">
             <h1 className="font-headline text-4xl sm:text-5xl font-bold">

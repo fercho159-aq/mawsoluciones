@@ -7,14 +7,14 @@ import CustomDevRoiCalculator from "@/components/custom-dev-roi-calculator";
 const ServicePage = () => {
   return (
     <div className="bg-background">
-      <section className="py-20 md:py-28 bg-card">
+      <section className="py-16 bg-card">
         <div className="container mx-auto px-4 md:px-6 text-center">
           <div className="max-w-3xl mx-auto">
             <h1 className="font-headline text-4xl sm:text-5xl font-bold">
               Desarrollo a la Medida
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-foreground/80">
-              Creamos soluciones de software y sistemas que se adaptan a tus procesos, eliminando cuellos de botella y dándote una ventaja competitiva.
+              Creamos soluciones de software que se adaptan a tus procesos, eliminando cuellos de botella y dándote una ventaja competitiva.
             </p>
           </div>
         </div>
@@ -39,15 +39,18 @@ const ServicePage = () => {
                 </li>
               </ul>
             </div>
-             <div className="relative aspect-[9/16] max-w-sm mx-auto w-full rounded-lg overflow-hidden shadow-xl">
-               <iframe
-                className="absolute top-0 left-0 w-full h-full"
-                src="https://www.youtube.com/embed/UMw2F8fIvF4"
-                title="YouTube video player"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
+             <div className="grid lg:grid-cols-2 gap-12 items-center">
+              <CustomDevRoiCalculator />
+               <div className="relative aspect-[9/16] max-w-sm mx-auto w-full rounded-lg overflow-hidden shadow-xl">
+                 <iframe
+                  className="absolute top-0 left-0 w-full h-full"
+                  src="https://www.youtube.com/embed/UMw2F8fIvF4"
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
             </div>
           </div>
         </div>
