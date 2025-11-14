@@ -893,10 +893,9 @@ const BoardView = ({ data, onUpdateTask, currentUser, onRefresh }: {
 
 
 export default function PendientesPage() {
-    const { user } = useAuth();
+    const { user, loading: userLoading } = useAuth();
     const [pendientes, setPendientes] = useState<PendienteWithRelations[]>([]);
     const [clients, setClients] = useState<Client[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [encargadoFilter, setEncargadoFilter] = useState('Todos');
     const [ejecutorFilter, setEjecutorFilter] = useState('Todos');
     const [searchFilter, setSearchFilter] = useState('');
@@ -907,7 +906,6 @@ export default function PendientesPage() {
     const { toast } = useToast();
 
     const fetchData = async () => {
-        setIsLoading(true);
         try {
             const [pendientesData, clientsData] = await Promise.all([
                 getPendientes(),
@@ -922,8 +920,6 @@ export default function PendientesPage() {
                 description: "No se pudieron obtener los pendientes o clientes. Intenta recargar la página.",
                 variant: "destructive"
             });
-        } finally {
-            setIsLoading(false);
         }
     }
     
@@ -1023,7 +1019,7 @@ export default function PendientesPage() {
     };
 
 
-    if (isLoading) {
+    if (userLoading) {
         return (
             <div className="flex items-center justify-center min-h-[50vh]">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
@@ -1226,5 +1222,6 @@ export default function PendientesPage() {
         </div>
     );
 }
+
 
 
