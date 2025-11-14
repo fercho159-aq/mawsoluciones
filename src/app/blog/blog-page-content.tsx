@@ -6,8 +6,11 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getBlogPosts } from './_actions';
-import type { BlogPost } from '@/lib/db/schema';
+import type { BlogPost as DbBlogPost } from '@/lib/db/schema';
 import Image from 'next/image';
+
+// Use the same type as defined in the action
+type BlogPost = DbBlogPost;
 
 const PostCard = ({ post }: { post: BlogPost }) => (
     <AnimatedDiv>
