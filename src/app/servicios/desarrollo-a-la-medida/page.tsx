@@ -7,7 +7,7 @@ import CustomDevRoiCalculator from "@/components/custom-dev-roi-calculator";
 const ServicePage = () => {
   return (
     <div className="bg-background">
-      <section className="py-24 sm:py-32 md:py-40 bg-card">
+      <section className="py-20 md:py-28 bg-card">
         <div className="container mx-auto px-4 md:px-6 text-center">
           <div className="max-w-3xl mx-auto">
             <h1 className="font-headline text-4xl sm:text-5xl font-bold">
@@ -26,7 +26,7 @@ const ServicePage = () => {
             <div className="prose prose-lg max-w-none text-foreground/80">
               <h2 className="font-headline text-3xl sm:text-4xl font-bold text-foreground">Software que Trabaja para Ti.</h2>
               <p>
-                Una solución a medida se construye alrededor de tu forma única de trabajar, optimizando tus operaciones y dándole a tu equipo las herramientas exactas que necesita.
+                Una solución a medida se construye alrededor de tu forma única de trabajar, optimizando tus operaciones.
               </p>
               <ul className="space-y-4 mt-6">
                 <li className="flex items-start">
@@ -36,10 +36,6 @@ const ServicePage = () => {
                 <li className="flex items-start">
                   <CheckCircle2 className="w-6 h-6 text-primary mr-3 mt-1 flex-shrink-0" />
                   <span><strong>Apps Web y Móviles:</strong> Herramientas internas o para clientes que solucionan problemas específicos.</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle2 className="w-6 h-6 text-primary mr-3 mt-1 flex-shrink-0" />
-                  <span><strong>Integraciones y APIs:</strong> Conectamos tus sistemas para eliminar la entrada manual de datos.</span>
                 </li>
               </ul>
             </div>

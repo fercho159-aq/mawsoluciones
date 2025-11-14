@@ -7,7 +7,7 @@ import DataAutomationCalculator from "@/components/data-automation-calculator";
 const ServicePage = () => {
   return (
     <div className="bg-background">
-      <section className="py-24 sm:py-32 md:py-40 bg-card">
+      <section className="py-20 md:py-28 bg-card">
         <div className="container mx-auto px-4 md:px-6 text-center">
           <div className="max-w-3xl mx-auto">
             <h1 className="font-headline text-4xl sm:text-5xl font-bold">
@@ -26,24 +26,16 @@ const ServicePage = () => {
             <div className="prose prose-lg max-w-none text-foreground/80">
               <h2 className="font-headline text-3xl sm:text-4xl font-bold text-foreground">Tus Sistemas, Sincronizados.</h2>
               <p>
-                Integramos tus herramientas y desarrollamos conectores a medida para que tus datos fluyan sin fricción, automatizando procesos manuales.
+                Integramos tus herramientas y desarrollamos conectores a medida para que tus datos fluyan sin fricción.
               </p>
               <ul className="space-y-4 mt-6">
                 <li className="flex items-start">
                   <CheckCircle2 className="w-6 h-6 text-primary mr-3 mt-1 flex-shrink-0" />
-                  <span><strong>Automatización con n8n:</strong> Conectamos tus apps para crear flujos de trabajo complejos sin código.</span>
+                  <span><strong>Automatización con n8n:</strong> Conectamos tus apps para crear flujos de trabajo complejos.</span>
                 </li>
                 <li className="flex items-start">
                   <CheckCircle2 className="w-6 h-6 text-primary mr-3 mt-1 flex-shrink-0" />
                   <span><strong>Conexión a Bases de Datos:</strong> Leemos y escribimos en tus bases de datos para una gestión centralizada.</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle2 className="w-6 h-6 text-primary mr-3 mt-1 flex-shrink-0" />
-                  <span><strong>APIs a la Medida:</strong> Si no existe una integración, la construimos para conectar tus sistemas.</span>
-                </li>
-                 <li className="flex items-start">
-                  <CheckCircle2 className="w-6 h-6 text-primary mr-3 mt-1 flex-shrink-0" />
-                  <span><strong>Dashboards en Tiempo Real:</strong> Centralizamos tus datos en un dashboard visual para decisiones informadas.</span>
                 </li>
               </ul>
             </div>
