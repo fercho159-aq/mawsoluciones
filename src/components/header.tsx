@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -25,6 +26,7 @@ import {
 } from "@/components/ui/accordion";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { ThemeToggle } from "./theme-toggle";
+import { automationCases } from "./automation-cases";
 
 const servicesLinks = [
   { 
@@ -233,6 +235,23 @@ const Header = () => {
                 </ul>
               </NavigationMenuContent>
             </NavigationMenuItem>
+             <NavigationMenuItem>
+              <NavigationMenuTrigger>Automatización</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+                  {automationCases.map((service) => (
+                    <ListItem
+                      key={service.label}
+                      title={service.label}
+                      href={service.href}
+                      icon={service.icon}
+                    >
+                      {service.description}
+                    </ListItem>
+                  ))}
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
 
             <NavigationMenuItem>
               <NavigationMenuTrigger>Casos de Éxito</NavigationMenuTrigger>
@@ -355,6 +374,25 @@ const Header = () => {
                       <AccordionContent className="pl-4">
                         <div className="flex flex-col gap-4 pt-2">
                           {servicesLinks.map((link) => (
+                            <Link
+                              key={link.href}
+                              href={link.href}
+                              className="text-base font-medium text-foreground/80"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              {link.label}
+                            </Link>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="item-6" className="border-b-0">
+                      <AccordionTrigger className="text-lg font-medium py-2 hover:no-underline">
+                        Automatización
+                      </AccordionTrigger>
+                      <AccordionContent className="pl-4">
+                        <div className="flex flex-col gap-4 pt-2">
+                          {automationCases.map((link) => (
                             <Link
                               key={link.href}
                               href={link.href}
