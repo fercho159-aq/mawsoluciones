@@ -101,6 +101,7 @@ export const blog_posts = pgTable('blog_posts', {
   date: timestamp('date', { withTimezone: true }).defaultNow().notNull(),
   author: varchar('author', { length: 255 }),
   content: text('content').notNull(),
+  featured_image_url: text('featured_image_url'),
   created_at: timestamp('created_at', { withTimezone: true }).defaultNow(),
 });
 

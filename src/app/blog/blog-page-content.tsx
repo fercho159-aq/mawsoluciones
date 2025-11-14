@@ -1,5 +1,3 @@
-"use client";
-
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import AnimatedDiv from '@/components/animated-div';
@@ -7,15 +5,24 @@ import { ArrowRight, Calendar, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { BlogPost } from './_actions';
 import { getBlogPosts } from './_actions';
-import { Suspense, useEffect, useState } from 'react';
-
+import type { BlogPost } from '@/lib/db/schema';
+import Image from 'next/image';
 
 const PostCard = ({ post }: { post: BlogPost }) => (
     <AnimatedDiv>
       <Link href={`/blog/${post.slug}`} className="group block h-full">
         <div className="bg-card rounded-lg shadow-lg overflow-hidden h-full flex flex-col transform hover:-translate-y-2 transition-transform duration-300">
+          {post.featured_image_url && (
+              <div className="relative aspect-video">
+                  <Image 
+                    src={post.featured_image_url}
+                    alt={post.title}
+                    fill
+                    className="object-cover"
+                  />
+              </div>
+          )}
           <div className="p-6 flex flex-col flex-grow">
             {post.category && <Badge variant="secondary" className="mb-2 w-fit">{post.category}</Badge>}
             <h3 className="font-headline text-lg font-bold mb-3 flex-grow group-hover:text-primary transition-colors">
@@ -47,24 +54,8 @@ const PostCard = ({ post }: { post: BlogPost }) => (
     </AnimatedDiv>
   );
 
-export default function BlogPageContent() {
-    const [posts, setPosts] = useState<BlogPost[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchPosts = async () => {
-            setIsLoading(true);
-            const fetchedPosts = await getBlogPosts();
-            setPosts(fetchedPosts);
-            setIsLoading(false);
-        };
-        fetchPosts();
-    }, []);
-
-    if (isLoading) {
-        return <div>Cargando...</div>;
-    }
-
+export default async function BlogPageContent() {
+    const posts = await getBlogPosts();
     const newsPosts = posts.filter(p => p.category === 'Noticias');
     const interviewPosts = posts.filter(p => p.category === 'Entrevistas');
 

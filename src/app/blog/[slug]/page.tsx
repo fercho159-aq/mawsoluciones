@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import AnimatedDiv from "@/components/animated-div";
 import { Card, CardContent } from "@/components/ui/card";
+import Image from "next/image";
 
 export default async function BlogPostPage({ params }: { params: { slug: string } }) {
   const post = await getBlogPostBySlug(params.slug);
@@ -50,6 +51,22 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
           </div>
         </div>
       </section>
+      
+      {post.featured_image_url && (
+        <section className="container mx-auto px-4 md:px-6 -mt-20 md:-mt-28 relative z-10">
+          <div className="max-w-5xl mx-auto">
+            <div className="relative aspect-video rounded-lg shadow-2xl overflow-hidden">
+                <Image 
+                    src={post.featured_image_url}
+                    alt={post.title}
+                    fill
+                    className="object-cover"
+                />
+            </div>
+          </div>
+        </section>
+      )}
+
 
       <section className="py-20 md:py-28">
         <div className="container mx-auto px-4 md:px-6">

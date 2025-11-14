@@ -8,6 +8,7 @@ import { es } from 'date-fns/locale';
 import { Button } from '../ui/button';
 import { getBlogPosts, type BlogPost } from '@/app/blog/_actions';
 import { Card, CardContent } from '../ui/card';
+import Image from 'next/image';
 
 export default async function BlogSection() {
   const allPosts = await getBlogPosts();
@@ -28,6 +29,16 @@ export default async function BlogSection() {
             <AnimatedDiv key={post.id}>
               <Link href={`/blog/${post.slug}`} className="group block h-full">
                 <Card className="bg-card rounded-lg shadow-lg overflow-hidden h-full flex flex-col transform hover:-translate-y-2 transition-transform duration-300">
+                  {post.featured_image_url && (
+                    <div className="relative aspect-video">
+                        <Image 
+                          src={post.featured_image_url}
+                          alt={post.title}
+                          fill
+                          className="object-cover"
+                        />
+                    </div>
+                  )}
                   <CardContent className="p-6 flex flex-col flex-grow">
                     {post.category && <Badge variant="secondary" className="mb-2 w-fit">{post.category}</Badge>}
                     <h3 className="font-headline text-lg font-bold mb-3 flex-grow group-hover:text-primary transition-colors">
