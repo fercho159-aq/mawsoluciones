@@ -23,6 +23,9 @@ const formSchema = z.object({
   name: z.string().min(2, {
     message: "El nombre debe tener al menos 2 caracteres.",
   }),
+  company: z.string().min(2, {
+    message: "El nombre de la empresa debe tener al menos 2 caracteres.",
+  }),
   email: z.string().email({
     message: "Por favor, introduce un email válido.",
   }),
@@ -41,6 +44,7 @@ export function ContactForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      company: "",
       email: "",
       phone: "",
       message: "",
@@ -51,6 +55,7 @@ export function ContactForm() {
     
     await addLead({
       name: values.name,
+      company: values.company,
       email: values.email,
       phone: values.phone,
       notas: values.message,
@@ -75,6 +80,19 @@ export function ContactForm() {
               <FormLabel>Nombre</FormLabel>
               <FormControl>
                 <Input placeholder="Tu nombre" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="company"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Empresa</FormLabel>
+              <FormControl>
+                <Input placeholder="Nombre de tu empresa" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -7,8 +7,13 @@ import { revalidatePath } from "next/cache";
 
 export async function addLead(data: Partial<Omit<NewProspect, 'id' | 'createdAt' | 'responsable' | 'status'>>) {
   try {
+    if (!data.company) {
+        // Fallback if company name is somehow not provided, though forms should require it.
+        data.company = data.name || 'Empresa no especificada';
+    }
+    
     await db.insert(prospects_maw).values({
-        name: data.name || data.company,
+        name: data.name,
         company: data.company,
         phone: data.phone,
         email: data.email,
@@ -16,6 +21,7 @@ export async function addLead(data: Partial<Omit<NewProspect, 'id' | 'createdAt'
         status: 'Lead Nuevo',
         responsable: 'Sin asignar', // Se establece como 'Sin asignar'
         data: data.data,
+        notas: data.notas,
     });
     
     revalidatePath("/equipo/dashboard/ventas"); 

@@ -1,5 +1,6 @@
 
 
+
 'use client';
 
 import React, { useState, useMemo, useEffect, startTransition } from 'react';
@@ -93,10 +94,10 @@ const AddLeadDialog = ({ onAction, children, prospect, isEditing }: { onAction: 
     }
 
     const handleSave = async () => {
-        if (!name && !company) {
+        if (!name || !company) {
             toast({
                 title: "Error",
-                description: "El nombre del cliente o de la empresa es obligatorio.",
+                description: "El nombre del contacto y de la empresa son obligatorios.",
                 variant: "destructive",
             });
             return;
@@ -147,11 +148,11 @@ const AddLeadDialog = ({ onAction, children, prospect, isEditing }: { onAction: 
                 </DialogHeader>
                 <div className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto px-2">
                     <div className="space-y-2">
-                        <Label htmlFor="cliente">Nombre del Contacto</Label>
+                        <Label htmlFor="cliente">Nombre del Contacto*</Label>
                         <Input id="cliente" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej. Juan Pérez" />
                     </div>
                      <div className="space-y-2">
-                        <Label htmlFor="empresa">Nombre de la Empresa</Label>
+                        <Label htmlFor="empresa">Nombre de la Empresa*</Label>
                         <Input id="empresa" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Ej. Tacos El Veloz" />
                     </div>
                      <div className="space-y-2">
@@ -575,7 +576,8 @@ export default function VentasPage() {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Cliente</TableHead>
+                            <TableHead>Contacto</TableHead>
+                            <TableHead>Empresa</TableHead>
                             <TableHead>
                                 <Select value={origenFilter} onValueChange={setOrigenFilter}>
                                     <SelectTrigger className="border-0 bg-transparent p-0 focus:ring-0 focus:ring-offset-0">
@@ -630,7 +632,8 @@ export default function VentasPage() {
                         {filteredProspects.map((lead) => (
                            <AddLeadDialog onAction={handleAction} prospect={lead} isEditing={true} key={lead.id}>
                             <TableRow className="cursor-pointer">
-                                <TableCell className="font-medium">{lead.name || lead.company}</TableCell>
+                                <TableCell className="font-medium">{lead.name}</TableCell>
+                                <TableCell>{lead.company}</TableCell>
                                 <TableCell>{lead.source}</TableCell>
                                 <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">{lead.notas}</TableCell>
                                 <TableCell>

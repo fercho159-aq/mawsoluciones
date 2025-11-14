@@ -22,8 +22,11 @@ export async function getProspects() {
 
 export async function addMawProspect(data: Partial<Omit<NewProspect, 'id' | 'createdAt'>>) {
     try {
+        if (!data.company) {
+            throw new Error("Company name is required.");
+        }
         await db.insert(prospects_maw).values({
-            name: data.name || data.company, 
+            name: data.name, 
             company: data.company,
             phone: data.phone,
             email: data.email,
