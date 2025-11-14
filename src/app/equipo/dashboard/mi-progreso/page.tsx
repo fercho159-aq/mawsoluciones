@@ -6,7 +6,7 @@ import React, { useState, useMemo, useEffect, startTransition } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { DollarSign, Building, TrendingUp, TrendingDown, PlusCircle, Edit, Trash2 } from 'lucide-react';
+import { DollarSign, Building, TrendingUp, TrendingDown, PlusCircle, Edit, Trash2, Info } from 'lucide-react';
 import { useAuth } from '@/lib/auth-provider';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,46 +24,71 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Textarea } from '@/components/ui/textarea';
 
-const EditableCell = ({ value, onSave }: { value: number | undefined, onSave: (newValue: number) => void }) => {
-    const [isEditing, setIsEditing] = useState(false);
+const EditableCell = ({ value, description, onSave }: { value: number | undefined, description?: string | null, onSave: (newAmount: number, newDescription: string) => void }) => {
+    const [open, setOpen] = useState(false);
     const [currentValue, setCurrentValue] = useState(value || 0);
+    const [currentDescription, setCurrentDescription] = useState(description || '');
 
     useEffect(() => {
-        setCurrentValue(value || 0);
-    }, [value])
-
-    const handleBlur = () => {
-        setIsEditing(false);
-        if (currentValue !== value) {
-            onSave(currentValue);
+        if (open) {
+            setCurrentValue(value || 0);
+            setCurrentDescription(description || '');
         }
-    };
-    
-    if (isEditing) {
-        return (
-            <Input 
-                type="number"
-                value={currentValue}
-                onChange={(e) => setCurrentValue(parseFloat(e.target.value) || 0)}
-                onBlur={handleBlur}
-                onKeyDown={(e) => e.key === 'Enter' && handleBlur()}
-                autoFocus
-                className="w-full h-8 text-right bg-transparent border-primary"
-            />
-        )
-    }
+    }, [open, value, description]);
 
+    const handleSave = () => {
+        onSave(currentValue, currentDescription);
+        setOpen(false);
+    }
+    
     return (
-        <div onClick={() => setIsEditing(true)} className="cursor-pointer w-full text-right p-2 h-8 rounded-md hover:bg-muted/50">
-            { (value || 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
-        </div>
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <div className="cursor-pointer w-full text-right p-2 h-10 rounded-md hover:bg-muted/50 flex items-center justify-end gap-1">
+                     {description && <Info className="w-3 h-3 text-muted-foreground" />}
+                    <span>{(value || 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
+                </div>
+            </PopoverTrigger>
+            <PopoverContent className="w-80" onBlur={handleSave}>
+                <div className="grid gap-4">
+                    <div className="space-y-2">
+                        <h4 className="font-medium leading-none">Editar Valor</h4>
+                        <p className="text-sm text-muted-foreground">
+                            Ajusta el monto y añade una descripción.
+                        </p>
+                    </div>
+                    <div className="grid gap-2">
+                        <div className="grid grid-cols-3 items-center gap-4">
+                            <Label htmlFor="monto">Monto</Label>
+                            <Input
+                                id="monto"
+                                type="number"
+                                value={currentValue}
+                                onChange={(e) => setCurrentValue(parseFloat(e.target.value) || 0)}
+                                className="col-span-2 h-8"
+                            />
+                        </div>
+                        <div className="grid grid-cols-3 items-center gap-4">
+                            <Label htmlFor="descripcion">Descripción</Label>
+                            <Input
+                                id="descripcion"
+                                value={currentDescription}
+                                onChange={(e) => setCurrentDescription(e.target.value)}
+                                className="col-span-2 h-8"
+                                placeholder="Ej. Ingreso extra por proyecto X"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </PopoverContent>
+        </Popover>
     )
 }
 
 const PersonalFinanceDashboard = ({ personalData, selectedYear, onRefresh }: { personalData: ComoVoyEnMisFinanzas[], selectedYear: number, onRefresh: () => void }) => {
     const { toast } = useToast();
     
-    const handleCellSave = async (month: string, category: string, newAmount: number) => {
+    const handleCellSave = async (month: string, category: string, newAmount: number, newDescription: string) => {
         const monthNames: Record<string, number> = { "enero": 0, "febrero": 1, "marzo": 2, "abril": 3, "mayo": 4, "junio": 5, "julio": 6, "agosto": 7, "septiembre": 8, "octubre": 9, "noviembre": 10, "diciembre": 11 };
         const monthIndex = monthNames[month.toLowerCase() as keyof typeof monthNames];
         const year = selectedYear;
@@ -79,7 +104,7 @@ const PersonalFinanceDashboard = ({ personalData, selectedYear, onRefresh }: { p
             id: -1,
             fecha: entryDate.toISOString(),
             tipo: newAmount >= 0 ? 'INGRESO' : 'GASTO',
-            descripcion: `${category} - ${month} ${year}`,
+            descripcion: newDescription,
             monto: newAmount,
             cuenta: 'Efectivo',
             categoria: category
@@ -108,13 +133,16 @@ const PersonalFinanceDashboard = ({ personalData, selectedYear, onRefresh }: { p
                     return getMonth(entryDate) === monthIndex && getYear(entryDate) === selectedYear && categoryMatch;
                 });
                 const totalAmount = entries.reduce((sum, item) => sum + (item.tipo.toUpperCase() === 'GASTO' ? -item.monto : item.monto), 0);
-                row[category] = totalAmount;
+                const description = entries.length > 0 ? entries[0].descripcion : null;
+                row[category] = { amount: totalAmount, description };
             });
             
-            if (row['Ganancia'] === 0 || !row['Ganancia']) {
-                row['Ganancia'] = incomeCategories
+            const gananciaData = row['Ganancia'];
+            if (!gananciaData || gananciaData.amount === 0) {
+                 const calculatedGanancia = incomeCategories
                     .filter(cat => cat !== 'Ganancia')
-                    .reduce((sum, cat) => sum + (row[cat] || 0), 0);
+                    .reduce((sum, cat) => sum + (row[cat]?.amount || 0), 0);
+                 row['Ganancia'] = { amount: calculatedGanancia, description: 'Suma de todas las categorías' };
             }
             
             return row;
@@ -125,7 +153,7 @@ const PersonalFinanceDashboard = ({ personalData, selectedYear, onRefresh }: { p
         return monthlyData.reduce((acc, row) => {
             Object.keys(row).forEach(key => {
                 if (key !== 'month') {
-                    acc[key] = (acc[key] || 0) + (row[key] || 0);
+                    acc[key] = (acc[key] || 0) + (row[key]?.amount || 0);
                 }
             });
             return acc;
@@ -164,12 +192,24 @@ const PersonalFinanceDashboard = ({ personalData, selectedYear, onRefresh }: { p
                         </TableHeader>
                         <TableBody>
                             {monthlyData.map((row) => (
-                                <TableRow key={row.month} className="h-12">
+                                <TableRow key={row.month} className="h-14">
                                     <TableCell className="font-medium capitalize">{row.month}</TableCell>
                                     {["Agencia", "Oscar", "Transporte", "Rentas", "Bienes Raices", "Intereses"].map(cat => (
-                                        <TableCell key={cat}><EditableCell value={row[cat]} onSave={(v) => handleCellSave(row.month, cat, v)}/></TableCell>
+                                        <TableCell key={cat} className='p-0'>
+                                            <EditableCell 
+                                                value={row[cat]?.amount} 
+                                                description={row[cat]?.description}
+                                                onSave={(newAmount, newDescription) => handleCellSave(row.month, cat, newAmount, newDescription)}
+                                            />
+                                        </TableCell>
                                     ))}
-                                    <TableCell className={cn("font-bold", (row.Ganancia || 0) < 0 ? "text-red-500" : "text-green-500")}><EditableCell value={row.Ganancia} onSave={(v) => handleCellSave(row.month, 'Ganancia', v)}/></TableCell>
+                                    <TableCell className={cn("p-0 font-bold", (row.Ganancia?.amount || 0) < 0 ? "text-red-500" : "text-green-500")}>
+                                        <EditableCell 
+                                            value={row.Ganancia?.amount} 
+                                            description={row.Ganancia?.description}
+                                            onSave={(newAmount, newDescription) => handleCellSave(row.month, 'Ganancia', newAmount, newDescription)}
+                                        />
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -530,5 +570,6 @@ export default function MiProgresoPage() {
     </div>
   );
 }
+
 
 

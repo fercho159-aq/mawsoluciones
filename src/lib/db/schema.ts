@@ -59,7 +59,7 @@ export const como_voy_en_mis_finanzas = pgTable('como_voy_en_mis_finanzas', {
     id: serial('id').primaryKey(),
     fecha: timestamp('fecha').notNull().defaultNow(),
     tipo: varchar('tipo', { length: 50 }).notNull(), // INGRESO o GASTO
-    descripcion: text('descripcion').notNull(),
+    descripcion: text('descripcion'),
     monto: real('monto').notNull(),
     cuenta: varchar('cuenta', { length: 100 }).notNull(),
     detalle_cuenta: varchar('detalle_cuenta', { length: 255 }),

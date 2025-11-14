@@ -45,7 +45,7 @@ export async function updatePersonalFinanceEntry(entry: PersonalFinanceTransacti
             await db.update(como_voy_en_mis_finanzas).set({
                 monto: Math.abs(rest.monto!), // Guardar siempre como positivo
                 tipo: rest.monto! >= 0 ? 'INGRESO' : 'GASTO',
-                descripcion: rest.descripcion || `${categoria} - ${entryDate.toLocaleString('es-MX', { month: 'long' })}`,
+                descripcion: rest.descripcion,
             }).where(eq(como_voy_en_mis_finanzas.id, idToUpdate));
 
         } else {
