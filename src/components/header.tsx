@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Menu, X, ChevronDown, CodeXml, PenSquare, Megaphone, Bot, Newspaper, Mic2, LayoutGrid, FileText, GraduationCap, Target, Wallet, BarChart4, DollarSign, Database, Users, Archive } from "lucide-react";
+import { Menu, X, ChevronDown, CodeXml, PenSquare, Megaphone, Bot, Newspaper, Mic2, LayoutGrid, FileText, GraduationCap, Target, Wallet, BarChart4, DollarSign, Database, Users, Archive, Combine, Zap } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,18 @@ const servicesLinks = [
     label: "Automatización",
     description: "Implementamos sistemas de automatización para nutrir leads y optimizar tus embudos de venta.",
     icon: <Bot className="w-5 h-5" />
+  },
+   { 
+    href: "/servicios/desarrollo-a-la-medida", 
+    label: "Desarrollo a la Medida",
+    description: "Creamos soluciones de software y aplicaciones personalizadas para resolver problemas específicos de tu negocio.",
+    icon: <Combine className="w-5 h-5" />
+  },
+   { 
+    href: "/servicios/automatizacion-y-desarrollo", 
+    label: "Automatización + Desarrollo",
+    description: "Conectamos tus sistemas y bases de datos para crear flujos de trabajo potentes y personalizados.",
+    icon: <Zap className="w-5 h-5" />
   },
 ];
 

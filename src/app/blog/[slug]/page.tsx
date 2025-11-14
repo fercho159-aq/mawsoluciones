@@ -53,7 +53,7 @@ export async function generateMetadata(
       authors: [post.author || "MAW Soluciones"],
     },
     twitter: {
-        card: "summary_large_image",
+        card: "sumary_large_image",
         title: post.title,
         description: post.excerpt || "Una publicación de MAW Soluciones",
         images: [imageUrl],
