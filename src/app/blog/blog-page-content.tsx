@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import AnimatedDiv from '@/components/animated-div';
@@ -5,12 +7,10 @@ import { ArrowRight, Calendar, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { getBlogPosts } from './_actions';
-import type { BlogPost as DbBlogPost } from '@/lib/db/schema';
 import Image from 'next/image';
+import { useState } from 'react';
+import type { BlogPost } from './_actions';
 
-// Use the same type as defined in the action
-type BlogPost = DbBlogPost;
 
 const PostCard = ({ post }: { post: BlogPost }) => (
     <AnimatedDiv>
@@ -57,15 +57,14 @@ const PostCard = ({ post }: { post: BlogPost }) => (
     </AnimatedDiv>
   );
 
-export default async function BlogPageContent() {
-    const posts = await getBlogPosts();
+export default function BlogPageContent({ posts }: { posts: BlogPost[] }) {
+    const [activeTab, setActiveTab] = useState('all');
+
     const newsPosts = posts.filter(p => p.category === 'Noticias');
     const interviewPosts = posts.filter(p => p.category === 'Entrevistas');
-
-    const defaultTab = 'all';
-
+    
     return (
-        <Tabs defaultValue={defaultTab} className="w-full">
+        <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
             <AnimatedDiv className="flex justify-center mb-12">
                 <TabsList>
                     <TabsTrigger value="all">Todas</TabsTrigger>
