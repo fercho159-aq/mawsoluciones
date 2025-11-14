@@ -49,7 +49,7 @@ const EditableCell = ({ value, description, onSave }: { value: number | undefine
                     <span>{(value || 0).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</span>
                 </div>
             </PopoverTrigger>
-            <PopoverContent className="w-80" onBlur={handleSave}>
+            <PopoverContent className="w-80">
                 <div className="grid gap-4">
                     <div className="space-y-2">
                         <h4 className="font-medium leading-none">Editar Valor</h4>
@@ -79,6 +79,7 @@ const EditableCell = ({ value, description, onSave }: { value: number | undefine
                             />
                         </div>
                     </div>
+                    <Button onClick={handleSave} size="sm" className="mt-2">Guardar</Button>
                 </div>
             </PopoverContent>
         </Popover>
@@ -570,6 +571,7 @@ export default function MiProgresoPage() {
     </div>
   );
 }
+
 
 
 
