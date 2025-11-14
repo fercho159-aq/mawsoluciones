@@ -4,6 +4,8 @@ import { Suspense } from 'react';
 import BlogPageContent from './blog-page-content';
 import { getBlogPosts } from './_actions';
 
+export const revalidate = 3600; // Revalidate every hour
+
 export default async function BlogPage() {
   const posts = await getBlogPosts();
 

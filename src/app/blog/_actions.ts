@@ -4,7 +4,6 @@
 import { db } from '@/lib/db';
 import { blog_posts } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
-import { unstable_noStore as noStore } from 'next/cache';
 
 export type BlogPost = typeof blog_posts.$inferSelect;
 

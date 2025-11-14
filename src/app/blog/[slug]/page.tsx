@@ -12,6 +12,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { Metadata, ResolvingMetadata } from "next";
 
+export const revalidate = 3600; // Revalidate every hour
+
 type Props = {
   params: { slug: string };
 };
