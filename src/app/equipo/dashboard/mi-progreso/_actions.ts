@@ -30,7 +30,6 @@ export async function updatePersonalFinanceEntry(entry: PersonalFinanceTransacti
         const year = entryDate.getUTCFullYear();
         const month = entryDate.getUTCMonth();
 
-        // Buscar si ya existe una entrada para esa categoría en ese mes y año
         const existingEntries = await db.select().from(como_voy_en_mis_finanzas).where(
             and(
                 eq(como_voy_en_mis_finanzas.categoria, categoria!),
@@ -40,23 +39,21 @@ export async function updatePersonalFinanceEntry(entry: PersonalFinanceTransacti
         );
 
         if (existingEntries.length > 0) {
-            // Si existen, las actualizamos (o la primera, si hay varias)
             const idToUpdate = existingEntries[0].id;
             await db.update(como_voy_en_mis_finanzas).set({
-                monto: Math.abs(rest.monto!), // Guardar siempre como positivo
+                monto: Math.abs(rest.monto!),
                 tipo: rest.monto! >= 0 ? 'INGRESO' : 'GASTO',
                 descripcion: rest.descripcion,
             }).where(eq(como_voy_en_mis_finanzas.id, idToUpdate));
 
         } else {
-             // Si no existe, creamos una nueva entrada
             await db.insert(como_voy_en_mis_finanzas).values({
                 fecha: entryDate,
                 categoria,
                 monto: Math.abs(rest.monto!),
                 tipo: rest.monto! >= 0 ? 'INGRESO' : 'GASTO',
-                descripcion: rest.descripcion || `${categoria} - ${entryDate.toLocaleString('es-MX', { month: 'long' })}`,
-                cuenta: 'Efectivo', // Valor predeterminado ya que no se especifica en la UI
+                descripcion: rest.descripcion,
+                cuenta: 'Efectivo', 
             });
         }
 
