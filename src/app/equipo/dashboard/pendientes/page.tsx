@@ -935,17 +935,32 @@ export default function PendientesPage() {
        try {
             await updatePendiente(task.id, data);
             toast({ title: 'Éxito', description: 'El pendiente ha sido actualizado.' });
-            fetchData();
+            startTransition(() => {
+                fetchData();
+            });
         } catch (error) {
             toast({ title: "Error", description: "No se pudo actualizar el pendiente.", variant: "destructive" });
         }
     };
     
+    const handleAddPendienteAction = async (data: Omit<PendienteMaw, 'id' | 'createdAt'>) => {
+        try {
+            await addPendiente(data);
+            startTransition(() => {
+                fetchData();
+            });
+        } catch (error) {
+            toast({ title: 'Error', description: 'No se pudo añadir el pendiente', variant: 'destructive'});
+        }
+    };
+
     const handleUpdatePendienteText = async (id: number, text: string) => {
         try {
             await updatePendiente(id, { pendientePrincipal: text });
             toast({ title: "Éxito", description: "Pendiente actualizado." });
-            fetchData();
+            startTransition(() => {
+                fetchData();
+            });
         } catch (error) {
             toast({ title: "Error", description: "No se pudo actualizar el pendiente.", variant: "destructive" });
         }
@@ -999,7 +1014,9 @@ export default function PendientesPage() {
             await deletePendientes(completedToDelete);
             toast({ title: 'Éxito', description: `${completedToDelete.length} pendiente(s) completado(s) eliminado(s).` });
             setSelectedPendientes([]);
-            fetchData();
+            startTransition(() => {
+                fetchData();
+            });
         } catch (error) {
             toast({ title: 'Error', description: 'No se pudo completar la eliminación.', variant: 'destructive' });
         }
@@ -1028,7 +1045,7 @@ export default function PendientesPage() {
             <div className='flex justify-between items-center mb-8'>
                 <h1 className="text-3xl font-bold font-headline">Pendientes de Equipo</h1>
                  {canManage && (
-                    <AddPendienteDialog clients={clients} onAdd={addPendiente}>
+                    <AddPendienteDialog clients={clients} onAdd={handleAddPendienteAction}>
                         <Button><PlusCircle className="w-4 h-4 mr-2" /> Añadir Pendiente Manual</Button>
                     </AddPendienteDialog>
                 )}
@@ -1209,4 +1226,5 @@ export default function PendientesPage() {
         </div>
     );
 }
+
 

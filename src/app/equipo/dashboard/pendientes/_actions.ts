@@ -25,7 +25,7 @@ export type NewPendienteData = Omit<PendienteMaw, 'id' | 'createdAt'>;
 export async function addPendiente(data: Omit<NewPendienteData, 'id' | 'createdAt'>) {
     try {
         await db.insert(pendientes_maw).values(data);
-        revalidatePath("/equipo/dashboard/pendientes");
+        // revalidatePath("/equipo/dashboard/pendientes");
     } catch (error) {
         console.error("Error adding pendiente:", error);
         throw new Error("Could not add pendiente");
@@ -35,7 +35,7 @@ export async function addPendiente(data: Omit<NewPendienteData, 'id' | 'createdA
 export async function updatePendiente(id: number, data: Partial<NewPendienteData>) {
     try {
         await db.update(pendientes_maw).set(data).where(eq(pendientes_maw.id, id));
-        revalidatePath("/equipo/dashboard/pendientes");
+        // revalidatePath("/equipo/dashboard/pendientes");
     } catch (error) {
         console.error("Error updating pendiente:", error);
         throw new Error("Could not update pendiente");
@@ -48,7 +48,7 @@ export async function deletePendientes(ids: number[]) {
         await db.delete(recordingEvents).where(inArray(recordingEvents.pendienteId, ids));
         // Then delete the pendientes
         await db.delete(pendientes_maw).where(inArray(pendientes_maw.id, ids));
-        revalidatePath("/equipo/dashboard/pendientes");
+        // revalidatePath("/equipo/dashboard/pendientes");
     } catch (error) {
         console.error("Error deleting pendientes:", error);
         throw new Error("No se pudo eliminar los pendientes. Verifica si tienen eventos de grabación asociados.");
@@ -69,7 +69,6 @@ export async function scheduleRecording(data: Omit<NewRecordingEvent, 'id'>) {
             // Insert
             await db.insert(recordingEvents).values(data);
         }
-        revalidatePath("/equipo/dashboard/pendientes");
         revalidatePath("/equipo/dashboard/calendario");
     } catch (error) {
         console.error("Error scheduling recording:", error);
@@ -80,7 +79,6 @@ export async function scheduleRecording(data: Omit<NewRecordingEvent, 'id'>) {
 export async function deleteRecording(pendienteId: number) {
     try {
         await db.delete(recordingEvents).where(eq(recordingEvents.pendienteId, pendienteId));
-        revalidatePath("/equipo/dashboard/pendientes");
         revalidatePath("/equipo/dashboard/calendario");
     } catch (error) {
         console.error("Error deleting recording:", error);
@@ -97,3 +95,4 @@ export async function getRecordingEvents() {
         return [];
     }
 }
+
