@@ -1,3 +1,4 @@
+
 import { getBlogPostBySlug, getBlogPosts } from "@/app/blog/_actions";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -28,10 +29,11 @@ export async function generateMetadata(
   }
 
   const previousImages = (await parent).openGraph?.images || [];
+  const imageUrl = post.featured_image_url || 'https://i.imgur.com/y4Uu2my.png';
 
   return {
     title: post.title,
-    description: post.excerpt,
+    description: post.excerpt || "Una publicación de MAW Soluciones",
     openGraph: {
       title: post.title,
       description: post.excerpt || "Una publicación de MAW Soluciones",
@@ -39,7 +41,7 @@ export async function generateMetadata(
       siteName: "MAW Soluciones",
       images: [
         {
-          url: post.featured_image_url || '/images/placeholder.png',
+          url: imageUrl,
           width: 1024,
           height: 1024,
           alt: post.title,
@@ -54,7 +56,7 @@ export async function generateMetadata(
         card: "summary_large_image",
         title: post.title,
         description: post.excerpt || "Una publicación de MAW Soluciones",
-        images: [post.featured_image_url || '/images/placeholder.png'],
+        images: [imageUrl],
     }
   };
 }
